@@ -1,0 +1,18 @@
+<component name="ArtifactManager">
+  <artifact name="client:jar">
+    <output-path>$PROJECT_DIR$/out/dist</output-path>
+    <root id="root">
+      <element id="directory" name="lib">
+        <element id="library" level="application" name="apache-commons-codec" />
+        <element id="library" level="application" name="apache-commons-io" />
+        <element id="library" level="application" name="apache-commons-lang" />
+        <element id="library" level="application" name="httpcomponents-client" />
+        <element id="library" level="application" name="log4j" />
+      </element>
+      <element id="archive" name="bug4j.jar">
+        <element id="module-output" name="client" />
+        <element id="module-output" name="common" />
+      </element>
+    </root>
+  </artifact>
+</component>

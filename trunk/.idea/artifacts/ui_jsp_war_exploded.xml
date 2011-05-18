@@ -1,0 +1,18 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="ui-jsp:war exploded">
+    <output-path>$PROJECT_DIR$/out/artifacts/ui_jsp_war_exploded</output-path>
+    <root id="root">
+      <element id="javaee-facet-resources" facet="ui-jsp/web/Web" />
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="ui-jsp" />
+        </element>
+        <element id="directory" name="lib">
+          <element id="library" level="application" name="apache-derby" />
+          <element id="library" level="application" name="apache-commons-util" />
+          <element id="library" level="application" name="log4j" />
+        </element>
+      </element>
+    </root>
+  </artifact>
+</component>
