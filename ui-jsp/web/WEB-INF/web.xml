@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2011 Cedric Dandoy
+  ~
+  ~    Licensed under the Apache License, Version 2.0 (the "License");
+  ~    you may not use this file except in compliance with the License.
+  ~    You may obtain a copy of the License at
+  ~
+  ~        http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~    Unless required by applicable law or agreed to in writing, software
+  ~    distributed under the License is distributed on an "AS IS" BASIS,
+  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~    See the License for the specific language governing permissions and
+  ~    limitations under the License.
+  -->
+
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+		  http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         version="2.5">
+
+    <description>Tell Bug</description>
+    <resource-ref>
+        <description>DB Connection</description>
+        <res-ref-name>jdbc/bugDB</res-ref-name>
+        <res-type>javax.sql.DataSource</res-type>
+        <res-auth>Container</res-auth>
+    </resource-ref>
+
+    <servlet>
+        <servlet-name>InServlet</servlet-name>
+        <servlet-class>org.dandoy.bug4j.server.jsp.InServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>InServlet</servlet-name>
+        <url-pattern>/in</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>BugServlet</servlet-name>
+        <servlet-class>org.dandoy.bug4j.server.jsp.BugServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ApplicationInfo</servlet-name>
+        <servlet-class>org.dandoy.bug4j.server.jsp.ApplicationInfo</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>StartupServlet</servlet-name>
+        <servlet-class>org.dandoy.bug4j.server.jsp.StartupServlet</servlet-class>
+        <load-on-startup>0</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BugServlet</servlet-name>
+        <url-pattern>/bug</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ApplicationInfo</servlet-name>
+        <url-pattern>/a</url-pattern>
+    </servlet-mapping>
+
+</web-app>
