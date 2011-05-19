@@ -9,7 +9,7 @@
         </element>
         <element id="directory" name="lib">
           <element id="library" level="application" name="apache-derby" />
-          <element id="library" level="application" name="apache-commons-util" />
+          <element id="library" level="application" name="commons-dbutils" />
           <element id="library" level="application" name="log4j" />
         </element>
       </element>

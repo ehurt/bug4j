@@ -3,6 +3,11 @@
     <output-path>$PROJECT_DIR$/out/dist</output-path>
     <root id="archive" name="bug4j.war">
       <element id="artifact" artifact-name="ui-jsp:war exploded" />
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="lib">
+          <element id="library" level="application" name="commons-dbutils" />
+        </element>
+      </element>
     </root>
   </artifact>
 </component>
