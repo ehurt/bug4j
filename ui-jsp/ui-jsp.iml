@@ -33,9 +33,9 @@
     <orderEntry type="jdk" jdkName="1.6" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" scope="PROVIDED" name="Tomcat 7" level="application_server_libraries" />
-    <orderEntry type="library" name="commons-dbutils" level="application" />
     <orderEntry type="library" name="apache-derby" level="application" />
     <orderEntry type="library" name="log4j" level="application" />
+    <orderEntry type="library" name="apache-commons-dbutil" level="application" />
   </component>
 </module>
 

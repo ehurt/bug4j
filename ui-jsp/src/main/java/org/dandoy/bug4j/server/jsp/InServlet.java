@@ -46,6 +46,10 @@ public class InServlet extends HttpServlet {
         final String version = request.getParameter("v");
         final String hash = request.getParameter("h");
 
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace(String.format("in :%s-%s-%s", app, version, hash));
+        }
+
         final Store store = StoreFactory.getStore();
         long bugId = -1;
         try {

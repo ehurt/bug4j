@@ -56,6 +56,11 @@ public class BugServlet extends HttpServlet {
             final String message = request.getParameter("m");
             final String exceptionMessage = request.getParameter("e");
             final String stackText = request.getParameter("s");
+
+            if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace(String.format("bug:%s-%s-%s-%s-%s-%s", app, version, hash, title, message, exceptionMessage));
+            }
+
             final Store store = StoreFactory.getStore();
             bugid = store.report(app, version, hash, title, message, exceptionMessage, stackText);
         } catch (Exception e) {

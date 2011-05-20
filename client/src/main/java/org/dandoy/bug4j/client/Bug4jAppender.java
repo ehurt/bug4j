@@ -22,6 +22,9 @@ import org.apache.log4j.spi.LoggingEvent;
 import org.apache.log4j.spi.ThrowableInformation;
 
 public class Bug4jAppender extends AppenderSkeleton {
+    public Bug4jAppender() {
+    }
+
     @SuppressWarnings({"ThrowableResultOfMethodCallIgnored"})
     @Override
     protected void append(LoggingEvent event) {
@@ -46,5 +49,20 @@ public class Bug4jAppender extends AppenderSkeleton {
     @Override
     public boolean requiresLayout() {
         return false;
+    }
+
+    @SuppressWarnings({"UnusedDeclaration"})
+    public void setServer(String server) {
+        Settings.getInstance().setServer(server);
+    }
+
+    @SuppressWarnings({"UnusedDeclaration"})
+    public void setApplicationName(String applicationName) {
+        Settings.getInstance().setApplicationName(applicationName);
+    }
+
+    @SuppressWarnings({"UnusedDeclaration"})
+    public void setApplicationVersion(String applicationVersion) {
+        Settings.getInstance().setApplicationVersion(applicationVersion);
     }
 }

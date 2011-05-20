@@ -16,45 +16,49 @@
 
 package org.dandoy.bug4j.client;
 
-import org.apache.log4j.Logger;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
 public class Settings {
-    private static final Logger LOGGER = Logger.getLogger(Settings.class);
-    private static final int DEFAULT_PORT = 8004;
-    private static final String DEFAULT_HOST = "localhost";
 
-    private final String _serverUri;
-    private final String _appName;
-    private final String _appVersion;
+    private static Settings INSTANCE;
 
-    public Settings(String appName, String appVersion, String serverUri) {
-        _appName = appName;
-        _appVersion = appVersion;
-        _serverUri = serverUri;
+    private String _server;
+    private String _applicationName;
+    private String _applicationVersion;
+
+    public Settings() {
+        _applicationName = "no-name";
+        _applicationVersion = "1.0";
+        _server = "http://localhost:8080/bug4j/";
     }
 
-    public static Settings readSettings() {
-        final Properties properties = readProperties();
-        final String serverUri = properties.getProperty("server", "http://localhost:8080/bug4j/");
-        final String appName = properties.getProperty("application.name");
-        final String appVersion = properties.getProperty("application.version");
-        final Settings ret = new Settings(appName, appVersion, serverUri);
-        return ret;
-    }
-
-    private static int getIntProperty(Properties properties, String key, int defaultValue) {
-        int ret = defaultValue;
-        final String property = properties.getProperty(key, Integer.toString(defaultValue));
-        try {
-            ret = Integer.parseInt(property);
-        } catch (NumberFormatException e) {
-            LOGGER.error("Failed to parse the value of \"" + key + "\":" + property);
+    public synchronized static Settings getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new Settings();
+            INSTANCE.readSettings();
         }
-        return ret;
+        return INSTANCE;
+    }
+
+    private void readSettings() {
+        final Properties properties = readProperties();
+
+        final String server = properties.getProperty("server");
+        if (server != null) {
+            _server = server;
+        }
+
+        final String appName = properties.getProperty("application.name");
+        if (appName != null) {
+            _applicationName = appName;
+        }
+
+        final String appVersion = properties.getProperty("application.version");
+        if (appVersion != null) {
+            _applicationVersion = appVersion;
+        }
     }
 
     private static Properties readProperties() {
@@ -69,21 +73,34 @@ public class Settings {
                     inputStream.close();
                 }
             } catch (IOException e) {
-                throw new IllegalStateException(e.getMessage(), e);
+                final String message = e.getMessage();
+                System.err.println(message);
             }
         }
         return ret;
     }
 
-    public String getServerUri() {
-        return _serverUri;
+    public String getServer() {
+        return _server;
+    }
+
+    public void setServer(String server) {
+        _server = server;
     }
 
     public String getApplicationName() {
-        return _appName;
+        return _applicationName;
+    }
+
+    public void setApplicationName(String applicationName) {
+        _applicationName = applicationName;
     }
 
     public String getApplicationVersion() {
-        return _appVersion;
+        return _applicationVersion;
+    }
+
+    public void setApplicationVersion(String applicationVersion) {
+        _applicationVersion = applicationVersion;
     }
 }

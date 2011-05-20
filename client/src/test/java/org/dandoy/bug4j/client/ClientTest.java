@@ -78,4 +78,23 @@ public class ClientTest {
             System.out.println("analyzed = " + analyzed);
         }
     }
+
+    @Test
+    public void testUseDefaultExceptionHandler() throws Exception {
+        Bug4jUncaughtExceptionHandler.install();
+
+        final Thread thread = new Thread() {
+            @Override
+            public void run() {
+                doSomethingBad();
+            }
+        };
+        // We have to start the client otherwise our shutdown might be enqueued before the exception
+        Client.start();
+
+        thread.start();
+        thread.join();
+
+        Client.shutdown();
+    }
 }

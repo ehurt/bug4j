@@ -16,6 +16,9 @@
 
 package org.dandoy.bug4j.client;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
 public class ReportableEvent {
     private final String _message;
     private final String exceptionMessage;
@@ -37,5 +40,24 @@ public class ReportableEvent {
 
     public String[] getThrowableStrRep() {
         return throwableStrRep;
+    }
+
+    public static ReportableEvent createReportableEvent(String message, Throwable throwable) {
+        final String[] throwableStrRep = createStringRepresentation(throwable);
+        return new ReportableEvent(message, throwable.getMessage(), throwableStrRep);
+    }
+
+    private static String[] createStringRepresentation(Throwable throwable) {
+        String[] ret;
+        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        final PrintStream printStream = new PrintStream(byteArrayOutputStream);
+        try {
+            throwable.printStackTrace(printStream);
+        } finally {
+            printStream.close();
+        }
+        final String stackText = byteArrayOutputStream.toString();
+        ret = stackText.split("[\r]?\n");
+        return ret;
     }
 }
