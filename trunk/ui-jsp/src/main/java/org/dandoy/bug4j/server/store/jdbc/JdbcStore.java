@@ -81,7 +81,6 @@ public class JdbcStore extends Store {
                         " VER VARCHAR(32)" +
                         ")"
                 );
-                statement.execute("CREATE UNIQUE INDEX BUG_HASH ON BUG (HASH)");
             }
 
             if (!doesTableExist(statement, "BUG")) {
@@ -96,7 +95,7 @@ public class JdbcStore extends Store {
                         " STACK_TEXT CLOB(16 K)" +
                         ")"
                 );
-                statement.execute("CREATE UNIQUE INDEX BUG_HASH ON BUG (HASH)");
+                statement.execute("CREATE UNIQUE INDEX BUG_HASH ON BUG (APP, HASH)");
             }
 
             if (!doesTableExist(statement, "HIT")) {

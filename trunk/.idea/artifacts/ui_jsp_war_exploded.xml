@@ -11,6 +11,7 @@
           <element id="library" level="application" name="apache-derby" />
           <element id="library" level="application" name="commons-dbutils" />
           <element id="library" level="application" name="log4j" />
+          <element id="library" level="application" name="apache-commons-dbutil" />
         </element>
       </element>
     </root>

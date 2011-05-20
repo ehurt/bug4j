@@ -55,7 +55,7 @@ class HttpConnector {
         try {
             final List<NameValuePair> nameValuePairList = Arrays.asList(nameValuePairs);
             final UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(nameValuePairList, "UTF-8");
-            final String serverUri = _settings.getServerUri();
+            final String serverUri = _settings.getServer();
             final HttpPost httpPost = new HttpPost(serverUri + endpoint);
             httpPost.setEntity(urlEncodedFormEntity);
 

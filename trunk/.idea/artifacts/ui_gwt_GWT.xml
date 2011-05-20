@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact name="ui-gwt:GWT">
+    <output-path>$PROJECT_DIR$/out/artifacts/ui_gwt_GWT</output-path>
+    <root id="root">
+      <element id="gwt-compiler-output" facet="ui-gwt/gwt/GWT" />
+    </root>
+  </artifact>
+</component>

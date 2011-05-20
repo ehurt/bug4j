@@ -39,7 +39,7 @@ public class Client {
 
     static void start() {
         if (_isStarted.compareAndSet(false, true)) {
-            final Settings settings = Settings.readSettings();
+            final Settings settings = Settings.getInstance();
 
             final Client client = new Client();
             final HttpConnector connector = new HttpConnector(settings);
