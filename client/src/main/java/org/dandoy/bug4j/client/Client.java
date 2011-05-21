@@ -37,7 +37,7 @@ public class Client {
     private Client() {
     }
 
-    static void start() {
+    public static void start() {
         if (_isStarted.compareAndSet(false, true)) {
             final Settings settings = Settings.getInstance();
 
@@ -58,7 +58,7 @@ public class Client {
         }
     }
 
-    static void shutdown() {
+    public static void shutdown() {
         if (_clientThread != null) {
             enqueue(STOP);
             try {
@@ -93,16 +93,18 @@ public class Client {
     private void process(ReportableEvent reportableEvent) {
         lazyInitialize();
         final String title = getTitle(reportableEvent);
-        final String hash = getHash(title);
-        final boolean isNew = _connector.reportHit(hash);
-        if (isNew) {
-            _connector.reportBug(
-                    hash,
-                    title,
-                    reportableEvent.getMessage(),
-                    reportableEvent.getExceptionMessage(),
-                    reportableEvent.getThrowableStrRep()
-            );
+        if (title != null) {
+            final String hash = getHash(title);
+            final boolean isNew = _connector.reportHit(hash);
+            if (isNew) {
+                _connector.reportBug(
+                        hash,
+                        title,
+                        reportableEvent.getMessage(),
+                        reportableEvent.getExceptionMessage(),
+                        reportableEvent.getThrowableStrRep()
+                );
+            }
         }
     }
 

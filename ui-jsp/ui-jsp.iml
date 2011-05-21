@@ -35,7 +35,7 @@
     <orderEntry type="library" scope="PROVIDED" name="Tomcat 7" level="application_server_libraries" />
     <orderEntry type="library" name="apache-derby" level="application" />
     <orderEntry type="library" name="log4j" level="application" />
-    <orderEntry type="library" name="apache-commons-dbutil" level="application" />
+    <orderEntry type="library" name="apache-commons-dbutils" level="application" />
   </component>
 </module>
 

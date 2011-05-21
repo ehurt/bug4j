@@ -5,7 +5,7 @@
       <element id="artifact" artifact-name="ui-jsp:war exploded" />
       <element id="directory" name="WEB-INF">
         <element id="directory" name="lib">
-          <element id="library" level="application" name="apache-commons-dbutil" />
+          <element id="library" level="application" name="apache-commons-dbutils" />
         </element>
       </element>
     </root>

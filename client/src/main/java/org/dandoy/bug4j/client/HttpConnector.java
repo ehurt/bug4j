@@ -26,9 +26,11 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.dandoy.bug4j.common.TextToLines;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 class HttpConnector {
@@ -104,11 +106,15 @@ class HttpConnector {
     }
 
     public List<String> getPackages() {
+        List<String> ret = Collections.emptyList();
         final String response = send("/a",
                 "a", "test",
                 "v", "1.0"
         );
-        final String[] ret = response.split("\r\n");
-        return Arrays.asList(ret);
+        if (response != null) {
+            final String[] lines = TextToLines.toLines(response);
+            ret = Arrays.asList(lines);
+        }
+        return ret;
     }
 }

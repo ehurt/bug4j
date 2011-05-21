@@ -18,6 +18,7 @@ package org.dandoy.bug4j.client;
 
 import org.apache.log4j.Logger;
 import org.dandoy.bug4j.common.StackAnalyzer;
+import org.dandoy.bug4j.common.TextToLines;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -70,7 +71,7 @@ public class ClientTest {
             final PrintStream printStream = new PrintStream(byteArrayOutputStream);
             e.printStackTrace(printStream);
             final String stackTrace = byteArrayOutputStream.toString();
-            final String[] lines = stackTrace.split("\r?\n");
+            final String[] lines = TextToLines.toLines(stackTrace);
             final List<String> stackLines = Arrays.asList(lines);
 
             final StackAnalyzer stackAnalyzer = new StackAnalyzer();
