@@ -16,6 +16,8 @@
 
 package org.dandoy.bug4j.client;
 
+import org.dandoy.bug4j.common.TextToLines;
+
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
@@ -57,7 +59,7 @@ public class ReportableEvent {
             printStream.close();
         }
         final String stackText = byteArrayOutputStream.toString();
-        ret = stackText.split("[\r]?\n");
+        ret = TextToLines.toLines(stackText);
         return ret;
     }
 }

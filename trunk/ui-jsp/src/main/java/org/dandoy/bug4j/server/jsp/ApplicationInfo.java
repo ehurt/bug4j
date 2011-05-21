@@ -24,10 +24,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 public class ApplicationInfo extends HttpServlet {
-    private final String[] APP_PACKAGES={
+    private final String[] APP_PACKAGES = {
             "org.dandoy.bug4j",
             "org.dandoy.bt",
     };
+
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         doPost(request, response);
     }
@@ -37,8 +38,12 @@ public class ApplicationInfo extends HttpServlet {
         final String applicationVersion = request.getParameter("v");
         response.setContentType("text/plain");
         final PrintWriter out = response.getWriter();
-        for (String appPackage : APP_PACKAGES) {
-            out.println(appPackage);
+        if (applicationName.startsWith("Test")) {
+            for (String appPackage : APP_PACKAGES) {
+                out.println(appPackage);
+            }
+        } else {
+            // We should load this from the database
         }
     }
 }
