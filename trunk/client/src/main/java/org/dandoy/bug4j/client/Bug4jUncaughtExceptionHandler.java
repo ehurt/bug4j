@@ -23,8 +23,7 @@ public class Bug4jUncaughtExceptionHandler implements Thread.UncaughtExceptionHa
 
     @Override
     public void uncaughtException(Thread thread, Throwable throwable) {
-        final ReportableEvent reportableEvent = ReportableEvent.createReportableEvent("Uncaught exception", throwable);
-        Client.enqueue(reportableEvent);
+        Client.report("Uncaught exception", throwable);
     }
 
     public static void install() {

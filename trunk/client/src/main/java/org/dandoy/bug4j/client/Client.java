@@ -17,77 +17,111 @@
 package org.dandoy.bug4j.client;
 
 import org.dandoy.bug4j.common.StackAnalyzer;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Client {
     private static final BlockingQueue<ReportableEvent> _queue = new LinkedBlockingQueue<ReportableEvent>();
     private static final ReportableEvent STOP = new ReportableEvent(null, null, null);
-    private static AtomicBoolean _isStarted = new AtomicBoolean();
     private static Thread _clientThread;
+    private static int _reported;
+
+    private final StackAnalyzer _stackAnalyzer = new StackAnalyzer();
     private HttpConnector _connector;
-    private StackAnalyzer _stackAnalyzer = new StackAnalyzer();
     private boolean _report = true;
     private boolean _isInitialized;
 
     private Client() {
     }
 
-    public static void start() {
-        if (_isStarted.compareAndSet(false, true)) {
-            final Settings settings = Settings.getInstance();
+    public static synchronized void start() {
+        start(null);
+    }
+
+    public static synchronized void start(@Nullable Settings settings) {
+        if (_clientThread == null) {
+            _reported = 0;
+
+            if (settings == null) {
+                settings = Settings.getDefaultInstance();
+            }
 
             final Client client = new Client();
             final HttpConnector connector = new HttpConnector(settings);
             client.setConnector(connector);
-
+            final Object tellMeWhenYouAreReady = new Object();
             final Thread thread = new Thread() {
                 @Override
                 public void run() {
-                    _clientThread = Thread.currentThread();
+                    synchronized (tellMeWhenYouAreReady) {
+                        tellMeWhenYouAreReady.notify();
+                    }
+
                     client.run();
                 }
             };
             thread.setName("Bug4J");
             thread.setDaemon(true);
             thread.start();
+            //noinspection SynchronizationOnLocalVariableOrMethodParameter
+            synchronized (tellMeWhenYouAreReady) {
+                try {
+                    tellMeWhenYouAreReady.wait();
+                    _clientThread = thread;
+                } catch (InterruptedException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
         }
     }
 
-    public static void shutdown() {
+    public synchronized static void shutdown() {
         if (_clientThread != null) {
             enqueue(STOP);
             try {
                 _clientThread.join();
+                _clientThread = null;
             } catch (InterruptedException e) {
-                // 
+                //
             }
         }
     }
 
     private void run() {
         while (true) {
-            final ReportableEvent reportableEvent;
+            final ReportableEvent reportableEvent = getNextReportableEvent();
+            if (reportableEvent == null) {
+                break;
+            }
+            processSafely(reportableEvent);
+        }
+    }
+
+    private void processSafely(ReportableEvent reportableEvent) {
+        if (_report) {
             try {
-                reportableEvent = _queue.take();
-            } catch (InterruptedException e) {
-                break;
-            }
-            if (reportableEvent == STOP) {
-                break;
-            }
-            if (_report) {
-                try {
-                    process(reportableEvent);
-                } catch (Throwable e) {
-                    _report = false;
-                }
+                process(reportableEvent);
+            } catch (Throwable e) {
+                _report = false;
             }
         }
+    }
+
+    private ReportableEvent getNextReportableEvent() {
+        ReportableEvent ret = null;
+        try {
+            final ReportableEvent top = _queue.take();
+            if (top != STOP) {
+                ret = top;
+            }
+        } catch (InterruptedException e) {
+            // ret stays null
+        }
+        return ret;
     }
 
     private void process(ReportableEvent reportableEvent) {
@@ -105,6 +139,7 @@ public class Client {
                         reportableEvent.getThrowableStrRep()
                 );
             }
+            _reported++;
         }
     }
 
@@ -130,12 +165,21 @@ public class Client {
         return ret;
     }
 
+    public void setConnector(HttpConnector connector) {
+        _connector = connector;
+    }
+
+    public static void report(String message, Throwable throwable) {
+        final ReportableEvent reportableEvent = ReportableEvent.createReportableEvent(message, throwable);
+        enqueue(reportableEvent);
+    }
+
     public static void enqueue(ReportableEvent reportableEvent) {
         start();
         _queue.add(reportableEvent);
     }
 
-    public void setConnector(HttpConnector connector) {
-        _connector = connector;
+    public static int getReported() {
+        return _reported;
     }
 }

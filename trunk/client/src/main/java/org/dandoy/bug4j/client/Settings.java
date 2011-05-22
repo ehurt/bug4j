@@ -34,12 +34,10 @@ public class Settings {
         _server = "http://localhost:8080/bug4j/";
     }
 
-    public synchronized static Settings getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new Settings();
-            INSTANCE.readSettings();
-        }
-        return INSTANCE;
+    public static Settings getDefaultInstance() {
+        final Settings ret = new Settings();
+        ret.readSettings();
+        return ret;
     }
 
     private void readSettings() {

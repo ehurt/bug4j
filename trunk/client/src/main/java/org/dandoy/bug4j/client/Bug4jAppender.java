@@ -22,6 +22,8 @@ import org.apache.log4j.spi.LoggingEvent;
 import org.apache.log4j.spi.ThrowableInformation;
 
 public class Bug4jAppender extends AppenderSkeleton {
+    private Settings _settings = Settings.getDefaultInstance();
+
     public Bug4jAppender() {
     }
 
@@ -44,6 +46,8 @@ public class Bug4jAppender extends AppenderSkeleton {
 
     @Override
     public void close() {
+        // Cannot shutdown the client because it may be locked by the log4j shutdown
+        // Client.shutdown();
     }
 
     @Override
@@ -51,18 +55,22 @@ public class Bug4jAppender extends AppenderSkeleton {
         return false;
     }
 
+    @Override
+    public void activateOptions() {
+    }
+
     @SuppressWarnings({"UnusedDeclaration"})
     public void setServer(String server) {
-        Settings.getInstance().setServer(server);
+        _settings.setServer(server);
     }
 
     @SuppressWarnings({"UnusedDeclaration"})
     public void setApplicationName(String applicationName) {
-        Settings.getInstance().setApplicationName(applicationName);
+        _settings.setApplicationName(applicationName);
     }
 
     @SuppressWarnings({"UnusedDeclaration"})
     public void setApplicationVersion(String applicationVersion) {
-        Settings.getInstance().setApplicationVersion(applicationVersion);
+        _settings.setApplicationVersion(applicationVersion);
     }
 }

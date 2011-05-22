@@ -16,38 +16,16 @@
 
 package org.dandoy.bug4j.client;
 
-import org.apache.log4j.Logger;
 import org.dandoy.bug4j.common.StackAnalyzer;
 import org.dandoy.bug4j.common.TextToLines;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
 
 public class ClientTest {
-    private static final Logger LOGGER = Logger.getLogger(ClientTest.class);
-
-    @Test
-    public void test() throws Exception {
-        try {
-            final FileInputStream fileInputStream = new FileInputStream("c:\\bogus");
-            fileInputStream.close();
-        } catch (IOException e) {
-            LOGGER.error("Failed to do something", e);
-        }
-
-        try {
-            doSomethingBad();
-        } catch (Exception e) {
-            LOGGER.error("Something else happened.", e);
-        }
-
-        Client.shutdown();
-    }
 
     private void doSomethingBad() {
         try {
@@ -78,24 +56,5 @@ public class ClientTest {
             final String analyzed = stackAnalyzer.analyze(stackLines);
             System.out.println("analyzed = " + analyzed);
         }
-    }
-
-    @Test
-    public void testUseDefaultExceptionHandler() throws Exception {
-        Bug4jUncaughtExceptionHandler.install();
-
-        final Thread thread = new Thread() {
-            @Override
-            public void run() {
-                doSomethingBad();
-            }
-        };
-        // We have to start the client otherwise our shutdown might be enqueued before the exception
-        Client.start();
-
-        thread.start();
-        thread.join();
-
-        Client.shutdown();
     }
 }
