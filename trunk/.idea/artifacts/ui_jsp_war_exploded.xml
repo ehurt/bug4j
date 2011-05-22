@@ -11,8 +11,10 @@
           <element id="library" level="application" name="apache-derby" />
           <element id="library" level="application" name="apache-commons-dbutils" />
           <element id="library" level="application" name="log4j" />
+          <element id="library" level="project" name="gwt-servlet" />
         </element>
       </element>
+      <element id="gwt-compiler-output" facet="ui-jsp/gwt/GWT" />
     </root>
   </artifact>
 </component>

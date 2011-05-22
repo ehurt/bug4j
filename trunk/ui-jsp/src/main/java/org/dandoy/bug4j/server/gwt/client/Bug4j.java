@@ -70,7 +70,7 @@ public class Bug4j implements EntryPoint {
         main.add(_dockPanel);
 
         final RootPanel userWidget = RootPanel.get("user-widget");
-        final Label label = new Label("cdandoy");
+        final Label label = new Label("user");
         label.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
