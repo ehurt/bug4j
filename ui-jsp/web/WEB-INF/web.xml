@@ -21,7 +21,7 @@
 		  http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
          version="2.5">
 
-    <description>Tell Bug</description>
+    <description>Bug4j</description>
     <resource-ref>
         <description>DB Connection</description>
         <res-ref-name>jdbc/bugDB</res-ref-name>
@@ -42,22 +42,38 @@
         <servlet-name>BugServlet</servlet-name>
         <servlet-class>org.dandoy.bug4j.server.jsp.BugServlet</servlet-class>
     </servlet>
+    <servlet-mapping>
+        <servlet-name>BugServlet</servlet-name>
+        <url-pattern>/bug</url-pattern>
+    </servlet-mapping>
+
     <servlet>
         <servlet-name>ApplicationInfo</servlet-name>
         <servlet-class>org.dandoy.bug4j.server.jsp.ApplicationInfo</servlet-class>
     </servlet>
+    <servlet-mapping>
+        <servlet-name>ApplicationInfo</servlet-name>
+        <url-pattern>/a</url-pattern>
+    </servlet-mapping>
+
     <servlet>
         <servlet-name>StartupServlet</servlet-name>
         <servlet-class>org.dandoy.bug4j.server.jsp.StartupServlet</servlet-class>
         <load-on-startup>0</load-on-startup>
     </servlet>
+
     <servlet-mapping>
-        <servlet-name>BugServlet</servlet-name>
-        <url-pattern>/bug</url-pattern>
+        <servlet-name>StartupServlet</servlet-name>
+        <url-pattern>/whyShouldIHaveAMappingQmQmQm</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+        <servlet-name>Bug4jService</servlet-name>
+        <servlet-class>org.dandoy.bug4j.server.gwt.server.Bug4jServiceImpl</servlet-class>
+    </servlet>
     <servlet-mapping>
-        <servlet-name>ApplicationInfo</servlet-name>
-        <url-pattern>/a</url-pattern>
+        <servlet-name>Bug4jService</servlet-name>
+        <url-pattern>/gwt/Bug4jService</url-pattern>
     </servlet-mapping>
 
 </web-app>

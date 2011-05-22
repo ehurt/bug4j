@@ -21,9 +21,23 @@ import org.dandoy.bug4j.server.gwt.client.Bug4jService;
 import org.dandoy.bug4j.server.gwt.client.bugs.BugEntry;
 import org.dandoy.bug4j.server.gwt.client.util.ModelUtil;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.*;
 
 public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jService {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        super.doGet(req, resp);    //To change body of overridden methods use File | Settings | File Templates.
+    }
+
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        super.doPut(req, resp);    //To change body of overridden methods use File | Settings | File Templates.
+    }
+
     @Override
     public List<BugEntry> getBugs(final String sortBy) {
         final ArrayList<BugEntry> ret = new ArrayList<BugEntry>(Arrays.asList(
