@@ -20,6 +20,7 @@
     <orderEntry type="module" module-name="common" />
     <orderEntry type="library" scope="PROVIDED" name="log4j" level="application" />
     <orderEntry type="library" name="httpcomponents-client" level="application" />
+    <orderEntry type="library" name="jetbrains" level="application" />
   </component>
 </module>
 
