@@ -23,7 +23,7 @@
 
     <servlet>
         <servlet-name>gwt gwtService</servlet-name>
-        <servlet-class>org.dandoy.bug4j.server.gwt.server.gwtServiceImpl</servlet-class>
+        <servlet-class>org.dandoy.bug4j.server.gwt.server.Bug4jServiceImpl</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>gwt gwtService</servlet-name>

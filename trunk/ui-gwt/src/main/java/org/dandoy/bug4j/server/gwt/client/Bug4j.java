@@ -24,6 +24,7 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
+import org.dandoy.bug4j.server.gwt.client.bugs.BugView;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>
@@ -99,8 +100,7 @@ public class Bug4j implements EntryPoint {
     }
 
     private void whenBugs() {
-        final HTML content = new HTML("BUGS BUGS BUGS");
-        setContent(content);
+        setContent(new BugView().createWidget());
     }
 
     private void whenAdminister() {
