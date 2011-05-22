@@ -33,6 +33,6 @@
     <entry-point class='org.dandoy.bug4j.server.gwt.client.Bug4j'/>
 
     <!-- Specify the app servlets.                   -->
-    <servlet path='/gwtService' class='org.dandoy.bug4j.server.gwt.server.gwtServiceImpl'/>
+    <servlet path='/gwtService' class='org.dandoy.bug4j.server.gwt.server.Bug4jServiceImpl'/>
 
 </module>

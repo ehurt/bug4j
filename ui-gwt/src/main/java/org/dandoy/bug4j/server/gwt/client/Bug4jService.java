@@ -19,20 +19,22 @@ package org.dandoy.bug4j.server.gwt.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import org.dandoy.bug4j.server.gwt.client.bugs.BugEntry;
+
+import java.util.List;
 
 @RemoteServiceRelativePath("gwtService")
-public interface gwtService extends RemoteService {
-    // Sample interface method of remote interface
-    String getMessage(String msg);
+public interface Bug4jService extends RemoteService {
+    List<BugEntry> getBugs(String sortBy);
 
     /**
      * Utility/Convenience class.
-     * Use gwtService.App.getInstance() to access static instance of gwtServiceAsync
+     * Use Bug4jService.App.getInstance() to access static instance of BugServiceAsync
      */
     public static class App {
-        private static gwtServiceAsync ourInstance = GWT.create(gwtService.class);
+        private static Bug4jServiceAsync ourInstance = GWT.create(Bug4jService.class);
 
-        public static synchronized gwtServiceAsync getInstance() {
+        public static synchronized Bug4jServiceAsync getInstance() {
             return ourInstance;
         }
     }

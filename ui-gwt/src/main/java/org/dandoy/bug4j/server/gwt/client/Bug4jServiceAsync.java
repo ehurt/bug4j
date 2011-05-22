@@ -14,14 +14,14 @@
  *    limitations under the License.
  */
 
-package org.dandoy.bug4j.server.gwt.server;
+package org.dandoy.bug4j.server.gwt.client;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import org.dandoy.bug4j.server.gwt.client.gwtService;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.dandoy.bug4j.server.gwt.client.bugs.BugEntry;
 
-public class gwtServiceImpl extends RemoteServiceServlet implements gwtService {
-    // Implementation of sample interface method
-    public String getMessage(String msg) {
-        return "Client said: \"" + msg + "\"<br>Server answered: \"Hi!\"";
-    }
+import java.util.List;
+
+public interface Bug4jServiceAsync {
+
+    void getBugs(String sortBy, AsyncCallback<List<BugEntry>> async);
 }
