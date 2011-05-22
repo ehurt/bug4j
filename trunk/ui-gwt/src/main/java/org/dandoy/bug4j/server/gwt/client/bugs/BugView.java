@@ -40,6 +40,7 @@ public class BugView {
         cellTable.setColumnWidth(BugViewColumn.TITLE, "300px");
         cellTable.addColumn(BugViewColumn.TITLE, "Title");
         cellTable.addColumn(BugViewColumn.HIT, "#");
+        cellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(BugViewColumn.HIT, false));
 
         AsyncDataProvider<BugEntry> dataProvider = new AsyncDataProvider<BugEntry>() {
             @Override

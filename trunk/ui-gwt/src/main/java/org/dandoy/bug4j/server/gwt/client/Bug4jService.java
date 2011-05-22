@@ -23,7 +23,7 @@ import org.dandoy.bug4j.server.gwt.client.bugs.BugEntry;
 
 import java.util.List;
 
-@RemoteServiceRelativePath("gwtService")
+@RemoteServiceRelativePath("Bug4jService")
 public interface Bug4jService extends RemoteService {
     List<BugEntry> getBugs(String sortBy);
 
