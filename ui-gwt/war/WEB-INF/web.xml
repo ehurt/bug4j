@@ -22,11 +22,11 @@
          version="2.5">
 
     <servlet>
-        <servlet-name>gwt gwtService</servlet-name>
+        <servlet-name>Bug4jService</servlet-name>
         <servlet-class>org.dandoy.bug4j.server.gwt.server.Bug4jServiceImpl</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>gwt gwtService</servlet-name>
-        <url-pattern>/gwt/gwtService</url-pattern>
+        <servlet-name>Bug4jService</servlet-name>
+        <url-pattern>/gwt/Bug4jService</url-pattern>
     </servlet-mapping>
 </web-app>
