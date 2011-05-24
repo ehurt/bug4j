@@ -18,55 +18,21 @@ package org.dandoy.bug4j.server.gwt.server;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import org.dandoy.bug4j.server.gwt.client.Bug4jService;
-import org.dandoy.bug4j.server.gwt.client.bugs.BugEntry;
-import org.dandoy.bug4j.server.gwt.client.util.ModelUtil;
+import org.dandoy.bug4j.server.gwt.client.data.Bug;
+import org.dandoy.bug4j.server.store.Store;
+import org.dandoy.bug4j.server.store.StoreFactory;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.*;
+import java.util.List;
 
 public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jService {
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doGet(req, resp);    //To change body of overridden methods use File | Settings | File Templates.
-    }
-
-    @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doPut(req, resp);    //To change body of overridden methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public List<BugEntry> getBugs(final String sortBy) {
-        final ArrayList<BugEntry> ret = new ArrayList<BugEntry>(Arrays.asList(
-                new BugEntry("app", "NPE at abc.java", 1, 3),
-                new BugEntry("app", "NPE at asd.java", 2, 6),
-                new BugEntry("app", "NPE at sdf.java", 3, 4),
-                new BugEntry("app", "NPE at qwe.java", 4, 1)
-        ));
-        if (!sortBy.isEmpty()) {
-            final String lcSortBy = sortBy.toLowerCase();
-            Comparator<BugEntry> bugEntryComparator = new Comparator<BugEntry>() {
-                @Override
-                public int compare(BugEntry o1, BugEntry o2) {
-                    if (lcSortBy.startsWith("i")) {
-                        return ModelUtil.compareTo(o1.getId(), o2.getId());
-                    } else if (lcSortBy.startsWith("t")) {
-                        return o1.getTitle().compareToIgnoreCase(o2.getTitle());
-                    } else if (lcSortBy.startsWith("h")) {
-                        return o1.getHitCount() - o2.getHitCount();
-                    } else {
-                        return 0;
-                    }
-                }
-            };
-            if (Character.isUpperCase(sortBy.charAt(0))) {
-                bugEntryComparator = Collections.reverseOrder(bugEntryComparator);
-            }
-            Collections.sort(ret, bugEntryComparator);
+    public List<Bug> getBugs(final String sortBy) {
+        try {
+            final Store store = StoreFactory.getStore();
+            return store.getBugs(null, 0, Integer.MAX_VALUE, sortBy);
+        } catch (Exception e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            throw new IllegalStateException(e.getMessage(), e);
         }
-        return ret;
     }
 }

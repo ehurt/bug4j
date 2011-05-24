@@ -1,6 +1,6 @@
-<%@ page import="org.dandoy.bug4j.server.store.StoreFactory" %>
+<%@ page import="org.dandoy.bug4j.server.gwt.client.data.Bug" %>
 <%@ page import="org.dandoy.bug4j.server.store.Store" %>
-<%@ page import="org.dandoy.bug4j.server.store.Bug" %>
+<%@ page import="org.dandoy.bug4j.server.store.StoreFactory" %>
 <%@ page import="java.util.List" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%--

@@ -104,9 +104,11 @@ public class Bug4j implements EntryPoint {
     }
 
     private void whenAdminister() {
-        final Widget content;
-        content = new HTML("ADMIN ADMIN ADMIN");
-        setContent(content);
+        SplitLayoutPanel p = new SplitLayoutPanel();
+        p.addNorth(new HTML("list"), 200);
+        p.add(new HTML("details"));
+        p.setSize("100%", "200px");
+        setContent(p);
     }
 
     private void setContent(Widget content) {

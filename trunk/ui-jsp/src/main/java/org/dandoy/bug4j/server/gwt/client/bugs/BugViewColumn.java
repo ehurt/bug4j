@@ -18,8 +18,9 @@ package org.dandoy.bug4j.server.gwt.client.bugs;
 
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.TextColumn;
+import org.dandoy.bug4j.server.gwt.client.data.Bug;
 
-public class BugViewColumn extends TextColumn<BugEntry> {
+public class BugViewColumn extends TextColumn<Bug> {
     public static final BugViewColumn ID = new BugViewColumn("I");
     public static final BugViewColumn TITLE = new BugViewColumn("T");
     public static final BugViewColumn HIT = new BugViewColumn("H");
@@ -32,7 +33,7 @@ public class BugViewColumn extends TextColumn<BugEntry> {
     }
 
     @Override
-    public String getValue(BugEntry bugEntry) {
+    public String getValue(Bug bugEntry) {
         if (ID._id.equals(_id)) {
             return Long.toString(bugEntry.getId());
         } else if (TITLE._id.equals(_id)) {

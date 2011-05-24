@@ -19,13 +19,13 @@ package org.dandoy.bug4j.server.gwt.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import org.dandoy.bug4j.server.gwt.client.bugs.BugEntry;
+import org.dandoy.bug4j.server.gwt.client.data.Bug;
 
 import java.util.List;
 
 @RemoteServiceRelativePath("Bug4jService")
 public interface Bug4jService extends RemoteService {
-    List<BugEntry> getBugs(String sortBy);
+    List<Bug> getBugs(String sortBy);
 
     /**
      * Utility/Convenience class.

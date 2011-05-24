@@ -21,10 +21,12 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import org.dandoy.bug4j.server.gwt.client.Bug4jService;
+import org.dandoy.bug4j.server.gwt.client.data.Bug;
 
 import java.util.List;
 
@@ -34,27 +36,32 @@ public class BugView {
     }
 
     public Widget createWidget() {
+        final CellTable<Bug> bugCellTable = createTable();
+        final ScrollPanel scrollPanel = new ScrollPanel(bugCellTable);
+        return scrollPanel;
+    }
 
-        final CellTable<BugEntry> cellTable = new CellTable<BugEntry>();
+    private CellTable<Bug> createTable() {
+        final CellTable<Bug> cellTable = new CellTable<Bug>();
         cellTable.addColumn(BugViewColumn.ID, "ID");
         cellTable.setColumnWidth(BugViewColumn.TITLE, "300px");
         cellTable.addColumn(BugViewColumn.TITLE, "Title");
         cellTable.addColumn(BugViewColumn.HIT, "#");
         cellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(BugViewColumn.HIT, false));
 
-        AsyncDataProvider<BugEntry> dataProvider = new AsyncDataProvider<BugEntry>() {
+        AsyncDataProvider<Bug> dataProvider = new AsyncDataProvider<Bug>() {
             @Override
-            protected void onRangeChanged(HasData<BugEntry> display) {
+            protected void onRangeChanged(HasData<Bug> display) {
                 final ColumnSortList sortList = cellTable.getColumnSortList();
                 final String sortBy = BugViewColumn.sortBy(sortList);
-                Bug4jService.App.getInstance().getBugs(sortBy, new AsyncCallback<List<BugEntry>>() {
+                Bug4jService.App.getInstance().getBugs(sortBy, new AsyncCallback<List<Bug>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         GWT.log("Failed");
                     }
 
                     @Override
-                    public void onSuccess(List<BugEntry> result) {
+                    public void onSuccess(List<Bug> result) {
                         cellTable.setRowData(result);
                     }
                 });

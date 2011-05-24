@@ -17,6 +17,7 @@
     </facet>
     <facet type="gwt" name="GWT">
       <configuration>
+        <setting name="compilerParameters" value="-localWorkers 4" />
         <setting name="compilerMaxHeapSize" value="128" />
         <setting name="gwtScriptOutputStyle" value="DETAILED" />
         <setting name="gwtSdkUrl" value="file://C:/Java/gwt-2.3.0" />
