@@ -17,7 +17,7 @@
 package org.dandoy.bug4j.server.store.jdbc;
 
 import org.apache.commons.dbutils.DbUtils;
-import org.dandoy.bug4j.server.store.Bug;
+import org.dandoy.bug4j.server.gwt.client.data.Bug;
 import org.dandoy.bug4j.server.store.BugDetail;
 import org.dandoy.bug4j.server.store.Store;
 
@@ -247,6 +247,53 @@ public class JdbcStore extends Store {
                 sql += "\n order by hitcount " + (ascending ? "ASC" : "DESC");
             }
             final PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            try {
+                final ResultSet resultSet = preparedStatement.executeQuery();
+                try {
+                    while (offset > 0 && resultSet.next()) {
+                        offset--;
+                    }
+                    while (max > 0 && resultSet.next()) {
+                        max--;
+                        final long bugId = resultSet.getLong(1);
+                        final String title = resultSet.getString(2);
+                        final int hitCount = resultSet.getInt(3);
+                        final Bug bug = new Bug(bugId, title, hitCount);
+                        ret.add(bug);
+                    }
+                } finally {
+                    DbUtils.closeQuietly(resultSet);
+                }
+            } finally {
+                DbUtils.closeQuietly(preparedStatement);
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
+            DbUtils.closeQuietly(connection);
+        }
+        return ret;
+    }
+
+    @Override
+    public List<Bug> getBugs(String app, int offset, int max, String orderBy) {
+        final List<Bug> ret = new ArrayList<Bug>();
+        final Connection connection = getConnection();
+        try {
+            StringBuilder sql = new StringBuilder("select bug.id,bug.title,(select count(*) from hit where hit.bug_id=bug.id) hitcount from bug\n");
+            String sep = "order by ";
+            for (int i = 0; i < orderBy.length(); i++) {
+                final char c = orderBy.charAt(i);
+                final char lc = Character.toLowerCase(c);
+                final int columnPos = "ith".indexOf(lc) + 1;
+                final boolean asc = Character.isLowerCase(c);
+                sql
+                        .append(sep)
+                        .append(columnPos)
+                        .append(asc ? " ASC" : " DESC");
+                sep = ", ";
+            }
+            final PreparedStatement preparedStatement = connection.prepareStatement(sql.toString());
             try {
                 final ResultSet resultSet = preparedStatement.executeQuery();
                 try {

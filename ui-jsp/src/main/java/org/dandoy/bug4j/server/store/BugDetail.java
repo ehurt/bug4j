@@ -16,6 +16,8 @@
 
 package org.dandoy.bug4j.server.store;
 
+import org.dandoy.bug4j.server.gwt.client.data.Bug;
+
 public class BugDetail extends Bug {
     private final String _message;
     private final String _exceptionMessage;

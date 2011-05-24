@@ -14,12 +14,17 @@
  *    limitations under the License.
  */
 
-package org.dandoy.bug4j.server.store;
+package org.dandoy.bug4j.server.gwt.client.data;
 
-public class Bug {
+import java.io.Serializable;
+
+public class Bug implements Serializable {
     private long _id;
     private String _title;
     private int _hitCount;
+
+    public Bug() {
+    }
 
     public Bug(long id, String title, int hitCount) {
         _id = id;

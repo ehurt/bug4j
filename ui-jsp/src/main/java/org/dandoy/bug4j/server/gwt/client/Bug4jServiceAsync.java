@@ -17,11 +17,11 @@
 package org.dandoy.bug4j.server.gwt.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.dandoy.bug4j.server.gwt.client.bugs.BugEntry;
+import org.dandoy.bug4j.server.gwt.client.data.Bug;
 
 import java.util.List;
 
 public interface Bug4jServiceAsync {
 
-    void getBugs(String sortBy, AsyncCallback<List<BugEntry>> async);
+    void getBugs(String sortBy, AsyncCallback<List<Bug>> async);
 }
