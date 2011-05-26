@@ -17,13 +17,13 @@
 package org.dandoy.bug4j.server.gwt.client;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.google.gwt.user.client.ui.TabLayoutPanel;
 import org.dandoy.bug4j.server.gwt.client.bugs.BugView;
 
 /**
@@ -31,93 +31,23 @@ import org.dandoy.bug4j.server.gwt.client.bugs.BugView;
  */
 public class Bug4j implements EntryPoint {
 
-    private DockPanel _dockPanel;
-    private Widget _content;
+    private DockLayoutPanel _dockLayoutPanel;
 
     /**
      * This is the entry point method.
      */
     public void onModuleLoad() {
 
-        _dockPanel = new DockPanel();
-        _dockPanel.addStyleName("dockpanel");
+        _dockLayoutPanel = new DockLayoutPanel(Style.Unit.EM);
+        _dockLayoutPanel.addNorth(new HTML("Bug4J"), 2);
 
-        {
-            final TabBar tabBar = new TabBar();
-            tabBar.addStyleName("tabbar");
-            tabBar.addTab("Bugs");
-            tabBar.addTab("Administer");
-            tabBar.addSelectionHandler(new SelectionHandler<Integer>() {
-                @Override
-                public void onSelection(SelectionEvent<Integer> integerSelectionEvent) {
-                    final Integer selectedItem = integerSelectionEvent.getSelectedItem();
-                    switch (selectedItem) {
-                        case 0:
-                            whenBugs();
-                            break;
-                        case 1:
-                            whenAdminister();
-                            break;
-                    }
-                }
+        final TabLayoutPanel tabLayoutPanel = new TabLayoutPanel(2, Style.Unit.EM);
+        tabLayoutPanel.add(new BugView().createWidget(), "Bugs");
+        tabLayoutPanel.add(new HTML("ADMIN"), "Administer");
+        _dockLayoutPanel.add(tabLayoutPanel);
 
-            });
-            tabBar.selectTab(0);
-            _dockPanel.add(tabBar, DockPanel.NORTH);
-        }
-
-        final RootPanel main = RootPanel.get();
-        main.add(_dockPanel);
-
-        final RootPanel userWidget = RootPanel.get("user-widget");
-        final Label label = new Label("user");
-        label.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                final PopupPanel popupPanel = new PopupPanel(true, true);
-                popupPanel.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-                    public void setPosition(int offsetWidth, int offsetHeight) {
-                        final int left = label.getAbsoluteLeft();
-                        final int top = label.getAbsoluteTop() + label.getOffsetHeight();
-                        popupPanel.setPopupPosition(left, top);
-                    }
-                });
-                final MenuBar fooMenu = new MenuBar(true);
-                Command cmd = new Command() {
-                    public void execute() {
-                        popupPanel.hide();
-                        Window.alert("You selected a menu item!");
-                    }
-                };
-                fooMenu.addItem("the", cmd);
-                fooMenu.addItem("foo", cmd);
-                fooMenu.addItem("menu", cmd);
-                popupPanel.setWidget(fooMenu);
-                popupPanel.show();
-            }
-        });
-        userWidget.add(label);
-    }
-
-    private void whenBugs() {
-        setContent(new BugView().createWidget());
-    }
-
-    private void whenAdminister() {
-        SplitLayoutPanel p = new SplitLayoutPanel();
-        p.addNorth(new HTML("list"), 200);
-        p.add(new HTML("details"));
-        p.setSize("100%", "200px");
-        setContent(p);
-    }
-
-    private void setContent(Widget content) {
-        if (_content != null) {
-            _content.removeFromParent();
-        }
-        _content = content;
-        if (_content != null) {
-            _dockPanel.add(_content, DockPanel.CENTER);
-        }
+        RootLayoutPanel.get().add(_dockLayoutPanel);
+        final Element loadingElement = DOM.getElementById("loading");
+        DOM.removeChild(DOM.getParent(loadingElement), loadingElement);
     }
 }

@@ -22,15 +22,22 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
 import org.dandoy.bug4j.server.gwt.client.Bug4jService;
 import org.dandoy.bug4j.server.gwt.client.data.Bug;
+import org.dandoy.bug4j.server.gwt.client.data.BugDetail;
 
 import java.util.List;
 
 public class BugView {
+
+    private BugDetailView _bugDetailView;
+    private SingleSelectionModel<Bug> _selectionModel;
 
     public BugView() {
     }
@@ -38,7 +45,13 @@ public class BugView {
     public Widget createWidget() {
         final CellTable<Bug> bugCellTable = createTable();
         final ScrollPanel scrollPanel = new ScrollPanel(bugCellTable);
-        return scrollPanel;
+
+        _bugDetailView = new BugDetailView();
+
+        final SplitLayoutPanel splitLayoutPanel = new SplitLayoutPanel(5);
+        splitLayoutPanel.addWest(scrollPanel, 500);
+        splitLayoutPanel.add(_bugDetailView.createWidget());
+        return splitLayoutPanel;
     }
 
     private CellTable<Bug> createTable() {
@@ -70,8 +83,32 @@ public class BugView {
         };
         dataProvider.addDataDisplay(cellTable);
         cellTable.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(cellTable));
+        _selectionModel = new SingleSelectionModel<Bug>();
+        cellTable.setSelectionModel(_selectionModel);
+
+        _selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                whenTableSelectionChanges();
+            }
+        });
 
         return cellTable;
     }
 
+    private void whenTableSelectionChanges() {
+        final Bug bug = _selectionModel.getSelectedObject();
+        final long bugId = bug.getId();
+        Bug4jService.App.getInstance().getBug(bugId, new AsyncCallback<BugDetail>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            @Override
+            public void onSuccess(BugDetail bugDetail) {
+                _bugDetailView.setSelectedBug(bugDetail);
+            }
+        });
+    }
 }

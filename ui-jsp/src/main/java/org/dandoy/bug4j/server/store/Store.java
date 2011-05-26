@@ -17,6 +17,7 @@
 package org.dandoy.bug4j.server.store;
 
 import org.dandoy.bug4j.server.gwt.client.data.Bug;
+import org.dandoy.bug4j.server.gwt.client.data.BugDetail;
 
 import java.util.List;
 
