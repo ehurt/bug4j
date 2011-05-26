@@ -37,6 +37,7 @@
     <title>Bug4J</title>
     <link type="text/css" rel="stylesheet" href="bug4j.css">
 
+    <%--suppress HtmlUnknownAttribute --%>
     <script type="text/javascript" language="javascript" src="gwt/gwt.nocache.js"></script>
 </head>
 <body>
