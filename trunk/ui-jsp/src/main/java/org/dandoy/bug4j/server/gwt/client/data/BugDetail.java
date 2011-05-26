@@ -14,14 +14,15 @@
  *    limitations under the License.
  */
 
-package org.dandoy.bug4j.server.store;
-
-import org.dandoy.bug4j.server.gwt.client.data.Bug;
+package org.dandoy.bug4j.server.gwt.client.data;
 
 public class BugDetail extends Bug {
-    private final String _message;
-    private final String _exceptionMessage;
-    private final String _stackText;
+    private String _message;
+    private String _exceptionMessage;
+    private String _stackText;
+
+    public BugDetail() {
+    }
 
     public BugDetail(long id, String title, int hitCount, String message, String exceptionMessage, String stackText) {
         super(id, title, hitCount);

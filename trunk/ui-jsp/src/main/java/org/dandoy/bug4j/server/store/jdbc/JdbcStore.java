@@ -18,7 +18,7 @@ package org.dandoy.bug4j.server.store.jdbc;
 
 import org.apache.commons.dbutils.DbUtils;
 import org.dandoy.bug4j.server.gwt.client.data.Bug;
-import org.dandoy.bug4j.server.store.BugDetail;
+import org.dandoy.bug4j.server.gwt.client.data.BugDetail;
 import org.dandoy.bug4j.server.store.Store;
 
 import javax.naming.Context;
