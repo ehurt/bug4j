@@ -31,11 +31,17 @@ public abstract class Store {
 
     public abstract void reportHit(long bugId, String version);
 
-    public abstract List<Bug> getBugs(String app, int offset, int max, String orderBy, boolean ascending);
-
     public abstract List<Bug> getBugs(String app, int offset, int max, String orderBy);
 
     public abstract BugDetail getBug(long id);
 
+    public abstract List<String> getPackages(String app);
+
+    public abstract void setPackages(String app, List<String> appPackages);
+
     public abstract void close();
+
+    public abstract void addPackage(String app, String appPackage);
+
+    public abstract void deletePackage(String app, String appPackage);
 }

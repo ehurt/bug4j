@@ -16,6 +16,8 @@
 
 package org.dandoy.bug4j.server.gwt.client.bugs;
 
+import com.google.gwt.cell.client.Cell;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.TextColumn;
 import org.dandoy.bug4j.server.gwt.client.data.Bug;
@@ -43,6 +45,11 @@ public class BugViewColumn extends TextColumn<Bug> {
         } else {
             throw new IllegalStateException("Invalid id: " + _id);
         }
+    }
+
+    @Override
+    public void render(Cell.Context context, Bug object, SafeHtmlBuilder sb) {
+        super.render(context, object, sb);    //To change body of overridden methods use File | Settings | File Templates.
     }
 
     public static String sortBy(ColumnSortList columnSortList) {

@@ -17,6 +17,7 @@
 package org.dandoy.bug4j.server.gwt.client;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
@@ -24,6 +25,7 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
+import org.dandoy.bug4j.server.gwt.client.admin.PackagesView;
 import org.dandoy.bug4j.server.gwt.client.bugs.BugView;
 
 /**
@@ -31,22 +33,22 @@ import org.dandoy.bug4j.server.gwt.client.bugs.BugView;
  */
 public class Bug4j implements EntryPoint {
 
-    private DockLayoutPanel _dockLayoutPanel;
+    public static final Resources IMAGES = GWT.create(Resources.class);
 
     /**
      * This is the entry point method.
      */
     public void onModuleLoad() {
 
-        _dockLayoutPanel = new DockLayoutPanel(Style.Unit.EM);
-        _dockLayoutPanel.addNorth(new HTML("Bug4J"), 2);
+        final DockLayoutPanel dockLayoutPanel = new DockLayoutPanel(Style.Unit.EM);
+        dockLayoutPanel.addNorth(new HTML("Bug4J"), 2);
 
         final TabLayoutPanel tabLayoutPanel = new TabLayoutPanel(2, Style.Unit.EM);
         tabLayoutPanel.add(new BugView().createWidget(), "Bugs");
-        tabLayoutPanel.add(new HTML("ADMIN"), "Administer");
-        _dockLayoutPanel.add(tabLayoutPanel);
+        tabLayoutPanel.add(new PackagesView("My Application").createWidget(), "Packages");
+        dockLayoutPanel.add(tabLayoutPanel);
 
-        RootLayoutPanel.get().add(_dockLayoutPanel);
+        RootLayoutPanel.get().add(dockLayoutPanel);
         final Element loadingElement = DOM.getElementById("loading");
         DOM.removeChild(DOM.getParent(loadingElement), loadingElement);
     }

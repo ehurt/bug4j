@@ -27,4 +27,12 @@ public interface Bug4jServiceAsync {
     void getBugs(String sortBy, AsyncCallback<List<Bug>> async);
 
     void getBug(long bugId, AsyncCallback<BugDetail> async);
+
+    void getPackages(String app, AsyncCallback<List<String>> async);
+
+    void setPackages(String app, List<String> appsPackages, AsyncCallback<Void> async);
+
+    void addPackage(String app, String appPackage, AsyncCallback<Void> async);
+
+    void deletePackage(String app, String appPackage, AsyncCallback<Void> async);
 }

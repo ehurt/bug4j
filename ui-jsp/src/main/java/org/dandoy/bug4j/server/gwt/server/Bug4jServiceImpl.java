@@ -52,4 +52,40 @@ public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jServi
         }
         return ret;
     }
+
+    @Override
+    public List<String> getPackages(String app) throws Exception {
+        final Store store = StoreFactory.getStore();
+        final List<String> ret;
+        try {
+            ret = store.getPackages(app);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new Exception(e.getMessage(), e);
+        }
+        return ret;
+    }
+
+    @Override
+    public void setPackages(String app, List<String> appsPackages) throws Exception {
+        final Store store = StoreFactory.getStore();
+        try {
+            store.setPackages(app, appsPackages);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new Exception(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void addPackage(String app, String appPackage) throws Exception {
+        final Store store = StoreFactory.getStore();
+        store.addPackage(app, appPackage);
+    }
+
+    @Override
+    public void deletePackage(String app, String appPackage) throws Exception {
+        final Store store = StoreFactory.getStore();
+        store.deletePackage(app, appPackage);
+    }
 }

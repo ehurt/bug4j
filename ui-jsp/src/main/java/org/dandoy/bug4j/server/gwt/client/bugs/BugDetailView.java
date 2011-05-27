@@ -16,23 +16,52 @@
 
 package org.dandoy.bug4j.server.gwt.client.bugs;
 
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.*;
 import org.dandoy.bug4j.server.gwt.client.data.BugDetail;
 
 public class BugDetailView {
 
-    private Button _button;
+    private HTML _stack;
+
+    interface BugDetailViewUiBinder extends UiBinder<HTMLPanel, BugDetailView> {
+    }
+
+    private static BugDetailViewUiBinder _ourUiBinder = GWT.create(BugDetailViewUiBinder.class);
+    @UiField
+    SpanElement _id;
+    @UiField
+    SpanElement _title;
+    @UiField
+    SpanElement _message;
+    @UiField
+    SpanElement _exceptionMessage;
 
     public BugDetailView() {
     }
 
-    public Widget createWidget() {
-        _button = new Button("Oh oh");
-        return _button;
+    public Widget getRootElement() {
+        final Widget rootElement = _ourUiBinder.createAndBindUi(this);
+        final DockLayoutPanel ret = new DockLayoutPanel(Style.Unit.EM);
+        ret.addNorth(rootElement, 7);
+        final TabLayoutPanel tabLayoutPanel = new TabLayoutPanel(2, Style.Unit.EM);
+        _stack = new HTML();
+        _stack.addStyleName("bug-detail-stack");
+        tabLayoutPanel.add(_stack, "Stack Dump");
+        tabLayoutPanel.add(new HTML("HITS"), "Hits");
+        ret.add(tabLayoutPanel);
+        return ret;
     }
 
-    public void setSelectedBug(BugDetail bugDetail) {
-        _button.setText(bugDetail.getExceptionMessage());
+    public void setBugDetail(BugDetail bugDetail) {
+        _id.setInnerText(Long.toString(bugDetail.getId()));
+        _title.setInnerText(bugDetail.getTitle());
+        _message.setInnerText(bugDetail.getMessage());
+        _exceptionMessage.setInnerText(bugDetail.getExceptionMessage());
+        _stack.setText(bugDetail.getStackText());
     }
 }

@@ -83,6 +83,15 @@ public class JdbcStore extends Store {
                 );
             }
 
+            if (!doesTableExist(statement, "APP_PACKAGES")) {
+                statement.execute("" +
+                        "CREATE TABLE APP_PACKAGES (" +
+                        " APP VARCHAR(32)," +
+                        " APP_PACKAGE VARCHAR(64)" +
+                        ")"
+                );
+            }
+
             if (!doesTableExist(statement, "BUG")) {
                 statement.execute("" +
                         "CREATE TABLE BUG (" +
@@ -236,46 +245,6 @@ public class JdbcStore extends Store {
     }
 
     @Override
-    public List<Bug> getBugs(String app, int offset, int max, String orderBy, boolean ascending) {
-        final List<Bug> ret = new ArrayList<Bug>();
-        final Connection connection = getConnection();
-        try {
-            String sql = "" +
-                    "select bug.id,bug.title,(select count(*) from hit where hit.bug_id=bug.id) hitcount" +
-                    "  from bug";
-            if ("h".equals(orderBy)) {
-                sql += "\n order by hitcount " + (ascending ? "ASC" : "DESC");
-            }
-            final PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            try {
-                final ResultSet resultSet = preparedStatement.executeQuery();
-                try {
-                    while (offset > 0 && resultSet.next()) {
-                        offset--;
-                    }
-                    while (max > 0 && resultSet.next()) {
-                        max--;
-                        final long bugId = resultSet.getLong(1);
-                        final String title = resultSet.getString(2);
-                        final int hitCount = resultSet.getInt(3);
-                        final Bug bug = new Bug(bugId, title, hitCount);
-                        ret.add(bug);
-                    }
-                } finally {
-                    DbUtils.closeQuietly(resultSet);
-                }
-            } finally {
-                DbUtils.closeQuietly(preparedStatement);
-            }
-        } catch (SQLException e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        } finally {
-            DbUtils.closeQuietly(connection);
-        }
-        return ret;
-    }
-
-    @Override
     public List<Bug> getBugs(String app, int offset, int max, String orderBy) {
         final List<Bug> ret = new ArrayList<Bug>();
         final Connection connection = getConnection();
@@ -359,6 +328,101 @@ public class JdbcStore extends Store {
     }
 
     @Override
+    public List<String> getPackages(String app) {
+        final List<String> ret = new ArrayList<String>();
+        final Connection connection = getConnection();
+        try {
+            try {
+                final PreparedStatement preparedStatement = connection.prepareStatement("SELECT APP_PACKAGE FROM APP_PACKAGES WHERE APP=? ORDER BY APP_PACKAGE");
+                try {
+                    preparedStatement.setString(1, app);
+                    final ResultSet resultSet = preparedStatement.executeQuery();
+                    try {
+                        while (resultSet.next()) {
+                            final String appPackage = resultSet.getString(1);
+                            ret.add(appPackage);
+                        }
+                    } finally {
+                        DbUtils.closeQuietly(resultSet);
+                    }
+                } finally {
+                    DbUtils.close(preparedStatement);
+                }
+            } catch (SQLException e) {
+                throw new IllegalStateException(e.getMessage(), e);
+            }
+        } finally {
+            DbUtils.closeQuietly(connection);
+        }
+        return ret;
+    }
+
+    @Override
+    public void setPackages(String app, List<String> appPackages) {
+        final Connection connection = getConnection();
+        try {
+            final PreparedStatement deleteStatement = connection.prepareStatement("DELETE FROM APP_PACKAGES WHERE APP=?");
+            try {
+                deleteStatement.setString(1, app);
+                deleteStatement.executeUpdate();
+            } finally {
+                DbUtils.closeQuietly(deleteStatement);
+            }
+            final PreparedStatement insertStatement = connection.prepareStatement("INSERT INTO APP_PACKAGES (APP, APP_PACKAGE) VALUES (?, ?)");
+            try {
+                insertStatement.setString(1, app);
+                for (String appPackage : appPackages) {
+                    insertStatement.setString(2, appPackage);
+                }
+            } finally {
+                DbUtils.closeQuietly(insertStatement);
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
+            DbUtils.closeQuietly(connection);
+        }
+    }
+
+    @Override
     public void close() {
+    }
+
+    @Override
+    public void addPackage(String app, String appPackage) {
+        final Connection connection = getConnection();
+        try {
+            final PreparedStatement insertStatement = connection.prepareStatement("INSERT INTO APP_PACKAGES (APP, APP_PACKAGE) VALUES (?, ?)");
+            try {
+                insertStatement.setString(1, app);
+                insertStatement.setString(2, appPackage);
+                insertStatement.executeUpdate();
+            } finally {
+                DbUtils.closeQuietly(insertStatement);
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
+            DbUtils.closeQuietly(connection);
+        }
+    }
+
+    @Override
+    public void deletePackage(String app, String appPackage) {
+        final Connection connection = getConnection();
+        try {
+            final PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM APP_PACKAGES WHERE APP=? AND APP_PACKAGE=?");
+            try {
+                preparedStatement.setString(1, app);
+                preparedStatement.setString(2, appPackage);
+                preparedStatement.executeUpdate();
+            } finally {
+                DbUtils.closeQuietly(preparedStatement);
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
+            DbUtils.closeQuietly(connection);
+        }
     }
 }

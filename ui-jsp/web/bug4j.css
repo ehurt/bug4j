@@ -71,3 +71,23 @@ div#main {
     padding: 0 5px 0 0;
     cursor: pointer;
 }
+
+.bug-detail-stack {
+    display: block;
+    font-family: monospace;
+    white-space: pre;
+}
+
+.bug-table {
+    cursor: pointer;
+}
+
+.app-pkg-name {
+    margin-left: 5px;
+    font-family: monospace;
+}
+
+.pkg-button {
+    vertical-align: middle;
+}
+
