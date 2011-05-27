@@ -16,7 +16,6 @@
 
 package org.dandoy.bug4j.server.gwt.client.bugs;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortList;
@@ -29,6 +28,7 @@ import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
+import org.dandoy.bug4j.server.gwt.client.Bug4j;
 import org.dandoy.bug4j.server.gwt.client.Bug4jService;
 import org.dandoy.bug4j.server.gwt.client.data.Bug;
 import org.dandoy.bug4j.server.gwt.client.data.BugDetail;
@@ -39,6 +39,7 @@ public class BugView {
 
     private SingleSelectionModel<Bug> _selectionModel;
     private BugDetailView _bugDetailView;
+    private CellTable<Bug> _cellTable;
 
     public BugView() {
     }
@@ -47,51 +48,39 @@ public class BugView {
         final CellTable<Bug> bugCellTable = createTable();
         final ScrollPanel scrollPanel = new ScrollPanel(bugCellTable);
 
-        _bugDetailView = new BugDetailView();
+        _bugDetailView = new BugDetailView(this);
 
         final SplitLayoutPanel splitLayoutPanel = new SplitLayoutPanel(5);
         splitLayoutPanel.addWest(scrollPanel, 500);
-        splitLayoutPanel.add(_bugDetailView.getRootElement());
+        splitLayoutPanel.add(_bugDetailView.createWidget());
         return splitLayoutPanel;
     }
 
-    private CellTable<Bug> createTable() {
-        final CellTable<Bug> cellTable = new CellTable<Bug>();
-        //noinspection GWTStyleCheck
-        cellTable.addStyleName("bug-table");
-        cellTable.addColumn(BugViewColumn.ID, "ID");
-        cellTable.setColumnWidth(BugViewColumn.TITLE, "300px");
-        cellTable.addColumn(BugViewColumn.TITLE, "Title");
-        cellTable.addColumn(BugViewColumn.HIT, "#");
+    public void whenBugListChanges() {
+        refreshBugs();
+    }
 
-        cellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(BugViewColumn.HIT, false));
+    private CellTable<Bug> createTable() {
+        _cellTable = new CellTable<Bug>();
+        //noinspection GWTStyleCheck
+        _cellTable.addStyleName("bug-table");
+        _cellTable.addColumn(BugViewColumn.ID, "ID");
+        _cellTable.setColumnWidth(BugViewColumn.TITLE, "300px");
+        _cellTable.addColumn(BugViewColumn.TITLE, "Title");
+        _cellTable.addColumn(BugViewColumn.HIT, "#");
+
+        _cellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(BugViewColumn.HIT, false));
 
         AsyncDataProvider<Bug> dataProvider = new AsyncDataProvider<Bug>() {
             @Override
             protected void onRangeChanged(HasData<Bug> display) {
-                final ColumnSortList sortList = cellTable.getColumnSortList();
-                final String sortBy = BugViewColumn.sortBy(sortList);
-                Bug4jService.App.getInstance().getBugs(sortBy, new AsyncCallback<List<Bug>>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        GWT.log("Failed");
-                    }
-
-                    @Override
-                    public void onSuccess(List<Bug> bugs) {
-                        cellTable.setRowData(bugs);
-                        if (!bugs.isEmpty()) {
-                            final Bug firstBug = bugs.get(0);
-                            _selectionModel.setSelected(firstBug, true);
-                        }
-                    }
-                });
+                refreshBugs();
             }
         };
-        dataProvider.addDataDisplay(cellTable);
-        cellTable.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(cellTable));
+        dataProvider.addDataDisplay(_cellTable);
+        _cellTable.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(_cellTable));
         _selectionModel = new SingleSelectionModel<Bug>();
-        cellTable.setSelectionModel(_selectionModel);
+        _cellTable.setSelectionModel(_selectionModel);
 
         _selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
@@ -100,7 +89,27 @@ public class BugView {
             }
         });
 
-        return cellTable;
+        return _cellTable;
+    }
+
+    private void refreshBugs() {
+        final ColumnSortList sortList = _cellTable.getColumnSortList();
+        final String sortBy = BugViewColumn.sortBy(sortList);
+        Bug4jService.App.getInstance().getBugs(Bug4j.APP, sortBy, new AsyncCallback<List<Bug>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert(caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(List<Bug> bugs) {
+                _cellTable.setRowData(bugs);
+                if (!bugs.isEmpty()) {
+                    final Bug firstBug = bugs.get(0);
+                    _selectionModel.setSelected(firstBug, true);
+                }
+            }
+        });
     }
 
     private void whenTableSelectionChanges() {

@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 import org.dandoy.bug4j.server.gwt.client.Bug4jService;
 import org.dandoy.bug4j.server.gwt.client.data.Bug;
 import org.dandoy.bug4j.server.gwt.client.data.BugDetail;
+import org.dandoy.bug4j.server.gwt.client.data.Hit;
 import org.dandoy.bug4j.server.store.Store;
 import org.dandoy.bug4j.server.store.StoreFactory;
 
@@ -30,10 +31,10 @@ public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jServi
     private static final Logger LOGGER = Logger.getLogger(Bug4jServiceImpl.class);
 
     @Override
-    public List<Bug> getBugs(final String sortBy) throws Exception {
+    public List<Bug> getBugs(String app, final String sortBy) throws Exception {
         try {
             final Store store = StoreFactory.getStore();
-            return store.getBugs(null, 0, Integer.MAX_VALUE, sortBy);
+            return store.getBugs(app, 0, Integer.MAX_VALUE, sortBy);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             throw new Exception(e.getMessage(), e);
@@ -54,6 +55,12 @@ public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jServi
     }
 
     @Override
+    public void deleteBug(long bugId) throws Exception {
+        final Store store = StoreFactory.getStore();
+        store.deleteBug(bugId);
+    }
+
+    @Override
     public List<String> getPackages(String app) throws Exception {
         final Store store = StoreFactory.getStore();
         final List<String> ret;
@@ -67,17 +74,6 @@ public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jServi
     }
 
     @Override
-    public void setPackages(String app, List<String> appsPackages) throws Exception {
-        final Store store = StoreFactory.getStore();
-        try {
-            store.setPackages(app, appsPackages);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
-            throw new Exception(e.getMessage(), e);
-        }
-    }
-
-    @Override
     public void addPackage(String app, String appPackage) throws Exception {
         final Store store = StoreFactory.getStore();
         store.addPackage(app, appPackage);
@@ -87,5 +83,11 @@ public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jServi
     public void deletePackage(String app, String appPackage) throws Exception {
         final Store store = StoreFactory.getStore();
         store.deletePackage(app, appPackage);
+    }
+
+    @Override
+    public List<Hit> getHits(long bugId, int offset, int max, String orderBy) {
+        final Store store = StoreFactory.getStore();
+        return store.getHits(bugId, offset, max, orderBy);
     }
 }

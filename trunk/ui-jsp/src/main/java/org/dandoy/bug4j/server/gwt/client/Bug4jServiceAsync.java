@@ -19,20 +19,23 @@ package org.dandoy.bug4j.server.gwt.client;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.dandoy.bug4j.server.gwt.client.data.Bug;
 import org.dandoy.bug4j.server.gwt.client.data.BugDetail;
+import org.dandoy.bug4j.server.gwt.client.data.Hit;
 
 import java.util.List;
 
 public interface Bug4jServiceAsync {
 
-    void getBugs(String sortBy, AsyncCallback<List<Bug>> async);
+    void getBugs(String app, String sortBy, AsyncCallback<List<Bug>> async);
 
     void getBug(long bugId, AsyncCallback<BugDetail> async);
 
     void getPackages(String app, AsyncCallback<List<String>> async);
 
-    void setPackages(String app, List<String> appsPackages, AsyncCallback<Void> async);
-
     void addPackage(String app, String appPackage, AsyncCallback<Void> async);
 
     void deletePackage(String app, String appPackage, AsyncCallback<Void> async);
+
+    void getHits(long bugId, int offset, int max, String orderBy, AsyncCallback<List<Hit>> async);
+
+    void deleteBug(long bugId, AsyncCallback<Void> async);
 }
