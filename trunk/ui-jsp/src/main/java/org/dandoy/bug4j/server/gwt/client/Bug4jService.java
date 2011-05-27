@@ -30,6 +30,14 @@ public interface Bug4jService extends RemoteService {
 
     BugDetail getBug(long bugId) throws Exception;
 
+    List<String> getPackages(String app) throws Exception;
+
+    void setPackages(String app, List<String> appsPackages) throws Exception;
+
+    void addPackage(String app, String appPackage) throws Exception;
+
+    void deletePackage(String app, String appPackage) throws Exception;
+
     /**
      * Utility/Convenience class.
      * Use Bug4jService.App.getInstance() to access static instance of BugServiceAsync

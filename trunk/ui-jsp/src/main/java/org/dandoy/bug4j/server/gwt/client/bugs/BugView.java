@@ -20,6 +20,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortList;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
@@ -36,8 +37,8 @@ import java.util.List;
 
 public class BugView {
 
-    private BugDetailView _bugDetailView;
     private SingleSelectionModel<Bug> _selectionModel;
+    private BugDetailView _bugDetailView;
 
     public BugView() {
     }
@@ -50,16 +51,19 @@ public class BugView {
 
         final SplitLayoutPanel splitLayoutPanel = new SplitLayoutPanel(5);
         splitLayoutPanel.addWest(scrollPanel, 500);
-        splitLayoutPanel.add(_bugDetailView.createWidget());
+        splitLayoutPanel.add(_bugDetailView.getRootElement());
         return splitLayoutPanel;
     }
 
     private CellTable<Bug> createTable() {
         final CellTable<Bug> cellTable = new CellTable<Bug>();
+        //noinspection GWTStyleCheck
+        cellTable.addStyleName("bug-table");
         cellTable.addColumn(BugViewColumn.ID, "ID");
         cellTable.setColumnWidth(BugViewColumn.TITLE, "300px");
         cellTable.addColumn(BugViewColumn.TITLE, "Title");
         cellTable.addColumn(BugViewColumn.HIT, "#");
+
         cellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(BugViewColumn.HIT, false));
 
         AsyncDataProvider<Bug> dataProvider = new AsyncDataProvider<Bug>() {
@@ -74,11 +78,14 @@ public class BugView {
                     }
 
                     @Override
-                    public void onSuccess(List<Bug> result) {
-                        cellTable.setRowData(result);
+                    public void onSuccess(List<Bug> bugs) {
+                        cellTable.setRowData(bugs);
+                        if (!bugs.isEmpty()) {
+                            final Bug firstBug = bugs.get(0);
+                            _selectionModel.setSelected(firstBug, true);
+                        }
                     }
                 });
-
             }
         };
         dataProvider.addDataDisplay(cellTable);
@@ -102,12 +109,12 @@ public class BugView {
         Bug4jService.App.getInstance().getBug(bugId, new AsyncCallback<BugDetail>() {
             @Override
             public void onFailure(Throwable caught) {
-                //To change body of implemented methods use File | Settings | File Templates.
+                Window.alert(caught.getMessage());
             }
 
             @Override
             public void onSuccess(BugDetail bugDetail) {
-                _bugDetailView.setSelectedBug(bugDetail);
+                _bugDetailView.setBugDetail(bugDetail);
             }
         });
     }

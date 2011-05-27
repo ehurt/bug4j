@@ -21,6 +21,7 @@ public class BugDetail extends Bug {
     private String _exceptionMessage;
     private String _stackText;
 
+    @SuppressWarnings({"UnusedDeclaration"})
     public BugDetail() {
     }
 
