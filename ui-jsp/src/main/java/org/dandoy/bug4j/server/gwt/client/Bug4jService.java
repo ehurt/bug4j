@@ -21,22 +21,26 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import org.dandoy.bug4j.server.gwt.client.data.Bug;
 import org.dandoy.bug4j.server.gwt.client.data.BugDetail;
+import org.dandoy.bug4j.server.gwt.client.data.Hit;
 
 import java.util.List;
 
 @RemoteServiceRelativePath("Bug4jService")
 public interface Bug4jService extends RemoteService {
-    List<Bug> getBugs(String sortBy) throws Exception;
+
+    List<Bug> getBugs(String app, String sortBy) throws Exception;
 
     BugDetail getBug(long bugId) throws Exception;
 
-    List<String> getPackages(String app) throws Exception;
+    void deleteBug(long bugId) throws Exception;
 
-    void setPackages(String app, List<String> appsPackages) throws Exception;
+    List<String> getPackages(String app) throws Exception;
 
     void addPackage(String app, String appPackage) throws Exception;
 
     void deletePackage(String app, String appPackage) throws Exception;
+
+    List<Hit> getHits(long bugId, int offset, int max, String orderBy);
 
     /**
      * Utility/Convenience class.

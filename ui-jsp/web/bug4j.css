@@ -52,6 +52,13 @@ div#footer p {
     border-top: thin solid #bbbaba;
 }
 
+.logo {
+    font-size: 32px;
+    color: #FF6600;
+    position: absolute;
+    top: 12px;
+}
+
 div#main {
     margin: 5px 0 0 1px;
 }
@@ -91,3 +98,9 @@ div#main {
     vertical-align: middle;
 }
 
+.stack-highlight {
+}
+
+.stack-dim {
+    color: #a9a9a9;
+}

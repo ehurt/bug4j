@@ -19,6 +19,7 @@ package org.dandoy.bug4j.server.store.jdbc;
 import org.apache.commons.dbutils.DbUtils;
 import org.dandoy.bug4j.server.gwt.client.data.Bug;
 import org.dandoy.bug4j.server.gwt.client.data.BugDetail;
+import org.dandoy.bug4j.server.gwt.client.data.Hit;
 import org.dandoy.bug4j.server.store.Store;
 
 import javax.naming.Context;
@@ -250,6 +251,7 @@ public class JdbcStore extends Store {
         final Connection connection = getConnection();
         try {
             StringBuilder sql = new StringBuilder("select bug.id,bug.title,(select count(*) from hit where hit.bug_id=bug.id) hitcount from bug\n");
+            sql.append(" where app=?");
             String sep = "order by ";
             for (int i = 0; i < orderBy.length(); i++) {
                 final char c = orderBy.charAt(i);
@@ -263,6 +265,7 @@ public class JdbcStore extends Store {
                 sep = ", ";
             }
             final PreparedStatement preparedStatement = connection.prepareStatement(sql.toString());
+            preparedStatement.setString(1, app);
             try {
                 final ResultSet resultSet = preparedStatement.executeQuery();
                 try {
@@ -422,6 +425,84 @@ public class JdbcStore extends Store {
         } catch (SQLException e) {
             throw new IllegalStateException(e.getMessage(), e);
         } finally {
+            DbUtils.closeQuietly(connection);
+        }
+    }
+
+    @Override
+    public List<Hit> getHits(long bugId, int offset, int max, String orderBy) {
+        final List<Hit> ret = new ArrayList<Hit>();
+        final Connection connection = getConnection();
+        try {
+            StringBuilder sql = new StringBuilder("select ID,APP_VER,DATE_REPORTED from HIT WHERE BUG_ID=?\n");
+            String sep = "order by ";
+            for (int i = 0; i < orderBy.length(); i++) {
+                final char c = orderBy.charAt(i);
+                final char lc = Character.toLowerCase(c);
+                final int columnPos = "iadb".indexOf(lc) + 1;
+                final boolean asc = Character.isLowerCase(c);
+                sql
+                        .append(sep)
+                        .append(columnPos)
+                        .append(asc ? " ASC" : " DESC");
+                sep = ", ";
+            }
+            final PreparedStatement preparedStatement = connection.prepareStatement(sql.toString());
+            try {
+                preparedStatement.setLong(1, bugId);
+
+                final ResultSet resultSet = preparedStatement.executeQuery();
+                try {
+                    while (offset > 0 && resultSet.next()) {
+                        offset--;
+                    }
+                    while (max > 0 && resultSet.next()) {
+                        max--;
+                        final long hitId = resultSet.getLong(1);
+                        final String appVer = resultSet.getString(2);
+                        final long dateReported = resultSet.getTimestamp(3).getTime();
+                        final Hit hit = new Hit(
+                                hitId,
+                                bugId,
+                                appVer,
+                                dateReported
+                        );
+                        ret.add(hit);
+                    }
+                } finally {
+                    DbUtils.closeQuietly(resultSet);
+                }
+            } finally {
+                DbUtils.closeQuietly(preparedStatement);
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
+            DbUtils.closeQuietly(connection);
+        }
+        return ret;
+    }
+
+    @Override
+    public void deleteBug(long bugId) {
+        final Connection connection = getConnection();
+        try {
+            final PreparedStatement deleteHitsStatement = connection.prepareStatement("DELETE FROM HIT WHERE BUG_ID=?");
+            try {
+                deleteHitsStatement.setLong(1, bugId);
+                deleteHitsStatement.executeUpdate();
+            } finally {
+                DbUtils.closeQuietly(deleteHitsStatement);
+            }
+
+            final PreparedStatement deleteBugStatement = connection.prepareStatement("DELETE FROM BUG WHERE ID=?");
+            try {
+                deleteBugStatement.setLong(1, bugId);
+                deleteBugStatement.executeUpdate();
+            } finally {
+                DbUtils.closeQuietly(deleteBugStatement);
+            }
+        } catch (SQLException e) {
             DbUtils.closeQuietly(connection);
         }
     }

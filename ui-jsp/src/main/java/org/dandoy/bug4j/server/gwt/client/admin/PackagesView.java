@@ -30,11 +30,9 @@ import java.util.List;
 public class PackagesView {
 
     private TextBox _textBox;
-    private String _app;
     private VerticalPanel _verticalPanel;
 
-    public PackagesView(String app) {
-        _app = app;
+    public PackagesView() {
     }
 
     public Widget createWidget() {
@@ -50,7 +48,7 @@ public class PackagesView {
             _verticalPanel.remove(0);
         }
 
-        Bug4jService.App.getInstance().getPackages(_app, new AsyncCallback<List<String>>() {
+        Bug4jService.App.getInstance().getPackages(Bug4j.APP, new AsyncCallback<List<String>>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
@@ -111,7 +109,8 @@ public class PackagesView {
     }
 
     private void whenAdd() {
-        Bug4jService.App.getInstance().addPackage(_app, _textBox.getText(), new AsyncCallback<Void>() {
+        Bug4j.clearAppPackages();
+        Bug4jService.App.getInstance().addPackage(Bug4j.APP, _textBox.getText(), new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
@@ -125,7 +124,8 @@ public class PackagesView {
     }
 
     private void whenDelete(String appPackage) {
-        Bug4jService.App.getInstance().deletePackage(_app, appPackage, new AsyncCallback<Void>() {
+        Bug4j.clearAppPackages();
+        Bug4jService.App.getInstance().deletePackage(Bug4j.APP, appPackage, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());

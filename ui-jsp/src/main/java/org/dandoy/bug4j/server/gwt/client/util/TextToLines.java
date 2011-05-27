@@ -14,14 +14,11 @@
  *    limitations under the License.
  */
 
-package org.dandoy.bug4j.common;
+package org.dandoy.bug4j.server.gwt.client.util;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * This is a copy of org.dandoy.bug4j.common.TextToLines
- */
 public final class TextToLines {
     private TextToLines() {
     }

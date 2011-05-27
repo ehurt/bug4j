@@ -21,35 +21,60 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.user.client.ui.TabLayoutPanel;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.*;
 import org.dandoy.bug4j.server.gwt.client.admin.PackagesView;
 import org.dandoy.bug4j.server.gwt.client.bugs.BugView;
+
+import java.util.List;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>
  */
 public class Bug4j implements EntryPoint {
-
+    public static final String APP = "My Application";
     public static final Resources IMAGES = GWT.create(Resources.class);
+    private static List<String> _appPackages;
 
     /**
      * This is the entry point method.
      */
     public void onModuleLoad() {
 
-        final DockLayoutPanel dockLayoutPanel = new DockLayoutPanel(Style.Unit.EM);
-        dockLayoutPanel.addNorth(new HTML("Bug4J"), 2);
+        final DockLayoutPanel dockLayoutPanel = new DockLayoutPanel(Style.Unit.PX);
+        final Widget html = new HTML("<img src=\"splat.png\"/><span class=\"logo\">Bug4J</span>");
+        dockLayoutPanel.addNorth(html, 55);
 
         final TabLayoutPanel tabLayoutPanel = new TabLayoutPanel(2, Style.Unit.EM);
         tabLayoutPanel.add(new BugView().createWidget(), "Bugs");
-        tabLayoutPanel.add(new PackagesView("My Application").createWidget(), "Packages");
+        tabLayoutPanel.add(new PackagesView().createWidget(), "Packages");
         dockLayoutPanel.add(tabLayoutPanel);
 
         RootLayoutPanel.get().add(dockLayoutPanel);
         final Element loadingElement = DOM.getElementById("loading");
         DOM.removeChild(DOM.getParent(loadingElement), loadingElement);
+    }
+
+    public static synchronized void withAppPackages(final AsyncCallback<List<String>> asyncCallback) {
+        if (_appPackages == null) {
+            Bug4jService.App.getInstance().getPackages(Bug4j.APP, new AsyncCallback<List<String>>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    asyncCallback.onFailure(caught);
+                }
+
+                @Override
+                public void onSuccess(List<String> result) {
+                    _appPackages = result;
+                    asyncCallback.onSuccess(_appPackages);
+                }
+            });
+        } else {
+            asyncCallback.onSuccess(_appPackages);
+        }
+    }
+
+    public static synchronized void clearAppPackages() {
+        _appPackages = null;
     }
 }

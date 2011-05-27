@@ -18,6 +18,7 @@ package org.dandoy.bug4j.server.store;
 
 import org.dandoy.bug4j.server.gwt.client.data.Bug;
 import org.dandoy.bug4j.server.gwt.client.data.BugDetail;
+import org.dandoy.bug4j.server.gwt.client.data.Hit;
 
 import java.util.List;
 
@@ -44,4 +45,8 @@ public abstract class Store {
     public abstract void addPackage(String app, String appPackage);
 
     public abstract void deletePackage(String app, String appPackage);
+
+    public abstract List<Hit> getHits(long bugId, int offset, int max, String orderBy);
+
+    public abstract void deleteBug(long bugId);
 }
