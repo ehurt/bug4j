@@ -42,7 +42,8 @@ public class BugDetailView {
     private HTML _stack;
     private HitsView _hitsView;
     private long _bugId;
-    private final BugView _bugView;
+    private final DisplaysBugs _displaysBugs;
+    private DockLayoutPanel _widget;
 
     interface BugDetailViewUiBinder extends UiBinder<HTMLPanel, BugDetailView> {
     }
@@ -57,23 +58,24 @@ public class BugDetailView {
     @UiField
     SpanElement _exceptionMessage;
 
-    public BugDetailView(BugView bugView) {
-        _bugView = bugView;
+    public BugDetailView(DisplaysBugs displaysBugs) {
+        _displaysBugs = displaysBugs;
     }
 
     public Widget createWidget() {
         final Widget rootElement = _ourUiBinder.createAndBindUi(this);
-        final DockLayoutPanel ret = new DockLayoutPanel(Style.Unit.EM);
-        ret.addNorth(buildToolbar(), 2);
-        ret.addNorth(rootElement, 7);
+        _widget = new DockLayoutPanel(Style.Unit.EM);
+//        _widget.setVisible(false);
+        _widget.addNorth(buildToolbar(), 2);
+        _widget.addNorth(rootElement, 7);
         final TabLayoutPanel tabLayoutPanel = new TabLayoutPanel(2, Style.Unit.EM);
         _stack = new HTML();
         _stack.addStyleName("bug-detail-stack");
-        tabLayoutPanel.add(_stack, "Stack Dump");
+        tabLayoutPanel.add(new ScrollPanel(_stack), "Stack Dump");
         _hitsView = new HitsView();
         tabLayoutPanel.add(_hitsView.createWidget(), "Hits");
-        ret.add(tabLayoutPanel);
-        return ret;
+        _widget.add(tabLayoutPanel);
+        return _widget;
     }
 
     private Widget buildToolbar() {
@@ -98,7 +100,22 @@ public class BugDetailView {
 
             @Override
             public void onSuccess(Void result) {
-                _bugView.whenBugListChanges();
+                _displaysBugs.whenBugListChanges();
+            }
+        });
+    }
+
+    public void displayBug(long bugId) {
+        Bug4jService.App.getInstance().getBug(bugId, new AsyncCallback<BugDetail>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert(caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(BugDetail bugDetail) {
+                setBugDetail(bugDetail);
+                _widget.setVisible(true);
             }
         });
     }

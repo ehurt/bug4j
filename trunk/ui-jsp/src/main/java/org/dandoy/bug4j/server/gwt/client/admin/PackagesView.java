@@ -36,10 +36,20 @@ public class PackagesView {
     }
 
     public Widget createWidget() {
+
+        // vertical panel of packages
         _verticalPanel = new VerticalPanel();
+        final ScrollPanel scrollPanel = new ScrollPanel(_verticalPanel);
+
+        final DecoratorPanel decoratorPanel = new DecoratorPanel();
+        final VerticalPanel verticalPanel = new VerticalPanel();
+        verticalPanel.add(new HTML("<H2>Packages</H2>"));
+        verticalPanel.add(scrollPanel);
+        decoratorPanel.add(verticalPanel);
+
         refreshList();
 
-        return new ScrollPanel(_verticalPanel);
+        return decoratorPanel;
     }
 
     private void refreshList() {

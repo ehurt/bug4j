@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="gwt-visualization">
+    <CLASSES>
+      <root url="jar://C:/Java/gwt-visualization-1.1.1/gwt-visualization.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://C:/Java/gwt-visualization-1.1.1/gwt-visualization.jar!/" />
+    </SOURCES>
+  </library>
+</component>

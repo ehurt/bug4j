@@ -21,6 +21,7 @@ import org.dandoy.bug4j.server.gwt.client.data.BugDetail;
 import org.dandoy.bug4j.server.gwt.client.data.Hit;
 
 import java.util.List;
+import java.util.Map;
 
 public abstract class Store {
     protected Store() {
@@ -38,8 +39,6 @@ public abstract class Store {
 
     public abstract List<String> getPackages(String app);
 
-    public abstract void setPackages(String app, List<String> appPackages);
-
     public abstract void close();
 
     public abstract void addPackage(String app, String appPackage);
@@ -49,4 +48,6 @@ public abstract class Store {
     public abstract List<Hit> getHits(long bugId, int offset, int max, String orderBy);
 
     public abstract void deleteBug(long bugId);
+
+    public abstract Map<Bug, int[]> getTopHits(String app, int daysBack, int max);
 }
