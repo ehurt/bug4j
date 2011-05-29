@@ -31,12 +31,12 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import org.dandoy.bug4j.server.gwt.client.Bug4j;
 import org.dandoy.bug4j.server.gwt.client.Bug4jService;
 import org.dandoy.bug4j.server.gwt.client.data.Bug;
-import org.dandoy.bug4j.server.gwt.client.data.BugDetail;
 
 import java.util.List;
 
-public class BugView {
+public class BugView implements DisplaysBugs {
 
+    private static final int PAGE_SIZE = 100;
     private SingleSelectionModel<Bug> _selectionModel;
     private BugDetailView _bugDetailView;
     private CellTable<Bug> _cellTable;
@@ -61,7 +61,7 @@ public class BugView {
     }
 
     private CellTable<Bug> createTable() {
-        _cellTable = new CellTable<Bug>();
+        _cellTable = new CellTable<Bug>(PAGE_SIZE);
         //noinspection GWTStyleCheck
         _cellTable.addStyleName("bug-table");
         _cellTable.addColumn(BugViewColumn.ID, "ID");
@@ -115,16 +115,6 @@ public class BugView {
     private void whenTableSelectionChanges() {
         final Bug bug = _selectionModel.getSelectedObject();
         final long bugId = bug.getId();
-        Bug4jService.App.getInstance().getBug(bugId, new AsyncCallback<BugDetail>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert(caught.getMessage());
-            }
-
-            @Override
-            public void onSuccess(BugDetail bugDetail) {
-                _bugDetailView.setBugDetail(bugDetail);
-            }
-        });
+        _bugDetailView.displayBug(bugId);
     }
 }

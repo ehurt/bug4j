@@ -26,16 +26,15 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.sql.Date;
+import java.util.*;
 
 public class JdbcStore extends Store {
     private static JdbcStore INSTANCE;
     private final Set<String> _knownApps = new HashSet<String>();
+    private static final long DAY = 1000L * 60 * 60 * 24;
 
-    private JdbcStore() {
+    protected JdbcStore() {
     }
 
     private void initialize() {
@@ -58,7 +57,7 @@ public class JdbcStore extends Store {
         return INSTANCE;
     }
 
-    private Connection getConnection() {
+    protected Connection getConnection() {
         final Connection ret;
         try {
             final Context initCtx = new InitialContext();
@@ -361,33 +360,6 @@ public class JdbcStore extends Store {
     }
 
     @Override
-    public void setPackages(String app, List<String> appPackages) {
-        final Connection connection = getConnection();
-        try {
-            final PreparedStatement deleteStatement = connection.prepareStatement("DELETE FROM APP_PACKAGES WHERE APP=?");
-            try {
-                deleteStatement.setString(1, app);
-                deleteStatement.executeUpdate();
-            } finally {
-                DbUtils.closeQuietly(deleteStatement);
-            }
-            final PreparedStatement insertStatement = connection.prepareStatement("INSERT INTO APP_PACKAGES (APP, APP_PACKAGE) VALUES (?, ?)");
-            try {
-                insertStatement.setString(1, app);
-                for (String appPackage : appPackages) {
-                    insertStatement.setString(2, appPackage);
-                }
-            } finally {
-                DbUtils.closeQuietly(insertStatement);
-            }
-        } catch (SQLException e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        } finally {
-            DbUtils.closeQuietly(connection);
-        }
-    }
-
-    @Override
     public void close() {
     }
 
@@ -503,7 +475,80 @@ public class JdbcStore extends Store {
                 DbUtils.closeQuietly(deleteBugStatement);
             }
         } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
             DbUtils.closeQuietly(connection);
         }
+    }
+
+    @Override
+    public Map<Bug, int[]> getTopHits(String app, int daysBack, int max) {
+        final Map<Bug, int[]> ret = new HashMap<Bug, int[]>();
+        final Connection connection = getConnection();
+        try {
+            final long now = System.currentTimeMillis();
+            final Date from = new Date(now - daysBack * DAY);
+            final Date to = new Date(now);
+            final List<Bug> bugs = getTopBugs(connection, max, from, to);
+            final PreparedStatement datesReportedStatement = connection.prepareStatement("" +
+                    "select DATE_REPORTED" +
+                    " from hit " +
+                    " where bug_id=? " +
+                    " and DATE_REPORTED BETWEEN ? AND ?");
+            try {
+                datesReportedStatement.setDate(2, from);
+                datesReportedStatement.setDate(3, to);
+                for (Bug bug : bugs) {
+                    datesReportedStatement.setLong(1, bug.getId());
+                    final ResultSet resultSet = datesReportedStatement.executeQuery();
+                    final int[] hitCounts = new int[daysBack];
+                    try {
+                        while (resultSet.next()) {
+                            final Date date = resultSet.getDate(1);
+                            final long time = date.getTime();
+                            final int day = (int) ((now - time) / DAY);
+                            hitCounts[daysBack - day]++;
+                        }
+                    } finally {
+                        resultSet.close();
+                    }
+                    ret.put(bug, hitCounts);
+                }
+            } finally {
+                datesReportedStatement.close();
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+        return ret;
+    }
+
+    private List<Bug> getTopBugs(Connection connection, int max, Date from, Date to) throws SQLException {
+        final List<Bug> ret = new ArrayList<Bug>();
+        final PreparedStatement countStatement = connection.prepareStatement("select H.BUG_ID, B.TITLE, count(*) \"CNT\" \n" +
+                "  from HIT H,BUG B\n" +
+                "  where H.BUG_ID=B.ID\n" +
+                "  and H.DATE_REPORTED BETWEEN ? AND ?" +
+                "  group by H.bug_id,B.TITLE\n" +
+                "  order by CNT DESC");
+        try {
+            countStatement.setDate(1, from);
+            countStatement.setDate(2, to);
+            final ResultSet resultSet = countStatement.executeQuery();
+            try {
+                for (int i = 0; resultSet.next() && i < max; i++) {
+                    final long bugId = resultSet.getLong(1);
+                    final String title = resultSet.getString(2);
+                    final int count = resultSet.getInt(3);
+                    final Bug bug = new Bug(bugId, title, count);
+                    ret.add(bug);
+                }
+            } finally {
+                resultSet.close();
+            }
+        } finally {
+            countStatement.close();
+        }
+        return ret;
     }
 }

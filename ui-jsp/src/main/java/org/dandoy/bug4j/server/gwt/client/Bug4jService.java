@@ -24,6 +24,7 @@ import org.dandoy.bug4j.server.gwt.client.data.BugDetail;
 import org.dandoy.bug4j.server.gwt.client.data.Hit;
 
 import java.util.List;
+import java.util.Map;
 
 @RemoteServiceRelativePath("Bug4jService")
 public interface Bug4jService extends RemoteService {
@@ -41,6 +42,8 @@ public interface Bug4jService extends RemoteService {
     void deletePackage(String app, String appPackage) throws Exception;
 
     List<Hit> getHits(long bugId, int offset, int max, String orderBy);
+
+    Map<Bug, int[]> getTopHits(String app, int daysBack, int max);
 
     /**
      * Utility/Convenience class.

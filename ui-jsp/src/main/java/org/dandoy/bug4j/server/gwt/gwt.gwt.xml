@@ -22,9 +22,6 @@
     <inherits name='com.google.gwt.uibinder.UiBinder'/>
 
     <inherits name="com.google.gwt.user.theme.standard.Standard"/>
-
-    <set-configuration-property name="UiBinder.useSafeHtmlTemplates" value="true"/>
-
     <!--
         <inherits name="com.google.gwt.user.theme.chrome.Chrome"/>
     -->
@@ -32,12 +29,16 @@
         <inherits name="com.google.gwt.user.theme.dark.Dark"/>
     -->
 
+    <set-configuration-property name="UiBinder.useSafeHtmlTemplates" value="true"/>
+
+    <inherits name="com.google.gwt.visualization.Visualization"/>
+
     <!-- Specify the app entry point class.                   -->
     <entry-point class='org.dandoy.bug4j.server.gwt.client.Bug4j'/>
 
     <!-- Specify the app servlets.                   -->
     <servlet path='/Bug4jService' class='org.dandoy.bug4j.server.gwt.server.Bug4jServiceImpl'/>
     <!--
-        <set-property name="user.agent" value="safari"/>
+    <set-property name="user.agent" value="safari"/>
     -->
 </module>

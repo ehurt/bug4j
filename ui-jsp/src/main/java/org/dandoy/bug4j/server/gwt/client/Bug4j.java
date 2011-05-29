@@ -25,6 +25,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import org.dandoy.bug4j.server.gwt.client.admin.PackagesView;
 import org.dandoy.bug4j.server.gwt.client.bugs.BugView;
+import org.dandoy.bug4j.server.gwt.client.bugs.HotBugsGraphView;
 
 import java.util.List;
 
@@ -47,7 +48,9 @@ public class Bug4j implements EntryPoint {
 
         final TabLayoutPanel tabLayoutPanel = new TabLayoutPanel(2, Style.Unit.EM);
         tabLayoutPanel.add(new BugView().createWidget(), "Bugs");
-        tabLayoutPanel.add(new PackagesView().createWidget(), "Packages");
+        tabLayoutPanel.add(new HotBugsGraphView().createWidget(), "Top Chart");
+        tabLayoutPanel.add(new PackagesView().createWidget(), "Setup");
+
         dockLayoutPanel.add(tabLayoutPanel);
 
         RootLayoutPanel.get().add(dockLayoutPanel);

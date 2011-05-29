@@ -26,6 +26,7 @@ import org.dandoy.bug4j.server.store.Store;
 import org.dandoy.bug4j.server.store.StoreFactory;
 
 import java.util.List;
+import java.util.Map;
 
 public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jService {
     private static final Logger LOGGER = Logger.getLogger(Bug4jServiceImpl.class);
@@ -89,5 +90,11 @@ public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jServi
     public List<Hit> getHits(long bugId, int offset, int max, String orderBy) {
         final Store store = StoreFactory.getStore();
         return store.getHits(bugId, offset, max, orderBy);
+    }
+
+    @Override
+    public Map<Bug, int[]> getTopHits(String app, int daysBack, int max) {
+        final Store store = StoreFactory.getStore();
+        return store.getTopHits(app, daysBack, max);
     }
 }

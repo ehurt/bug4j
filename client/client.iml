@@ -21,6 +21,7 @@
     <orderEntry type="library" scope="PROVIDED" name="log4j" level="application" />
     <orderEntry type="library" name="httpcomponents-client" level="application" />
     <orderEntry type="library" name="jetbrains" level="application" />
+    <orderEntry type="library" name="gwt-visualization" level="project" />
   </component>
 </module>
 
