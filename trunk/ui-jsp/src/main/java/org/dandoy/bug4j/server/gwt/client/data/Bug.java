@@ -26,6 +26,11 @@ public class Bug implements Serializable {
     public Bug() {
     }
 
+    @Override
+    public String toString() {
+        return _id + "-" + _title;
+    }
+
     public Bug(long id, String title, int hitCount) {
         _id = id;
         _title = title;

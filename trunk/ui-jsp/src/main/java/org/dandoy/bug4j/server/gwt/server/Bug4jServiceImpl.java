@@ -94,7 +94,12 @@ public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jServi
 
     @Override
     public Map<Bug, int[]> getTopHits(String app, int daysBack, int max) {
-        final Store store = StoreFactory.getStore();
-        return store.getTopHits(app, daysBack, max);
+        try {
+            final Store store = StoreFactory.getStore();
+            return store.getTopHits(app, daysBack, max);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new IllegalStateException(e.getMessage(), e);
+        }
     }
 }

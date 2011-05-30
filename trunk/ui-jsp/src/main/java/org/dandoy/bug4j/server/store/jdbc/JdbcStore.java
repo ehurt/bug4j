@@ -487,9 +487,11 @@ public class JdbcStore extends Store {
         final Connection connection = getConnection();
         try {
             final long now = System.currentTimeMillis();
-            final Date from = new Date(now - daysBack * DAY);
-            final Date to = new Date(now);
-            final List<Bug> bugs = getTopBugs(connection, max, from, to);
+            final long tFrom = adjustToMidnight(now - daysBack * DAY);
+            final long tTo = adjustToMidnight(now) + DAY;
+            final Date from = new Date(tFrom);
+            final Date to = new Date(tTo);
+            final List<Bug> bugs = getTopBugs(connection, app, max, from, to);
             final PreparedStatement datesReportedStatement = connection.prepareStatement("" +
                     "select DATE_REPORTED" +
                     " from hit " +
@@ -501,13 +503,13 @@ public class JdbcStore extends Store {
                 for (Bug bug : bugs) {
                     datesReportedStatement.setLong(1, bug.getId());
                     final ResultSet resultSet = datesReportedStatement.executeQuery();
-                    final int[] hitCounts = new int[daysBack];
+                    final int[] hitCounts = new int[daysBack + 1]; // if we go 0 days back we still 1: today
                     try {
                         while (resultSet.next()) {
                             final Date date = resultSet.getDate(1);
                             final long time = date.getTime();
-                            final int day = (int) ((now - time) / DAY);
-                            hitCounts[daysBack - day]++;
+                            final int day = daysBack - (int) ((tTo - time) / DAY);
+                            hitCounts[day + 1]++;
                         }
                     } finally {
                         resultSet.close();
@@ -523,17 +525,29 @@ public class JdbcStore extends Store {
         return ret;
     }
 
-    private List<Bug> getTopBugs(Connection connection, int max, Date from, Date to) throws SQLException {
+    private static long adjustToMidnight(long t) {
+        final Calendar calendar = new GregorianCalendar();
+        calendar.setTimeInMillis(t);
+        calendar.set(Calendar.HOUR, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTimeInMillis();
+    }
+
+    private List<Bug> getTopBugs(Connection connection, String app, int max, Date from, Date to) throws SQLException {
         final List<Bug> ret = new ArrayList<Bug>();
-        final PreparedStatement countStatement = connection.prepareStatement("select H.BUG_ID, B.TITLE, count(*) \"CNT\" \n" +
-                "  from HIT H,BUG B\n" +
-                "  where H.BUG_ID=B.ID\n" +
+        final PreparedStatement countStatement = connection.prepareStatement("select H.BUG_ID, B.TITLE, count(*) \"CNT\" " +
+                "  from HIT H,BUG B" +
+                "  where H.BUG_ID=B.ID" +
                 "  and H.DATE_REPORTED BETWEEN ? AND ?" +
-                "  group by H.bug_id,B.TITLE\n" +
+                "  and B.APP=?" +
+                "  group by H.bug_id,B.TITLE" +
                 "  order by CNT DESC");
         try {
             countStatement.setDate(1, from);
             countStatement.setDate(2, to);
+            countStatement.setString(3, app);
             final ResultSet resultSet = countStatement.executeQuery();
             try {
                 for (int i = 0; resultSet.next() && i < max; i++) {

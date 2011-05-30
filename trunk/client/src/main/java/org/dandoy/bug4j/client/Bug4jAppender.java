@@ -57,6 +57,7 @@ public class Bug4jAppender extends AppenderSkeleton {
 
     @Override
     public void activateOptions() {
+        Client.start(_settings);
     }
 
     @SuppressWarnings({"UnusedDeclaration"})

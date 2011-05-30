@@ -18,6 +18,7 @@ package org.dandoy.bug4j.server.gwt.client.bugs;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsArray;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
@@ -127,8 +128,8 @@ public class HotBugsGraphView implements DisplaysBugs {
         _bugs.clear();
 
         DataTable data = DataTable.create();
-        data.addColumn(ColumnType.DATE, "Date");
-        data.addRows(daysBack);
+        data.addColumn(ColumnType.STRING, "Date");
+        data.addRows(daysBack + 1);
 
         int col = 1;
         for (Map.Entry<Bug, int[]> bugEntry : topHits.entrySet()) {
@@ -144,8 +145,12 @@ public class HotBugsGraphView implements DisplaysBugs {
             col++;
         }
         final long now = System.currentTimeMillis();
-        for (int i = 0; i < daysBack; i++) {
-            data.setValue(i, 0, new Date(now - daysBack * DAY));
+        final DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat("EEE");
+        for (int i = 0; i < daysBack + 1; i++) {
+            final long t = now - (daysBack - i) * DAY;
+            final Date date = new Date(t);
+            final String s = dateTimeFormat.format(date);
+            data.setValue(i, 0, s);
         }
         return data;
     }
