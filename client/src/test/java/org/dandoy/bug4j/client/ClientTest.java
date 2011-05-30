@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -36,7 +37,7 @@ public class ClientTest {
     }
 
     private void doSomethingNotTooGood() {
-        throw new NullPointerException("aie!");
+        new ArrayList<String>().get(1);
     }
 
     @Test

@@ -51,7 +51,7 @@ public class BugView implements DisplaysBugs {
         _bugDetailView = new BugDetailView(this);
 
         final SplitLayoutPanel splitLayoutPanel = new SplitLayoutPanel(5);
-        splitLayoutPanel.addWest(scrollPanel, 500);
+        splitLayoutPanel.addWest(scrollPanel, 600);
         splitLayoutPanel.add(_bugDetailView.createWidget());
         return splitLayoutPanel;
     }
@@ -62,12 +62,15 @@ public class BugView implements DisplaysBugs {
 
     private CellTable<Bug> createTable() {
         _cellTable = new CellTable<Bug>(PAGE_SIZE);
+        _cellTable.setWidth("100%", true);
         //noinspection GWTStyleCheck
         _cellTable.addStyleName("bug-table");
         _cellTable.addColumn(BugViewColumn.ID, "ID");
-        _cellTable.setColumnWidth(BugViewColumn.TITLE, "300px");
         _cellTable.addColumn(BugViewColumn.TITLE, "Title");
         _cellTable.addColumn(BugViewColumn.HIT, "#");
+
+        _cellTable.setColumnWidth(BugViewColumn.ID, "6em");
+        _cellTable.setColumnWidth(BugViewColumn.HIT, "6em");
 
         _cellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(BugViewColumn.HIT, false));
 

@@ -18,18 +18,12 @@ package org.dandoy.bug4j.client;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.dandoy.bug4j.common.StackAnalyzer;
-import org.dandoy.bug4j.common.TextToLines;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.ArrayList;
 
 public class Bug4jTest {
     private static final Logger LOGGER = Logger.getLogger(Bug4jTest.class);
@@ -52,7 +46,6 @@ public class Bug4jTest {
         LogManager.shutdown();
         Client.shutdown();
         Assert.assertEquals(2, Client.getReported());
-
     }
 
     @Test
@@ -114,6 +107,6 @@ public class Bug4jTest {
     }
 
     private void doSomethingNotTooGood() {
-        throw new NullPointerException("aie!");
+        new ArrayList<String>().get(1);
     }
 }
