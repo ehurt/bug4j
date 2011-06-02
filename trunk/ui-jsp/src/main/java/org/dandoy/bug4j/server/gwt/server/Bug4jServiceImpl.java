@@ -19,9 +19,7 @@ package org.dandoy.bug4j.server.gwt.server;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import org.apache.log4j.Logger;
 import org.dandoy.bug4j.server.gwt.client.Bug4jService;
-import org.dandoy.bug4j.server.gwt.client.data.Bug;
-import org.dandoy.bug4j.server.gwt.client.data.BugDetail;
-import org.dandoy.bug4j.server.gwt.client.data.Hit;
+import org.dandoy.bug4j.server.gwt.client.data.*;
 import org.dandoy.bug4j.server.store.Store;
 import org.dandoy.bug4j.server.store.StoreFactory;
 
@@ -43,22 +41,14 @@ public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jServi
     }
 
     @Override
-    public BugDetail getBug(long bugId) throws Exception {
-        final BugDetail ret;
+    public void deleteBug(long bugId) throws Exception {
         try {
             final Store store = StoreFactory.getStore();
-            ret = store.getBug(bugId);
+            store.deleteBug(bugId);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            throw new Exception(e.getMessage(), e);
+            throw e;
         }
-        return ret;
-    }
-
-    @Override
-    public void deleteBug(long bugId) throws Exception {
-        final Store store = StoreFactory.getStore();
-        store.deleteBug(bugId);
     }
 
     @Override
@@ -101,5 +91,40 @@ public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jServi
             LOGGER.error(e.getMessage(), e);
             throw new IllegalStateException(e.getMessage(), e);
         }
+    }
+
+    public BugHit getLastHit(long bugId) {
+        try {
+            final Store store = StoreFactory.getStore();
+            return store.getLastHit(bugId);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public BugDetailInitialData getBugDetailInitialData(String app, long bugId) {
+        try {
+            final Store store = StoreFactory.getStore();
+            final Bug bug = store.getBug(app, bugId);
+            final List<Long> bugHits = store.getHitIds(bugId);
+            BugHitAndStack lastStack = null;
+            if (!bugHits.isEmpty()) {
+                final long lastHit = bugHits.get(0);
+                lastStack = store.getBugHitAndStack(lastHit);
+            }
+            final BugDetailInitialData bugDetailInitialData = new BugDetailInitialData(bug, bugHits, lastStack);
+            return bugDetailInitialData;
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public BugHitAndStack getBugHitAndStack(long hitId) {
+        final Store store = StoreFactory.getStore();
+        return store.getBugHitAndStack(hitId);
     }
 }

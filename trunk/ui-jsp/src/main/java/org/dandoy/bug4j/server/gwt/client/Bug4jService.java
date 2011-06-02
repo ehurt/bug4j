@@ -19,9 +19,7 @@ package org.dandoy.bug4j.server.gwt.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import org.dandoy.bug4j.server.gwt.client.data.Bug;
-import org.dandoy.bug4j.server.gwt.client.data.BugDetail;
-import org.dandoy.bug4j.server.gwt.client.data.Hit;
+import org.dandoy.bug4j.server.gwt.client.data.*;
 
 import java.util.List;
 import java.util.Map;
@@ -30,8 +28,6 @@ import java.util.Map;
 public interface Bug4jService extends RemoteService {
 
     List<Bug> getBugs(String app, String sortBy) throws Exception;
-
-    BugDetail getBug(long bugId) throws Exception;
 
     void deleteBug(long bugId) throws Exception;
 
@@ -44,6 +40,12 @@ public interface Bug4jService extends RemoteService {
     List<Hit> getHits(long bugId, int offset, int max, String orderBy);
 
     Map<Bug, int[]> getTopHits(String app, int daysBack, int max);
+
+    BugHit getLastHit(long bugId);
+
+    BugDetailInitialData getBugDetailInitialData(String app, long bugId);
+
+    BugHitAndStack getBugHitAndStack(long hitId);
 
     /**
      * Utility/Convenience class.

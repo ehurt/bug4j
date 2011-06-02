@@ -16,11 +16,10 @@
 
 package org.dandoy.bug4j.client;
 
-import org.dandoy.bug4j.common.StackAnalyzer;
+import org.dandoy.bug4j.common.FullStackHashCalculator;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -30,10 +29,8 @@ public class Client {
     private static Thread _clientThread;
     private static int _reported;
 
-    private final StackAnalyzer _stackAnalyzer = new StackAnalyzer();
     private HttpConnector _connector;
     private boolean _report = true;
-    private boolean _isInitialized;
 
     private Client() {
     }
@@ -125,15 +122,12 @@ public class Client {
     }
 
     private void process(ReportableEvent reportableEvent) {
-        lazyInitialize();
-        final String title = getTitle(reportableEvent);
-        if (title != null) {
-            final String hash = getHash(title);
-            final boolean isNew = _connector.reportHit(hash);
+        final String[] throwableStrRep = reportableEvent.getThrowableStrRep();
+        final String textHash = FullStackHashCalculator.getTextHash(Arrays.asList(throwableStrRep));
+        if (textHash != null) {
+            final boolean isNew = _connector.reportHit(textHash);
             if (isNew) {
                 _connector.reportBug(
-                        hash,
-                        title,
                         reportableEvent.getMessage(),
                         reportableEvent.getExceptionMessage(),
                         reportableEvent.getThrowableStrRep()
@@ -141,28 +135,6 @@ public class Client {
             }
             _reported++;
         }
-    }
-
-    private void lazyInitialize() {
-        if (!_isInitialized) {
-            final List<String> packages = _connector.getPackages();
-            _isInitialized = true;
-            _stackAnalyzer.setApplicationPackages(packages);
-        }
-    }
-
-    private String getTitle(ReportableEvent reportableEvent) {
-        final String[] throwableStrRep = reportableEvent.getThrowableStrRep();
-        final List<String> stackLines = Arrays.asList(throwableStrRep);
-        final String title = _stackAnalyzer.analyze(stackLines);
-        return title;
-    }
-
-    private String getHash(String title) {
-        final String ret;
-        final int hash = Math.abs(title.hashCode());
-        ret = Integer.toString(hash, 16);
-        return ret;
     }
 
     public void setConnector(HttpConnector connector) {

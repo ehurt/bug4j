@@ -16,9 +16,7 @@
 
 package org.dandoy.bug4j.server.store;
 
-import org.dandoy.bug4j.server.gwt.client.data.Bug;
-import org.dandoy.bug4j.server.gwt.client.data.BugDetail;
-import org.dandoy.bug4j.server.gwt.client.data.Hit;
+import org.dandoy.bug4j.server.gwt.client.data.*;
 
 import java.util.List;
 import java.util.Map;
@@ -27,15 +25,9 @@ public abstract class Store {
     protected Store() {
     }
 
-    public abstract long find(String app, String hash);
-
-    public abstract long report(String app, String version, String hash, String title, String message, String exceptionMessage, String stackText);
-
-    public abstract void reportHit(long bugId, String version);
+    public abstract Bug getBug(String app, long bugId);
 
     public abstract List<Bug> getBugs(String app, int offset, int max, String orderBy);
-
-    public abstract BugDetail getBug(long id);
 
     public abstract List<String> getPackages(String app);
 
@@ -50,4 +42,24 @@ public abstract class Store {
     public abstract void deleteBug(long bugId);
 
     public abstract Map<Bug, int[]> getTopHits(String app, int daysBack, int max);
+
+    public abstract Stack getStackByHash(String app, String fullHash);
+
+    public abstract Strain getStrainByHash(String app, String strainHash);
+
+    public abstract long createBug(String app, String title);
+
+    public abstract Strain createStrain(String app, long bugid, String strainHash);
+
+    public abstract Stack createStack(String app, long bugId, long strainId, String fullHash, String stackText);
+
+    public abstract void reportHitOnStack(String app, String version, Stack stack);
+
+    public abstract BugHit getLastHit(long bugId);
+
+    public abstract String getStack(long hitId);
+
+    public abstract BugHitAndStack getBugHitAndStack(long hitId);
+
+    public abstract List<Long> getHitIds(long bugId);
 }

@@ -17,6 +17,7 @@
 package org.dandoy.bug4j.server.jsp;
 
 import org.apache.log4j.Logger;
+import org.dandoy.bug4j.server.gwt.client.data.Stack;
 import org.dandoy.bug4j.server.store.Store;
 import org.dandoy.bug4j.server.store.StoreFactory;
 
@@ -46,22 +47,24 @@ public class InServlet extends HttpServlet {
         final String version = request.getParameter("v");
         final String hash = request.getParameter("h");
 
+        final String s = doit(app, version, hash);
+        out.print(s);
+    }
+
+    static String doit(String app, String version, String hash) {
+        final String ret;
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace(String.format("in :%s-%s-%s", app, version, hash));
         }
 
         final Store store = StoreFactory.getStore();
-        long bugId = -1;
-        try {
-            bugId = store.find(app, hash);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-        if (bugId >= 0) {
-            store.reportHit(bugId, version);
-            out.print("Old");
+        final Stack stack = store.getStackByHash(app, hash);
+        if (stack != null) {
+            store.reportHitOnStack(app, version, stack);
+            ret = "Old";
         } else {
-            out.print("New");
+            ret = "New";
         }
+        return ret;
     }
 }

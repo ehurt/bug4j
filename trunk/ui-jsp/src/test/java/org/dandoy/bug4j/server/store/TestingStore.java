@@ -18,21 +18,23 @@ package org.dandoy.bug4j.server.store;
 
 import org.dandoy.bug4j.server.store.jdbc.JdbcStore;
 
-public final class StoreFactory {
-    private static Store _store;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
-    private StoreFactory() {
+public class TestingStore extends JdbcStore {
+    public TestingStore() {
+        initialize();
     }
 
-    public static void createJdbcStore() {
-        _store = JdbcStore.getInstance();
-    }
-
-    public static void setStore(Store store) {
-        _store = store;
-    }
-
-    public static Store getStore() {
-        return _store;
+    @Override
+    protected Connection getConnection() {
+        final Connection ret;
+        try {
+            ret = DriverManager.getConnection("jdbc:derby:memory:tst;create=true");
+        } catch (SQLException e) {
+            throw new IllegalStateException(e);
+        }
+        return ret;
     }
 }

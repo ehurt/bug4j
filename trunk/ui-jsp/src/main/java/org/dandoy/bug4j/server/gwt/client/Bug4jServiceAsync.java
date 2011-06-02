@@ -17,9 +17,7 @@
 package org.dandoy.bug4j.server.gwt.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.dandoy.bug4j.server.gwt.client.data.Bug;
-import org.dandoy.bug4j.server.gwt.client.data.BugDetail;
-import org.dandoy.bug4j.server.gwt.client.data.Hit;
+import org.dandoy.bug4j.server.gwt.client.data.*;
 
 import java.util.List;
 import java.util.Map;
@@ -27,8 +25,6 @@ import java.util.Map;
 public interface Bug4jServiceAsync {
 
     void getBugs(String app, String sortBy, AsyncCallback<List<Bug>> async);
-
-    void getBug(long bugId, AsyncCallback<BugDetail> async);
 
     void getPackages(String app, AsyncCallback<List<String>> async);
 
@@ -41,4 +37,10 @@ public interface Bug4jServiceAsync {
     void deleteBug(long bugId, AsyncCallback<Void> async);
 
     void getTopHits(String app, int daysBack, int max, AsyncCallback<Map<Bug, int[]>> async);
+
+    void getLastHit(long bugId, AsyncCallback<BugHit> async);
+
+    void getBugDetailInitialData(String app, long bugId, AsyncCallback<BugDetailInitialData> async);
+
+    void getBugHitAndStack(long hitId, AsyncCallback<BugHitAndStack> async);
 }
