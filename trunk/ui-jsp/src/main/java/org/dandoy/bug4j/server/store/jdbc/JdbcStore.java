@@ -17,6 +17,7 @@
 package org.dandoy.bug4j.server.store.jdbc;
 
 import org.apache.commons.dbutils.DbUtils;
+import org.apache.commons.io.IOUtils;
 import org.dandoy.bug4j.server.gwt.client.data.*;
 import org.dandoy.bug4j.server.gwt.client.data.Stack;
 import org.dandoy.bug4j.server.store.Store;
@@ -24,6 +25,7 @@ import org.dandoy.bug4j.server.store.Store;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
+import java.io.*;
 import java.sql.*;
 import java.sql.Date;
 import java.util.*;
@@ -754,7 +756,21 @@ public class JdbcStore extends Store {
         try {
             insertStackTextStatement.setLong(1, stackId);
             insertStackTextStatement.setString(2, stackText);
-            insertStackTextStatement.executeUpdate();
+            final byte[] bytes = stackText.getBytes("UTF-8");
+            final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+            try {
+                final InputStreamReader inputStreamReader = new InputStreamReader(byteArrayInputStream);
+                try {
+                    insertStackTextStatement.setClob(2, inputStreamReader);
+                    insertStackTextStatement.executeUpdate();
+                } finally {
+                    IOUtils.closeQuietly(inputStreamReader);
+                }
+            } finally {
+                IOUtils.closeQuietly(byteArrayInputStream);
+            }
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalStateException(e.getMessage(), e);
         } finally {
             DbUtils.closeQuietly(insertStackTextStatement);
         }
@@ -834,8 +850,12 @@ public class JdbcStore extends Store {
                 final ResultSet resultSet = preparedStatement.executeQuery();
                 try {
                     if (resultSet.next()) {
-                        ret = resultSet.getString(1);
+                        final Clob clob = resultSet.getClob(1);
+                        final Reader characterStream = clob.getCharacterStream();
+                        ret = IOUtils.toString(characterStream);
                     }
+                } catch (IOException e) {
+                    throw new IllegalStateException(e.getMessage(), e);
                 } finally {
                     DbUtils.closeQuietly(resultSet);
                 }

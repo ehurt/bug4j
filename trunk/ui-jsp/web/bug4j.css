@@ -105,6 +105,9 @@ div#main {
 }
 
 .BugDetailView-bug-header {
+    margin: 3px;
+    border: 1px solid #a9a9a9;
+    padding: 3px;
 }
 
 .BugDetailView-nav-button {
@@ -112,17 +115,29 @@ div#main {
 }
 
 .BugDetailView-hit-header {
+    background-color: #f3f7fb;
     margin: 3px;
     padding: 3px;
+}
+
+.BugDetailView-hit-label {
+    font-weight: bold;
+}
+
+.BugDetailView-hit-value {
 }
 
 .BugDetailView-hit-stack {
     display: block;
     font-family: monospace;
     white-space: pre;
+}
+
+.BugDetailView-hit-grid {
+}
+
+.BugDetailView-hit-stack-sp {
     margin: 3px;
     padding: 3px;
 }
 
-BugDetailView-hit-stack-sp {
-}

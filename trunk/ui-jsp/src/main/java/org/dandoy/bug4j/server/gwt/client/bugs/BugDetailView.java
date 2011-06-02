@@ -44,28 +44,28 @@ public class BugDetailView {
     private final DisplaysBugs _displaysBugs;
     private Label _label;
     private HTML _stack;
-    private Label _hitIdLabel = new Label();
-    private Label _versionLabel = new Label();
-    private Label _reportedLabel = new Label();
+    private Label _hitIdWidget;
+    private Label _versionWidget;
+    private Label _reportedWidget;
     private int _currentHit;
     private List<Long> _bugHitIds = Collections.emptyList();
+    private DockLayoutPanel _widget;
 
     public BugDetailView(DisplaysBugs displaysBugs) {
         _displaysBugs = displaysBugs;
     }
 
     public Widget createWidget() {
-        final DockLayoutPanel dockLayoutPanel = new DockLayoutPanel(Style.Unit.EM);
+        _widget = new DockLayoutPanel(Style.Unit.EM);
 
-        dockLayoutPanel.addNorth(createBugHeader(), 6);
-        dockLayoutPanel.addNorth(createHitHeader(), 5);
-        dockLayoutPanel.add(buildStackPanel());
-        return dockLayoutPanel;
+        _widget.addNorth(createBugHeader(), 7);
+        _widget.addNorth(createHitHeader(), 5);
+        _widget.add(buildStackPanel());
+        return _widget;
     }
 
     public Widget createBugHeader() {
         final VerticalPanel verticalPanel = new VerticalPanel();
-        verticalPanel.addStyleName(".BugDetailView-bug-header");
 
         {
             verticalPanel.add(buildToolbar());
@@ -112,19 +112,44 @@ public class BugDetailView {
             verticalPanel.add(hitPickPanel);
         }
 
-        return verticalPanel;
+        final SimpleLayoutPanel simpleLayoutPanel = new SimpleLayoutPanel();
+        simpleLayoutPanel.addStyleName("BugDetailView-bug-header");
+        simpleLayoutPanel.add(verticalPanel);
+
+        return simpleLayoutPanel;
     }
 
     public Widget createHitHeader() {
+
+        final Label hitIdLabel = new Label("Hit#:");
+        hitIdLabel.addStyleName("BugDetailView-hit-label");
+        _hitIdWidget = new Label();
+        _hitIdWidget.addStyleName("BugDetailView-hit-value");
+
+        final Label versionLabel = new Label("Version:");
+        versionLabel.addStyleName("BugDetailView-hit-label");
+        _versionWidget = new Label();
+        _versionWidget.addStyleName("BugDetailView-hit-value");
+
+        final Label reportedLabel = new Label("Reported:");
+        reportedLabel.addStyleName("BugDetailView-hit-label");
+        _reportedWidget = new Label();
+        _reportedWidget.addStyleName("BugDetailView-hit-value");
+
         final Grid grid = new Grid(3, 2);
-        grid.addStyleName("BugDetailView-hit-header");
-        grid.setWidget(0, 0, new Label("Hit#:"));
-        grid.setWidget(0, 1, _hitIdLabel);
-        grid.setWidget(1, 0, new Label("Version:"));
-        grid.setWidget(1, 1, _versionLabel);
-        grid.setWidget(2, 0, new Label("Reported:"));
-        grid.setWidget(2, 1, _reportedLabel);
-        return grid;
+        grid.addStyleName("BugDetailView-hit-grid");
+        grid.setWidget(0, 0, hitIdLabel);
+        grid.setWidget(0, 1, _hitIdWidget);
+        grid.setWidget(1, 0, versionLabel);
+        grid.setWidget(1, 1, _versionWidget);
+        grid.setWidget(2, 0, reportedLabel);
+        grid.setWidget(2, 1, _reportedWidget);
+
+        final SimpleLayoutPanel simpleLayoutPanel = new SimpleLayoutPanel();
+        simpleLayoutPanel.add(grid);
+        simpleLayoutPanel.addStyleName("BugDetailView-hit-header");
+
+        return simpleLayoutPanel;
     }
 
     private ScrollPanel buildStackPanel() {
@@ -213,18 +238,19 @@ public class BugDetailView {
                 if (lastBugHitAndStack != null) {
                     display(lastBugHitAndStack);
                 }
+                _widget.forceLayout();
             }
         });
     }
 
     private void display(BugHitAndStack bugHitAndStack) {
-        _hitIdLabel.setText(Long.toString(bugHitAndStack.getHitId()));
-        _versionLabel.setText(bugHitAndStack.getAppVer());
+        _hitIdWidget.setText(Integer.toString(_bugHitIds.size() - _currentHit));
+        _versionWidget.setText(bugHitAndStack.getAppVer());
 
         final DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_MEDIUM);
         final long tReported = bugHitAndStack.getDateReported();
         final String dateReportedText = dateTimeFormat.format(new Date(tReported));
-        _reportedLabel.setText(dateReportedText);
+        _reportedWidget.setText(dateReportedText);
 
         final String stack = bugHitAndStack.getStack();
         render(stack);
