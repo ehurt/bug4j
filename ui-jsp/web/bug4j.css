@@ -79,12 +79,6 @@ div#main {
     cursor: pointer;
 }
 
-.bug-detail-stack {
-    display: block;
-    font-family: monospace;
-    white-space: pre;
-}
-
 .bug-table {
     cursor: pointer;
 }
@@ -103,4 +97,32 @@ div#main {
 
 .stack-dim {
     color: #a9a9a9;
+}
+
+.BugDetailView-title {
+    font-size: large;
+    padding: 5px;
+}
+
+.BugDetailView-bug-header {
+}
+
+.BugDetailView-nav-button {
+    padding: 5px;
+}
+
+.BugDetailView-hit-header {
+    margin: 3px;
+    padding: 3px;
+}
+
+.BugDetailView-hit-stack {
+    display: block;
+    font-family: monospace;
+    white-space: pre;
+    margin: 3px;
+    padding: 3px;
+}
+
+BugDetailView-hit-stack-sp {
 }

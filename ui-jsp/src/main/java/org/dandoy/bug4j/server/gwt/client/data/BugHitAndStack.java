@@ -14,25 +14,20 @@
  *    limitations under the License.
  */
 
-package org.dandoy.bug4j.server.store;
+package org.dandoy.bug4j.server.gwt.client.data;
 
-import org.dandoy.bug4j.server.store.jdbc.JdbcStore;
+public class BugHitAndStack extends BugHit {
+    private String _stack;
 
-public final class StoreFactory {
-    private static Store _store;
-
-    private StoreFactory() {
+    public BugHitAndStack() {
     }
 
-    public static void createJdbcStore() {
-        _store = JdbcStore.getInstance();
+    public BugHitAndStack(long hitId, String appVer, long dateReported, String stack) {
+        super(hitId, appVer, dateReported);
+        _stack = stack;
     }
 
-    public static void setStore(Store store) {
-        _store = store;
-    }
-
-    public static Store getStore() {
-        return _store;
+    public String getStack() {
+        return _stack;
     }
 }

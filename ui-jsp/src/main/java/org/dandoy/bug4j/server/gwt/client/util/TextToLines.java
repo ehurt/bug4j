@@ -23,7 +23,12 @@ public final class TextToLines {
     private TextToLines() {
     }
 
-    public static String[] toLines(String text) {
+    public static String[] toArray(String text) {
+        final List<String> ret = toList(text);
+        return ret.toArray(new String[ret.size()]);
+    }
+
+    public static List<String> toList(String text) {
         final List<String> ret = new ArrayList<String>();
         final int length = text.length();
         int from = 0;
@@ -48,6 +53,6 @@ public final class TextToLines {
             final String line = text.substring(from, to);
             ret.add(line);
         }
-        return ret.toArray(new String[ret.size()]);
+        return ret;
     }
 }

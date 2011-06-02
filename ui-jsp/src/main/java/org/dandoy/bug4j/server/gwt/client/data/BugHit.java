@@ -14,25 +14,33 @@
  *    limitations under the License.
  */
 
-package org.dandoy.bug4j.server.store;
+package org.dandoy.bug4j.server.gwt.client.data;
 
-import org.dandoy.bug4j.server.store.jdbc.JdbcStore;
+import java.io.Serializable;
 
-public final class StoreFactory {
-    private static Store _store;
+public class BugHit implements Serializable {
+    private long _hitId;
+    private String _appVer;
+    private long _dateReported;
 
-    private StoreFactory() {
+    public BugHit() {
     }
 
-    public static void createJdbcStore() {
-        _store = JdbcStore.getInstance();
+    public BugHit(long hitId, String appVer, long dateReported) {
+        _hitId = hitId;
+        _appVer = appVer;
+        _dateReported = dateReported;
     }
 
-    public static void setStore(Store store) {
-        _store = store;
+    public long getHitId() {
+        return _hitId;
     }
 
-    public static Store getStore() {
-        return _store;
+    public String getAppVer() {
+        return _appVer;
+    }
+
+    public long getDateReported() {
+        return _dateReported;
     }
 }

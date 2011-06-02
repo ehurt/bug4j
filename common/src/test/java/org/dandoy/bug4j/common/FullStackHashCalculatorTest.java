@@ -14,5 +14,17 @@
  *    limitations under the License.
  */
 
-public class Test0 {
+package org.dandoy.bug4j.common;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.util.Collections;
+
+public class FullStackHashCalculatorTest {
+    @Test
+    public void testGetTextHash() throws Exception {
+        final String textHash = FullStackHashCalculator.getTextHash(Collections.singletonList("Hello World"));
+        Assert.assertEquals("ahbq32gqrjl6ywuq3ux0m406d", textHash);
+    }
 }

@@ -48,15 +48,6 @@
     </servlet-mapping>
 
     <servlet>
-        <servlet-name>ApplicationInfo</servlet-name>
-        <servlet-class>org.dandoy.bug4j.server.jsp.ApplicationInfo</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>ApplicationInfo</servlet-name>
-        <url-pattern>/a</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
         <servlet-name>StartupServlet</servlet-name>
         <servlet-class>org.dandoy.bug4j.server.jsp.StartupServlet</servlet-class>
         <load-on-startup>0</load-on-startup>

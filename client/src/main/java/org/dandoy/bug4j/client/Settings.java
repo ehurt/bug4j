@@ -21,9 +21,6 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public class Settings {
-
-    private static Settings INSTANCE;
-
     private String _server;
     private String _applicationName;
     private String _applicationVersion;

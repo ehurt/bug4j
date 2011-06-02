@@ -25,6 +25,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
+/**
+ * This is a test
+ */
 public class Bug4jTest {
     private static final Logger LOGGER = Logger.getLogger(Bug4jTest.class);
 

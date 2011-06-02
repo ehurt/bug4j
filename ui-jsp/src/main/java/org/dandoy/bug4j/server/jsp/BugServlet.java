@@ -17,6 +17,12 @@
 package org.dandoy.bug4j.server.jsp;
 
 import org.apache.log4j.Logger;
+import org.dandoy.bug4j.common.FullStackHashCalculator;
+import org.dandoy.bug4j.common.StackAnalyzer;
+import org.dandoy.bug4j.common.StackPathHashCalculator;
+import org.dandoy.bug4j.server.gwt.client.data.Stack;
+import org.dandoy.bug4j.server.gwt.client.data.Strain;
+import org.dandoy.bug4j.server.gwt.client.util.TextToLines;
 import org.dandoy.bug4j.server.store.Store;
 import org.dandoy.bug4j.server.store.StoreFactory;
 
@@ -25,7 +31,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.List;
 
 public class BugServlet extends HttpServlet {
     private static final Logger LOGGER = Logger.getLogger(BugServlet.class);
@@ -41,32 +47,40 @@ public class BugServlet extends HttpServlet {
     private void doit(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         response.setContentType("text/plain");
-        final PrintWriter out = response.getWriter();
-        final long bugid = report(request);
-        out.print(bugid);
-    }
-
-    private long report(HttpServletRequest request) {
-        long bugid;
         try {
             final String app = request.getParameter("a");
             final String version = request.getParameter("v");
-            final String hash = request.getParameter("h");
-            final String title = request.getParameter("t");
             final String message = request.getParameter("m");
             final String exceptionMessage = request.getParameter("e");
             final String stackText = request.getParameter("s");
 
-            if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace(String.format("bug:%s-%s-%s-%s-%s-%s", app, version, hash, title, message, exceptionMessage));
-            }
-
-            final Store store = StoreFactory.getStore();
-            bugid = store.report(app, version, hash, title, message, exceptionMessage, stackText);
+            doit(app, version, stackText);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            bugid = -1;
         }
-        return bugid;
+    }
+
+    static void doit(String app, String version, String stackText) {
+
+        final Store store = StoreFactory.getStore();
+        final List<String> stackLines = TextToLines.toList(stackText);
+
+        final List<String> appPackages = store.getPackages(app);
+        final StackAnalyzer stackAnalyzer = new StackAnalyzer();
+        stackAnalyzer.setApplicationPackages(appPackages);
+        final String fullHash = FullStackHashCalculator.getTextHash(stackLines);
+
+        Stack stack = store.getStackByHash(app, fullHash);
+        if (stack == null) {
+            final String strainHash = StackPathHashCalculator.analyze(stackLines);
+            Strain strain = store.getStrainByHash(app, strainHash);
+            if (strain == null) {
+                final String title = stackAnalyzer.analyze(stackLines);
+                final long bugId = store.createBug(app, title);
+                strain = store.createStrain(app, bugId, strainHash);
+            }
+            stack = store.createStack(app, strain.getBugId(), strain.getStrainId(), fullHash, stackText);
+        }
+        store.reportHitOnStack(app, version, stack);
     }
 }

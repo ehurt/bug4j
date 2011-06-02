@@ -7,6 +7,9 @@
         <element id="directory" name="lib">
           <element id="library" level="application" name="apache-commons-dbutils" />
         </element>
+        <element id="directory" name="classes">
+          <element id="module-output" name="common" />
+        </element>
       </element>
     </root>
   </artifact>

@@ -17,9 +17,31 @@
 package org.dandoy.bug4j.server.gwt.client.data;
 
 import java.io.Serializable;
+import java.util.List;
 
-public class BugDetail implements Serializable {
-    public BugDetail() {
+public class BugDetailInitialData implements Serializable {
+    private Bug _bug;
+    private List<Long> _bugHitIds;
+    private BugHitAndStack _lastStack;
+
+    public BugDetailInitialData() {
     }
 
+    public BugDetailInitialData(Bug bug, List<Long> bugHitIds, BugHitAndStack lastStack) {
+        _bug = bug;
+        _bugHitIds = bugHitIds;
+        _lastStack = lastStack;
+    }
+
+    public Bug getBug() {
+        return _bug;
+    }
+
+    public List<Long> getBugHitIds() {
+        return _bugHitIds;
+    }
+
+    public BugHitAndStack getLastBugHitAndStack() {
+        return _lastStack;
+    }
 }

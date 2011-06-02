@@ -17,9 +17,8 @@
 package org.dandoy.bug4j.server.store.jdbc;
 
 import org.apache.commons.dbutils.DbUtils;
-import org.dandoy.bug4j.server.gwt.client.data.Bug;
-import org.dandoy.bug4j.server.gwt.client.data.BugDetail;
-import org.dandoy.bug4j.server.gwt.client.data.Hit;
+import org.dandoy.bug4j.server.gwt.client.data.*;
+import org.dandoy.bug4j.server.gwt.client.data.Stack;
 import org.dandoy.bug4j.server.store.Store;
 
 import javax.naming.Context;
@@ -37,7 +36,7 @@ public class JdbcStore extends Store {
     protected JdbcStore() {
     }
 
-    private void initialize() {
+    protected void initialize() {
         final Connection connection = getConnection();
         try {
             createTables(connection);
@@ -77,7 +76,7 @@ public class JdbcStore extends Store {
             if (!doesTableExist(statement, "APP")) {
                 statement.execute("" +
                         "CREATE TABLE APP (" +
-                        " APP VARCHAR(32)," +
+                        " APP VARCHAR(32) NOT NULL," +
                         " VER VARCHAR(32)" +
                         ")"
                 );
@@ -86,8 +85,8 @@ public class JdbcStore extends Store {
             if (!doesTableExist(statement, "APP_PACKAGES")) {
                 statement.execute("" +
                         "CREATE TABLE APP_PACKAGES (" +
-                        " APP VARCHAR(32)," +
-                        " APP_PACKAGE VARCHAR(64)" +
+                        " APP VARCHAR(32) NOT NULL," +
+                        " APP_PACKAGE VARCHAR(64) NOT NULL" +
                         ")"
                 );
             }
@@ -95,23 +94,49 @@ public class JdbcStore extends Store {
             if (!doesTableExist(statement, "BUG")) {
                 statement.execute("" +
                         "CREATE TABLE BUG (" +
-                        " ID INT GENERATED ALWAYS AS IDENTITY," +
-                        " HASH VARCHAR(64)," +
-                        " APP VARCHAR(32)," +
-                        " TITLE VARCHAR(256)," +
-                        " MESSAGE VARCHAR(256)," +
-                        " EXCEPTION_MESSAGE VARCHAR(256)," +
+                        " BUG_ID INT GENERATED ALWAYS AS IDENTITY," +
+                        " APP VARCHAR(32) NOT NULL," +
+                        " TITLE VARCHAR(256) NOT NULL" +
+                        ")"
+                );
+            }
+
+            if (!doesTableExist(statement, "STRAIN")) {
+                statement.execute("" +
+                        "CREATE TABLE STRAIN (" +
+                        " STRAIN_ID INT GENERATED ALWAYS AS IDENTITY," +
+                        " BUG_ID INT," +
+                        " HASH VARCHAR(64)" +
+                        ")"
+                );
+            }
+
+            if (!doesTableExist(statement, "STACK")) {
+                statement.execute("" +
+                        "CREATE TABLE STACK (" +
+                        " STACK_ID INT GENERATED ALWAYS AS IDENTITY," +
+                        " BUG_ID INT," +
+                        " STRAIN_ID INT," +
+                        " HASH VARCHAR(64)" +
+                        ")"
+                );
+            }
+
+            if (!doesTableExist(statement, "STACK_TEXT")) {
+                statement.execute("" +
+                        "CREATE TABLE STACK_TEXT (" +
+                        " STACK_ID INT," +
                         " STACK_TEXT CLOB(16 K)" +
                         ")"
                 );
-                statement.execute("CREATE UNIQUE INDEX BUG_HASH ON BUG (APP, HASH)");
             }
 
             if (!doesTableExist(statement, "HIT")) {
                 statement.execute("" +
                         "CREATE TABLE HIT (" +
-                        " ID INT GENERATED ALWAYS AS IDENTITY," +
+                        " HIT_ID INT GENERATED ALWAYS AS IDENTITY," +
                         " BUG_ID INT," +
+                        " STACK_ID INT," +
                         " APP_VER VARCHAR(32)," +
                         " DATE_REPORTED TIMESTAMP" +
                         ")"
@@ -172,86 +197,65 @@ public class JdbcStore extends Store {
         }
     }
 
-    @Override
-    public long find(String app, String hash) {
-        long ret = -1;
+    public Bug getBug(String app, long bugId) {
+        String title = null;
+        int hitCount = 0;
+        final Connection connection = getConnection();
         try {
-            final Connection connection = getConnection();
+            final PreparedStatement bugStatement = connection.prepareStatement("select TITLE from BUG where BUG_ID=?");
             try {
-                final PreparedStatement existsStatement = connection.prepareStatement("SELECT ID FROM BUG WHERE APP=? AND HASH=?");
-                existsStatement.setString(1, app);
-                existsStatement.setString(2, hash);
-                final ResultSet resultSet = existsStatement.executeQuery();
+                bugStatement.setLong(1, bugId);
+
+                final ResultSet resultSet = bugStatement.executeQuery();
                 try {
                     if (resultSet.next()) {
-                        ret = resultSet.getLong(1);
+                        title = resultSet.getString(1);
                     }
                 } finally {
                     DbUtils.closeQuietly(resultSet);
                 }
             } finally {
-                DbUtils.closeQuietly(connection);
+                DbUtils.closeQuietly(bugStatement);
             }
-        } catch (SQLException e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        }
-        return ret;
-    }
 
-    @Override
-    public long report(String app, String ver, String hash, String title, String message, String exceptionMessage, String stackText) {
-        final Connection connection = getConnection();
-        try {
-            createApp(connection, app, ver);
-            final PreparedStatement insertBugStatement = connection.prepareStatement("INSERT INTO BUG (HASH, APP, TITLE, MESSAGE, EXCEPTION_MESSAGE, STACK_TEXT) VALUES (?,?,?,?,?,?)");
+            final PreparedStatement countStatement = connection.prepareStatement("select count(*) from HIT where BUG_ID=?");
             try {
-                insertBugStatement.setString(1, hash);
-                insertBugStatement.setString(2, app);
-                insertBugStatement.setString(3, title);
-                insertBugStatement.setString(4, message);
-                insertBugStatement.setString(5, exceptionMessage);
-                insertBugStatement.setString(6, stackText);
-                insertBugStatement.execute();
-                final long bugid = find(app, hash);
-                reportHit(bugid, ver);
-                return bugid;
+                countStatement.setLong(1, bugId);
+
+                final ResultSet resultSet = countStatement.executeQuery();
+                try {
+                    if (resultSet.next()) {
+                        hitCount = resultSet.getInt(1);
+                    }
+                } finally {
+                    DbUtils.closeQuietly(resultSet);
+                }
             } finally {
-                DbUtils.closeQuietly(insertBugStatement);
+                DbUtils.closeQuietly(countStatement);
             }
         } catch (SQLException e) {
             throw new IllegalStateException(e.getMessage(), e);
         } finally {
             DbUtils.closeQuietly(connection);
         }
+        return new Bug(bugId, title, hitCount);
     }
 
-    @Override
-    public void reportHit(long bugId, String version) {
-        final Connection connection = getConnection();
-        try {
-            final PreparedStatement insertHitStatement = connection.prepareStatement("INSERT INTO HIT (BUG_ID,APP_VER,DATE_REPORTED) VALUES(?,?,CURRENT_TIMESTAMP)");
-            try {
-                insertHitStatement.setLong(1, bugId);
-                insertHitStatement.setString(2, version);
-                insertHitStatement.execute();
-            } finally {
-                DbUtils.closeQuietly(insertHitStatement);
-            }
-        } catch (SQLException e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        } finally {
-            DbUtils.closeQuietly(connection);
-        }
-    }
-
+    /**
+     * Get a set of bugs
+     *
+     * @param orderBy can be a combination of i(d), t(itle) or h(its)
+     * @return
+     */
     @Override
     public List<Bug> getBugs(String app, int offset, int max, String orderBy) {
         final List<Bug> ret = new ArrayList<Bug>();
         final Connection connection = getConnection();
         try {
-            StringBuilder sql = new StringBuilder("select bug.id,bug.title,(select count(*) from hit where hit.bug_id=bug.id) hitcount from bug\n");
-            sql.append(" where app=?");
-            String sep = "order by ";
+            StringBuilder sql = new StringBuilder("" +
+                    "select BUG.BUG_ID,BUG.TITLE,(select count(*) from HIT where HIT.BUG_ID=BUG.BUG_ID) HITCOUNT from BUG\n");
+            sql.append(" where BUG.APP=?");
+            String sep = " order by ";
             for (int i = 0; i < orderBy.length(); i++) {
                 final char c = orderBy.charAt(i);
                 final char lc = Character.toLowerCase(c);
@@ -281,42 +285,6 @@ public class JdbcStore extends Store {
                     }
                 } finally {
                     DbUtils.closeQuietly(resultSet);
-                }
-            } finally {
-                DbUtils.closeQuietly(preparedStatement);
-            }
-        } catch (SQLException e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        } finally {
-            DbUtils.closeQuietly(connection);
-        }
-        return ret;
-    }
-
-    @Override
-    public BugDetail getBug(long bugId) {
-        BugDetail ret = null;
-        final Connection connection = getConnection();
-        try {
-            final PreparedStatement preparedStatement = connection.prepareStatement("" +
-                    "select BUG.TITLE," +
-                    "       (select count(*) from hit where hit.bug_id=?)," +
-                    "       BUG.MESSAGE," +
-                    "       BUG.EXCEPTION_MESSAGE," +
-                    "       BUG.STACK_TEXT" +
-                    "  from BUG" +
-                    "  where BUG.ID=?");
-            try {
-                preparedStatement.setLong(1, bugId);
-                preparedStatement.setLong(2, bugId);
-                final ResultSet resultSet = preparedStatement.executeQuery();
-                if (resultSet.next()) {
-                    final String title = resultSet.getString(1);
-                    final int hitCount = resultSet.getInt(2);
-                    final String message = resultSet.getString(3);
-                    final String exceptionMessage = resultSet.getString(4);
-                    final String stackText = resultSet.getString(5);
-                    ret = new BugDetail(bugId, title, hitCount, message, exceptionMessage, stackText);
                 }
             } finally {
                 DbUtils.closeQuietly(preparedStatement);
@@ -456,6 +424,36 @@ public class JdbcStore extends Store {
     }
 
     @Override
+    public List<Long> getHitIds(long bugId) {
+        final List<Long> ret = new ArrayList<Long>();
+        final Connection connection = getConnection();
+        try {
+            final PreparedStatement preparedStatement = connection.prepareStatement("select HIT_ID from HIT WHERE BUG_ID=? ORDER BY DATE_REPORTED DESC");
+            try {
+                preparedStatement.setLong(1, bugId);
+
+                final ResultSet resultSet = preparedStatement.executeQuery();
+                try {
+                    while (resultSet.next()) {
+                        final long hitId = resultSet.getLong(1);
+                        ret.add(hitId);
+                    }
+                } finally {
+                    DbUtils.closeQuietly(resultSet);
+                }
+            } finally {
+                DbUtils.closeQuietly(preparedStatement);
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
+            DbUtils.closeQuietly(connection);
+        }
+        return ret;
+    }
+
+
+    @Override
     public void deleteBug(long bugId) {
         final Connection connection = getConnection();
         try {
@@ -467,7 +465,31 @@ public class JdbcStore extends Store {
                 DbUtils.closeQuietly(deleteHitsStatement);
             }
 
-            final PreparedStatement deleteBugStatement = connection.prepareStatement("DELETE FROM BUG WHERE ID=?");
+            final PreparedStatement deleteStackTextStatement = connection.prepareStatement("DELETE FROM STACK_TEXT WHERE STACK_ID IN (select DISTINCT S.STACK_ID from STACK S WHERE BUG_ID=?)");
+            try {
+                deleteStackTextStatement.setLong(1, bugId);
+                deleteStackTextStatement.executeUpdate();
+            } finally {
+                DbUtils.closeQuietly(deleteStackTextStatement);
+            }
+
+            final PreparedStatement deleteStackStatement = connection.prepareStatement("DELETE FROM STACK WHERE BUG_ID=?");
+            try {
+                deleteStackStatement.setLong(1, bugId);
+                deleteStackStatement.executeUpdate();
+            } finally {
+                DbUtils.closeQuietly(deleteStackStatement);
+            }
+
+            final PreparedStatement deleteStrainStatement = connection.prepareStatement("DELETE FROM STRAIN WHERE BUG_ID=?");
+            try {
+                deleteStrainStatement.setLong(1, bugId);
+                deleteStrainStatement.executeUpdate();
+            } finally {
+                DbUtils.closeQuietly(deleteStrainStatement);
+            }
+
+            final PreparedStatement deleteBugStatement = connection.prepareStatement("DELETE FROM BUG WHERE BUG_ID=?");
             try {
                 deleteBugStatement.setLong(1, bugId);
                 deleteBugStatement.executeUpdate();
@@ -539,10 +561,10 @@ public class JdbcStore extends Store {
         final List<Bug> ret = new ArrayList<Bug>();
         final PreparedStatement countStatement = connection.prepareStatement("select H.BUG_ID, B.TITLE, count(*) \"CNT\" " +
                 "  from HIT H,BUG B" +
-                "  where H.BUG_ID=B.ID" +
+                "  where H.BUG_ID=B.BUG_ID" +
                 "  and H.DATE_REPORTED BETWEEN ? AND ?" +
                 "  and B.APP=?" +
-                "  group by H.bug_id,B.TITLE" +
+                "  group by H.BUG_ID,B.TITLE" +
                 "  order by CNT DESC");
         try {
             countStatement.setDate(1, from);
@@ -562,6 +584,303 @@ public class JdbcStore extends Store {
             }
         } finally {
             countStatement.close();
+        }
+        return ret;
+    }
+
+    //////////
+    @Override
+    public Stack getStackByHash(String app, String fullHash) {
+        Stack ret = null;
+        final Connection connection = getConnection();
+        try {
+            final PreparedStatement preparedStatement = connection.prepareStatement("" +
+                    "SELECT S.BUG_ID, S.STRAIN_ID, S.STACK_ID" +
+                    " FROM STACK S, BUG B" +
+                    " WHERE S.HASH=?" +
+                    " AND S.BUG_ID=B.BUG_ID" +
+                    " AND B.APP=?");
+            try {
+                preparedStatement.setString(1, fullHash);
+                preparedStatement.setString(2, app);
+                final ResultSet resultSet = preparedStatement.executeQuery();
+                try {
+                    if (resultSet.next()) {
+                        final long bugId = resultSet.getLong(1);
+                        final long strainId = resultSet.getLong(2);
+                        final long stackId = resultSet.getLong(3);
+                        ret = new Stack(bugId, strainId, stackId);
+                    }
+                } finally {
+                    DbUtils.closeQuietly(resultSet);
+                }
+            } finally {
+                DbUtils.closeQuietly(preparedStatement);
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
+            DbUtils.closeQuietly(connection);
+        }
+        return ret;
+    }
+
+    @Override
+    public Strain getStrainByHash(String app, String strainHash) {
+        Strain ret = null;
+        final Connection connection = getConnection();
+        try {
+            final PreparedStatement preparedStatement = connection.prepareStatement("" +
+                    "SELECT S.BUG_ID, S.STRAIN_ID" +
+                    " FROM STRAIN S, BUG B" +
+                    " WHERE S.HASH=?" +
+                    " AND S.BUG_ID=B.BUG_ID" +
+                    " AND B.APP=?");
+            try {
+                preparedStatement.setString(1, strainHash);
+                preparedStatement.setString(2, app);
+                final ResultSet resultSet = preparedStatement.executeQuery();
+                try {
+                    if (resultSet.next()) {
+                        final long bugId = resultSet.getLong(1);
+                        final long strainId = resultSet.getLong(2);
+                        ret = new Strain(bugId, strainId);
+                    }
+                } finally {
+                    DbUtils.closeQuietly(resultSet);
+                }
+            } finally {
+                DbUtils.closeQuietly(preparedStatement);
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
+            DbUtils.closeQuietly(connection);
+        }
+        return ret;
+    }
+
+    @Override
+    public long createBug(String app, String title) {
+        long ret;
+        final Connection connection = getConnection();
+        try {
+            final PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO BUG (APP, TITLE) VALUES(?,?)", Statement.RETURN_GENERATED_KEYS);
+            try {
+                preparedStatement.setString(1, app);
+                preparedStatement.setString(2, title);
+                preparedStatement.executeUpdate();
+                final ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+                if (!generatedKeys.next()) {
+                    throw new IllegalStateException("Failed to get the generated bug ID");
+                }
+                ret = generatedKeys.getLong(1);
+            } finally {
+                DbUtils.closeQuietly(preparedStatement);
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
+            DbUtils.closeQuietly(connection);
+        }
+        return ret;
+    }
+
+    @Override
+    public Strain createStrain(String app, long bugid, String strainHash) {
+        Strain ret;
+        final Connection connection = getConnection();
+        try {
+            final PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO STRAIN (BUG_ID,HASH) VALUES(?,?)", Statement.RETURN_GENERATED_KEYS);
+            try {
+                preparedStatement.setLong(1, bugid);
+                preparedStatement.setString(2, strainHash);
+                preparedStatement.executeUpdate();
+                final ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+                if (!generatedKeys.next()) {
+                    throw new IllegalStateException("Failed to get the generated strain ID");
+                }
+                final long strainId = generatedKeys.getLong(1);
+                ret = new Strain(bugid, strainId);
+            } finally {
+                DbUtils.closeQuietly(preparedStatement);
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
+            DbUtils.closeQuietly(connection);
+        }
+        return ret;
+    }
+
+    @Override
+    public Stack createStack(String app, long bugId, long strainId, String fullHash, String stackText) {
+        Stack ret;
+        final Connection connection = getConnection();
+        try {
+            ret = insertStack(connection, bugId, strainId, fullHash);
+
+            insertStackText(connection, ret.getStackId(), stackText);
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
+            DbUtils.closeQuietly(connection);
+        }
+        return ret;
+    }
+
+    private static Stack insertStack(Connection connection, long bugId, long strainId, String fullHash) throws SQLException {
+        final Stack ret;
+        final PreparedStatement insertStackStatement = connection.prepareStatement("INSERT INTO STACK (BUG_ID,STRAIN_ID,HASH) VALUES(?,?,?)", Statement.RETURN_GENERATED_KEYS);
+        try {
+            insertStackStatement.setLong(1, bugId);
+            insertStackStatement.setLong(2, strainId);
+            insertStackStatement.setString(3, fullHash);
+            insertStackStatement.executeUpdate();
+            final ResultSet generatedKeys = insertStackStatement.getGeneratedKeys();
+            if (!generatedKeys.next()) {
+                throw new IllegalStateException("Failed to get the generated STACK ID");
+            }
+            final long stackId = generatedKeys.getLong(1);
+            ret = new Stack(bugId, strainId, stackId);
+        } finally {
+            DbUtils.closeQuietly(insertStackStatement);
+        }
+        return ret;
+    }
+
+    private static void insertStackText(Connection connection, long stackId, String stackText) throws SQLException {
+        final PreparedStatement insertStackTextStatement = connection.prepareStatement("INSERT INTO STACK_TEXT (STACK_ID,STACK_TEXT) VALUES(?,?)");
+        try {
+            insertStackTextStatement.setLong(1, stackId);
+            insertStackTextStatement.setString(2, stackText);
+            insertStackTextStatement.executeUpdate();
+        } finally {
+            DbUtils.closeQuietly(insertStackTextStatement);
+        }
+    }
+
+    @Override
+    public void reportHitOnStack(String app, String appVersion, Stack stack) {
+        final Connection connection = getConnection();
+        try {
+            final PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO HIT (BUG_ID,STACK_ID,APP_VER,DATE_REPORTED) VALUES(?,?,?,?)");
+            try {
+                final long bugId = stack.getBugId();
+                final long stackId = stack.getStackId();
+                final Timestamp now = new Timestamp(System.currentTimeMillis());
+
+                preparedStatement.setLong(1, bugId);
+                preparedStatement.setLong(2, stackId);
+                preparedStatement.setString(3, appVersion);
+                preparedStatement.setTimestamp(4, now);
+                preparedStatement.executeUpdate();
+            } finally {
+                DbUtils.closeQuietly(preparedStatement);
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
+            DbUtils.closeQuietly(connection);
+        }
+    }
+
+    @Override
+    public BugHit getLastHit(long bugId) {
+        BugHit ret = null;
+        final Connection connection = getConnection();
+        try {
+            final PreparedStatement preparedStatement = connection.prepareStatement("" +
+                    "SELECT H.HIT_ID, H.APP_VER, H.DATE_REPORTED" +
+                    " FROM HIT H" +
+                    " WHERE H.BUG_ID=?" +
+                    " ORDER BY DATE_REPORTED DESC");
+            try {
+                preparedStatement.setLong(1, bugId);
+                final ResultSet resultSet = preparedStatement.executeQuery();
+                try {
+                    if (resultSet.next()) {
+                        final long hitId = resultSet.getLong(1);
+                        final String appVer = resultSet.getString(2);
+                        final Timestamp timestamp = resultSet.getTimestamp(3);
+                        final long dateReported = timestamp.getTime();
+                        ret = new BugHit(hitId, appVer, dateReported);
+                    }
+                } finally {
+                    DbUtils.closeQuietly(resultSet);
+                }
+            } finally {
+                DbUtils.closeQuietly(preparedStatement);
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
+            DbUtils.closeQuietly(connection);
+        }
+        return ret;
+    }
+
+    public String getStack(long hitId) {
+        String ret = null;
+        final Connection connection = getConnection();
+        try {
+            final PreparedStatement preparedStatement = connection.prepareStatement("" +
+                    "SELECT S.STACK_TEXT" +
+                    " FROM STACK_TEXT S, HIT H" +
+                    " WHERE H.HIT_ID=?" +
+                    " AND H.STACK_ID=S.STACK_ID");
+            try {
+                preparedStatement.setLong(1, hitId);
+                final ResultSet resultSet = preparedStatement.executeQuery();
+                try {
+                    if (resultSet.next()) {
+                        ret = resultSet.getString(1);
+                    }
+                } finally {
+                    DbUtils.closeQuietly(resultSet);
+                }
+            } finally {
+                DbUtils.closeQuietly(preparedStatement);
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
+            DbUtils.closeQuietly(connection);
+        }
+        return ret;
+    }
+
+    @Override
+    public BugHitAndStack getBugHitAndStack(long hitId) {
+        BugHitAndStack ret = null;
+        final Connection connection = getConnection();
+        try {
+            final PreparedStatement preparedStatement = connection.prepareStatement("" +
+                    "SELECT H.APP_VER,H.DATE_REPORTED,S.STACK_TEXT" +
+                    " FROM STACK_TEXT S, HIT H" +
+                    " WHERE H.HIT_ID=?" +
+                    " AND H.STACK_ID=S.STACK_ID");
+            try {
+                preparedStatement.setLong(1, hitId);
+                final ResultSet resultSet = preparedStatement.executeQuery();
+                try {
+                    if (resultSet.next()) {
+                        final String appVer = resultSet.getString(1);
+                        final Timestamp timestamp = resultSet.getTimestamp(2);
+                        final long dateReported = timestamp.getTime();
+                        final String stack = resultSet.getString(3);
+                        ret = new BugHitAndStack(hitId, appVer, dateReported, stack);
+                    }
+                } finally {
+                    DbUtils.closeQuietly(resultSet);
+                }
+            } finally {
+                DbUtils.closeQuietly(preparedStatement);
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
+            DbUtils.closeQuietly(connection);
         }
         return ret;
     }
