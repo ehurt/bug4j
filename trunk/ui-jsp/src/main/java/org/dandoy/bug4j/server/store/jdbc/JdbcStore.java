@@ -32,6 +32,7 @@ import java.util.*;
 
 public class JdbcStore extends Store {
     private static JdbcStore INSTANCE;
+    private static final int STACK_SIZE_LIMIT = 128 * 1024;
     private final Set<String> _knownApps = new HashSet<String>();
     private static final long DAY = 1000L * 60 * 60 * 24;
 
@@ -128,7 +129,7 @@ public class JdbcStore extends Store {
                 statement.execute("" +
                         "CREATE TABLE STACK_TEXT (" +
                         " STACK_ID INT," +
-                        " STACK_TEXT CLOB(16 K)" +
+                        " STACK_TEXT CLOB(" + STACK_SIZE_LIMIT + ")" +
                         ")"
                 );
             }
@@ -755,6 +756,9 @@ public class JdbcStore extends Store {
         final PreparedStatement insertStackTextStatement = connection.prepareStatement("INSERT INTO STACK_TEXT (STACK_ID,STACK_TEXT) VALUES(?,?)");
         try {
             insertStackTextStatement.setLong(1, stackId);
+            if (stackText.length() > STACK_SIZE_LIMIT) {
+                stackText = stackText.substring(0, stackText.length());
+            }
             insertStackTextStatement.setString(2, stackText);
             final byte[] bytes = stackText.getBytes("UTF-8");
             final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);

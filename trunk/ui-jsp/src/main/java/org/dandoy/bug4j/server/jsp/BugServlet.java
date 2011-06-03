@@ -55,7 +55,7 @@ public class BugServlet extends HttpServlet {
             final String stackText = request.getParameter("s");
 
             doit(app, version, stackText);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
         }
     }
