@@ -31,7 +31,7 @@
 
     <servlet>
         <servlet-name>InServlet</servlet-name>
-        <servlet-class>org.dandoy.bug4j.server.jsp.InServlet</servlet-class>
+        <servlet-class>org.bug4j.server.jsp.InServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>InServlet</servlet-name>
@@ -40,7 +40,7 @@
 
     <servlet>
         <servlet-name>BugServlet</servlet-name>
-        <servlet-class>org.dandoy.bug4j.server.jsp.BugServlet</servlet-class>
+        <servlet-class>org.bug4j.server.jsp.BugServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>BugServlet</servlet-name>
@@ -49,7 +49,7 @@
 
     <servlet>
         <servlet-name>StartupServlet</servlet-name>
-        <servlet-class>org.dandoy.bug4j.server.jsp.StartupServlet</servlet-class>
+        <servlet-class>org.bug4j.server.jsp.StartupServlet</servlet-class>
         <load-on-startup>0</load-on-startup>
     </servlet>
 
@@ -60,7 +60,7 @@
 
     <servlet>
         <servlet-name>Bug4jService</servlet-name>
-        <servlet-class>org.dandoy.bug4j.server.gwt.server.Bug4jServiceImpl</servlet-class>
+        <servlet-class>org.bug4j.server.gwt.server.Bug4jServiceImpl</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>Bug4jService</servlet-name>
