@@ -59,7 +59,7 @@ public class BugDetailView {
         _widget = new DockLayoutPanel(Style.Unit.EM);
 
         _widget.addNorth(createBugHeader(), 7);
-        _widget.addNorth(createHitHeader(), 5);
+        _widget.addNorth(createHitHeader(), 6);
         _widget.add(buildStackPanel());
         return _widget;
     }

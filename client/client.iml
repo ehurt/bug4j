@@ -22,6 +22,7 @@
     <orderEntry type="library" name="httpcomponents-client" level="application" />
     <orderEntry type="library" name="jetbrains" level="application" />
     <orderEntry type="library" name="gwt-visualization" level="project" />
+    <orderEntry type="library" name="jetbrains" level="application" />
   </component>
 </module>
 

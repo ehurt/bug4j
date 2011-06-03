@@ -3,14 +3,19 @@
     <output-path>$PROJECT_DIR$/out/dist/client</output-path>
     <root id="root">
       <element id="directory" name="lib">
-        <element id="library" level="application" name="apache-commons-codec" />
-        <element id="library" level="application" name="apache-commons-io" />
-        <element id="library" level="application" name="apache-commons-lang" />
         <element id="library" level="application" name="httpcomponents-client" />
       </element>
       <element id="archive" name="bug4j.jar">
         <element id="module-output" name="client" />
         <element id="module-output" name="common" />
+      </element>
+      <element id="archive" name="bug4j-src.zip">
+        <element id="directory" name="client">
+          <element id="dir-copy" path="$PROJECT_DIR$/client/src" />
+        </element>
+        <element id="directory" name="common">
+          <element id="dir-copy" path="$PROJECT_DIR$/common/src" />
+        </element>
       </element>
     </root>
   </artifact>
