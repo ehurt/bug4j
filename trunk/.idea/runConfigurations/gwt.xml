@@ -2,6 +2,7 @@
   <configuration default="false" name="gwt" type="GWT.ConfigurationType" factoryName="GWT Configuration">
     <module name="ui-jsp" />
     <option name="SHELL_PARAMETERS" value=" -noserver -port 8063" />
+    <option name="RUN_PAGE" value="ui/index.html" />
     <RunnerSettings RunnerId="Debug">
       <option name="DEBUG_PORT" value="52799" />
       <option name="TRANSPORT" value="0" />

@@ -25,7 +25,8 @@ import org.bug4j.server.store.Store;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
-import java.io.*;
+import java.io.IOException;
+import java.io.Reader;
 import java.sql.*;
 import java.sql.Date;
 import java.util.*;
@@ -760,21 +761,10 @@ public class JdbcStore extends Store {
                 stackText = stackText.substring(0, stackText.length());
             }
             insertStackTextStatement.setString(2, stackText);
-            final byte[] bytes = stackText.getBytes("UTF-8");
-            final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
-            try {
-                final InputStreamReader inputStreamReader = new InputStreamReader(byteArrayInputStream);
-                try {
-                    insertStackTextStatement.setClob(2, inputStreamReader);
-                    insertStackTextStatement.executeUpdate();
-                } finally {
-                    IOUtils.closeQuietly(inputStreamReader);
-                }
-            } finally {
-                IOUtils.closeQuietly(byteArrayInputStream);
-            }
-        } catch (UnsupportedEncodingException e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            final Clob clob = connection.createClob();
+            clob.setString(1, stackText);
+            insertStackTextStatement.setClob(2, clob);
+            insertStackTextStatement.executeUpdate();
         } finally {
             DbUtils.closeQuietly(insertStackTextStatement);
         }

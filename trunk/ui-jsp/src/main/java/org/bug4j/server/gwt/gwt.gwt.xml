@@ -29,8 +29,6 @@
         <inherits name="com.google.gwt.user.theme.dark.Dark"/>
     -->
 
-    <set-configuration-property name="UiBinder.useSafeHtmlTemplates" value="true"/>
-
     <inherits name="com.google.gwt.visualization.Visualization"/>
 
     <!-- Specify the app entry point class.                   -->

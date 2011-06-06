@@ -30,6 +30,39 @@
     </resource-ref>
 
     <servlet>
+        <servlet-name>derbynet</servlet-name>
+        <servlet-class>org.apache.derby.drda.NetServlet</servlet-class>
+        <init-param>
+            <param-name>startNetworkServerOnInit</param-name>
+            <param-value>true</param-value>
+        </init-param>
+        <init-param>
+            <param-name>portNumber</param-name>
+            <param-value>1527</param-value>
+        </init-param>
+        <!--
+        The "host" parameter allows configuration of the host name that will
+        be used for the listening socket for network connections. By default,
+        the Network Server will listen to requests only on the loopback
+        address, which means that it will only accept connections from the
+        local host. Changing this value could expose the server to
+        external connections, which raises security concerns, so before using
+        the "host" parameter, you should run under the Java security
+        manager and enable user authentication.
+        -->
+        <init-param>
+            <param-name>host</param-name>
+            <param-value>localhost</param-value>
+        </init-param>
+        <load-on-startup>0</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>derbynet</servlet-name>
+        <url-pattern>/derbynet</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>InServlet</servlet-name>
         <servlet-class>org.bug4j.server.jsp.InServlet</servlet-class>
     </servlet>
@@ -50,7 +83,7 @@
     <servlet>
         <servlet-name>StartupServlet</servlet-name>
         <servlet-class>org.bug4j.server.jsp.StartupServlet</servlet-class>
-        <load-on-startup>0</load-on-startup>
+        <load-on-startup>1</load-on-startup>
     </servlet>
 
     <servlet-mapping>
@@ -67,4 +100,20 @@
         <url-pattern>/gwt/Bug4jService</url-pattern>
     </servlet-mapping>
 
+    <security-role>
+        <role-name>bug4j-ui</role-name>
+    </security-role>
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>bug4j Console</web-resource-name>
+            <url-pattern>/ui/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>bug4j-ui</role-name>
+        </auth-constraint>
+    </security-constraint>
+    <login-config>
+        <auth-method>BASIC</auth-method>
+        <realm-name>default</realm-name>
+    </login-config>
 </web-app>

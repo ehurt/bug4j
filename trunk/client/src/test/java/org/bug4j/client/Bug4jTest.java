@@ -19,6 +19,7 @@ package org.bug4j.client;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.FileInputStream;
@@ -84,21 +85,38 @@ public class Bug4jTest {
 
     @Test
     public void testForceNew() throws Exception {
-        final IllegalStateException e = new IllegalStateException("oh?");
+        final IllegalStateException e = new IllegalStateException("oh, c 'est d\u00e9j\u00e0 cass\u00e9?");
         e.setStackTrace(new StackTraceElement[]{
-                new StackTraceElement("org.bug4j.someClass", "someMethod", "someClass.java", (int) (Math.random() * 10000)),
-                new StackTraceElement("org.bug4j.someClass", "someMethod", "someClass.java", (int) (Math.random() * 10000)),
-                new StackTraceElement("org.bug4j.someClass", "someMethod", "someClass.java", (int) (Math.random() * 10000)),
-                new StackTraceElement("org.bug4j.someClass", "someMethod", "someClass.java", (int) (Math.random() * 10000)),
-                new StackTraceElement("org.bug4j.someClass", "someMethod", "someClass.java", (int) (Math.random() * 10000)),
-                new StackTraceElement("org.bug4j.someClass", "someMethod", "someClass.java", (int) (Math.random() * 10000)),
-                new StackTraceElement("org.bug4j.someClass", "someMethod", "someClass.java", (int) (Math.random() * 10000)),
-                new StackTraceElement("org.bug4j.someClass", "someMethod", "someClass.java", (int) (Math.random() * 10000))
+                new StackTraceElement("org.bug4j.someClass", buildRandomMethodName(), "someClass.java", (int) (Math.random() * 10000)),
+                new StackTraceElement("org.bug4j.someClass", buildRandomMethodName(), "someClass.java", (int) (Math.random() * 10000)),
+                new StackTraceElement("org.bug4j.someClass", buildRandomMethodName(), "someClass.java", (int) (Math.random() * 10000)),
+                new StackTraceElement("org.bug4j.someClass", buildRandomMethodName(), "someClass.java", (int) (Math.random() * 10000)),
+                new StackTraceElement("org.bug4j.someClass", buildRandomMethodName(), "someClass.java", (int) (Math.random() * 10000)),
+                new StackTraceElement("org.bug4j.someClass", buildRandomMethodName(), "someClass.java", (int) (Math.random() * 10000)),
+                new StackTraceElement("org.bug4j.someClass", buildRandomMethodName(), "someClass.java", (int) (Math.random() * 10000)),
+                new StackTraceElement("org.bug4j.someClass", buildRandomMethodName(), "someClass.java", (int) (Math.random() * 10000))
         });
         Client.report("Forcing a new exception", e);
 
         Client.shutdown();
         Assert.assertEquals(1, Client.getReported());
+    }
+
+    @Test
+    @Ignore
+    public void testCreateMany() throws Exception {
+        for (int i = 0; i < 1000; i++) {
+            testForceNew();
+        }
+    }
+
+    private String buildRandomMethodName() {
+        final StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < 10; i++) {
+            final char c = (char) (Math.random() * 26 + 'a');
+            stringBuilder.append(c);
+        }
+        return stringBuilder.toString();
     }
 
     private void doSomethingBad() {
