@@ -43,7 +43,7 @@ public class Bug4j implements EntryPoint {
     public void onModuleLoad() {
 
         final DockLayoutPanel dockLayoutPanel = new DockLayoutPanel(Style.Unit.PX);
-        final Widget html = new HTML("<img src=\"/icons/splat.png\"/><span class=\"logo\">Bug4J</span>");
+        final Widget html = new HTML("<img src=\"../icons/splat.png\"/><span class=\"logo\">Bug4J</span>");
         dockLayoutPanel.addNorth(html, 55);
 
         final TabLayoutPanel tabLayoutPanel = new TabLayoutPanel(2, Style.Unit.EM);
