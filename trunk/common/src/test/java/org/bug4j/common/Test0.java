@@ -18,35 +18,8 @@ package org.bug4j.common;
 
 import org.junit.Test;
 
-import java.math.BigInteger;
-import java.security.MessageDigest;
-
 public class Test0 {
     @Test
     public void test() throws Exception {
-        final MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-        messageDigest.update("Hello World".getBytes("UTF-8"));
-        final byte[] bytes = messageDigest.digest();
-
-        BigInteger bigInt = new BigInteger(1, bytes);
-        String v1 = bigInt.toString(36);
-        System.out.println("v1 = " + v1);
-    }
-
-    @Test
-    public void testX() throws Exception {
-        dothis();
-    }
-
-    private void dothis() {
-        try {
-            doThat();
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    private void doThat() {
-        throw new NullPointerException();
     }
 }
