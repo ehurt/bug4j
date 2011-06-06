@@ -19,6 +19,8 @@ package org.bug4j.server.gwt.client;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -47,9 +49,28 @@ public class Bug4j implements EntryPoint {
         dockLayoutPanel.addNorth(html, 55);
 
         final TabLayoutPanel tabLayoutPanel = new TabLayoutPanel(2, Style.Unit.EM);
-        tabLayoutPanel.add(new BugView().createWidget(), "Bugs");
-        tabLayoutPanel.add(new HotBugsGraphView().createWidget(), "Top Chart");
-        tabLayoutPanel.add(new PackagesView().createWidget(), "Setup");
+        final BugView bugView = new BugView();
+        final HotBugsGraphView hotBugsGraphView = new HotBugsGraphView();
+        final PackagesView packagesView = new PackagesView();
+
+        tabLayoutPanel.add(bugView.createWidget(), "Bugs");
+        tabLayoutPanel.add(hotBugsGraphView.createWidget(), "Top Chart");
+        tabLayoutPanel.add(packagesView.createWidget(), "Setup");
+
+        tabLayoutPanel.addSelectionHandler(new SelectionHandler<Integer>() {
+            @Override
+            public void onSelection(SelectionEvent<Integer> integerSelectionEvent) {
+                final int selectedItem = integerSelectionEvent.getSelectedItem();
+                switch (selectedItem) {
+                    case 0:
+                        bugView.whenBugListChanges();
+                        break;
+                    case 1:
+                        hotBugsGraphView.whenBugListChanges();
+                        break;
+                }
+            }
+        });
 
         dockLayoutPanel.add(tabLayoutPanel);
 

@@ -69,8 +69,8 @@ public class BugView implements DisplaysBugs {
         _cellTable.addColumn(BugViewColumn.TITLE, "Title");
         _cellTable.addColumn(BugViewColumn.HIT, "#");
 
-        _cellTable.setColumnWidth(BugViewColumn.ID, "6em");
-        _cellTable.setColumnWidth(BugViewColumn.HIT, "6em");
+        _cellTable.setColumnWidth(BugViewColumn.ID, "5em");
+        _cellTable.setColumnWidth(BugViewColumn.HIT, "5em");
 
         _cellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(BugViewColumn.HIT, false));
 

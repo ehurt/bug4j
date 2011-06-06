@@ -70,7 +70,9 @@ public class StackPathHashCalculator {
                 final Matcher matcher = STACK_PATTERN.matcher(stackLine);
                 if (matcher.matches()) {
                     final String methodCall = matcher.group(1);
-                    messageDigest.update(methodCall.getBytes("UTF-8"));
+                    if (!methodCall.startsWith("sun.reflect.")) {
+                        messageDigest.update(methodCall.getBytes("UTF-8"));
+                    }
                 }
             }
         }

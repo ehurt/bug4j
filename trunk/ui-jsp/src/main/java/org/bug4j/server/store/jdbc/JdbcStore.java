@@ -67,6 +67,7 @@ public class JdbcStore extends Store {
             final Context envCtx = (Context) initCtx.lookup("java:comp/env");
             final DataSource bugDB = (DataSource) envCtx.lookup("jdbc/bugDB");
             ret = bugDB.getConnection();
+            ret.setAutoCommit(true);
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
