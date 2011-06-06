@@ -67,9 +67,11 @@ public class BugDetailView {
     public Widget createBugHeader() {
         final VerticalPanel verticalPanel = new VerticalPanel();
 
+/* Remove the "Delete button for now.
         {
             verticalPanel.add(buildToolbar());
         }
+*/
 
         {
             _label = new Label();

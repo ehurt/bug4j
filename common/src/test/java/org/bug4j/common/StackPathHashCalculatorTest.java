@@ -54,7 +54,7 @@ public class StackPathHashCalculatorTest {
                 "	at org.bug4j.common.Test0.dothis(Test0.java:42)",
                 "	... 22 more"
         );
-        Assert.assertEquals("7zz4jt87euff6pmum2fzsfcbp", StackPathHashCalculator.analyze(stack));
+        Assert.assertEquals("ykn1pmves7846yx9ssisy9h9", StackPathHashCalculator.analyze(stack));
     }
 
     @Test
