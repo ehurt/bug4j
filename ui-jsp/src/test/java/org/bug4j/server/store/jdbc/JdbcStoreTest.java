@@ -33,8 +33,8 @@ import java.util.List;
 public class JdbcStoreTest {
 
     private static final String STACK_TEXT = "java.lang.IllegalStateException: java.lang.IndexOutOfBoundsException: Index: 1, Size: 0" +
-            "	at org.dandoy.Test0.dothis(Test0.java:44)" +
-            "	at org.dandoy.Test0.testX(Test0.java:37)" +
+            "	at org.bug4j.common.Test0.dothis(Test0.java:44)" +
+            "	at org.bug4j.common.Test0.testX(Test0.java:37)" +
             "	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)" +
             "	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)" +
             "	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)" +
@@ -56,8 +56,8 @@ public class JdbcStoreTest {
             "Caused by: java.lang.IndexOutOfBoundsException: Index: 1+ Size: 0" +
             "	at java.util.ArrayList.RangeCheck(ArrayList.java:547)" +
             "	at java.util.ArrayList.get(ArrayList.java:322)" +
-            "	at org.dandoy.Test0.doThat(Test0.java:49)" +
-            "	at org.dandoy.Test0.dothis(Test0.java:42)" +
+            "	at org.bug4j.common.Test0.doThat(Test0.java:49)" +
+            "	at org.bug4j.common.Test0.dothis(Test0.java:42)" +
             "	... 22 more";
     private static final String APP = "My Application";
 
