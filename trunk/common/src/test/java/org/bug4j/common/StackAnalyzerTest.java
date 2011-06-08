@@ -14,19 +14,22 @@
  *    limitations under the License.
  */
 
-package org.bug4j.client;
+package org.bug4j.common;
 
-import org.bug4j.common.StackAnalyzer;
-import org.bug4j.common.TextToLines;
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class ClientTest {
+/**
+ */
+public class StackAnalyzerTest {
 
     private void doSomethingBad() {
         try {
@@ -56,6 +59,21 @@ public class ClientTest {
             final StackAnalyzer stackAnalyzer = new StackAnalyzer();
             final String analyzed = stackAnalyzer.analyze(stackLines);
             System.out.println("analyzed = " + analyzed);
+        }
+    }
+
+    @Test
+    public void test() throws IOException {
+
+        final StackAnalyzer stackAnalyzer = new StackAnalyzer();
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        final InputStream inputStream = classLoader.getResourceAsStream("org/bug4j/common/StackAnalyzerTest.1.txt");
+        try {
+            final List lines = IOUtils.readLines(inputStream);
+            //noinspection unchecked
+            stackAnalyzer.analyze(lines);
+        } finally {
+            inputStream.close();
         }
     }
 }

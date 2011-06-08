@@ -105,11 +105,13 @@ public class StackAnalyzer {
     }
 
     static String getExceptionClass(String messageLine) {
+        final String ret;
         final int pos = messageLine.indexOf(':');
         if (pos < 0) {
-            throw new IllegalStateException("Invalid first line in a stack trace: \"" + messageLine + "\"");
+            ret = messageLine;
+        } else {
+            ret = messageLine.substring(0, pos);
         }
-        final String ret = messageLine.substring(0, pos);
         return ret;
     }
 }
