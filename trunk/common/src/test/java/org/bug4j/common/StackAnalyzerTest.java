@@ -62,6 +62,7 @@ public class StackAnalyzerTest {
         }
     }
 
+    @SuppressWarnings({"unchecked"})
     @Test
     public void test() throws IOException {
 
@@ -70,7 +71,6 @@ public class StackAnalyzerTest {
         final InputStream inputStream = classLoader.getResourceAsStream("org/bug4j/common/StackAnalyzerTest.1.txt");
         try {
             final List lines = IOUtils.readLines(inputStream);
-            //noinspection unchecked
             stackAnalyzer.analyze(lines);
         } finally {
             inputStream.close();
