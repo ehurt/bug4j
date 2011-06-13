@@ -24,7 +24,7 @@ import java.util.Map;
 
 public interface Bug4jServiceAsync {
 
-    void getBugs(String app, String sortBy, AsyncCallback<List<Bug>> async);
+    void getBugs(String app, Filter filter, String sortBy, AsyncCallback<List<Bug>> async);
 
     void getPackages(String app, AsyncCallback<List<String>> async);
 

@@ -23,30 +23,24 @@ import java.io.PrintStream;
 
 public class ReportableEvent {
     private final String _message;
-    private final String exceptionMessage;
-    private final String[] throwableStrRep;
+    private final String[] _throwableStrRep;
 
-    public ReportableEvent(String message, String exceptionMessage, String[] throwableStrRep) {
+    public ReportableEvent(String message, String[] throwableStrRep) {
         _message = message;
-        this.exceptionMessage = exceptionMessage;
-        this.throwableStrRep = throwableStrRep;
+        _throwableStrRep = throwableStrRep;
     }
 
     public String getMessage() {
         return _message;
     }
 
-    public String getExceptionMessage() {
-        return exceptionMessage;
-    }
-
     public String[] getThrowableStrRep() {
-        return throwableStrRep;
+        return _throwableStrRep;
     }
 
     public static ReportableEvent createReportableEvent(String message, Throwable throwable) {
         final String[] throwableStrRep = createStringRepresentation(throwable);
-        return new ReportableEvent(message, throwable.getMessage(), throwableStrRep);
+        return new ReportableEvent(message, throwableStrRep);
     }
 
     private static String[] createStringRepresentation(Throwable throwable) {

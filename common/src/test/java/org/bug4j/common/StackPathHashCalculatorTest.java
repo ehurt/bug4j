@@ -58,6 +58,64 @@ public class StackPathHashCalculatorTest {
     }
 
     @Test
+    public void testSkipReflect() throws Exception {
+        final List<String> stackRef = Arrays.asList(
+                "java.lang.IllegalStateException: java.lang.IndexOutOfBoundsException: Index: 1, Size: 0",
+                "	at org.bug4j.common.Test0.dothis(Test0.java:44)",
+                "	at org.bug4j.common.Test0.testX(Test0.java:37)",
+                "	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)",
+                "	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)",
+                "	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)",
+                "	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:44)",
+                "	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:20)",
+                "Caused by: java.lang.IndexOutOfBoundsException: Index: 1, Size: 0",
+                "	at java.util.ArrayList.RangeCheck(ArrayList.java:547)",
+                "	at java.util.ArrayList.get(ArrayList.java:322)",
+                "	at org.bug4j.common.Test0.doThat(Test0.java:49)",
+                "	at org.bug4j.common.Test0.dothis(Test0.java:42)",
+                "	... 22 more"
+        );
+
+
+        final List<String> stack_1 = Arrays.asList(
+                "java.lang.IllegalStateException: java.lang.IndexOutOfBoundsException: Index: 1, Size: 0",
+                "	at org.bug4j.common.Test0.dothis(Test0.java:44)",
+                "	at org.bug4j.common.Test0.testX(Test0.java:37)",
+                "	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)",
+                "	at sun.reflect.NativeMethodAccessorImplxxxxxxxx.invoke(NativeMethodAccessorImpl.java:39)",
+                "	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)",
+                "	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:44)",
+                "	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:20)",
+                "Caused by: java.lang.IndexOutOfBoundsException: Index: 1, Size: 0",
+                "	at java.util.ArrayList.RangeCheck(ArrayList.java:547)",
+                "	at java.util.ArrayList.get(ArrayList.java:322)",
+                "	at org.bug4j.common.Test0.doThat(Test0.java:49)",
+                "	at org.bug4j.common.Test0.dothis(Test0.java:42)",
+                "	... 22 more"
+        );
+        Assert.assertEquals(StackPathHashCalculator.analyze(stackRef), StackPathHashCalculator.analyze(stack_1));
+
+
+        final List<String> stack_2 = Arrays.asList(
+                "java.lang.IllegalStateException: java.lang.IndexOutOfBoundsException: Index: 1, Size: 0",
+                "	at org.bug4j.common.Test0.dothis(Test0.java:44)",
+                "	at org.bug4j.common.Test0.testX(Test0.java:37)",
+                "	at $Proxy199.invoke(Unknown Source)",
+                "	at sun.reflect.NativeMethodAccessorImplxxxxxxxx.invoke(NativeMethodAccessorImpl.java:39)",
+                "	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)",
+                "	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:44)",
+                "	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:20)",
+                "Caused by: java.lang.IndexOutOfBoundsException: Index: 1, Size: 0",
+                "	at java.util.ArrayList.RangeCheck(ArrayList.java:547)",
+                "	at java.util.ArrayList.get(ArrayList.java:322)",
+                "	at org.bug4j.common.Test0.doThat(Test0.java:49)",
+                "	at org.bug4j.common.Test0.dothis(Test0.java:42)",
+                "	... 22 more"
+        );
+        Assert.assertEquals(StackPathHashCalculator.analyze(stackRef), StackPathHashCalculator.analyze(stack_2));
+    }
+
+    @Test
     public void testCompareSimple() throws Exception {
         final List<String> refStack = Arrays.asList(
                 "java.lang.IllegalStateException: java.lang.IndexOutOfBoundsException: Index: 1, Size: 0",

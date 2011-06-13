@@ -30,10 +30,10 @@ public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jServi
     private static final Logger LOGGER = Logger.getLogger(Bug4jServiceImpl.class);
 
     @Override
-    public List<Bug> getBugs(String app, final String sortBy) throws Exception {
+    public List<Bug> getBugs(String app, Filter filter, final String sortBy) throws Exception {
         try {
             final Store store = StoreFactory.getStore();
-            return store.getBugs(app, 0, Integer.MAX_VALUE, sortBy);
+            return store.getBugs(app, filter, 0, Integer.MAX_VALUE, sortBy);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             throw new Exception(e.getMessage(), e);

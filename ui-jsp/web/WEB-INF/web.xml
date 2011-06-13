@@ -38,7 +38,7 @@
         </init-param>
         <init-param>
             <param-name>portNumber</param-name>
-            <param-value>1527</param-value>
+            <param-value>1528</param-value>
         </init-param>
         <!--
         The "host" parameter allows configuration of the host name that will
@@ -98,6 +98,15 @@
     <servlet-mapping>
         <servlet-name>Bug4jService</servlet-name>
         <url-pattern>/gwt/Bug4jService</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ExportServlet</servlet-name>
+        <servlet-class>org.bug4j.server.jsp.ExportServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ExportServlet</servlet-name>
+        <url-pattern>/bug/export</url-pattern>
     </servlet-mapping>
 
     <security-role>

@@ -48,8 +48,8 @@ public class Bug4jTest {
         }
 
         LogManager.shutdown();
-        Client.shutdown();
-        Assert.assertEquals(2, Client.getReported());
+        Bug4jAgent.shutdown();
+        Assert.assertEquals(2, Bug4jAgent.getReported());
     }
 
     @Test
@@ -66,8 +66,8 @@ public class Bug4jTest {
         thread.start();
         thread.join();
 
-        Client.shutdown();
-        Assert.assertEquals(1, Client.getReported());
+        Bug4jAgent.shutdown();
+        Assert.assertEquals(1, Bug4jAgent.getReported());
     }
 
     @Test
@@ -76,11 +76,11 @@ public class Bug4jTest {
             final FileInputStream fileInputStream = new FileInputStream("c:\\bogus");
             fileInputStream.close();
         } catch (IOException e) {
-            Client.report("Failed to do something", e);
+            Bug4jAgent.report("Failed to do something", e);
         }
 
-        Client.shutdown();
-        Assert.assertEquals(1, Client.getReported());
+        Bug4jAgent.shutdown();
+        Assert.assertEquals(1, Bug4jAgent.getReported());
     }
 
     @Test
@@ -96,10 +96,37 @@ public class Bug4jTest {
                 new StackTraceElement("org.bug4j.someClass", buildRandomMethodName(), "someClass.java", (int) (Math.random() * 10000)),
                 new StackTraceElement("org.bug4j.someClass", buildRandomMethodName(), "someClass.java", (int) (Math.random() * 10000))
         });
-        Client.report("Forcing a new exception", e);
+        Bug4jAgent.report("Forcing a new exception", e);
 
-        Client.shutdown();
-        Assert.assertEquals(1, Client.getReported());
+        Bug4jAgent.shutdown();
+        Assert.assertEquals(1, Bug4jAgent.getReported());
+    }
+
+    @Test
+    public void testSameTitle() throws Exception {
+        {
+            final IllegalStateException e = new IllegalStateException("SameTitle");
+            e.setStackTrace(new StackTraceElement[]{
+                    new StackTraceElement("org.bug4j.someClass", "someMethod", "someClass.java", 100),
+                    new StackTraceElement("org.bug4j.someClass", "someMethod", "someClass.java", 200),
+                    new StackTraceElement("org.bug4j.someClass", "someMethod", "someClass.java", 300),
+                    new StackTraceElement("org.bug4j.someClass", "someMethod", "someClass.java", 400),
+            });
+            Bug4jAgent.report("testSameTitle", e);
+        }
+
+        {
+            final IllegalStateException e = new IllegalStateException("SameTitle");
+            e.setStackTrace(new StackTraceElement[]{
+                    new StackTraceElement("org.bug4j.someClass", "someMethod", "someClass.java", 100),
+                    new StackTraceElement("org.bug4j.someOtherClass", "someOtherMethod", "someClass.java", 123),
+                    new StackTraceElement("org.bug4j.someOtherClass", "someOtherMethod", "someClass.java", 456),
+                    new StackTraceElement("org.bug4j.someOtherClass", "someMethod", "someClass.java", 400),
+            });
+            Bug4jAgent.report("testSameTitle", e);
+        }
+
+        Bug4jAgent.shutdown();
     }
 
     @Test

@@ -27,7 +27,7 @@ public abstract class Store {
 
     public abstract Bug getBug(String app, long bugId);
 
-    public abstract List<Bug> getBugs(String app, int offset, int max, String orderBy);
+    public abstract List<Bug> getBugs(String app, Filter filter, int offset, int max, String orderBy);
 
     public abstract List<String> getPackages(String app);
 
@@ -62,4 +62,6 @@ public abstract class Store {
     public abstract BugHitAndStack getBugHitAndStack(long hitId);
 
     public abstract List<Long> getHitIds(long bugId);
+
+    public abstract Long getBugIdByTitle(String app, String title);
 }
