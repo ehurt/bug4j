@@ -81,13 +81,14 @@ class HttpConnector {
         return response.equals("New");
     }
 
-    public void reportBug(String message, String exceptionMessage, String[] stackLines) {
+    public void reportBug(String message, String[] stackLines) {
         final String stackText = toText(stackLines);
+        final String applicationName = _settings.getApplicationName();
+        final String applicationVersion = _settings.getApplicationVersion();
         send("/bug",
-                "a", _settings.getApplicationName(),
-                "v", _settings.getApplicationVersion(),
+                "a", applicationName,
+                "v", applicationVersion,
                 "m", message,
-                "e", exceptionMessage,
                 "s", stackText
         );
     }

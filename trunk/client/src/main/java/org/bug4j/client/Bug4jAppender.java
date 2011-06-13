@@ -36,10 +36,7 @@ public class Bug4jAppender extends AppenderSkeleton {
             final ThrowableInformation throwableInformation = event.getThrowableInformation();
             if (throwableInformation != null) {
                 final Throwable throwable = throwableInformation.getThrowable();
-                final String exceptionMessage = throwable.getMessage();
-                final String[] throwableStrRep = throwableInformation.getThrowableStrRep();
-                final ReportableEvent reportableEvent = new ReportableEvent(message, exceptionMessage, throwableStrRep);
-                Client.enqueue(reportableEvent);
+                Bug4jAgent.report(message, throwable);
             }
         }
     }
@@ -57,7 +54,7 @@ public class Bug4jAppender extends AppenderSkeleton {
 
     @Override
     public void activateOptions() {
-        Client.start(_settings);
+        Bug4jAgent.start(_settings);
     }
 
     @SuppressWarnings({"UnusedDeclaration"})

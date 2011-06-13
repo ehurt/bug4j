@@ -16,14 +16,17 @@
 
 package org.bug4j.server.gwt.client.bugs;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortList;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.SplitLayoutPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -31,6 +34,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import org.bug4j.server.gwt.client.Bug4j;
 import org.bug4j.server.gwt.client.Bug4jService;
 import org.bug4j.server.gwt.client.data.Bug;
+import org.bug4j.server.gwt.client.data.Filter;
 
 import java.util.List;
 
@@ -40,6 +44,8 @@ public class BugView implements DisplaysBugs {
     private SingleSelectionModel<Bug> _selectionModel;
     private BugDetailView _bugDetailView;
     private CellTable<Bug> _cellTable;
+    private final Filter _filter = new Filter();
+    private MenuItem _filterMenuItem;
 
     public BugView() {
     }
@@ -47,13 +53,57 @@ public class BugView implements DisplaysBugs {
     public Widget createWidget() {
         final CellTable<Bug> bugCellTable = createTable();
         final ScrollPanel scrollPanel = new ScrollPanel(bugCellTable);
+        final DockLayoutPanel dockLayoutPanel = new DockLayoutPanel(Style.Unit.EM);
+        final MenuBar menuBar = new MenuBar();
+        _filterMenuItem = menuBar.addItem("<<<filter>>>", new Command() {
+            @Override
+            public void execute() {
+                whenFilter();
+            }
+        });
+        updateFilterMenuItem();
+
+        menuBar.addItem("Export...", new Command() {
+            @Override
+            public void execute() {
+                whenExport();
+            }
+        });
+        dockLayoutPanel.addNorth(menuBar, 2);
+
+        dockLayoutPanel.add(scrollPanel);
 
         _bugDetailView = new BugDetailView(this);
 
         final SplitLayoutPanel splitLayoutPanel = new SplitLayoutPanel(5);
-        splitLayoutPanel.addWest(scrollPanel, 600);
+        splitLayoutPanel.addWest(dockLayoutPanel, 600);
         splitLayoutPanel.add(_bugDetailView.createWidget());
         return splitLayoutPanel;
+    }
+
+    private void whenExport() {
+        final String moduleBaseURL = GWT.getModuleBaseURL();
+        Window.open(moduleBaseURL + "../bug/export?a=" + Bug4j.APP, "_self", "");
+    }
+
+    private void whenFilter() {
+        final FilterDialog filterDialog = new FilterDialog(_filter);
+        filterDialog.addCloseHandler(new CloseHandler<PopupPanel>() {
+            @Override
+            public void onClose(CloseEvent<PopupPanel> popupPanelCloseEvent) {
+                if (!popupPanelCloseEvent.isAutoClosed()) {
+                    final Filter newFilter = filterDialog.getFilter();
+                    newFilter.copyTo(_filter);
+                    refreshBugs();
+                    updateFilterMenuItem();
+                }
+            }
+        });
+        filterDialog.show();
+    }
+
+    private void updateFilterMenuItem() {
+        _filterMenuItem.setText("Filter" + (_filter.isFiltering() ? "*" : ""));
     }
 
     public void whenBugListChanges() {
@@ -98,7 +148,7 @@ public class BugView implements DisplaysBugs {
     private void refreshBugs() {
         final ColumnSortList sortList = _cellTable.getColumnSortList();
         final String sortBy = BugViewColumn.sortBy(sortList);
-        Bug4jService.App.getInstance().getBugs(Bug4j.APP, sortBy, new AsyncCallback<List<Bug>>() {
+        Bug4jService.App.getInstance().getBugs(Bug4j.APP, _filter, sortBy, new AsyncCallback<List<Bug>>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());

@@ -19,7 +19,9 @@ package org.bug4j.server.jsp;
 import org.bug4j.common.FullStackHashCalculator;
 import org.bug4j.server.gwt.client.data.Bug;
 import org.bug4j.server.gwt.client.data.BugHit;
+import org.bug4j.server.gwt.client.data.Filter;
 import org.bug4j.server.gwt.client.util.TextToLines;
+import org.bug4j.server.processor.BugProcessor;
 import org.bug4j.server.store.Store;
 import org.bug4j.server.store.StoreFactory;
 import org.bug4j.server.store.TestingStore;
@@ -86,7 +88,7 @@ public class ServletsTest {
             final String s = InServlet.doit(APP, APP_VERSION, textHash);
             assertEquals("New", s);
 
-            BugServlet.doit(APP, APP_VERSION, STACK_TEXT);
+            BugProcessor.process(APP, APP_VERSION, STACK_TEXT);
         }
 
         { // Submit the same bug
@@ -96,7 +98,7 @@ public class ServletsTest {
         }
 
         {
-            final List<Bug> bugs = _store.getBugs(APP, 0, 100, "i");
+            final List<Bug> bugs = _store.getBugs(APP, new Filter(), 0, 100, "i");
             assertEquals(1, bugs.size());
             final Bug bug = bugs.get(0);
             assertEquals("IndexOutOfBoundsException at Test0.java:49", bug.getTitle());

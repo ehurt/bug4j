@@ -28,7 +28,7 @@ public class Settings {
     public Settings() {
         _applicationName = "no-name";
         _applicationVersion = "1.0";
-        _server = "http://localhost:8080/bug4j/";
+        _server = "http://localhost:8063/bug4j/";
     }
 
     public static Settings getDefaultInstance() {

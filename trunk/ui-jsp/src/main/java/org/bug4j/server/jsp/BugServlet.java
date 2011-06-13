@@ -17,21 +17,13 @@
 package org.bug4j.server.jsp;
 
 import org.apache.log4j.Logger;
-import org.bug4j.common.FullStackHashCalculator;
-import org.bug4j.common.StackAnalyzer;
-import org.bug4j.common.StackPathHashCalculator;
-import org.bug4j.server.gwt.client.data.Stack;
-import org.bug4j.server.gwt.client.data.Strain;
-import org.bug4j.server.gwt.client.util.TextToLines;
-import org.bug4j.server.store.Store;
-import org.bug4j.server.store.StoreFactory;
+import org.bug4j.server.processor.BugProcessor;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 
 public class BugServlet extends HttpServlet {
     private static final Logger LOGGER = Logger.getLogger(BugServlet.class);
@@ -51,36 +43,11 @@ public class BugServlet extends HttpServlet {
             final String app = request.getParameter("a");
             final String version = request.getParameter("v");
             final String message = request.getParameter("m");
-            final String exceptionMessage = request.getParameter("e");
             final String stackText = request.getParameter("s");
 
-            doit(app, version, stackText);
+            BugProcessor.process(app, version, stackText);
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
         }
-    }
-
-    static void doit(String app, String version, String stackText) {
-
-        final Store store = StoreFactory.getStore();
-        final List<String> stackLines = TextToLines.toList(stackText);
-
-        final List<String> appPackages = store.getPackages(app);
-        final StackAnalyzer stackAnalyzer = new StackAnalyzer();
-        stackAnalyzer.setApplicationPackages(appPackages);
-        final String fullHash = FullStackHashCalculator.getTextHash(stackLines);
-
-        Stack stack = store.getStackByHash(app, fullHash);
-        if (stack == null) {
-            final String strainHash = StackPathHashCalculator.analyze(stackLines);
-            Strain strain = store.getStrainByHash(app, strainHash);
-            if (strain == null) {
-                final String title = stackAnalyzer.analyze(stackLines);
-                final long bugId = store.createBug(app, title);
-                strain = store.createStrain(app, bugId, strainHash);
-            }
-            stack = store.createStack(app, strain.getBugId(), strain.getStrainId(), fullHash, stackText);
-        }
-        store.reportHitOnStack(app, version, stack);
     }
 }

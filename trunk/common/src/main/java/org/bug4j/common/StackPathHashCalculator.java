@@ -70,12 +70,25 @@ public class StackPathHashCalculator {
                 final Matcher matcher = STACK_PATTERN.matcher(stackLine);
                 if (matcher.matches()) {
                     final String methodCall = matcher.group(1);
-                    if (!methodCall.startsWith("sun.reflect.")) {
+                    if (!isSyntheticProxyMethod(methodCall)) {
                         messageDigest.update(methodCall.getBytes("UTF-8"));
                     }
                 }
             }
         }
+    }
+
+    private static boolean isSyntheticProxyMethod(String methodCall) {
+        final String[] prefixes = {
+                "sun.reflect.",
+                "$Proxy"
+        };
+        for (String prefix : prefixes) {
+            if (methodCall.startsWith(prefix)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     static String getExceptionClass(String messageLine) {

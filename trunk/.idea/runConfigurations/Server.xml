@@ -53,6 +53,7 @@
     </ConfigurationWrapper>
     <method>
       <option name="BuildArtifacts" enabled="true">
+        <artifact name="client:jar" />
         <artifact name="ui-jsp:war exploded" />
       </option>
     </method>

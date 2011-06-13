@@ -23,7 +23,7 @@ public class Bug4jUncaughtExceptionHandler implements Thread.UncaughtExceptionHa
 
     @Override
     public void uncaughtException(Thread thread, Throwable throwable) {
-        Client.report("Uncaught exception", throwable);
+        Bug4jAgent.report("Uncaught exception", throwable);
     }
 
     public static void install() {
