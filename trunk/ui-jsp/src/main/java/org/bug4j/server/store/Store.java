@@ -17,6 +17,7 @@
 package org.bug4j.server.store;
 
 import org.bug4j.server.gwt.client.data.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
@@ -53,7 +54,7 @@ public abstract class Store {
 
     public abstract Stack createStack(String app, long bugId, long strainId, String fullHash, String stackText);
 
-    public abstract void reportHitOnStack(String app, String version, Stack stack);
+    public abstract void reportHitOnStack(String app, String version, @Nullable String message, @Nullable String user, Stack stack);
 
     public abstract BugHit getLastHit(long bugId);
 

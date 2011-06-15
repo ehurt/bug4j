@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.bug4j.server.gwt.client.data.Stack;
 import org.bug4j.server.store.Store;
 import org.bug4j.server.store.StoreFactory;
+import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -45,13 +46,15 @@ public class InServlet extends HttpServlet {
 
         final String app = request.getParameter("a");
         final String version = request.getParameter("v");
+        final String message = request.getParameter("m");
+        final String user = request.getParameter("u");
         final String hash = request.getParameter("h");
 
-        final String s = doit(app, version, hash);
+        final String s = doit(app, version, message, user, hash);
         out.print(s);
     }
 
-    static String doit(String app, String version, String hash) {
+    static String doit(String app, String version, @Nullable String message, @Nullable String user, String hash) {
         final String ret;
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace(String.format("in :%s-%s-%s", app, version, hash));
@@ -60,7 +63,7 @@ public class InServlet extends HttpServlet {
         final Store store = StoreFactory.getStore();
         final Stack stack = store.getStackByHash(app, hash);
         if (stack != null) {
-            store.reportHitOnStack(app, version, stack);
+            store.reportHitOnStack(app, version, message, user, stack);
             ret = "Old";
         } else {
             ret = "New";

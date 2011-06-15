@@ -160,6 +160,8 @@ public class BugView implements DisplaysBugs {
                 if (!bugs.isEmpty()) {
                     final Bug firstBug = bugs.get(0);
                     _selectionModel.setSelected(firstBug, true);
+                } else {
+                    _selectionModel.setSelected(null, true);
                 }
             }
         });
@@ -167,7 +169,11 @@ public class BugView implements DisplaysBugs {
 
     private void whenTableSelectionChanges() {
         final Bug bug = _selectionModel.getSelectedObject();
-        final long bugId = bug.getId();
-        _bugDetailView.displayBug(bugId);
+        if (bug != null) {
+            final long bugId = bug.getId();
+            _bugDetailView.displayBug(bugId);
+        } else {
+            _bugDetailView.clear();
+        }
     }
 }
