@@ -104,6 +104,8 @@ public class JdbcStore extends Store {
                         " TITLE VARCHAR(256) NOT NULL" +
                         ")"
                 );
+                statement.execute("CREATE INDEX BUG_ID_IDX ON BUG(BUG_ID)");
+                statement.execute("CREATE INDEX BUG_TITLE_IDX ON BUG(TITLE)");
             }
 
             if (!doesTableExist(statement, "STRAIN")) {
@@ -114,6 +116,7 @@ public class JdbcStore extends Store {
                         " HASH VARCHAR(64)" +
                         ")"
                 );
+                statement.execute("CREATE INDEX STRAIN_HASH_IDX ON STRAIN(HASH)");
             }
 
             if (!doesTableExist(statement, "STACK")) {
@@ -125,6 +128,8 @@ public class JdbcStore extends Store {
                         " HASH VARCHAR(64)" +
                         ")"
                 );
+                statement.execute("CREATE INDEX STACK_HASH_IDX ON STACK(HASH)");
+                statement.execute("CREATE INDEX STACK_BUGID_IDX ON STACK(BUG_ID)");
             }
 
             if (!doesTableExist(statement, "STACK_TEXT")) {
@@ -134,6 +139,7 @@ public class JdbcStore extends Store {
                         " STACK_TEXT CLOB(" + STACK_SIZE_LIMIT + ")" +
                         ")"
                 );
+                statement.execute("CREATE INDEX STACK_TEXT_ID_IDX ON STACK_TEXT(STACK_ID)");
             }
 
             if (!doesTableExist(statement, "HIT")) {
@@ -143,9 +149,20 @@ public class JdbcStore extends Store {
                         " BUG_ID INT," +
                         " STACK_ID INT," +
                         " APP_VER VARCHAR(32)," +
-                        " DATE_REPORTED TIMESTAMP" +
+                        " DATE_REPORTED TIMESTAMP," +
+                        " REPORTED_BY VARCHAR(1024)," +
+                        " MESSAGE VARCHAR(1024)" +
                         ")"
                 );
+                statement.execute("CREATE INDEX HIT_HIT_ID_IDX ON HIT(HIT_ID)");
+                statement.execute("CREATE INDEX HIT_BUG_ID_IDX ON HIT(BUG_ID)");
+            } else {
+                try {
+                    final ResultSet resultSet = statement.executeQuery("SELECT REPORTED_BY FROM HIT WHERE 1=2");
+                    resultSet.close();
+                } catch (SQLException e) {
+                    statement.execute("ALTER TABLE HIT ADD COLUMN REPORTED_BY VARCHAR(1024)");
+                }
             }
         } finally {
             DbUtils.closeQuietly(statement);
@@ -159,6 +176,13 @@ public class JdbcStore extends Store {
         } catch (SQLException e) {
             return false;
         }
+    }
+
+    private static String truncate(String s, int length) {
+        if (length < s.length()) {
+            s = s.substring(0, length);
+        }
+        return s;
     }
 
     private void loadApps(Connection connection) throws SQLException {
@@ -830,10 +854,10 @@ public class JdbcStore extends Store {
     }
 
     @Override
-    public void reportHitOnStack(String app, String appVersion, Stack stack) {
+    public void reportHitOnStack(String app, String appVersion, String message, String user, Stack stack) {
         final Connection connection = getConnection();
         try {
-            final PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO HIT (BUG_ID,STACK_ID,APP_VER,DATE_REPORTED) VALUES(?,?,?,?)");
+            final PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO HIT (BUG_ID,STACK_ID,APP_VER,DATE_REPORTED,MESSAGE,REPORTED_BY) VALUES(?,?,?,?,?,?)");
             try {
                 final long bugId = stack.getBugId();
                 final long stackId = stack.getStackId();
@@ -843,6 +867,8 @@ public class JdbcStore extends Store {
                 preparedStatement.setLong(2, stackId);
                 preparedStatement.setString(3, appVersion);
                 preparedStatement.setTimestamp(4, now);
+                preparedStatement.setString(5, truncate(message, 1024));
+                preparedStatement.setString(6, truncate(user, 1024));
                 preparedStatement.executeUpdate();
             } finally {
                 DbUtils.closeQuietly(preparedStatement);
@@ -860,7 +886,7 @@ public class JdbcStore extends Store {
         final Connection connection = getConnection();
         try {
             final PreparedStatement preparedStatement = connection.prepareStatement("" +
-                    "SELECT H.HIT_ID, H.APP_VER, H.DATE_REPORTED" +
+                    "SELECT H.HIT_ID, H.APP_VER, H.DATE_REPORTED,H.REPORTED_BY" +
                     " FROM HIT H" +
                     " WHERE H.BUG_ID=?" +
                     " ORDER BY DATE_REPORTED DESC");
@@ -873,7 +899,8 @@ public class JdbcStore extends Store {
                         final String appVer = resultSet.getString(2);
                         final Timestamp timestamp = resultSet.getTimestamp(3);
                         final long dateReported = timestamp.getTime();
-                        ret = new BugHit(hitId, appVer, dateReported);
+                        final String user = resultSet.getString(4);
+                        ret = new BugHit(hitId, appVer, dateReported, user);
                     }
                 } finally {
                     DbUtils.closeQuietly(resultSet);
@@ -929,7 +956,7 @@ public class JdbcStore extends Store {
         final Connection connection = getConnection();
         try {
             final PreparedStatement preparedStatement = connection.prepareStatement("" +
-                    "SELECT H.APP_VER,H.DATE_REPORTED,S.STACK_TEXT" +
+                    "SELECT H.APP_VER,H.DATE_REPORTED,H.REPORTED_BY,S.STACK_TEXT" +
                     " FROM STACK_TEXT S, HIT H" +
                     " WHERE H.HIT_ID=?" +
                     " AND H.STACK_ID=S.STACK_ID");
@@ -941,8 +968,9 @@ public class JdbcStore extends Store {
                         final String appVer = resultSet.getString(1);
                         final Timestamp timestamp = resultSet.getTimestamp(2);
                         final long dateReported = timestamp.getTime();
-                        final String stack = resultSet.getString(3);
-                        ret = new BugHitAndStack(hitId, appVer, dateReported, stack);
+                        final String user = resultSet.getString(3);
+                        final String stack = resultSet.getString(4);
+                        ret = new BugHitAndStack(hitId, appVer, dateReported, user, stack);
                     }
                 } finally {
                     DbUtils.closeQuietly(resultSet);

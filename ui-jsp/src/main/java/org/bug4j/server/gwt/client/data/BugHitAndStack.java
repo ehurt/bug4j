@@ -22,8 +22,8 @@ public class BugHitAndStack extends BugHit {
     public BugHitAndStack() {
     }
 
-    public BugHitAndStack(long hitId, String appVer, long dateReported, String stack) {
-        super(hitId, appVer, dateReported);
+    public BugHitAndStack(long hitId, String appVer, long dateReported, String user, String stack) {
+        super(hitId, appVer, dateReported, user);
         _stack = stack;
     }
 

@@ -22,14 +22,16 @@ public class BugHit implements Serializable {
     private long _hitId;
     private String _appVer;
     private long _dateReported;
+    private String _user;
 
     public BugHit() {
     }
 
-    public BugHit(long hitId, String appVer, long dateReported) {
+    public BugHit(long hitId, String appVer, long dateReported, String user) {
         _hitId = hitId;
         _appVer = appVer;
         _dateReported = dateReported;
+        _user = user;
     }
 
     public long getHitId() {
@@ -42,5 +44,9 @@ public class BugHit implements Serializable {
 
     public long getDateReported() {
         return _dateReported;
+    }
+
+    public String getUser() {
+        return _user;
     }
 }

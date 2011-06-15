@@ -43,9 +43,10 @@ public class BugServlet extends HttpServlet {
             final String app = request.getParameter("a");
             final String version = request.getParameter("v");
             final String message = request.getParameter("m");
+            final String user = request.getParameter("u");
             final String stackText = request.getParameter("s");
 
-            BugProcessor.process(app, version, stackText);
+            BugProcessor.process(app, version, message, user, stackText);
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
         }

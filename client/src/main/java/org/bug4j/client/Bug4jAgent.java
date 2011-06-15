@@ -25,7 +25,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class Bug4jAgent {
     private static final BlockingQueue<ReportableEvent> _queue = new LinkedBlockingQueue<ReportableEvent>();
-    private static final ReportableEvent STOP = new ReportableEvent(null, null);
+    private static final ReportableEvent STOP = new ReportableEvent();
     private static Thread _clientThread;
     private static int _reported;
 
@@ -125,10 +125,13 @@ public class Bug4jAgent {
         final String[] throwableStrRep = reportableEvent.getThrowableStrRep();
         final String textHash = FullStackHashCalculator.getTextHash(Arrays.asList(throwableStrRep));
         if (textHash != null) {
-            final boolean isNew = _connector.reportHit(textHash);
+            final String message = reportableEvent.getMessage();
+            final String user = reportableEvent.getUser();
+            final boolean isNew = _connector.reportHit(message, user, textHash);
             if (isNew) {
                 _connector.reportBug(
-                        reportableEvent.getMessage(),
+                        message,
+                        user,
                         reportableEvent.getThrowableStrRep()
                 );
             }
@@ -140,9 +143,13 @@ public class Bug4jAgent {
         _connector = connector;
     }
 
-    public static void report(String message, Throwable throwable) {
+    public static void report(@Nullable String message, Throwable throwable) {
         final ReportableEvent reportableEvent = ReportableEvent.createReportableEvent(message, throwable);
         enqueue(reportableEvent);
+    }
+
+    public static void report(Throwable throwable) {
+        report(null, throwable);
     }
 
     static void enqueue(ReportableEvent reportableEvent) {

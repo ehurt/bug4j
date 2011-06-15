@@ -72,16 +72,18 @@ class HttpConnector {
         return ret;
     }
 
-    public boolean reportHit(String hash) {
+    public boolean reportHit(String message, String user, String hash) {
         final String response = send("/in",
                 "a", _settings.getApplicationName(),
                 "v", _settings.getApplicationVersion(),
+                "m", message,
+                "u", user,
                 "h", hash
         );
         return response.equals("New");
     }
 
-    public void reportBug(String message, String[] stackLines) {
+    public void reportBug(String message, String user, String[] stackLines) {
         final String stackText = toText(stackLines);
         final String applicationName = _settings.getApplicationName();
         final String applicationVersion = _settings.getApplicationVersion();
@@ -89,6 +91,7 @@ class HttpConnector {
                 "a", applicationName,
                 "v", applicationVersion,
                 "m", message,
+                "u", user,
                 "s", stackText
         );
     }

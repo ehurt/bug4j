@@ -22,6 +22,7 @@ import org.bug4j.common.StackPathHashCalculator;
 import org.bug4j.common.TextToLines;
 import org.bug4j.server.gwt.client.data.Stack;
 import org.bug4j.server.gwt.client.data.Strain;
+import org.bug4j.server.store.Store;
 import org.bug4j.server.store.TestingStore;
 import org.junit.After;
 import org.junit.Before;
@@ -63,7 +64,7 @@ public class JdbcStoreTest {
 
     private static final String APP_VERSION = "1.3";
 
-    private TestingStore _store;
+    private Store _store;
 
     @Before
     public void setUp() throws Exception {
@@ -97,7 +98,7 @@ public class JdbcStoreTest {
             }
             stack = _store.createStack(APP, bugid, strain.getStrainId(), fullHash, STACK_TEXT);
         }
-        _store.reportHitOnStack(APP, APP_VERSION, stack);
+        _store.reportHitOnStack(APP, APP_VERSION, null, null, stack);
         bugid = stack.getBugId();
         System.out.println("bugid = " + bugid);
     }

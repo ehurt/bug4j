@@ -24,10 +24,17 @@ import java.io.PrintStream;
 public class ReportableEvent {
     private final String _message;
     private final String[] _throwableStrRep;
+    private final String _user;
 
-    public ReportableEvent(String message, String[] throwableStrRep) {
+    public ReportableEvent() {
+        //noinspection NullableProblems
+        this(null, null, null);
+    }
+
+    public ReportableEvent(String message, String[] throwableStrRep, String user) {
         _message = message;
         _throwableStrRep = throwableStrRep;
+        _user = user;
     }
 
     public String getMessage() {
@@ -38,9 +45,14 @@ public class ReportableEvent {
         return _throwableStrRep;
     }
 
+    public String getUser() {
+        return _user;
+    }
+
     public static ReportableEvent createReportableEvent(String message, Throwable throwable) {
         final String[] throwableStrRep = createStringRepresentation(throwable);
-        return new ReportableEvent(message, throwableStrRep);
+        final String user = System.getProperty("user.name", null);
+        return new ReportableEvent(message, throwableStrRep, user);
     }
 
     private static String[] createStringRepresentation(Throwable throwable) {

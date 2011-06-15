@@ -84,6 +84,19 @@ public class Bug4jTest {
     }
 
     @Test
+    public void testDirectCallNoMessage() throws Exception {
+        try {
+            final FileInputStream fileInputStream = new FileInputStream("c:\\bogus");
+            fileInputStream.close();
+        } catch (IOException e) {
+            Bug4jAgent.report(e);
+        }
+
+        Bug4jAgent.shutdown();
+        Assert.assertEquals(1, Bug4jAgent.getReported());
+    }
+
+    @Test
     public void testForceNew() throws Exception {
         final IllegalStateException e = new IllegalStateException("oh, c 'est d\u00e9j\u00e0 cass\u00e9?");
         e.setStackTrace(new StackTraceElement[]{

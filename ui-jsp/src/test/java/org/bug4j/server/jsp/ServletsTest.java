@@ -85,15 +85,15 @@ public class ServletsTest {
 
         { // Submit a new bug
             final String textHash = FullStackHashCalculator.getTextHash(stackLines);
-            final String s = InServlet.doit(APP, APP_VERSION, textHash);
+            final String s = InServlet.doit(APP, APP_VERSION, null, null, textHash);
             assertEquals("New", s);
 
-            BugProcessor.process(APP, APP_VERSION, STACK_TEXT);
+            BugProcessor.process(APP, APP_VERSION, null, null, STACK_TEXT);
         }
 
         { // Submit the same bug
             final String textHash = FullStackHashCalculator.getTextHash(stackLines);
-            final String s = InServlet.doit(APP, APP_VERSION, textHash);
+            final String s = InServlet.doit(APP, APP_VERSION, null, null, textHash);
             assertEquals("Old", s);
         }
 

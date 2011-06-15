@@ -47,6 +47,7 @@ public class BugDetailView {
     private Label _hitIdWidget;
     private Label _versionWidget;
     private Label _reportedWidget;
+    private Label _reportedByWidget;
     private int _currentHit;
     private List<Long> _bugHitIds = Collections.emptyList();
     private DockLayoutPanel _widget;
@@ -59,7 +60,7 @@ public class BugDetailView {
         _widget = new DockLayoutPanel(Style.Unit.EM);
 
         _widget.addNorth(createBugHeader(), 7);
-        _widget.addNorth(createHitHeader(), 6);
+        _widget.addNorth(createHitHeader(), 8);
         _widget.add(buildStackPanel());
         return _widget;
     }
@@ -138,7 +139,12 @@ public class BugDetailView {
         _reportedWidget = new Label();
         _reportedWidget.addStyleName("BugDetailView-hit-value");
 
-        final Grid grid = new Grid(3, 2);
+        final Label reportedByLabel = new Label("Reported By:");
+        reportedByLabel.addStyleName("BugDetailView-hit-label");
+        _reportedByWidget = new Label();
+        _reportedByWidget.addStyleName("BugDetailView-hit-value");
+
+        final Grid grid = new Grid(4, 2);
         grid.addStyleName("BugDetailView-hit-grid");
         grid.setWidget(0, 0, hitIdLabel);
         grid.setWidget(0, 1, _hitIdWidget);
@@ -146,6 +152,8 @@ public class BugDetailView {
         grid.setWidget(1, 1, _versionWidget);
         grid.setWidget(2, 0, reportedLabel);
         grid.setWidget(2, 1, _reportedWidget);
+        grid.setWidget(3, 0, reportedByLabel);
+        grid.setWidget(3, 1, _reportedByWidget);
 
         final SimpleLayoutPanel simpleLayoutPanel = new SimpleLayoutPanel();
         simpleLayoutPanel.add(grid);
@@ -220,6 +228,17 @@ public class BugDetailView {
         });
     }
 
+    public void clear() {
+        _label.setText("");
+        _bugHitIds = Collections.emptyList();
+        _currentHit = 0;
+        _hitIdWidget.setText("");
+        _versionWidget.setText("");
+        _reportedWidget.setText("");
+        _reportedByWidget.setText("");
+        _stack.setHTML("");
+    }
+
     public void displayBug(final long bugId) {
         _bugId = bugId;
 
@@ -246,6 +265,7 @@ public class BugDetailView {
     }
 
     private void display(BugHitAndStack bugHitAndStack) {
+
         _hitIdWidget.setText(Integer.toString(_bugHitIds.size() - _currentHit));
         _versionWidget.setText(bugHitAndStack.getAppVer());
 
@@ -253,6 +273,9 @@ public class BugDetailView {
         final long tReported = bugHitAndStack.getDateReported();
         final String dateReportedText = dateTimeFormat.format(new Date(tReported));
         _reportedWidget.setText(dateReportedText);
+
+        final String user = bugHitAndStack.getUser();
+        _reportedByWidget.setText(user);
 
         final String stack = bugHitAndStack.getStack();
         render(stack);

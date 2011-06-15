@@ -24,6 +24,7 @@ import org.bug4j.server.gwt.client.data.Strain;
 import org.bug4j.server.gwt.client.util.TextToLines;
 import org.bug4j.server.store.Store;
 import org.bug4j.server.store.StoreFactory;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -31,7 +32,7 @@ public final class BugProcessor {
     private BugProcessor() {
     }
 
-    public static void process(String app, String version, String stackText) {
+    public static void process(String app, String version, @Nullable String message, @Nullable String user, String stackText) {
         final Store store = StoreFactory.getStore();
         final List<String> stackLines = TextToLines.toList(stackText);
 
@@ -55,6 +56,6 @@ public final class BugProcessor {
             }
             stack = store.createStack(app, strain.getBugId(), strain.getStrainId(), fullHash, stackText);
         }
-        store.reportHitOnStack(app, version, stack);
+        store.reportHitOnStack(app, version, message, user, stack);
     }
 }

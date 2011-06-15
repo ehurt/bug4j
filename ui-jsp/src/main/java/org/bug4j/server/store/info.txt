@@ -1,7 +1,0 @@
-
-BUG:
-
-STRAIN:
-    Version
-    Message
-    ExceptionMessage
