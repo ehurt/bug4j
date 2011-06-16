@@ -19,6 +19,7 @@ package org.bug4j.server.processor;
 import org.bug4j.common.FullStackHashCalculator;
 import org.bug4j.common.StackAnalyzer;
 import org.bug4j.common.StackPathHashCalculator;
+import org.bug4j.server.gwt.client.data.Hit;
 import org.bug4j.server.gwt.client.data.Stack;
 import org.bug4j.server.gwt.client.data.Strain;
 import org.bug4j.server.gwt.client.util.TextToLines;
@@ -29,10 +30,18 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public final class BugProcessor {
+    /**
+     * When trying to match by title, how many stacks we want to look at.
+     */
+    private static final int MATCH_BY_TITLE_LOOK_BACK_MAX = 30;
+
     private BugProcessor() {
     }
 
-    public static void process(String app, String version, @Nullable String message, @Nullable String user, String stackText) {
+    /**
+     * @return the bugid that was matched.
+     */
+    public static long process(String app, String version, @Nullable String message, @Nullable String user, String stackText) {
         final Store store = StoreFactory.getStore();
         final List<String> stackLines = TextToLines.toList(stackText);
 
@@ -43,7 +52,7 @@ public final class BugProcessor {
             final List<String> appPackages = store.getPackages(app);
             final StackAnalyzer stackAnalyzer = new StackAnalyzer();
             stackAnalyzer.setApplicationPackages(appPackages);
-            final String title = stackAnalyzer.analyze(stackLines);
+            final String title = stackAnalyzer.getTitle(stackLines);
 
             if (title == null) {
                 throw new IllegalStateException("Failed to analyze a stack [\n" + stackText + "\n]");
@@ -52,7 +61,7 @@ public final class BugProcessor {
             final String strainHash = StackPathHashCalculator.analyze(stackLines);
             Strain strain = store.getStrainByHash(app, strainHash);
             if (strain == null) {
-                Long bugId = store.getBugIdByTitle(app, title);
+                Long bugId = identifyBugByTitle(store, app, stackLines, title);
                 if (bugId == null) {
                     bugId = store.createBug(app, title);
                 }
@@ -61,5 +70,31 @@ public final class BugProcessor {
             stack = store.createStack(app, strain.getBugId(), strain.getStrainId(), fullHash, stackText);
         }
         store.reportHitOnStack(app, version, message, user, stack);
+
+        return stack.getBugId();
+    }
+
+    /**
+     * Tries to deduplicate based on the exact location and causes.
+     * This addresses the case for example of a NPE at the exact same location but from different code paths.
+     * To match, the underlying causes must be identical.
+     */
+    private static Long identifyBugByTitle(Store store, String app, List<String> thisStackLines, String title) {
+        final StackAnalyzer stackAnalyzer = new StackAnalyzer();
+        final List<String> thisCauses = stackAnalyzer.getCauses(thisStackLines);
+        final List<Long> bugIds = store.getBugIdByTitle(app, title);
+        for (long bugId : bugIds) {
+            final List<Hit> hits = store.getHits(bugId, 0, MATCH_BY_TITLE_LOOK_BACK_MAX, "D"); // only look back at the last hits
+            for (Hit hit : hits) {
+                final long hitId = hit.getId();
+                final String thatStackText = store.getStack(hitId);
+                final List<String> thatStackLines = TextToLines.toList(thatStackText);
+                final List<String> thatCauses = stackAnalyzer.getCauses(thatStackLines);
+                if (thisCauses.equals(thatCauses)) {
+                    return bugId;
+                }
+            }
+        }
+        return null;
     }
 }

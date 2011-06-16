@@ -440,7 +440,7 @@ public class JdbcStore extends Store {
             for (int i = 0; i < orderBy.length(); i++) {
                 final char c = orderBy.charAt(i);
                 final char lc = Character.toLowerCase(c);
-                final int columnPos = "iadb".indexOf(lc) + 1;
+                final int columnPos = "iad".indexOf(lc) + 1;
                 final boolean asc = Character.isLowerCase(c);
                 sql
                         .append(sep)
@@ -514,8 +514,8 @@ public class JdbcStore extends Store {
     }
 
     @Override
-    public Long getBugIdByTitle(String app, String title) {
-        Long ret = null;
+    public List<Long> getBugIdByTitle(String app, String title) {
+        final List<Long> ret = new ArrayList<Long>();
         final Connection connection = getConnection();
         try {
             final PreparedStatement preparedStatement = connection.prepareStatement("select BUG_ID FROM BUG WHERE APP=? AND TITLE=?");
@@ -525,8 +525,8 @@ public class JdbcStore extends Store {
 
                 final ResultSet resultSet = preparedStatement.executeQuery();
                 try {
-                    if (resultSet.next()) {
-                        ret = resultSet.getLong(1);
+                    while (resultSet.next()) {
+                        ret.add(resultSet.getLong(1));
                     }
                 } finally {
                     DbUtils.closeQuietly(resultSet);

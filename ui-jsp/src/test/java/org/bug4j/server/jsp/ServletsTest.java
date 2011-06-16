@@ -80,7 +80,7 @@ public class ServletsTest {
     }
 
     @Test
-    public void test() throws Exception {
+    public void test1() throws Exception {
         final List<String> stackLines = TextToLines.toList(STACK_TEXT);
 
         { // Submit a new bug

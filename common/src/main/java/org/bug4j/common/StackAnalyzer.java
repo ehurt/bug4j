@@ -16,6 +16,7 @@
 
 package org.bug4j.common;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -35,7 +36,7 @@ public class StackAnalyzer {
         _applicationPackages = applicationPackages;
     }
 
-    public String analyze(List<String> stackLines) {
+    public String getTitle(List<String> stackLines) {
         final Iterator<String> iterator = stackLines.iterator();
         if (iterator.hasNext()) {
             final String messageLine = iterator.next();
@@ -45,6 +46,29 @@ public class StackAnalyzer {
         }
         return null;
     }
+
+    public List<String> getCauses(List<String> stackLines) {
+        final List<String> ret = new ArrayList<String>();
+        final Iterator<String> iterator = stackLines.iterator();
+        if (iterator.hasNext()) {
+
+            final String messageLine = iterator.next();
+            final String firstExceptionClass = getExceptionClass(messageLine);
+            ret.add(firstExceptionClass);
+
+            while (iterator.hasNext()) {
+                final String stackLine = iterator.next();
+                if (stackLine.startsWith("Caused by: ")) {
+                    final String substring = stackLine.substring("Caused by: ".length());
+                    final String exceptionClass = getExceptionClass(substring);
+                    ret.add(exceptionClass);
+                }
+            }
+            return ret;
+        }
+        return null;
+    }
+
 
     protected String analyze(String exceptionClass, Iterator<String> iterator) {
         String ret = null;

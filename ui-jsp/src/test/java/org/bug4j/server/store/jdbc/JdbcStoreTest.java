@@ -90,7 +90,7 @@ public class JdbcStoreTest {
             final String strainHash = StackPathHashCalculator.analyze(stackLines);
             Strain strain = _store.getStrainByHash(APP, strainHash);
             if (strain == null) {
-                final String title = stackAnalyzer.analyze(stackLines);
+                final String title = stackAnalyzer.getTitle(stackLines);
                 bugid = _store.createBug(APP, title);
                 strain = _store.createStrain(APP, bugid, strainHash);
             } else {

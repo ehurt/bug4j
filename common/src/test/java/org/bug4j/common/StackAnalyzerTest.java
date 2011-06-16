@@ -17,6 +17,7 @@
 package org.bug4j.common;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -44,7 +45,7 @@ public class StackAnalyzerTest {
     }
 
     @Test
-    public void testAnalyzer() throws Exception {
+    public void testTitle1() throws Exception {
         try {
             doSomethingBad();
         } catch (Exception e) {
@@ -57,23 +58,45 @@ public class StackAnalyzerTest {
             final List<String> stackLines = Arrays.asList(lines);
 
             final StackAnalyzer stackAnalyzer = new StackAnalyzer();
-            final String analyzed = stackAnalyzer.analyze(stackLines);
-            System.out.println("analyzed = " + analyzed);
+            final String title = stackAnalyzer.getTitle(stackLines);
+            Assert.assertTrue(title.matches("IndexOutOfBoundsException at StackAnalyzerTest.java:[0-9]+"));
         }
     }
 
     @SuppressWarnings({"unchecked"})
     @Test
-    public void test() throws IOException {
+    public void testTitle2() throws IOException {
 
         final StackAnalyzer stackAnalyzer = new StackAnalyzer();
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         final InputStream inputStream = classLoader.getResourceAsStream("org/bug4j/common/StackAnalyzerTest.1.txt");
         try {
             final List lines = IOUtils.readLines(inputStream);
-            stackAnalyzer.analyze(lines);
+            final String title = stackAnalyzer.getTitle(lines);
+            Assert.assertEquals("NullPointerException at QueryNodeDTO.java:106", title);
         } finally {
             inputStream.close();
+        }
+    }
+
+    @Test
+    public void testGetCause() throws Exception {
+        try {
+            doSomethingBad();
+        } catch (Exception e) {
+            e.printStackTrace();
+            final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            final PrintStream printStream = new PrintStream(byteArrayOutputStream);
+            e.printStackTrace(printStream);
+            final String stackTrace = byteArrayOutputStream.toString();
+            final String[] lines = TextToLines.toLines(stackTrace);
+            final List<String> stackLines = Arrays.asList(lines);
+
+            final StackAnalyzer stackAnalyzer = new StackAnalyzer();
+            final List<String> causes = stackAnalyzer.getCauses(stackLines);
+            Assert.assertEquals(2, causes.size());
+            Assert.assertEquals("java.lang.IllegalStateException", causes.get(0));
+            Assert.assertEquals("java.lang.IndexOutOfBoundsException", causes.get(1));
         }
     }
 }
