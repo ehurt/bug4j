@@ -38,6 +38,9 @@ public abstract class Store {
 
     public abstract void deletePackage(String app, String appPackage);
 
+    /**
+     * @param orderBy i[d], a[pplication version] or d[ate reported], lowercase=ascending
+     */
     public abstract List<Hit> getHits(long bugId, int offset, int max, String orderBy);
 
     public abstract void deleteBug(long bugId);
@@ -64,5 +67,5 @@ public abstract class Store {
 
     public abstract List<Long> getHitIds(long bugId);
 
-    public abstract Long getBugIdByTitle(String app, String title);
+    public abstract List<Long> getBugIdByTitle(String app, String title);
 }

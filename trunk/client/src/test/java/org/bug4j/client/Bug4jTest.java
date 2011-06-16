@@ -100,14 +100,14 @@ public class Bug4jTest {
     public void testForceNew() throws Exception {
         final IllegalStateException e = new IllegalStateException("oh, c 'est d\u00e9j\u00e0 cass\u00e9?");
         e.setStackTrace(new StackTraceElement[]{
-                new StackTraceElement("org.bug4j.someClass", buildRandomMethodName(), "someClass.java", (int) (Math.random() * 10000)),
-                new StackTraceElement("org.bug4j.someClass", buildRandomMethodName(), "someClass.java", (int) (Math.random() * 10000)),
-                new StackTraceElement("org.bug4j.someClass", buildRandomMethodName(), "someClass.java", (int) (Math.random() * 10000)),
-                new StackTraceElement("org.bug4j.someClass", buildRandomMethodName(), "someClass.java", (int) (Math.random() * 10000)),
-                new StackTraceElement("org.bug4j.someClass", buildRandomMethodName(), "someClass.java", (int) (Math.random() * 10000)),
-                new StackTraceElement("org.bug4j.someClass", buildRandomMethodName(), "someClass.java", (int) (Math.random() * 10000)),
-                new StackTraceElement("org.bug4j.someClass", buildRandomMethodName(), "someClass.java", (int) (Math.random() * 10000)),
-                new StackTraceElement("org.bug4j.someClass", buildRandomMethodName(), "someClass.java", (int) (Math.random() * 10000))
+                new StackTraceElement("org.bug4j.SomeClass", buildRandomMethodName(), "SomeClass.java", (int) (Math.random() * 10000)),
+                new StackTraceElement("org.bug4j.SomeClass", buildRandomMethodName(), "SomeClass.java", (int) (Math.random() * 10000)),
+                new StackTraceElement("org.bug4j.SomeClass", buildRandomMethodName(), "SomeClass.java", (int) (Math.random() * 10000)),
+                new StackTraceElement("org.bug4j.SomeClass", buildRandomMethodName(), "SomeClass.java", (int) (Math.random() * 10000)),
+                new StackTraceElement("org.bug4j.SomeClass", buildRandomMethodName(), "SomeClass.java", (int) (Math.random() * 10000)),
+                new StackTraceElement("org.bug4j.SomeClass", buildRandomMethodName(), "SomeClass.java", (int) (Math.random() * 10000)),
+                new StackTraceElement("org.bug4j.SomeClass", buildRandomMethodName(), "SomeClass.java", (int) (Math.random() * 10000)),
+                new StackTraceElement("org.bug4j.SomeClass", buildRandomMethodName(), "SomeClass.java", (int) (Math.random() * 10000))
         });
         Bug4jAgent.report("Forcing a new exception", e);
 
@@ -120,10 +120,10 @@ public class Bug4jTest {
         {
             final IllegalStateException e = new IllegalStateException("SameTitle");
             e.setStackTrace(new StackTraceElement[]{
-                    new StackTraceElement("org.bug4j.someClass", "someMethod", "someClass.java", 100),
-                    new StackTraceElement("org.bug4j.someClass", "someMethod", "someClass.java", 200),
-                    new StackTraceElement("org.bug4j.someClass", "someMethod", "someClass.java", 300),
-                    new StackTraceElement("org.bug4j.someClass", "someMethod", "someClass.java", 400),
+                    new StackTraceElement("org.bug4j.SomeClass", "someMethod", "SomeClass.java", 100),
+                    new StackTraceElement("org.bug4j.SomeClass", "someMethod", "SomeClass.java", 200),
+                    new StackTraceElement("org.bug4j.SomeClass", "someMethod", "SomeClass.java", 300),
+                    new StackTraceElement("org.bug4j.SomeClass", "someMethod", "SomeClass.java", 400),
             });
             Bug4jAgent.report("testSameTitle", e);
         }
@@ -131,16 +131,40 @@ public class Bug4jTest {
         {
             final IllegalStateException e = new IllegalStateException("SameTitle");
             e.setStackTrace(new StackTraceElement[]{
-                    new StackTraceElement("org.bug4j.someClass", "someMethod", "someClass.java", 100),
-                    new StackTraceElement("org.bug4j.someOtherClass", "someOtherMethod", "someClass.java", 123),
-                    new StackTraceElement("org.bug4j.someOtherClass", "someOtherMethod", "someClass.java", 456),
-                    new StackTraceElement("org.bug4j.someOtherClass", "someMethod", "someClass.java", 400),
+                    new StackTraceElement("org.bug4j.SomeClass", "someMethod", "SomeClass.java", 100),
+                    new StackTraceElement("org.bug4j.someOtherClass", "someOtherMethod", "SomeClass.java", 123),
+                    new StackTraceElement("org.bug4j.someOtherClass", "someOtherMethod", "SomeClass.java", 456),
+                    new StackTraceElement("org.bug4j.someOtherClass", "someMethod", "SomeClass.java", 400),
             });
             Bug4jAgent.report("testSameTitle", e);
         }
 
         Bug4jAgent.shutdown();
+        Assert.assertEquals(2, Bug4jAgent.getReported());
     }
+
+    /**
+     * Verifies that we don't report the same error twice
+     */
+    @Test
+    public void testNoReReport() throws Exception {
+        {
+            final IllegalStateException e = new IllegalStateException("SameTitle");
+            e.setStackTrace(new StackTraceElement[]{
+                    new StackTraceElement("org.bug4j.SomeClass", "testSameTitle", "SomeClass.java", 100),
+                    new StackTraceElement("org.bug4j.SomeClass", "testSameTitle", "SomeClass.java", 200),
+                    new StackTraceElement("org.bug4j.SomeClass", "testSameTitle", "SomeClass.java", 300),
+                    new StackTraceElement("org.bug4j.SomeClass", "testSameTitle", "SomeClass.java", 400),
+            });
+            for (int i = 0; i < 10; i++) {
+                Bug4jAgent.report("testSameTitle", e);
+            }
+        }
+
+        Bug4jAgent.shutdown();
+        Assert.assertEquals(1, Bug4jAgent.getReported());
+    }
+
 
     @Test
     @Ignore

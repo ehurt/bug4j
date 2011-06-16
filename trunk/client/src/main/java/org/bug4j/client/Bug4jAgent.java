@@ -34,6 +34,7 @@ public class Bug4jAgent {
     private static Thread _clientThread;
     private static int _reported;
     private final boolean _anonymousReports;
+    private final ReportLRU _reportLRU = new ReportLRU();
 
     private HttpConnector _connector;
     private boolean _report = true;
@@ -137,17 +138,19 @@ public class Bug4jAgent {
         final String[] throwableStrRep = reportableEvent.getThrowableStrRep();
         final String textHash = FullStackHashCalculator.getTextHash(Arrays.asList(throwableStrRep));
         if (textHash != null) {
-            final String message = reportableEvent.getMessage();
-            final String user = _anonymousReports ? "anonymous" : reportableEvent.getUser();
-            final boolean isNew = _connector.reportHit(message, user, textHash);
-            if (isNew) {
-                _connector.reportBug(
-                        message,
-                        user,
-                        reportableEvent.getThrowableStrRep()
-                );
+            if (_reportLRU.put(textHash)) { // Refrain from sending the same eror
+                final String message = reportableEvent.getMessage();
+                final String user = _anonymousReports ? "anonymous" : reportableEvent.getUser();
+                final boolean isNew = _connector.reportHit(message, user, textHash);
+                if (isNew) {
+                    _connector.reportBug(
+                            message,
+                            user,
+                            reportableEvent.getThrowableStrRep()
+                    );
+                }
+                _reported++;
             }
-            _reported++;
         }
     }
 
