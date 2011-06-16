@@ -21,8 +21,19 @@ import org.apache.log4j.Level;
 import org.apache.log4j.spi.LoggingEvent;
 import org.apache.log4j.spi.ThrowableInformation;
 
+/**
+ * A log4j appender. When using bug4j with log4j, you can configure the settings in log4j.properties or log4j.xml.
+ * For example:<pre>
+ *     log4j.rootLogger=INFO, A1, BUG4J
+ *     ...
+ *     log4j.appender.BUG4J=org.bug4j.client.Bug4jAppender
+ *     log4j.appender.BUG4J.serverUrl=http://bug4j.example.com:8063/bug4j
+ *     log4j.appender.BUG4J.applicationName=My Application
+ *     log4j.appender.BUG4J.applicationVersion=1.3
+ * </pre>
+ */
 public class Bug4jAppender extends AppenderSkeleton {
-    private Settings _settings = Settings.getDefaultInstance();
+    private final Bug4jStarter _bug4jStarter = new Bug4jStarter();
 
     public Bug4jAppender() {
     }
@@ -54,21 +65,26 @@ public class Bug4jAppender extends AppenderSkeleton {
 
     @Override
     public void activateOptions() {
-        Bug4jAgent.start(_settings);
+        _bug4jStarter.start();
     }
 
     @SuppressWarnings({"UnusedDeclaration"})
-    public void setServer(String server) {
-        _settings.setServer(server);
+    public void setServerUrl(String serverUrl) {
+        _bug4jStarter.setServerUrl(serverUrl);
     }
 
     @SuppressWarnings({"UnusedDeclaration"})
     public void setApplicationName(String applicationName) {
-        _settings.setApplicationName(applicationName);
+        _bug4jStarter.setApplicationName(applicationName);
     }
 
     @SuppressWarnings({"UnusedDeclaration"})
     public void setApplicationVersion(String applicationVersion) {
-        _settings.setApplicationVersion(applicationVersion);
+        _bug4jStarter.setApplicationVersion(applicationVersion);
+    }
+
+    @SuppressWarnings({"UnusedDeclaration"})
+    public void setAnonymousReports(String anonymousReports) {
+        _bug4jStarter.setAnonymousReports(Boolean.valueOf(anonymousReports));
     }
 }

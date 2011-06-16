@@ -45,6 +45,10 @@ public final class BugProcessor {
             stackAnalyzer.setApplicationPackages(appPackages);
             final String title = stackAnalyzer.analyze(stackLines);
 
+            if (title == null) {
+                throw new IllegalStateException("Failed to analyze a stack [\n" + stackText + "\n]");
+            }
+
             final String strainHash = StackPathHashCalculator.analyze(stackLines);
             Strain strain = store.getStrainByHash(app, strainHash);
             if (strain == null) {

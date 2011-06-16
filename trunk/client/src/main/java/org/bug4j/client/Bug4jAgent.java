@@ -23,33 +23,38 @@ import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+/**
+ * Reports exceptions to the bug4j server.
+ * Exceptions are processed by a background thread which is started by {@link Bug4jStarter}.
+ * The Bug4jAgent will be started automatically with the first exception report.
+ */
 public class Bug4jAgent {
     private static final BlockingQueue<ReportableEvent> _queue = new LinkedBlockingQueue<ReportableEvent>();
-    private static final ReportableEvent STOP = new ReportableEvent();
+    private static final ReportableEvent STOP = new ReportableEvent("stop", new String[0], "stop");
     private static Thread _clientThread;
     private static int _reported;
+    private final boolean _anonymousReports;
 
     private HttpConnector _connector;
     private boolean _report = true;
 
-    private Bug4jAgent() {
+    private Bug4jAgent(boolean anonymousReports) {
+        _anonymousReports = anonymousReports;
     }
 
-    public static synchronized void start() {
-        start(null);
-    }
-
-    public static synchronized void start(@Nullable Settings settings) {
-        if (_clientThread == null) {
+    static synchronized void start(Settings settings) {
+        if (!isStarted()) {
             _reported = 0;
 
-            if (settings == null) {
-                settings = Settings.getDefaultInstance();
-            }
+            final boolean anonymousReports = settings.isAnonymousReports();
+            final Bug4jAgent client = new Bug4jAgent(anonymousReports);
 
-            final Bug4jAgent client = new Bug4jAgent();
-            final HttpConnector connector = new HttpConnector(settings);
+            final String serverUrl = settings.getServerUrl();
+            final String applicationName = settings.getApplicationName();
+            final String applicationVersion = settings.getApplicationVersion();
+            final HttpConnector connector = new HttpConnector(serverUrl, applicationName, applicationVersion);
             client.setConnector(connector);
+
             final Object tellMeWhenYouAreReady = new Object();
             final Thread thread = new Thread() {
                 @Override
@@ -61,7 +66,7 @@ public class Bug4jAgent {
                     client.run();
                 }
             };
-            thread.setName("Bug4J");
+            thread.setName("bug4j");
             thread.setDaemon(true);
             thread.start();
             //noinspection SynchronizationOnLocalVariableOrMethodParameter
@@ -76,6 +81,13 @@ public class Bug4jAgent {
         }
     }
 
+    private static boolean isStarted() {
+        return _clientThread != null;
+    }
+
+    /**
+     * Shuts down the bug4j thread.
+     */
     public synchronized static void shutdown() {
         if (_clientThread != null) {
             enqueue(STOP);
@@ -126,7 +138,7 @@ public class Bug4jAgent {
         final String textHash = FullStackHashCalculator.getTextHash(Arrays.asList(throwableStrRep));
         if (textHash != null) {
             final String message = reportableEvent.getMessage();
-            final String user = reportableEvent.getUser();
+            final String user = _anonymousReports ? "anonymous" : reportableEvent.getUser();
             final boolean isNew = _connector.reportHit(message, user, textHash);
             if (isNew) {
                 _connector.reportBug(
@@ -139,21 +151,34 @@ public class Bug4jAgent {
         }
     }
 
-    public void setConnector(HttpConnector connector) {
+    private void setConnector(HttpConnector connector) {
         _connector = connector;
     }
 
+    /**
+     * Reports an exception to the server
+     *
+     * @param message   An error message
+     * @param throwable the exception to report
+     */
     public static void report(@Nullable String message, Throwable throwable) {
         final ReportableEvent reportableEvent = ReportableEvent.createReportableEvent(message, throwable);
         enqueue(reportableEvent);
     }
 
+    /**
+     * Reports an exception to the server
+     *
+     * @param throwable the exception to report
+     */
     public static void report(Throwable throwable) {
         report(null, throwable);
     }
 
     static void enqueue(ReportableEvent reportableEvent) {
-        start();
+        if (!isStarted()) {
+            new Bug4jStarter().start();
+        }
         _queue.add(reportableEvent);
     }
 

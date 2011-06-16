@@ -179,8 +179,10 @@ public class JdbcStore extends Store {
     }
 
     private static String truncate(String s, int length) {
-        if (length < s.length()) {
-            s = s.substring(0, length);
+        if (s != null) {
+            if (length < s.length()) {
+                s = s.substring(0, length);
+            }
         }
         return s;
     }

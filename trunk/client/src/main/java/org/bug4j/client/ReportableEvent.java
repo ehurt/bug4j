@@ -21,15 +21,10 @@ import org.bug4j.common.TextToLines;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-public class ReportableEvent {
+class ReportableEvent {
     private final String _message;
     private final String[] _throwableStrRep;
     private final String _user;
-
-    public ReportableEvent() {
-        //noinspection NullableProblems
-        this(null, null, null);
-    }
 
     public ReportableEvent(String message, String[] throwableStrRep, String user) {
         _message = message;

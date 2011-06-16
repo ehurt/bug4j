@@ -16,71 +16,24 @@
 
 package org.bug4j.client;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
-public class Settings {
-    private String _server;
+class Settings {
+    private String _serverUrl;
     private String _applicationName;
     private String _applicationVersion;
+    private boolean _anonymousReports;
 
-    public Settings() {
+    Settings() {
         _applicationName = "no-name";
         _applicationVersion = "1.0";
-        _server = "http://localhost:8063/bug4j/";
+        _serverUrl = "http://localhost:8063/bug4j/";
     }
 
-    public static Settings getDefaultInstance() {
-        final Settings ret = new Settings();
-        ret.readSettings();
-        return ret;
+    public String getServerUrl() {
+        return _serverUrl;
     }
 
-    private void readSettings() {
-        final Properties properties = readProperties();
-
-        final String server = properties.getProperty("server");
-        if (server != null) {
-            _server = server;
-        }
-
-        final String appName = properties.getProperty("application.name");
-        if (appName != null) {
-            _applicationName = appName;
-        }
-
-        final String appVersion = properties.getProperty("application.version");
-        if (appVersion != null) {
-            _applicationVersion = appVersion;
-        }
-    }
-
-    private static Properties readProperties() {
-        final Properties ret = new Properties();
-        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        final InputStream inputStream = classLoader.getResourceAsStream("bug4j.properties");
-        if (inputStream != null) {
-            try {
-                try {
-                    ret.load(inputStream);
-                } finally {
-                    inputStream.close();
-                }
-            } catch (IOException e) {
-                final String message = e.getMessage();
-                System.err.println(message);
-            }
-        }
-        return ret;
-    }
-
-    public String getServer() {
-        return _server;
-    }
-
-    public void setServer(String server) {
-        _server = server;
+    public void setServerUrl(String serverUrl) {
+        _serverUrl = serverUrl;
     }
 
     public String getApplicationName() {
@@ -97,5 +50,13 @@ public class Settings {
 
     public void setApplicationVersion(String applicationVersion) {
         _applicationVersion = applicationVersion;
+    }
+
+    public boolean isAnonymousReports() {
+        return _anonymousReports;
+    }
+
+    public void setAnonymousReports(boolean anonymousReports) {
+        _anonymousReports = anonymousReports;
     }
 }
