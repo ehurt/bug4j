@@ -33,10 +33,14 @@ import java.util.List;
 
 class HttpConnector {
     final HttpClient _httpClient = new DefaultHttpClient();
-    private Settings _settings;
+    private final String _serverUri;
+    private final String _applicationName;
+    private final String _applicationVersion;
 
-    public HttpConnector(Settings settings) {
-        _settings = settings;
+    public HttpConnector(String serverUrl, String applicationName, String applicationVersion) {
+        _serverUri = serverUrl;
+        _applicationName = applicationName;
+        _applicationVersion = applicationVersion;
     }
 
     private String send(String endpoint, String... nameValuePairs) {
@@ -55,8 +59,7 @@ class HttpConnector {
         try {
             final List<NameValuePair> nameValuePairList = Arrays.asList(nameValuePairs);
             final UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(nameValuePairList, "UTF-8");
-            final String serverUri = _settings.getServer();
-            final HttpPost httpPost = new HttpPost(serverUri + endpoint);
+            final HttpPost httpPost = new HttpPost(_serverUri + endpoint);
             httpPost.setEntity(urlEncodedFormEntity);
 
             final HttpResponse httpResponse = _httpClient.execute(httpPost);
@@ -74,8 +77,8 @@ class HttpConnector {
 
     public boolean reportHit(String message, String user, String hash) {
         final String response = send("/in",
-                "a", _settings.getApplicationName(),
-                "v", _settings.getApplicationVersion(),
+                "a", _applicationName,
+                "v", _applicationVersion,
                 "m", message,
                 "u", user,
                 "h", hash
@@ -85,8 +88,8 @@ class HttpConnector {
 
     public void reportBug(String message, String user, String[] stackLines) {
         final String stackText = toText(stackLines);
-        final String applicationName = _settings.getApplicationName();
-        final String applicationVersion = _settings.getApplicationVersion();
+        final String applicationName = _applicationName;
+        final String applicationVersion = _applicationVersion;
         send("/bug",
                 "a", applicationName,
                 "v", applicationVersion,

@@ -16,9 +16,14 @@
 
 package org.bug4j.client;
 
+/**
+ * This class can be used as the default exception handler for a thread.
+ *
+ * @see #install()
+ */
 public class Bug4jUncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
 
-    public Bug4jUncaughtExceptionHandler() {
+    private Bug4jUncaughtExceptionHandler() {
     }
 
     @Override
@@ -26,6 +31,11 @@ public class Bug4jUncaughtExceptionHandler implements Thread.UncaughtExceptionHa
         Bug4jAgent.report("Uncaught exception", throwable);
     }
 
+    /**
+     * Installs a bug4j default exception handler.
+     *
+     * @see Thread#setDefaultUncaughtExceptionHandler(java.lang.Thread.UncaughtExceptionHandler)
+     */
     public static void install() {
         final Bug4jUncaughtExceptionHandler bug4jUncaughtExceptionHandler = new Bug4jUncaughtExceptionHandler();
         Thread.setDefaultUncaughtExceptionHandler(bug4jUncaughtExceptionHandler);

@@ -7,7 +7,6 @@
     </CLASSES>
     <JAVADOC />
     <SOURCES>
-      <root url="jar://C:/Java/gwt-2.3.0/user-2.3-sources.zip!/user/src" />
       <root url="jar://C:/Java/gwt-2.3.0/gwt-user.jar!/" />
     </SOURCES>
   </library>
