@@ -24,6 +24,7 @@ public class BugDetailInitialData implements Serializable {
     private List<Long> _bugHitIds;
     private BugHitAndStack _lastStack;
 
+    @SuppressWarnings({"UnusedDeclaration"})
     public BugDetailInitialData() {
     }
 

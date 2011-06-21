@@ -19,6 +19,7 @@ package org.bug4j.server.gwt.client.data;
 public class BugHitAndStack extends BugHit {
     private String _stack;
 
+    @SuppressWarnings({"UnusedDeclaration"})
     public BugHitAndStack() {
     }
 

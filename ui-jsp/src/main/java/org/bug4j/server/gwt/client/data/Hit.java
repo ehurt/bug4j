@@ -20,7 +20,6 @@ import java.io.Serializable;
 
 public class Hit implements Serializable {
     private long _id;
-    private long _bugId;
     private String _appVer;
     private long _dateReported;
 
@@ -28,19 +27,14 @@ public class Hit implements Serializable {
     public Hit() {
     }
 
-    public Hit(long id, long bugId, String appVer, long dateReported) {
+    public Hit(long id, String appVer, long dateReported) {
         _id = id;
-        _bugId = bugId;
         _appVer = appVer;
         _dateReported = dateReported;
     }
 
     public long getId() {
         return _id;
-    }
-
-    public long getBugId() {
-        return _bugId;
     }
 
     public String getAppVer() {

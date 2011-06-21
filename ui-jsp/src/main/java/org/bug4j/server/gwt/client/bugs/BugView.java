@@ -171,7 +171,7 @@ public class BugView implements DisplaysBugs {
         final Bug bug = _selectionModel.getSelectedObject();
         if (bug != null) {
             final long bugId = bug.getId();
-            _bugDetailView.displayBug(bugId);
+            _bugDetailView.displayBug(_filter, bugId);
         } else {
             _bugDetailView.clear();
         }

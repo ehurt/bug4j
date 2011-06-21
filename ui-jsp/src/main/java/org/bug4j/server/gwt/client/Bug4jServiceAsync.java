@@ -40,7 +40,7 @@ public interface Bug4jServiceAsync {
 
     void getLastHit(long bugId, AsyncCallback<BugHit> async);
 
-    void getBugDetailInitialData(String app, long bugId, AsyncCallback<BugDetailInitialData> async);
+    void getBugDetailInitialData(String app, Filter filter, long bugId, AsyncCallback<BugDetailInitialData> async);
 
     void getBugHitAndStack(long hitId, AsyncCallback<BugHitAndStack> async);
 }

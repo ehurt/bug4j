@@ -30,6 +30,7 @@ import org.bug4j.server.gwt.client.Bug4jService;
 import org.bug4j.server.gwt.client.data.Bug;
 import org.bug4j.server.gwt.client.data.BugDetailInitialData;
 import org.bug4j.server.gwt.client.data.BugHitAndStack;
+import org.bug4j.server.gwt.client.data.Filter;
 import org.bug4j.server.gwt.client.util.TextToLines;
 
 import java.util.ArrayList;
@@ -239,10 +240,10 @@ public class BugDetailView {
         _stack.setHTML("");
     }
 
-    public void displayBug(final long bugId) {
+    public void displayBug(Filter filter, final long bugId) {
         _bugId = bugId;
 
-        Bug4jService.App.getInstance().getBugDetailInitialData(Bug4j.APP, bugId, new AsyncCallback<BugDetailInitialData>() {
+        Bug4jService.App.getInstance().getBugDetailInitialData(Bug4j.APP, filter, bugId, new AsyncCallback<BugDetailInitialData>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());

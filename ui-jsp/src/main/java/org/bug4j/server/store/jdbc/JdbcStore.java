@@ -325,13 +325,9 @@ public class JdbcStore extends Store {
             final PreparedStatement preparedStatement = connection.prepareStatement(jdbcSql);
             namedParameterProcessor.setParameter(preparedStatement, "app", app);
             if (filter.hasHitWithinDays()) {
-                final Calendar from = Calendar.getInstance();
-                from.add(Calendar.DAY_OF_MONTH, -filter.getHitWithinDays());
-                from.set(Calendar.HOUR_OF_DAY, 23);
-                from.set(Calendar.MINUTE, 59);
-                from.set(Calendar.SECOND, 59);
-                from.set(Calendar.MILLISECOND, 999);
-                namedParameterProcessor.setParameter(preparedStatement, "hitDateMin", new Timestamp(from.getTimeInMillis()));
+                final Integer hitWithinDays = filter.getHitWithinDays();
+                final Timestamp timestamp = getPrevDaysTimestamp(hitWithinDays);
+                namedParameterProcessor.setParameter(preparedStatement, "hitDateMin", timestamp);
             }
             if (filter.hasTitle()) {
                 namedParameterProcessor.setParameter(preparedStatement, "titleFilter", "%" + filter.getTitle().toUpperCase() + "%");
@@ -470,7 +466,6 @@ public class JdbcStore extends Store {
                         final long dateReported = resultSet.getTimestamp(3).getTime();
                         final Hit hit = new Hit(
                                 hitId,
-                                bugId,
                                 appVer,
                                 dateReported
                         );
@@ -490,12 +485,44 @@ public class JdbcStore extends Store {
         return ret;
     }
 
+    private static Timestamp getPrevDaysTimestamp(int days) {
+        final Timestamp ret;
+
+        final Calendar from = Calendar.getInstance();
+        from.add(Calendar.DAY_OF_MONTH, -days);
+        from.set(Calendar.HOUR_OF_DAY, 23);
+        from.set(Calendar.MINUTE, 59);
+        from.set(Calendar.SECOND, 59);
+        from.set(Calendar.MILLISECOND, 999);
+        final long timeInMillis = from.getTimeInMillis();
+        ret = new Timestamp(timeInMillis);
+
+        return ret;
+    }
+
     @Override
-    public List<Long> getHitIds(long bugId) {
+    public List<Long> getHitIds(Filter filter, long bugId) {
         final List<Long> ret = new ArrayList<Long>();
         final Connection connection = getConnection();
         try {
-            final PreparedStatement preparedStatement = connection.prepareStatement("select HIT_ID from HIT WHERE BUG_ID=? ORDER BY DATE_REPORTED DESC");
+            final StringBuilder sql = new StringBuilder();
+            sql.append("select h.hit_id from hit h where h.bug_id=:bugId");
+            if (filter.hasHitWithinDays()) {
+                sql.append(" and h.date_reported > :hitDateMin");
+            }
+            sql.append(" order by date_reported desc");
+
+            final NamedParameterProcessor namedParameterProcessor = new NamedParameterProcessor(sql.toString());
+
+            final String jdbcSql = namedParameterProcessor.getJdbcSql();
+            final PreparedStatement preparedStatement = connection.prepareStatement(jdbcSql);
+
+            namedParameterProcessor.setParameter(preparedStatement, "bugId", bugId);
+            if (filter.hasHitWithinDays()) {
+                final Integer hitWithinDays = filter.getHitWithinDays();
+                final Timestamp timestamp = getPrevDaysTimestamp(hitWithinDays);
+                namedParameterProcessor.setParameter(preparedStatement, "hitDateMin", timestamp);
+            }
             try {
                 preparedStatement.setLong(1, bugId);
 
@@ -704,7 +731,7 @@ public class JdbcStore extends Store {
                         final long bugId = resultSet.getLong(1);
                         final long strainId = resultSet.getLong(2);
                         final long stackId = resultSet.getLong(3);
-                        ret = new Stack(bugId, strainId, stackId);
+                        ret = new Stack(bugId, stackId);
                     }
                 } finally {
                     DbUtils.closeQuietly(resultSet);
@@ -837,7 +864,7 @@ public class JdbcStore extends Store {
                 throw new IllegalStateException("Failed to get the generated STACK ID");
             }
             final long stackId = generatedKeys.getLong(1);
-            ret = new Stack(bugId, strainId, stackId);
+            ret = new Stack(bugId, stackId);
         } finally {
             DbUtils.closeQuietly(insertStackStatement);
         }
