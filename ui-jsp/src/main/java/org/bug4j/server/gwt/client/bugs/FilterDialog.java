@@ -28,6 +28,7 @@ public class FilterDialog extends DialogBox {
     private TextBox _hitDays;
     private final Filter _filter;
     private TextBox _title;
+    private CheckBox _multipleReports;
 
     public FilterDialog(Filter filter) {
         _filter = new Filter(filter);
@@ -48,16 +49,17 @@ public class FilterDialog extends DialogBox {
     }
 
     private Widget createContent() {
-        final Grid ret = new Grid(2, 3);
+        final VerticalPanel ret = new VerticalPanel();
+        final Grid grid = new Grid(2, 3);
 
         { // Hit days
             _hitDays = new TextBox();
             if (_filter.hasHitWithinDays()) {
                 _hitDays.setText(Integer.toString(_filter.getHitWithinDays()));
             }
-            ret.setWidget(0, 0, new Label("Hit Within:"));
-            ret.setWidget(0, 1, _hitDays);
-            ret.setWidget(0, 2, new Label("days"));
+            grid.setWidget(0, 0, new Label("Hit Within:"));
+            grid.setWidget(0, 1, _hitDays);
+            grid.setWidget(0, 2, new Label("days"));
         }
 
         {
@@ -65,10 +67,17 @@ public class FilterDialog extends DialogBox {
             if (_filter.hasTitle()) {
                 _title.setText(_filter.getTitle());
             }
-            ret.setWidget(1, 0, new Label("Title:"));
-            ret.setWidget(1, 1, _title);
+            grid.setWidget(1, 0, new Label("Title:"));
+            grid.setWidget(1, 1, _title);
         }
 
+        ret.add(grid);
+
+        {
+            _multipleReports = new CheckBox("Reported by multiple users");
+            _multipleReports.setValue(_filter.isReportedByMultiple());
+            ret.add(_multipleReports);
+        }
 
         return ret;
     }
@@ -142,6 +151,9 @@ public class FilterDialog extends DialogBox {
 
         final String titleText = _title.getText();
         _filter.setTitle(titleText.isEmpty() ? null : titleText);
+
+        final boolean multipleReportsValue = _multipleReports.getValue();
+        _filter.setReportedByMultiple(multipleReportsValue);
     }
 
     @Override
