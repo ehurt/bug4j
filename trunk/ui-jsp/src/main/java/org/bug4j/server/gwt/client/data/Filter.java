@@ -23,6 +23,7 @@ import java.io.Serializable;
 public class Filter implements Serializable {
     private String _title;
     private Integer _hitWithinDays = 7;
+    private boolean _reportedByMultiple = true;
 
     public Filter() {
     }
@@ -34,10 +35,11 @@ public class Filter implements Serializable {
     public void copyTo(Filter that) {
         that.setHitWithinDays(this.getHitWithinDays());
         that.setTitle(this.getTitle());
+        that.setReportedByMultiple(this.isReportedByMultiple());
     }
 
     public boolean isFiltering() {
-        return hasHitWithinDays() || hasTitle();
+        return hasHitWithinDays() || hasTitle() || isReportedByMultiple();
     }
 
     public boolean hasHitWithinDays() {
@@ -55,6 +57,7 @@ public class Filter implements Serializable {
     public void clear() {
         setHitWithinDays(null);
         setTitle(null);
+        setReportedByMultiple(false);
     }
 
     public boolean hasTitle() {
@@ -67,5 +70,13 @@ public class Filter implements Serializable {
 
     public void setTitle(@Nullable String title) {
         _title = title;
+    }
+
+    public boolean isReportedByMultiple() {
+        return _reportedByMultiple;
+    }
+
+    public void setReportedByMultiple(boolean reportedByMultiple) {
+        _reportedByMultiple = reportedByMultiple;
     }
 }

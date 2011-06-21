@@ -297,26 +297,32 @@ public class JdbcStore extends Store {
             if (filter.hasTitle()) {
                 sql.append(" AND upper(b.title) like :titleFilter");
             }
-            sql.append(
-                    "  GROUP BY b.bug_id, b.title" +
-                            "  HAVING COUNT(h.hit_id) > 0");
 
-            String sep = " order by ";
+            sql.append("  GROUP BY b.bug_id, b.title");
+
+            sql.append("  HAVING COUNT(h.hit_id) > 0");
+            if (filter.isReportedByMultiple()) {
+                sql.append(" AND");
+                sql.append(" COUNT(distinct h.reported_by) > 1");
+            }
+
+            String orderBySep = " order by ";
             for (int i = 0; i < orderBy.length(); i++) {
                 final char c = orderBy.charAt(i);
                 final char lc = Character.toLowerCase(c);
                 final int columnPos = "ith".indexOf(lc) + 1;
                 final boolean asc = Character.isLowerCase(c);
                 sql
-                        .append(sep)
+                        .append(orderBySep)
                         .append(columnPos)
                         .append(asc ? " ASC" : " DESC");
-                sep = ", ";
+                orderBySep = ", ";
             }
 
             final NamedParameterProcessor namedParameterProcessor = new NamedParameterProcessor(sql.toString());
 
-            final PreparedStatement preparedStatement = connection.prepareStatement(namedParameterProcessor.getJdbcSql());
+            final String jdbcSql = namedParameterProcessor.getJdbcSql();
+            final PreparedStatement preparedStatement = connection.prepareStatement(jdbcSql);
             namedParameterProcessor.setParameter(preparedStatement, "app", app);
             if (filter.hasHitWithinDays()) {
                 final Calendar from = Calendar.getInstance();
