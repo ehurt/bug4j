@@ -20,24 +20,19 @@ import java.io.Serializable;
 
 public class Stack implements Serializable {
     private long _bugId;
-    private long _strainId;
     private long _stackId;
 
+    @SuppressWarnings({"UnusedDeclaration"})
     public Stack() {
     }
 
-    public Stack(long bugId, long strainId, long stackId) {
+    public Stack(long bugId, long stackId) {
         _bugId = bugId;
-        _strainId = strainId;
         _stackId = stackId;
     }
 
     public long getBugId() {
         return _bugId;
-    }
-
-    public long getStrainId() {
-        return _strainId;
     }
 
     public long getStackId() {

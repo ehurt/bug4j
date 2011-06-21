@@ -43,7 +43,7 @@ public interface Bug4jService extends RemoteService {
 
     BugHit getLastHit(long bugId);
 
-    BugDetailInitialData getBugDetailInitialData(String app, long bugId);
+    BugDetailInitialData getBugDetailInitialData(String app, Filter filter, long bugId);
 
     BugHitAndStack getBugHitAndStack(long hitId);
 

@@ -65,7 +65,7 @@ public abstract class Store {
 
     public abstract BugHitAndStack getBugHitAndStack(long hitId);
 
-    public abstract List<Long> getHitIds(long bugId);
+    public abstract List<Long> getHitIds(Filter filter, long bugId);
 
     public abstract List<Long> getBugIdByTitle(String app, String title);
 }

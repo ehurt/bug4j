@@ -104,11 +104,11 @@ public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jServi
     }
 
     @Override
-    public BugDetailInitialData getBugDetailInitialData(String app, long bugId) {
+    public BugDetailInitialData getBugDetailInitialData(String app, Filter filter, long bugId) {
         try {
             final Store store = StoreFactory.getStore();
             final Bug bug = store.getBug(app, bugId);
-            final List<Long> bugHits = store.getHitIds(bugId);
+            final List<Long> bugHits = store.getHitIds(filter, bugId);
             BugHitAndStack lastStack = null;
             if (!bugHits.isEmpty()) {
                 final long lastHit = bugHits.get(0);

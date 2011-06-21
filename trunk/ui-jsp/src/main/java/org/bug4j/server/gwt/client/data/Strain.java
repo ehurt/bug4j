@@ -22,6 +22,7 @@ public class Strain implements Serializable {
     private long _bugId;
     private long _strainId;
 
+    @SuppressWarnings({"UnusedDeclaration"})
     public Strain() {
     }
 
