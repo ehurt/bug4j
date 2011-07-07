@@ -104,6 +104,19 @@ public class Bug4j implements EntryPoint {
             }
         });
         popup.addSeparator();
+        popup.addItem("Export", new Command() {
+            @Override
+            public void execute() {
+                whenExport();
+            }
+        });
+        popup.addItem("Import", new Command() {
+            @Override
+            public void execute() {
+                whenImport();
+            }
+        });
+        popup.addSeparator();
         popup.addItem("Logout", new Command() {
             @Override
             public void execute() {
@@ -147,6 +160,18 @@ public class Bug4j implements EntryPoint {
             }
         });
         return dockLayoutPanel;
+    }
+
+    private void whenImport() {
+        Window.alert("Not implemented yet");
+    }
+
+    private void whenExport() {
+        final String moduleBaseURL = GWT.getModuleBaseURL();
+        final String application = getApplication();
+        if (application != null) {
+            Window.open(moduleBaseURL + "../bug/export?a=" + application, "_self", "");
+        }
     }
 
     private void whenLogout() {
