@@ -243,7 +243,9 @@ public class BugDetailView {
     public void displayBug(Filter filter, final long bugId) {
         _bugId = bugId;
 
-        Bug4jService.App.getInstance().getBugDetailInitialData(Bug4j.APP, filter, bugId, new AsyncCallback<BugDetailInitialData>() {
+        final Bug4j bug4J = _displaysBugs.getBug4J();
+        final String application = bug4J.getApplication();
+        Bug4jService.App.getInstance().getBugDetailInitialData(application, filter, bugId, new AsyncCallback<BugDetailInitialData>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
@@ -283,7 +285,8 @@ public class BugDetailView {
     }
 
     private void render(final String stackText) {
-        Bug4j.withAppPackages(new AsyncCallback<List<String>>() {
+        final Bug4j bug4J = _displaysBugs.getBug4J();
+        bug4J.withAppPackages(new AsyncCallback<List<String>>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());

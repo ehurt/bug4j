@@ -22,12 +22,57 @@ import org.bug4j.server.gwt.client.Bug4jService;
 import org.bug4j.server.gwt.client.data.*;
 import org.bug4j.server.store.Store;
 import org.bug4j.server.store.StoreFactory;
+import org.jetbrains.annotations.Nullable;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
 public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jService {
     private static final Logger LOGGER = Logger.getLogger(Bug4jServiceImpl.class);
+
+    @Override
+    public String getUserName() throws Exception {
+        final HttpServletRequest threadLocalRequest = getThreadLocalRequest();
+        final String remoteUser = threadLocalRequest.getRemoteUser();
+        return remoteUser;
+    }
+
+    @Override
+    public List<String> getApplications() throws Exception {
+        try {
+            final Store store = StoreFactory.getStore();
+            return store.getApplications();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    @Override
+    @Nullable
+    public String getDefaultApplication() throws Exception {
+        String ret = null;
+        final String remoteUser = getUserName();
+        final Store store = StoreFactory.getStore();
+        try {
+            ret = store.getDefaultApplication(remoteUser);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+        return ret;
+    }
+
+    @Override
+    public void setDefaultApplication(String app) throws Exception {
+        final String remoteUser = getUserName();
+        final Store store = StoreFactory.getStore();
+        try {
+            store.setDefaultApplication(remoteUser, app);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+    }
 
     @Override
     public List<Bug> getBugs(String app, Filter filter, final String sortBy) throws Exception {
@@ -62,6 +107,16 @@ public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jServi
             throw new Exception(e.getMessage(), e);
         }
         return ret;
+    }
+
+    @Override
+    public void setPackages(String app, List<String> packages) throws Exception {
+        final Store store = StoreFactory.getStore();
+        try {
+            store.setPackages(app, packages);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
     }
 
     @Override

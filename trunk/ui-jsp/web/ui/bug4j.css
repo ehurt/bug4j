@@ -90,6 +90,7 @@ div#main {
 
 .pkg-button {
     vertical-align: middle;
+    cursor: pointer;
 }
 
 .stack-highlight {
@@ -140,4 +141,13 @@ div#main {
     margin: 3px;
     padding: 3px;
 }
+
+#dd-menu {
+    padding: 0 8px 0 0;
+    background-image: url("../icons/dropdown.png");
+    background-repeat: no-repeat;
+    background-position: right center;
+}
+
+
 

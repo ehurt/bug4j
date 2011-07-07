@@ -20,9 +20,6 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 
 public interface Resources extends ClientBundle {
-    @Source("icons/add.png")
-    ImageResource add();
-
-    @Source("icons/delete.png")
-    ImageResource delete();
+    @Source("icons/bin_closed.png")
+    ImageResource binClosed();
 }

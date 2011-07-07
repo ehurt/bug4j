@@ -27,11 +27,21 @@ import java.util.Map;
 @RemoteServiceRelativePath("Bug4jService")
 public interface Bug4jService extends RemoteService {
 
+    String getUserName() throws Exception;
+
+    List<String> getApplications() throws Exception;
+
+    String getDefaultApplication() throws Exception;
+
+    void setDefaultApplication(String app) throws Exception;
+
     List<Bug> getBugs(String app, Filter filter, String sortBy) throws Exception;
 
     void deleteBug(long bugId) throws Exception;
 
     List<String> getPackages(String app) throws Exception;
+
+    void setPackages(String app, List<String> packages) throws Exception;
 
     void addPackage(String app, String appPackage) throws Exception;
 
