@@ -35,6 +35,7 @@ import org.bug4j.server.gwt.client.Bug4j;
 import org.bug4j.server.gwt.client.Bug4jService;
 import org.bug4j.server.gwt.client.data.Bug;
 import org.bug4j.server.gwt.client.data.Filter;
+import org.bug4j.server.gwt.client.util.PropertyListener;
 
 import java.util.List;
 
@@ -46,8 +47,16 @@ public class BugView implements DisplaysBugs {
     private CellTable<Bug> _cellTable;
     private final Filter _filter = new Filter();
     private MenuItem _filterMenuItem;
+    private final Bug4j _bug4j;
 
-    public BugView() {
+    public BugView(Bug4j bug4j) {
+        _bug4j = bug4j;
+        _bug4j.addApplicationListener(new PropertyListener<String>() {
+            @Override
+            public void propertyChanged(String key, String value) {
+                refreshBugs();
+            }
+        });
     }
 
     public Widget createWidget() {
@@ -83,7 +92,10 @@ public class BugView implements DisplaysBugs {
 
     private void whenExport() {
         final String moduleBaseURL = GWT.getModuleBaseURL();
-        Window.open(moduleBaseURL + "../bug/export?a=" + Bug4j.APP, "_self", "");
+        final String application = _bug4j.getApplication();
+        if (application != null) {
+            Window.open(moduleBaseURL + "../bug/export?a=" + application, "_self", "");
+        }
     }
 
     private void whenFilter() {
@@ -110,10 +122,17 @@ public class BugView implements DisplaysBugs {
         refreshBugs();
     }
 
+    @Override
+    public Bug4j getBug4J() {
+        return _bug4j;
+    }
+
     private CellTable<Bug> createTable() {
         _cellTable = new CellTable<Bug>(PAGE_SIZE);
+        final Label noDataLabel = new Label("No data");
+        noDataLabel.getElement().getStyle().setFontSize(20, Style.Unit.PT);
+        _cellTable.setEmptyTableWidget(noDataLabel);
         _cellTable.setWidth("100%", true);
-        //noinspection GWTStyleCheck
         _cellTable.addStyleName("bug-table");
         _cellTable.addColumn(BugViewColumn.ID, "ID");
         _cellTable.addColumn(BugViewColumn.TITLE, "Title");
@@ -148,23 +167,28 @@ public class BugView implements DisplaysBugs {
     private void refreshBugs() {
         final ColumnSortList sortList = _cellTable.getColumnSortList();
         final String sortBy = BugViewColumn.sortBy(sortList);
-        Bug4jService.App.getInstance().getBugs(Bug4j.APP, _filter, sortBy, new AsyncCallback<List<Bug>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert(caught.getMessage());
-            }
-
-            @Override
-            public void onSuccess(List<Bug> bugs) {
-                _cellTable.setRowData(bugs);
-                if (!bugs.isEmpty()) {
-                    final Bug firstBug = bugs.get(0);
-                    _selectionModel.setSelected(firstBug, true);
-                } else {
-                    _selectionModel.setSelected(null, true);
+        final String application = _bug4j.getApplication();
+        if (application != null) {
+            Bug4jService.App.getInstance().getBugs(application, _filter, sortBy, new AsyncCallback<List<Bug>>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    Window.alert(caught.getMessage());
                 }
-            }
-        });
+
+                @Override
+                public void onSuccess(List<Bug> bugs) {
+                    _cellTable.setRowData(bugs);
+                    if (!bugs.isEmpty()) {
+                        final Bug firstBug = bugs.get(0);
+                        _selectionModel.setSelected(firstBug, true);
+                    } else {
+                        _selectionModel.setSelected(null, true);
+                    }
+                }
+            });
+        } else {
+            _cellTable.setRowCount(0);
+        }
     }
 
     private void whenTableSelectionChanges() {

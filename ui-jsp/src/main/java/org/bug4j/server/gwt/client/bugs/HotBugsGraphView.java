@@ -49,8 +49,10 @@ public class HotBugsGraphView implements DisplaysBugs {
     private SimpleLayoutPanel _simpleLayoutPanel;
     private LineChart _lineChart;
     private final List<Bug> _bugs = new ArrayList<Bug>();
+    private final Bug4j _bug4j;
 
-    public HotBugsGraphView() {
+    public HotBugsGraphView(Bug4j bug4j) {
+        _bug4j = bug4j;
     }
 
     public Widget createWidget() {
@@ -72,21 +74,24 @@ public class HotBugsGraphView implements DisplaysBugs {
 
     private void addOrReplaceGraph() {
         try {
-            Bug4jService.App.getInstance().getTopHits(Bug4j.APP, DAYS_BACK, MAX_BUGS, new AsyncCallback<Map<Bug, int[]>>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    Window.alert(caught.getMessage());
-                }
-
-                @Override
-                public void onSuccess(Map<Bug, int[]> topHits) {
-                    final Widget widget = createGraph(DAYS_BACK, topHits);
-                    for (Widget oldWidget : _simpleLayoutPanel) {
-                        _simpleLayoutPanel.remove(oldWidget);
+            final String application = _bug4j.getApplication();
+            if (application != null) {
+                Bug4jService.App.getInstance().getTopHits(application, DAYS_BACK, MAX_BUGS, new AsyncCallback<Map<Bug, int[]>>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Window.alert(caught.getMessage());
                     }
-                    _simpleLayoutPanel.add(widget);
-                }
-            });
+
+                    @Override
+                    public void onSuccess(Map<Bug, int[]> topHits) {
+                        final Widget widget = createGraph(DAYS_BACK, topHits);
+                        for (Widget oldWidget : _simpleLayoutPanel) {
+                            _simpleLayoutPanel.remove(oldWidget);
+                        }
+                        _simpleLayoutPanel.add(widget);
+                    }
+                });
+            }
         } catch (Exception e) {
             GWT.log(e.getMessage(), e);
         }
@@ -158,5 +163,10 @@ public class HotBugsGraphView implements DisplaysBugs {
     @Override
     public void whenBugListChanges() {
         addOrReplaceGraph();
+    }
+
+    @Override
+    public Bug4j getBug4J() {
+        return _bug4j;
     }
 }

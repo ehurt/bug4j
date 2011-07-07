@@ -21,23 +21,31 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import org.bug4j.server.gwt.client.admin.PackagesView;
 import org.bug4j.server.gwt.client.bugs.BugView;
 import org.bug4j.server.gwt.client.bugs.HotBugsGraphView;
+import org.bug4j.server.gwt.client.settings.ApplicationDialog;
+import org.bug4j.server.gwt.client.settings.SettingsDialog;
+import org.bug4j.server.gwt.client.util.PropertyListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>
  */
 public class Bug4j implements EntryPoint {
-    public static final String APP = "My Application";
     public static final Resources IMAGES = GWT.create(Resources.class);
     private static List<String> _appPackages;
+    private String _application;
+    private final List<PropertyListener<String>> _applicationListeners = new ArrayList<PropertyListener<String>>();
+    private MenuItem _appMenuButton;
+    private String _userName;
 
     /**
      * This is the entry point method.
@@ -45,19 +53,17 @@ public class Bug4j implements EntryPoint {
     public void onModuleLoad() {
 
         final DockLayoutPanel dockLayoutPanel = new DockLayoutPanel(Style.Unit.PX);
-        final Widget html = new HTML("<img src=\"../icons/splat.png\"/><span class=\"logo\">Bug4J</span>");
-        dockLayoutPanel.addNorth(html, 55);
+        final Widget northWidget = buildNorthWidget();
+        dockLayoutPanel.addNorth(northWidget, 55);
 
-        final TabLayoutPanel tabLayoutPanel = new TabLayoutPanel(2, Style.Unit.EM);
-        final BugView bugView = new BugView();
-        final HotBugsGraphView hotBugsGraphView = new HotBugsGraphView();
-        final PackagesView packagesView = new PackagesView();
+        final TabLayoutPanel bugPanel = new TabLayoutPanel(2, Style.Unit.EM);
+        final BugView bugView = new BugView(this);
+        final HotBugsGraphView hotBugsGraphView = new HotBugsGraphView(this);
 
-        tabLayoutPanel.add(bugView.createWidget(), "Bugs");
-        tabLayoutPanel.add(hotBugsGraphView.createWidget(), "Top Chart");
-        tabLayoutPanel.add(packagesView.createWidget(), "Setup");
+        bugPanel.add(bugView.createWidget(), "Bugs");
+        bugPanel.add(hotBugsGraphView.createWidget(), "Top Chart");
 
-        tabLayoutPanel.addSelectionHandler(new SelectionHandler<Integer>() {
+        bugPanel.addSelectionHandler(new SelectionHandler<Integer>() {
             @Override
             public void onSelection(SelectionEvent<Integer> integerSelectionEvent) {
                 final int selectedItem = integerSelectionEvent.getSelectedItem();
@@ -72,16 +78,94 @@ public class Bug4j implements EntryPoint {
             }
         });
 
-        dockLayoutPanel.add(tabLayoutPanel);
+        dockLayoutPanel.add(bugPanel);
 
         RootLayoutPanel.get().add(dockLayoutPanel);
         final Element loadingElement = DOM.getElementById("loading");
         DOM.removeChild(DOM.getParent(loadingElement), loadingElement);
     }
 
-    public static synchronized void withAppPackages(final AsyncCallback<List<String>> asyncCallback) {
+    private Widget buildNorthWidget() {
+        final DockLayoutPanel dockLayoutPanel = new DockLayoutPanel(Style.Unit.EM);
+
+        final FlowPanel flowPanel = new FlowPanel();
+        final MenuBar menuBar = new MenuBar();
+        final MenuBar popup = new MenuBar(true);
+        popup.addItem("Application...", new Command() {
+            @Override
+            public void execute() {
+                whenApplication();
+            }
+        });
+        popup.addItem("Settings...", new Command() {
+            @Override
+            public void execute() {
+                whenSettings();
+            }
+        });
+        popup.addSeparator();
+        popup.addItem("Logout", new Command() {
+            @Override
+            public void execute() {
+                whenLogout();
+            }
+        });
+
+        _appMenuButton = menuBar.addItem("-", popup);
+        _appMenuButton.getElement().setId("dd-menu");
+
+        final Style style = menuBar.getElement().getStyle();
+        style.setFloat(Style.Float.RIGHT);
+        style.setMarginRight(5, Style.Unit.PX);
+
+        flowPanel.add(menuBar);
+
+        dockLayoutPanel.addLineEnd(flowPanel, 20);
+        final HTML html = new HTML("<img src=\"../icons/splat.png\"/><span class=\"logo\">Bug4J</span>");
+        dockLayoutPanel.add(html);
+
+        Bug4jService.App.getInstance().getDefaultApplication(new AsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert(caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(final String applicationName) {
+                setApplication(applicationName);
+            }
+        });
+        Bug4jService.App.getInstance().getUserName(new AsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert(caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(String userName) {
+                setUserName(userName);
+            }
+        });
+        return dockLayoutPanel;
+    }
+
+    private void whenLogout() {
+        Window.open("../ui/logout.jsp", "_self", "");
+    }
+
+    private void whenSettings() {
+        final SettingsDialog settingsDialog = new SettingsDialog(this);
+        settingsDialog.show();
+    }
+
+    private void whenApplication() {
+        final ApplicationDialog applicationDialog = new ApplicationDialog(this);
+        applicationDialog.show();
+    }
+
+    public synchronized void withAppPackages(final AsyncCallback<List<String>> asyncCallback) {
         if (_appPackages == null) {
-            Bug4jService.App.getInstance().getPackages(Bug4j.APP, new AsyncCallback<List<String>>() {
+            Bug4jService.App.getInstance().getPackages(_application, new AsyncCallback<List<String>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     asyncCallback.onFailure(caught);
@@ -98,7 +182,40 @@ public class Bug4j implements EntryPoint {
         }
     }
 
-    public static synchronized void clearAppPackages() {
-        _appPackages = null;
+    public String getApplication() {
+        return _application;
+    }
+
+    public void setApplication(String application) {
+        _application = application;
+        updateAppButtonText();
+        for (PropertyListener<String> applicationListener : _applicationListeners) {
+            applicationListener.propertyChanged("application", application);
+        }
+    }
+
+    public void addApplicationListener(PropertyListener<String> listener) {
+        _applicationListeners.add(listener);
+    }
+
+    private void setUserName(String userName) {
+        _userName = userName;
+        updateAppButtonText();
+    }
+
+    private void updateAppButtonText() {
+        final StringBuilder stringBuilder = new StringBuilder();
+        if (_application != null) {
+            stringBuilder.append(_application);
+        } else {
+            stringBuilder.append("< No Application >");
+        }
+
+        stringBuilder.append(" - ");
+        if (_userName != null) {
+            stringBuilder.append(_userName);
+        }
+
+        _appMenuButton.setText(stringBuilder.toString());
     }
 }

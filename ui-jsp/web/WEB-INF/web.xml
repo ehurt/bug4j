@@ -116,6 +116,7 @@
         <web-resource-collection>
             <web-resource-name>bug4j Console</web-resource-name>
             <url-pattern>/ui/*</url-pattern>
+            <url-pattern>/gwt/Bug4jService</url-pattern>
         </web-resource-collection>
         <auth-constraint>
             <role-name>bug4j-ui</role-name>

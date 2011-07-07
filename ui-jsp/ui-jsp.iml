@@ -51,7 +51,7 @@
     </orderEntry>
     <orderEntry type="module" module-name="common" />
     <orderEntry type="library" name="apache-commons-io" level="project" />
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" scope="PROVIDED">
       <library>
         <CLASSES>
           <root url="jar://$APPLICATION_HOME_DIR$/lib/annotations.jar!/" />

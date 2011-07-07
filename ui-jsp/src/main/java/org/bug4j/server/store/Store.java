@@ -32,6 +32,8 @@ public abstract class Store {
 
     public abstract List<String> getPackages(String app);
 
+    public abstract void setPackages(String app, List<String> packages);
+
     public abstract void close();
 
     public abstract void addPackage(String app, String appPackage);
@@ -68,4 +70,10 @@ public abstract class Store {
     public abstract List<Long> getHitIds(Filter filter, long bugId);
 
     public abstract List<Long> getBugIdByTitle(String app, String title);
+
+    public abstract List<String> getApplications();
+
+    public abstract void setDefaultApplication(String remoteUser, String app);
+
+    public abstract String getDefaultApplication(String remoteUser);
 }

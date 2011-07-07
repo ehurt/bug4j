@@ -43,4 +43,14 @@ public interface Bug4jServiceAsync {
     void getBugDetailInitialData(String app, Filter filter, long bugId, AsyncCallback<BugDetailInitialData> async);
 
     void getBugHitAndStack(long hitId, AsyncCallback<BugHitAndStack> async);
+
+    void setPackages(String app, List<String> packages, AsyncCallback<Void> async);
+
+    void getApplications(AsyncCallback<List<String>> async);
+
+    void setDefaultApplication(String app, AsyncCallback<Void> async);
+
+    void getDefaultApplication(AsyncCallback<String> async);
+
+    void getUserName(AsyncCallback<String> async);
 }

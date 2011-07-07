@@ -14,12 +14,14 @@
  *    limitations under the License.
  */
 
-package org.bug4j.common;
+package org.bug4j.server.gwt.client;
 
-import org.junit.Test;
+import com.google.gwt.user.client.ui.Widget;
 
-public class Test0 {
-    @Test
-    public void test() throws Exception {
-    }
+/**
+ */
+public interface OverlayView {
+    Widget getWidget();
+
+    boolean close();
 }

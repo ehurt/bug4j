@@ -14,12 +14,8 @@
  *    limitations under the License.
  */
 
-package org.bug4j.common;
+package org.bug4j.server.gwt.client.util;
 
-import org.junit.Test;
-
-public class Test0 {
-    @Test
-    public void test() throws Exception {
-    }
+public interface PropertyListener<T> {
+    void propertyChanged(String key, T value);
 }
