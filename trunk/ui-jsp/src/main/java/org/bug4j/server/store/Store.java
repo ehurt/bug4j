@@ -76,4 +76,8 @@ public abstract class Store {
     public abstract void setDefaultApplication(String remoteUser, String app);
 
     public abstract String getDefaultApplication(String remoteUser);
+
+    public abstract Filter getDefaultFilter(String userName);
+
+    public abstract void setDefaultFilter(String userName, Filter filter);
 }

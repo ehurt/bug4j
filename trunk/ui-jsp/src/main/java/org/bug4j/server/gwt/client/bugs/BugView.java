@@ -54,7 +54,18 @@ public class BugView implements DisplaysBugs {
         _bug4j.addApplicationListener(new PropertyListener<String>() {
             @Override
             public void propertyChanged(String key, String value) {
-                refreshBugs();
+                Bug4jService.App.getInstance().getDefaultFilter(new AsyncCallback<Filter>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Window.alert(caught.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(Filter result) {
+                        result.copyTo(_filter);
+                        refreshBugs();
+                    }
+                });
             }
         });
     }
@@ -108,6 +119,17 @@ public class BugView implements DisplaysBugs {
                     newFilter.copyTo(_filter);
                     refreshBugs();
                     updateFilterMenuItem();
+                    Bug4jService.App.getInstance().setDefaultFilter(newFilter, new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            Window.alert(caught.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            // ignore
+                        }
+                    });
                 }
             }
         });
