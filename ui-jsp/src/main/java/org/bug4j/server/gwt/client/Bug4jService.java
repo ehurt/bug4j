@@ -35,6 +35,10 @@ public interface Bug4jService extends RemoteService {
 
     void setDefaultApplication(String app) throws Exception;
 
+    Filter getDefaultFilter() throws Exception;
+
+    void setDefaultFilter(Filter filter) throws Exception;
+
     List<Bug> getBugs(String app, Filter filter, String sortBy) throws Exception;
 
     void deleteBug(long bugId) throws Exception;

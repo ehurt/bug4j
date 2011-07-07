@@ -75,6 +75,29 @@ public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jServi
     }
 
     @Override
+    public Filter getDefaultFilter() throws Exception {
+        try {
+            final Store store = StoreFactory.getStore();
+            return store.getDefaultFilter(getUserName());
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new Exception(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void setDefaultFilter(Filter filter) throws Exception {
+        try {
+            final Store store = StoreFactory.getStore();
+            final String userName = getUserName();
+            store.setDefaultFilter(userName, filter);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new Exception(e.getMessage(), e);
+        }
+    }
+
+    @Override
     public List<Bug> getBugs(String app, Filter filter, final String sortBy) throws Exception {
         try {
             final Store store = StoreFactory.getStore();

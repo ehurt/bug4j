@@ -674,6 +674,20 @@ public class JdbcStore extends Store {
         return ret;
     }
 
+    @Nullable
+    public Integer getUserPref_Integer(String remoteUser, String key, @Nullable Integer defaultValue) {
+        Integer ret = defaultValue;
+        final String userPref = getUserPref(remoteUser, key, null);
+        if (userPref != null) {
+            try {
+                ret = Integer.valueOf(userPref);
+            } catch (NumberFormatException e) {
+                // ignore
+            }
+        }
+        return ret;
+    }
+
     public void setUserPref(String remoteUser, String key, String value) {
         final Connection connection = getConnection();
         try {
@@ -704,6 +718,11 @@ public class JdbcStore extends Store {
         }
     }
 
+    public void setUserPref(String remoteUser, String key, Integer value) {
+        String stringValue = value == null ? null : value.toString();
+        setUserPref(remoteUser, key, stringValue);
+    }
+
     @Override
     public void setDefaultApplication(String remoteUser, String app) {
         setUserPref(remoteUser, PREF_DEFAULT_APP, app);
@@ -720,6 +739,23 @@ public class JdbcStore extends Store {
             }
         }
         return ret;
+    }
+
+    public Filter getDefaultFilter(String remoteUser) {
+        final Filter ret = new Filter();
+        final String title = getUserPref(remoteUser, "FILTER_TITLE", null);
+        final Integer hitWithinDays = getUserPref_Integer(remoteUser, "FILTER_DAYS", 7);
+        final String multiUsers = getUserPref(remoteUser, "FILTER_MULTI_USERS", Boolean.TRUE.toString());
+        ret.setTitle(title);
+        ret.setHitWithinDays(hitWithinDays);
+        ret.setReportedByMultiple(Boolean.parseBoolean(multiUsers));
+        return ret;
+    }
+
+    public void setDefaultFilter(String remoteUser, Filter filter) {
+        setUserPref(remoteUser, "FILTER_TITLE", filter.getTitle());
+        setUserPref(remoteUser, "FILTER_DAYS", filter.getHitWithinDays());
+        setUserPref(remoteUser, "FILTER_MULTI_USERS", Boolean.toString(filter.isReportedByMultiple()));
     }
 
     private String getAnyApp() {
