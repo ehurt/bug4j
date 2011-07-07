@@ -16,7 +16,6 @@
 
 package org.bug4j.server.gwt.client.bugs;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
@@ -83,12 +82,6 @@ public class BugView implements DisplaysBugs {
         });
         updateFilterMenuItem();
 
-        menuBar.addItem("Export...", new Command() {
-            @Override
-            public void execute() {
-                whenExport();
-            }
-        });
         dockLayoutPanel.addNorth(menuBar, 2);
 
         dockLayoutPanel.add(scrollPanel);
@@ -99,14 +92,6 @@ public class BugView implements DisplaysBugs {
         splitLayoutPanel.addWest(dockLayoutPanel, 600);
         splitLayoutPanel.add(_bugDetailView.createWidget());
         return splitLayoutPanel;
-    }
-
-    private void whenExport() {
-        final String moduleBaseURL = GWT.getModuleBaseURL();
-        final String application = _bug4j.getApplication();
-        if (application != null) {
-            Window.open(moduleBaseURL + "../bug/export?a=" + application, "_self", "");
-        }
     }
 
     private void whenFilter() {

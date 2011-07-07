@@ -695,7 +695,7 @@ public class JdbcStore extends Store {
             try {
                 updateStatement.setString(1, value);
                 updateStatement.setString(2, remoteUser);
-                updateStatement.setString(3, PREF_DEFAULT_APP);
+                updateStatement.setString(3, key);
                 final int updated = updateStatement.executeUpdate();
                 if (updated == 0) {
                     final PreparedStatement insertStatement = connection.prepareStatement("INSERT INTO USER_PREFS(USER_NAME,PREF_KEY,PREF_VALUE) VALUES(?,?,?)");
