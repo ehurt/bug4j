@@ -19,7 +19,7 @@ package org.bug4j.server.processor;
 import org.bug4j.common.FullStackHashCalculator;
 import org.bug4j.common.StackAnalyzer;
 import org.bug4j.common.StackPathHashCalculator;
-import org.bug4j.server.gwt.client.data.Hit;
+import org.bug4j.server.gwt.client.data.BugHit;
 import org.bug4j.server.gwt.client.data.Stack;
 import org.bug4j.server.gwt.client.data.Strain;
 import org.bug4j.server.gwt.client.util.TextToLines;
@@ -65,9 +65,9 @@ public final class BugProcessor {
                 if (bugId == null) {
                     bugId = store.createBug(app, title);
                 }
-                strain = store.createStrain(app, bugId, strainHash);
+                strain = store.createStrain(bugId, strainHash);
             }
-            stack = store.createStack(app, strain.getBugId(), strain.getStrainId(), fullHash, stackText);
+            stack = store.createStack(strain.getBugId(), strain.getStrainId(), fullHash, stackText);
         }
         store.reportHitOnStack(app, version, message, user, stack);
 
@@ -84,9 +84,9 @@ public final class BugProcessor {
         final List<String> thisCauses = stackAnalyzer.getCauses(thisStackLines);
         final List<Long> bugIds = store.getBugIdByTitle(app, title);
         for (long bugId : bugIds) {
-            final List<Hit> hits = store.getHits(bugId, 0, MATCH_BY_TITLE_LOOK_BACK_MAX, "D"); // only look back at the last hits
-            for (Hit hit : hits) {
-                final long hitId = hit.getId();
+            final List<BugHit> hits = store.getHits(bugId, null, 0, MATCH_BY_TITLE_LOOK_BACK_MAX, "D"); // only look back at the last hits
+            for (BugHit hit : hits) {
+                final long hitId = hit.getHitId();
                 final String thatStackText = store.getStack(hitId);
                 final List<String> thatStackLines = TextToLines.toList(thatStackText);
                 final List<String> thatCauses = stackAnalyzer.getCauses(thatStackLines);

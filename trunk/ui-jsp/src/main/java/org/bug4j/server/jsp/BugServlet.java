@@ -36,7 +36,7 @@ public class BugServlet extends HttpServlet {
         doit(request, response);
     }
 
-    private void doit(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void doit(HttpServletRequest request, HttpServletResponse response) {
 
         response.setContentType("text/plain");
         try {

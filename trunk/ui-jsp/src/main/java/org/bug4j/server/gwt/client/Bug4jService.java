@@ -19,7 +19,10 @@ package org.bug4j.server.gwt.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import org.bug4j.server.gwt.client.data.*;
+import org.bug4j.server.gwt.client.data.Bug;
+import org.bug4j.server.gwt.client.data.BugHit;
+import org.bug4j.server.gwt.client.data.BugHitAndStack;
+import org.bug4j.server.gwt.client.data.Filter;
 
 import java.util.List;
 import java.util.Map;
@@ -47,19 +50,11 @@ public interface Bug4jService extends RemoteService {
 
     void setPackages(String app, List<String> packages) throws Exception;
 
-    void addPackage(String app, String appPackage) throws Exception;
+    List<BugHit> getHits(long bugId, Filter filter, int offset, int max, String orderBy) throws Exception;
 
-    void deletePackage(String app, String appPackage) throws Exception;
+    Map<Bug, int[]> getTopHits(String app, int daysBack, int max) throws Exception;
 
-    List<Hit> getHits(long bugId, int offset, int max, String orderBy);
-
-    Map<Bug, int[]> getTopHits(String app, int daysBack, int max);
-
-    BugHit getLastHit(long bugId);
-
-    BugDetailInitialData getBugDetailInitialData(String app, Filter filter, long bugId);
-
-    BugHitAndStack getBugHitAndStack(long hitId);
+    BugHitAndStack getBugHitAndStack(long hitId) throws Exception;
 
     /**
      * Utility/Convenience class.

@@ -50,23 +50,26 @@ public class BugView implements DisplaysBugs {
 
     public BugView(Bug4j bug4j) {
         _bug4j = bug4j;
-        _bug4j.addApplicationListener(new PropertyListener<String>() {
+        _bug4j.addPropertyListener(new PropertyListener<String>() {
             @Override
             public void propertyChanged(String key, String value) {
-                Bug4jService.App.getInstance().getDefaultFilter(new AsyncCallback<Filter>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        Window.alert(caught.getMessage());
-                    }
-
-                    @Override
-                    public void onSuccess(Filter result) {
-                        result.copyTo(_filter);
-                        refreshBugs();
-                    }
-                });
+                refreshBugs();
             }
         });
+
+        Bug4jService.App.getInstance().getDefaultFilter(new AsyncCallback<Filter>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert(caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(Filter result) {
+                result.copyTo(_filter);
+                refreshBugs();
+            }
+        });
+
     }
 
     public Widget createWidget() {
@@ -172,37 +175,39 @@ public class BugView implements DisplaysBugs {
     }
 
     private void refreshBugs() {
-        final ColumnSortList sortList = _cellTable.getColumnSortList();
-        final String sortBy = BugViewColumn.sortBy(sortList);
-        final String application = _bug4j.getApplication();
-        if (application != null) {
-            Bug4jService.App.getInstance().getBugs(application, _filter, sortBy, new AsyncCallback<List<Bug>>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    Window.alert(caught.getMessage());
-                }
-
-                @Override
-                public void onSuccess(List<Bug> bugs) {
-                    _cellTable.setRowData(bugs);
-                    if (!bugs.isEmpty()) {
-                        final Bug firstBug = bugs.get(0);
-                        _selectionModel.setSelected(firstBug, true);
-                    } else {
-                        _selectionModel.setSelected(null, true);
+        if (_cellTable != null && _selectionModel != null) {
+            final ColumnSortList sortList = _cellTable.getColumnSortList();
+            final String sortBy = BugViewColumn.sortBy(sortList);
+            final String application = _bug4j.getApplication();
+            if (application != null) {
+                Bug4jService.App.getInstance().getBugs(application, _filter, sortBy, new AsyncCallback<List<Bug>>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Window.alert(caught.getMessage());
                     }
-                }
-            });
-        } else {
-            _cellTable.setRowCount(0);
+
+                    @Override
+                    public void onSuccess(List<Bug> bugs) {
+                        _cellTable.setRowData(bugs);
+                        if (!bugs.isEmpty()) {
+                            final Bug firstBug = bugs.get(0);
+                            _selectionModel.setSelected(firstBug, true);
+                        } else {
+                            _selectionModel.setSelected(null, true);
+                        }
+                    }
+                });
+            } else {
+                _cellTable.setRowCount(0);
+                _selectionModel.setSelected(null, true);
+            }
         }
     }
 
     private void whenTableSelectionChanges() {
         final Bug bug = _selectionModel.getSelectedObject();
         if (bug != null) {
-            final long bugId = bug.getId();
-            _bugDetailView.displayBug(_filter, bugId);
+            _bugDetailView.displayBug(_filter, bug);
         } else {
             _bugDetailView.clear();
         }

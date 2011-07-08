@@ -24,8 +24,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class NamedParameterProcessor {
-    private Map<String, List<Integer>> _paramPos = new HashMap<String, List<Integer>>();
-    private String _jdbcSql;
+    private final Map<String, List<Integer>> _paramPos = new HashMap<String, List<Integer>>();
+    private final String _jdbcSql;
 
     public NamedParameterProcessor(String sql) {
         final StringBuilder stringBuilder = new StringBuilder();

@@ -26,8 +26,6 @@ public abstract class Store {
     protected Store() {
     }
 
-    public abstract Bug getBug(String app, long bugId);
-
     public abstract List<Bug> getBugs(String app, Filter filter, int offset, int max, String orderBy);
 
     public abstract List<String> getPackages(String app);
@@ -36,14 +34,10 @@ public abstract class Store {
 
     public abstract void close();
 
-    public abstract void addPackage(String app, String appPackage);
-
-    public abstract void deletePackage(String app, String appPackage);
-
     /**
      * @param orderBy i[d], a[pplication version] or d[ate reported], lowercase=ascending
      */
-    public abstract List<Hit> getHits(long bugId, int offset, int max, String orderBy);
+    public abstract List<BugHit> getHits(long bugId, @Nullable Filter filter, int offset, int max, String orderBy);
 
     public abstract void deleteBug(long bugId);
 
@@ -55,9 +49,9 @@ public abstract class Store {
 
     public abstract long createBug(String app, String title);
 
-    public abstract Strain createStrain(String app, long bugid, String strainHash);
+    public abstract Strain createStrain(long bugid, String strainHash);
 
-    public abstract Stack createStack(String app, long bugId, long strainId, String fullHash, String stackText);
+    public abstract Stack createStack(long bugId, long strainId, String fullHash, String stackText);
 
     public abstract void reportHitOnStack(String app, String version, @Nullable String message, @Nullable String user, Stack stack);
 
@@ -66,8 +60,6 @@ public abstract class Store {
     public abstract String getStack(long hitId);
 
     public abstract BugHitAndStack getBugHitAndStack(long hitId);
-
-    public abstract List<Long> getHitIds(Filter filter, long bugId);
 
     public abstract List<Long> getBugIdByTitle(String app, String title);
 

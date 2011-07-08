@@ -32,7 +32,7 @@ import java.util.List;
  */
 public class SettingsDialog extends BaseDialog {
     private Grid _grid;
-    private List<String> _packages = new ArrayList<String>();
+    private final List<String> _packages = new ArrayList<String>();
 
     public SettingsDialog(Bug4j bug4j) {
         super("Setup", bug4j);

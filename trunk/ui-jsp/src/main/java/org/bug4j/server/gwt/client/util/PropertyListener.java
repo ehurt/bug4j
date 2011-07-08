@@ -16,6 +16,8 @@
 
 package org.bug4j.server.gwt.client.util;
 
+import org.jetbrains.annotations.Nullable;
+
 public interface PropertyListener<T> {
-    void propertyChanged(String key, T value);
+    void propertyChanged(String key, @Nullable T value);
 }

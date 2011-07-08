@@ -22,48 +22,135 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.view.client.*;
 import org.bug4j.server.gwt.client.Bug4j;
 import org.bug4j.server.gwt.client.Bug4jService;
 import org.bug4j.server.gwt.client.data.Bug;
-import org.bug4j.server.gwt.client.data.BugDetailInitialData;
+import org.bug4j.server.gwt.client.data.BugHit;
 import org.bug4j.server.gwt.client.data.BugHitAndStack;
 import org.bug4j.server.gwt.client.data.Filter;
 import org.bug4j.server.gwt.client.util.TextToLines;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 @SuppressWarnings({"GWTStyleCheck"})
-public class BugDetailView {
+class BugDetailView {
 
-    private long _bugId;
+    private static final int PAGE_SIZE = 200;
     private final DisplaysBugs _displaysBugs;
     private Label _label;
     private HTML _stack;
-    private Label _hitIdWidget;
-    private Label _versionWidget;
-    private Label _reportedWidget;
-    private Label _reportedByWidget;
-    private int _currentHit;
-    private List<Long> _bugHitIds = Collections.emptyList();
-    private DockLayoutPanel _widget;
+    private CellTable<BugHit> _cellTable;
+    private Filter _filter;
+    private Bug _bug;
+    private static final TextColumn<BugHit> _dateColumn = new TextColumn<BugHit>() {
+        @Override
+        public String getValue(BugHit bugHit) {
+            final long dateReported = bugHit.getDateReported();
+            final DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_MEDIUM);
+            final String ret = dateTimeFormat.format(new Date(dateReported));
+            return ret;
+        }
+    };
+
+    private static final TextColumn<BugHit> _versionColumn = new TextColumn<BugHit>() {
+        @Override
+        public String getValue(BugHit bugHit) {
+            return bugHit.getAppVer();
+        }
+    };
+    private static final TextColumn<BugHit> _userColumn = new TextColumn<BugHit>() {
+        @Override
+        public String getValue(BugHit bugHit) {
+            return bugHit.getUser();
+        }
+    };
+    private SingleSelectionModel<BugHit> _selectionModel;
 
     public BugDetailView(DisplaysBugs displaysBugs) {
         _displaysBugs = displaysBugs;
     }
 
     public Widget createWidget() {
-        _widget = new DockLayoutPanel(Style.Unit.EM);
+        final DockLayoutPanel ret = new DockLayoutPanel(Style.Unit.EM);
+        ret.addNorth(createBugHeader(), 3);
 
-        _widget.addNorth(createBugHeader(), 7);
-        _widget.addNorth(createHitHeader(), 8);
-        _widget.add(buildStackPanel());
-        return _widget;
+        final SplitLayoutPanel splitLayoutPanel = new SplitLayoutPanel();
+        _cellTable = buildCellTable();
+        splitLayoutPanel.addNorth(new ScrollPanel(_cellTable), 250);
+        splitLayoutPanel.add(buildStackPanel());
+        ret.add(splitLayoutPanel);
+        return ret;
+    }
+
+    private CellTable<BugHit> buildCellTable() {
+        _cellTable = new CellTable<BugHit>(PAGE_SIZE);
+        _cellTable.setWidth("100%", true);
+
+        _dateColumn.setSortable(true);
+        _versionColumn.setSortable(true);
+        _userColumn.setSortable(true);
+
+        _cellTable.addColumn(_dateColumn, "Date");
+        _cellTable.addColumn(_versionColumn, "Version");
+        _cellTable.addColumn(_userColumn, "User");
+
+        _cellTable.setRowStyles(new RowStyles<BugHit>() {
+            @Override
+            public String getStyleNames(BugHit row, int rowIndex) {
+                String ret = "BugDetailView-hit-cell";
+//                if (row.getHitId() % 2 == 0) {
+//                    ret += " BugDetailView-hit-cell-unread";
+//                }
+                return ret;
+            }
+        });
+        _cellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(_dateColumn, false));
+
+        AsyncDataProvider<BugHit> dataProvider = new AsyncDataProvider<BugHit>() {
+            @Override
+            protected void onRangeChanged(HasData<BugHit> display) {
+                refreshData();
+            }
+        };
+        dataProvider.addDataDisplay(_cellTable);
+
+        _cellTable.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(_cellTable));
+        _selectionModel = new SingleSelectionModel<BugHit>();
+        _cellTable.setSelectionModel(_selectionModel);
+        _selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                whenHitSelectionChanges();
+            }
+        });
+        return _cellTable;
+    }
+
+    private void whenHitSelectionChanges() {
+        final BugHit bugHit = _selectionModel.getSelectedObject();
+        if (bugHit != null) {
+            final long hitId = bugHit.getHitId();
+            Bug4jService.App.getInstance().getBugHitAndStack(hitId, new AsyncCallback<BugHitAndStack>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    Window.alert(caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(BugHitAndStack bugHitAndStack) {
+                    final String stack = bugHitAndStack.getStack();
+                    render(stack);
+                }
+            });
+        }
+
     }
 
     public Widget createBugHeader() {
@@ -81,84 +168,9 @@ public class BugDetailView {
             verticalPanel.add(_label);
         }
 
-        {
-            final HorizontalPanel hitPickPanel = new HorizontalPanel();
-            final Anchor prev = new Anchor("<");
-            prev.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    whenPrev();
-                }
-            });
-            prev.addStyleName("BugDetailView-nav-button");
-            hitPickPanel.add(prev);
-
-            final Anchor dotdot = new Anchor("...");
-            dotdot.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    whenDotDot();
-                }
-            });
-            dotdot.addStyleName("BugDetailView-nav-button");
-            hitPickPanel.add(dotdot);
-
-            final Anchor next = new Anchor(">");
-            next.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    whenNext();
-                }
-            });
-            next.addStyleName("BugDetailView-nav-button");
-            hitPickPanel.add(next);
-
-            verticalPanel.add(hitPickPanel);
-        }
-
         final SimpleLayoutPanel simpleLayoutPanel = new SimpleLayoutPanel();
         simpleLayoutPanel.addStyleName("BugDetailView-bug-header");
         simpleLayoutPanel.add(verticalPanel);
-
-        return simpleLayoutPanel;
-    }
-
-    public Widget createHitHeader() {
-
-        final Label hitIdLabel = new Label("Hit#:");
-        hitIdLabel.addStyleName("BugDetailView-hit-label");
-        _hitIdWidget = new Label();
-        _hitIdWidget.addStyleName("BugDetailView-hit-value");
-
-        final Label versionLabel = new Label("Version:");
-        versionLabel.addStyleName("BugDetailView-hit-label");
-        _versionWidget = new Label();
-        _versionWidget.addStyleName("BugDetailView-hit-value");
-
-        final Label reportedLabel = new Label("Reported:");
-        reportedLabel.addStyleName("BugDetailView-hit-label");
-        _reportedWidget = new Label();
-        _reportedWidget.addStyleName("BugDetailView-hit-value");
-
-        final Label reportedByLabel = new Label("Reported By:");
-        reportedByLabel.addStyleName("BugDetailView-hit-label");
-        _reportedByWidget = new Label();
-        _reportedByWidget.addStyleName("BugDetailView-hit-value");
-
-        final Grid grid = new Grid(4, 2);
-        grid.addStyleName("BugDetailView-hit-grid");
-        grid.setWidget(0, 0, hitIdLabel);
-        grid.setWidget(0, 1, _hitIdWidget);
-        grid.setWidget(1, 0, versionLabel);
-        grid.setWidget(1, 1, _versionWidget);
-        grid.setWidget(2, 0, reportedLabel);
-        grid.setWidget(2, 1, _reportedWidget);
-        grid.setWidget(3, 0, reportedByLabel);
-        grid.setWidget(3, 1, _reportedByWidget);
-
-        final SimpleLayoutPanel simpleLayoutPanel = new SimpleLayoutPanel();
-        simpleLayoutPanel.add(grid);
-        simpleLayoutPanel.addStyleName("BugDetailView-hit-header");
 
         return simpleLayoutPanel;
     }
@@ -169,37 +181,6 @@ public class BugDetailView {
         final ScrollPanel scrollPanel = new ScrollPanel(_stack);
         scrollPanel.addStyleName("BugDetailView-hit-stack-sp");
         return scrollPanel;
-    }
-
-    private void whenPrev() {
-        if (_currentHit > 0) {
-            setCurrentHit(_currentHit - 1);
-        }
-    }
-
-    private void whenDotDot() {
-    }
-
-    private void whenNext() {
-        if (_currentHit + 1 < _bugHitIds.size()) {
-            setCurrentHit(_currentHit + 1);
-        }
-    }
-
-    private void setCurrentHit(final int hit) {
-        final long hitId = _bugHitIds.get(hit);
-        Bug4jService.App.getInstance().getBugHitAndStack(hitId, new AsyncCallback<BugHitAndStack>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert(caught.getMessage());
-            }
-
-            @Override
-            public void onSuccess(BugHitAndStack bugHitAndStack) {
-                _currentHit = hit;
-                display(bugHitAndStack);
-            }
-        });
     }
 
     private Widget buildToolbar() {
@@ -216,7 +197,7 @@ public class BugDetailView {
     }
 
     private void whenDelete() {
-        Bug4jService.App.getInstance().deleteBug(_bugId, new AsyncCallback<Void>() {
+        Bug4jService.App.getInstance().deleteBug(_bug.getId(), new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
@@ -231,57 +212,56 @@ public class BugDetailView {
 
     public void clear() {
         _label.setText("");
-        _bugHitIds = Collections.emptyList();
-        _currentHit = 0;
-        _hitIdWidget.setText("");
-        _versionWidget.setText("");
-        _reportedWidget.setText("");
-        _reportedByWidget.setText("");
+        _cellTable.setRowCount(0);
         _stack.setHTML("");
     }
 
-    public void displayBug(Filter filter, final long bugId) {
-        _bugId = bugId;
-
-        final Bug4j bug4J = _displaysBugs.getBug4J();
-        final String application = bug4J.getApplication();
-        Bug4jService.App.getInstance().getBugDetailInitialData(application, filter, bugId, new AsyncCallback<BugDetailInitialData>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert(caught.getMessage());
-            }
-
-            @Override
-            public void onSuccess(BugDetailInitialData result) {
-                final Bug bug = result.getBug();
-                final String s = bugId + "-" + bug.getTitle();
-                _label.setText(s);
-                _bugHitIds = result.getBugHitIds();
-                _currentHit = 0;
-                final BugHitAndStack lastBugHitAndStack = result.getLastBugHitAndStack();
-                if (lastBugHitAndStack != null) {
-                    display(lastBugHitAndStack);
-                }
-                _widget.forceLayout();
-            }
-        });
+    public void displayBug(Filter filter, final Bug bug) {
+        _filter = filter;
+        _bug = bug;
+        refreshData();
     }
 
-    private void display(BugHitAndStack bugHitAndStack) {
+    private void refreshData() {
+        if (_bug != null) {
+            final long bugId = _bug.getId();
 
-        _hitIdWidget.setText(Integer.toString(_bugHitIds.size() - _currentHit));
-        _versionWidget.setText(bugHitAndStack.getAppVer());
+            final String s = bugId + "-" + _bug.getTitle();
+            _label.setText(s);
 
-        final DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_MEDIUM);
-        final long tReported = bugHitAndStack.getDateReported();
-        final String dateReportedText = dateTimeFormat.format(new Date(tReported));
-        _reportedWidget.setText(dateReportedText);
+            final StringBuilder sortBy = new StringBuilder();
+            final ColumnSortList sortList = _cellTable.getColumnSortList();
+            for (int i = 0; i < sortList.size(); i++) {
+                final ColumnSortList.ColumnSortInfo columnSortInfo = sortList.get(i);
+                final Column<?, ?> column = columnSortInfo.getColumn();
+                final char c = column == _dateColumn ? 'd' :
+                               column == _versionColumn ? 'v' :
+                               column == _userColumn ? 'b' : 'X';
+                final boolean ascending = columnSortInfo.isAscending();
+                sortBy.append(ascending ? c : Character.toUpperCase(c));
+            }
 
-        final String user = bugHitAndStack.getUser();
-        _reportedByWidget.setText(user);
+            Bug4jService.App.getInstance().getHits(bugId, _filter, 0, PAGE_SIZE, sortBy.toString(), new AsyncCallback<List<BugHit>>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    Window.alert(caught.getMessage());
+                }
 
-        final String stack = bugHitAndStack.getStack();
-        render(stack);
+                @Override
+                public void onSuccess(List<BugHit> bugHits) {
+                    _cellTable.setRowData(bugHits);
+                    final SelectionModel<? super BugHit> selectionModel = _cellTable.getSelectionModel();
+                    if (!bugHits.isEmpty()) {
+                        final BugHit firstBugHit = bugHits.get(0);
+                        selectionModel.setSelected(firstBugHit, true);
+                    } else {
+                        selectionModel.setSelected(null, true);
+                    }
+                }
+            });
+        } else {
+            _cellTable.setRowCount(0);
+        }
     }
 
     private void render(final String stackText) {

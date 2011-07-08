@@ -19,8 +19,8 @@ package org.bug4j.server.jsp;
 import org.apache.commons.io.output.CloseShieldOutputStream;
 import org.apache.log4j.Logger;
 import org.bug4j.server.gwt.client.data.Bug;
+import org.bug4j.server.gwt.client.data.BugHit;
 import org.bug4j.server.gwt.client.data.Filter;
-import org.bug4j.server.gwt.client.data.Hit;
 import org.bug4j.server.store.Store;
 import org.bug4j.server.store.StoreFactory;
 
@@ -83,15 +83,16 @@ public class ExportServlet extends HttpServlet {
                         xmlStreamWriter.writeAttribute("id", Long.toString(bugId));
                         xmlStreamWriter.writeAttribute("title", bugTitle);
 
-                        final List<Hit> hits = store.getHits(bugId, 0, Integer.MAX_VALUE, "");
+                        final List<BugHit> hits = store.getHits(bugId, null, 0, Integer.MAX_VALUE, "");
                         xmlStreamWriter.writeStartElement("hits");
-                        for (Hit hit : hits) {
-                            final long hitId = hit.getId();
+                        for (BugHit hit : hits) {
+                            final long hitId = hit.getHitId();
                             final long dateReported = hit.getDateReported();
                             final String stack = store.getStack(hitId);
                             xmlStreamWriter.writeStartElement("hit");
                             xmlStreamWriter.writeAttribute("id", Long.toString(hitId));
                             xmlStreamWriter.writeAttribute("date", dateFormat.format(new Date(dateReported)));
+                            xmlStreamWriter.writeAttribute("user", hit.getUser());
                             xmlStreamWriter.writeCData(stack);
                             xmlStreamWriter.writeEndElement();
                         }

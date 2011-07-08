@@ -243,50 +243,6 @@ public class JdbcStore extends Store {
         }
     }
 
-    public Bug getBug(String app, long bugId) {
-        String title = null;
-        int hitCount = 0;
-        final Connection connection = getConnection();
-        try {
-            final PreparedStatement bugStatement = connection.prepareStatement("select TITLE from BUG where BUG_ID=?");
-            try {
-                bugStatement.setLong(1, bugId);
-
-                final ResultSet resultSet = bugStatement.executeQuery();
-                try {
-                    if (resultSet.next()) {
-                        title = resultSet.getString(1);
-                    }
-                } finally {
-                    DbUtils.closeQuietly(resultSet);
-                }
-            } finally {
-                DbUtils.closeQuietly(bugStatement);
-            }
-
-            final PreparedStatement countStatement = connection.prepareStatement("select count(*) from HIT where BUG_ID=?");
-            try {
-                countStatement.setLong(1, bugId);
-
-                final ResultSet resultSet = countStatement.executeQuery();
-                try {
-                    if (resultSet.next()) {
-                        hitCount = resultSet.getInt(1);
-                    }
-                } finally {
-                    DbUtils.closeQuietly(resultSet);
-                }
-            } finally {
-                DbUtils.closeQuietly(countStatement);
-            }
-        } catch (SQLException e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        } finally {
-            DbUtils.closeQuietly(connection);
-        }
-        return new Bug(bugId, title, hitCount);
-    }
-
     /**
      * Get a set of bugs
      *
@@ -444,54 +400,20 @@ public class JdbcStore extends Store {
     }
 
     @Override
-    public void addPackage(String app, String appPackage) {
+    public List<BugHit> getHits(long bugId, @Nullable Filter filter, int offset, int max, String orderBy) {
+        final List<BugHit> ret = new ArrayList<BugHit>();
         final Connection connection = getConnection();
         try {
-            final PreparedStatement insertStatement = connection.prepareStatement("INSERT INTO APP_PACKAGES (APP, APP_PACKAGE) VALUES (?, ?)");
-            try {
-                insertStatement.setString(1, app);
-                insertStatement.setString(2, appPackage);
-                insertStatement.executeUpdate();
-            } finally {
-                DbUtils.closeQuietly(insertStatement);
+            StringBuilder sql = new StringBuilder("select H.HIT_ID,H.APP_VER,H.DATE_REPORTED,H.REPORTED_BY from HIT H WHERE H.BUG_ID=:bugId\n");
+            final boolean hasHitWithinDays = filter != null && filter.hasHitWithinDays();
+            if (hasHitWithinDays) {
+                sql.append(" AND H.DATE_REPORTED > :hitDateMin");
             }
-        } catch (SQLException e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        } finally {
-            DbUtils.closeQuietly(connection);
-        }
-    }
-
-    @Override
-    public void deletePackage(String app, String appPackage) {
-        final Connection connection = getConnection();
-        try {
-            final PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM APP_PACKAGES WHERE APP=? AND APP_PACKAGE=?");
-            try {
-                preparedStatement.setString(1, app);
-                preparedStatement.setString(2, appPackage);
-                preparedStatement.executeUpdate();
-            } finally {
-                DbUtils.closeQuietly(preparedStatement);
-            }
-        } catch (SQLException e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        } finally {
-            DbUtils.closeQuietly(connection);
-        }
-    }
-
-    @Override
-    public List<Hit> getHits(long bugId, int offset, int max, String orderBy) {
-        final List<Hit> ret = new ArrayList<Hit>();
-        final Connection connection = getConnection();
-        try {
-            StringBuilder sql = new StringBuilder("select HIT_ID,APP_VER,DATE_REPORTED from HIT WHERE BUG_ID=?\n");
-            String sep = "order by ";
+            String sep = " order by ";
             for (int i = 0; i < orderBy.length(); i++) {
                 final char c = orderBy.charAt(i);
                 final char lc = Character.toLowerCase(c);
-                final int columnPos = "iad".indexOf(lc) + 1;
+                final int columnPos = "ivdb".indexOf(lc) + 1;
                 final boolean asc = Character.isLowerCase(c);
                 sql
                         .append(sep)
@@ -499,10 +421,17 @@ public class JdbcStore extends Store {
                         .append(asc ? " ASC" : " DESC");
                 sep = ", ";
             }
-            final PreparedStatement preparedStatement = connection.prepareStatement(sql.toString());
-            try {
-                preparedStatement.setLong(1, bugId);
+            final NamedParameterProcessor namedParameterProcessor = new NamedParameterProcessor(sql.toString());
+            final String jdbcSql = namedParameterProcessor.getJdbcSql();
+            final PreparedStatement preparedStatement = connection.prepareStatement(jdbcSql);
 
+            namedParameterProcessor.setParameter(preparedStatement, "bugId", bugId);
+            if (hasHitWithinDays) {
+                final Integer hitWithinDays = filter.getHitWithinDays();
+                final Timestamp timestamp = getPrevDaysTimestamp(hitWithinDays);
+                namedParameterProcessor.setParameter(preparedStatement, "hitDateMin", timestamp);
+            }
+            try {
                 final ResultSet resultSet = preparedStatement.executeQuery();
                 try {
                     while (offset > 0 && resultSet.next()) {
@@ -513,12 +442,14 @@ public class JdbcStore extends Store {
                         final long hitId = resultSet.getLong(1);
                         final String appVer = resultSet.getString(2);
                         final long dateReported = resultSet.getTimestamp(3).getTime();
-                        final Hit hit = new Hit(
+                        final String user = resultSet.getString(4);
+                        final BugHit bugHit = new BugHit(
                                 hitId,
                                 appVer,
-                                dateReported
+                                dateReported,
+                                user
                         );
-                        ret.add(hit);
+                        ret.add(bugHit);
                     }
                 } finally {
                     DbUtils.closeQuietly(resultSet);
@@ -546,52 +477,6 @@ public class JdbcStore extends Store {
         final long timeInMillis = from.getTimeInMillis();
         ret = new Timestamp(timeInMillis);
 
-        return ret;
-    }
-
-    @Override
-    public List<Long> getHitIds(Filter filter, long bugId) {
-        final List<Long> ret = new ArrayList<Long>();
-        final Connection connection = getConnection();
-        try {
-            final StringBuilder sql = new StringBuilder();
-            sql.append("select h.hit_id from hit h where h.bug_id=:bugId");
-            if (filter.hasHitWithinDays()) {
-                sql.append(" and h.date_reported > :hitDateMin");
-            }
-            sql.append(" order by date_reported desc");
-
-            final NamedParameterProcessor namedParameterProcessor = new NamedParameterProcessor(sql.toString());
-
-            final String jdbcSql = namedParameterProcessor.getJdbcSql();
-            final PreparedStatement preparedStatement = connection.prepareStatement(jdbcSql);
-
-            namedParameterProcessor.setParameter(preparedStatement, "bugId", bugId);
-            if (filter.hasHitWithinDays()) {
-                final Integer hitWithinDays = filter.getHitWithinDays();
-                final Timestamp timestamp = getPrevDaysTimestamp(hitWithinDays);
-                namedParameterProcessor.setParameter(preparedStatement, "hitDateMin", timestamp);
-            }
-            try {
-                preparedStatement.setLong(1, bugId);
-
-                final ResultSet resultSet = preparedStatement.executeQuery();
-                try {
-                    while (resultSet.next()) {
-                        final long hitId = resultSet.getLong(1);
-                        ret.add(hitId);
-                    }
-                } finally {
-                    DbUtils.closeQuietly(resultSet);
-                }
-            } finally {
-                DbUtils.closeQuietly(preparedStatement);
-            }
-        } catch (SQLException e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        } finally {
-            DbUtils.closeQuietly(connection);
-        }
         return ret;
     }
 
@@ -1012,7 +897,7 @@ public class JdbcStore extends Store {
     }
 
     @Override
-    public Strain createStrain(String app, long bugid, String strainHash) {
+    public Strain createStrain(long bugid, String strainHash) {
         Strain ret;
         final Connection connection = getConnection();
         try {
@@ -1039,7 +924,7 @@ public class JdbcStore extends Store {
     }
 
     @Override
-    public Stack createStack(String app, long bugId, long strainId, String fullHash, String stackText) {
+    public Stack createStack(long bugId, long strainId, String fullHash, String stackText) {
         Stack ret;
         final Connection connection = getConnection();
         try {
