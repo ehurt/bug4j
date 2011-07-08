@@ -32,6 +32,7 @@ import org.bug4j.server.gwt.client.bugs.HotBugsGraphView;
 import org.bug4j.server.gwt.client.settings.ApplicationDialog;
 import org.bug4j.server.gwt.client.settings.SettingsDialog;
 import org.bug4j.server.gwt.client.util.PropertyListener;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +44,7 @@ public class Bug4j implements EntryPoint {
     public static final Resources IMAGES = GWT.create(Resources.class);
     private static List<String> _appPackages;
     private String _application;
-    private final List<PropertyListener<String>> _applicationListeners = new ArrayList<PropertyListener<String>>();
+    private final List<PropertyListener<String>> _propertyListeners = new ArrayList<PropertyListener<String>>();
     private MenuItem _appMenuButton;
     private String _userName;
 
@@ -181,6 +182,8 @@ public class Bug4j implements EntryPoint {
     private void whenSettings() {
         final SettingsDialog settingsDialog = new SettingsDialog(this);
         settingsDialog.show();
+        _appPackages = null;
+        firePropertyChange("packages", null);
     }
 
     private void whenApplication() {
@@ -214,13 +217,17 @@ public class Bug4j implements EntryPoint {
     public void setApplication(String application) {
         _application = application;
         updateAppButtonText();
-        for (PropertyListener<String> applicationListener : _applicationListeners) {
-            applicationListener.propertyChanged("application", application);
+        firePropertyChange("application", application);
+    }
+
+    private void firePropertyChange(String property, @Nullable String value) {
+        for (PropertyListener<String> applicationListener : _propertyListeners) {
+            applicationListener.propertyChanged(property, value);
         }
     }
 
-    public void addApplicationListener(PropertyListener<String> listener) {
-        _applicationListeners.add(listener);
+    public void addPropertyListener(PropertyListener<String> listener) {
+        _propertyListeners.add(listener);
     }
 
     private void setUserName(String userName) {

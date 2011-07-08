@@ -29,7 +29,7 @@ public class BugViewColumn extends TextColumn<Bug> {
 
     private final String _id;
 
-    public BugViewColumn(String id) {
+    private BugViewColumn(String id) {
         _id = id;
         setSortable(true);
     }

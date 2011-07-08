@@ -92,11 +92,11 @@ public class JdbcStoreTest {
             if (strain == null) {
                 final String title = stackAnalyzer.getTitle(stackLines);
                 bugid = _store.createBug(APP, title);
-                strain = _store.createStrain(APP, bugid, strainHash);
+                strain = _store.createStrain(bugid, strainHash);
             } else {
                 bugid = strain.getBugId();
             }
-            stack = _store.createStack(APP, bugid, strain.getStrainId(), fullHash, STACK_TEXT);
+            stack = _store.createStack(bugid, strain.getStrainId(), fullHash, STACK_TEXT);
         }
         _store.reportHitOnStack(APP, APP_VERSION, null, null, stack);
         bugid = stack.getBugId();

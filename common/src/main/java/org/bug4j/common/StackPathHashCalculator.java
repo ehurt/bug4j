@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 public class StackPathHashCalculator {
     private static final Pattern STACK_PATTERN = Pattern.compile("\tat ([^()]*)\\((.*)\\)");
 
-    public StackPathHashCalculator() {
+    private StackPathHashCalculator() {
     }
 
     public static String analyze(List<String> stackLines) {

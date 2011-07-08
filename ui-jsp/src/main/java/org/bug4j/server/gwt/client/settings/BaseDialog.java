@@ -29,12 +29,12 @@ public abstract class BaseDialog extends DialogBox {
     private final Bug4j _bug4j;
 
     protected BaseDialog(String title, Bug4j bug4j) {
+        _bug4j = bug4j;
         setText(title);
 
         final Widget widget = createWidget();
         setWidget(widget);
         center();
-        _bug4j = bug4j;
     }
 
     protected abstract void whenOk();

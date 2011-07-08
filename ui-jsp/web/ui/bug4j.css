@@ -107,25 +107,8 @@ div#main {
 
 .BugDetailView-bug-header {
     margin: 3px;
-    border: 1px solid #a9a9a9;
+    border-bottom: 1px solid #a9a9a9;
     padding: 3px;
-}
-
-.BugDetailView-nav-button {
-    padding: 5px;
-}
-
-.BugDetailView-hit-header {
-    background-color: #f3f7fb;
-    margin: 3px;
-    padding: 3px;
-}
-
-.BugDetailView-hit-label {
-    font-weight: bold;
-}
-
-.BugDetailView-hit-value {
 }
 
 .BugDetailView-hit-stack {
@@ -134,12 +117,18 @@ div#main {
     white-space: pre;
 }
 
-.BugDetailView-hit-grid {
-}
-
 .BugDetailView-hit-stack-sp {
     margin: 3px;
     padding: 3px;
+}
+
+.BugDetailView-hit-cell {
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.BugDetailView-hit-cell-unread {
+    font-weight: bold;
 }
 
 #dd-menu {
