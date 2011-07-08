@@ -98,7 +98,7 @@ public class ServletsTest {
         }
 
         {
-            final List<Bug> bugs = _store.getBugs(APP, new Filter(), 0, 100, "i");
+            final List<Bug> bugs = _store.getBugs("cda", APP, new Filter(), 0, 100, "i");
             assertEquals(1, bugs.size());
             final Bug bug = bugs.get(0);
             assertEquals("IndexOutOfBoundsException at Test0.java:49", bug.getTitle());

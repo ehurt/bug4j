@@ -83,8 +83,12 @@ div#main {
     cursor: pointer;
 }
 
+.BugView-row-read {
+    color: #797979;
+}
+
 .BugView-row-unread {
-    font-weight: bold;
+    color: black;
 }
 
 .app-pkg-name {
@@ -132,7 +136,11 @@ div#main {
 }
 
 .BugDetailView-hit-cell-unread {
-    font-weight: bold;
+    color: black;
+}
+
+.BugDetailView-hit-cell-read {
+    color: #797979;
 }
 
 #dd-menu {

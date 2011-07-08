@@ -261,7 +261,7 @@ public class JdbcStore extends Store {
      * @return
      */
     @Override
-    public List<Bug> getBugs(String app, Filter filter, int offset, int max, String orderBy) {
+    public List<Bug> getBugs(String userName, String app, Filter filter, int offset, int max, String orderBy) {
         final List<Bug> ret = new ArrayList<Bug>();
         final Connection connection = getConnection();
         try {
@@ -273,7 +273,7 @@ public class JdbcStore extends Store {
                     "        ur.last_hit_id" +
                     "  FROM bug b" +
                     "    LEFT OUTER JOIN hit h ON b.bug_id = h.bug_id" +
-                    "    LEFT OUTER JOIN user_read ur ON b.bug_id = ur.bug_id" +
+                    "    LEFT OUTER JOIN user_read ur ON b.bug_id = ur.bug_id AND ur.user_name=:userName" +
                     "  WHERE b.app = :app");
 
             if (filter.hasHitWithinDays()) {
@@ -309,6 +309,7 @@ public class JdbcStore extends Store {
             final String jdbcSql = namedParameterProcessor.getJdbcSql();
             final PreparedStatement preparedStatement = connection.prepareStatement(jdbcSql);
             namedParameterProcessor.setParameter(preparedStatement, "app", app);
+            namedParameterProcessor.setParameter(preparedStatement, "userName", userName);
             if (filter.hasHitWithinDays()) {
                 final Integer hitWithinDays = filter.getHitWithinDays();
                 final Timestamp timestamp = getPrevDaysTimestamp(hitWithinDays);
