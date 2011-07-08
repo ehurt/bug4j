@@ -56,6 +56,8 @@ public interface Bug4jService extends RemoteService {
 
     BugHitAndStack getBugHitAndStack(long hitId) throws Exception;
 
+    void markRead(long bugId) throws Exception;
+
     /**
      * Utility/Convenience class.
      * Use Bug4jService.App.getInstance() to access static instance of BugServiceAsync

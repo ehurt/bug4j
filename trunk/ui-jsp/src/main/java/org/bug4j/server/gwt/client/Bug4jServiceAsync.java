@@ -52,4 +52,6 @@ public interface Bug4jServiceAsync {
     void getDefaultFilter(AsyncCallback<Filter> async);
 
     void setDefaultFilter(Filter filter, AsyncCallback<Void> async);
+
+    void markRead(long bugId, AsyncCallback<Void> async);
 }

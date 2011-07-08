@@ -16,25 +16,39 @@
 
 package org.bug4j.server.gwt.client.data;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.io.Serializable;
 
 public class Bug implements Serializable {
     private long _id;
     private String _title;
     private int _hitCount;
+    @Nullable
+    private Long _maxHit;
+    @Nullable
+    private Long _lastReadHit;
 
     public Bug() {
-    }
-
-    @Override
-    public String toString() {
-        return _id + "-" + _title;
     }
 
     public Bug(long id, String title, int hitCount) {
         _id = id;
         _title = title;
         _hitCount = hitCount;
+    }
+
+    public Bug(long id, String title, int hitCount, long maxHit, Long lastReadHit) {
+        _id = id;
+        _title = title;
+        _hitCount = hitCount;
+        _maxHit = maxHit;
+        _lastReadHit = lastReadHit;
+    }
+
+    @Override
+    public String toString() {
+        return _id + "-" + _title;
     }
 
     public long getId() {
@@ -47,5 +61,27 @@ public class Bug implements Serializable {
 
     public int getHitCount() {
         return _hitCount;
+    }
+
+    @SuppressWarnings({"ConstantConditions"})
+    public boolean isRead() {
+        if (_maxHit == null) {
+            return true;
+        }
+        if (_lastReadHit == null) {
+            return false;
+        }
+        if (_lastReadHit < _maxHit) {
+            return false;
+        }
+        return true;
+    }
+
+    public long getLastReadHit() {
+        return _lastReadHit == null ? 0 : _lastReadHit;
+    }
+
+    public void setRead(boolean read) {
+        _lastReadHit = read ? Long.MAX_VALUE : null;
     }
 }

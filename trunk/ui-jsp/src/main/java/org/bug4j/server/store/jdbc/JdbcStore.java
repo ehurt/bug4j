@@ -179,6 +179,17 @@ public class JdbcStore extends Store {
                 );
                 statement.execute("CREATE INDEX USER_NAME_IDX ON USER_PREFS(USER_NAME,PREF_KEY)");
             }
+
+            if (!doesTableExist(statement, "USER_READ")) {
+                statement.execute("" +
+                        "CREATE TABLE USER_READ (" +
+                        " USER_NAME VARCHAR(255)," +
+                        " BUG_ID INT," +
+                        " LAST_HIT_ID INT" +
+                        ")"
+                );
+                statement.execute("CREATE INDEX USER_READ_IDX ON USER_READ(USER_NAME,BUG_ID)");
+            }
         } finally {
             DbUtils.closeQuietly(statement);
         }
@@ -257,9 +268,12 @@ public class JdbcStore extends Store {
             StringBuilder sql = new StringBuilder("" +
                     "SELECT b.bug_id," +
                     "        b.title," +
-                    "        COUNT(h.hit_id) AS hit_count" +
-                    "  FROM bug b LEFT OUTER JOIN hit h" +
-                    "    ON b.bug_id = h.bug_id" +
+                    "        COUNT(h.hit_id) AS hit_count," +
+                    "        MAX(h.hit_id) AS hit_max," +
+                    "        ur.last_hit_id" +
+                    "  FROM bug b" +
+                    "    LEFT OUTER JOIN hit h ON b.bug_id = h.bug_id" +
+                    "    LEFT OUTER JOIN user_read ur ON b.bug_id = ur.bug_id" +
                     "  WHERE b.app = :app");
 
             if (filter.hasHitWithinDays()) {
@@ -269,7 +283,7 @@ public class JdbcStore extends Store {
                 sql.append(" AND upper(b.title) like :titleFilter");
             }
 
-            sql.append("  GROUP BY b.bug_id, b.title");
+            sql.append("  GROUP BY b.bug_id, b.title,ur.last_hit_id");
 
             sql.append("  HAVING COUNT(h.hit_id) > 0");
             if (filter.isReportedByMultiple()) {
@@ -314,7 +328,12 @@ public class JdbcStore extends Store {
                         final long bugId = resultSet.getLong(1);
                         final String title = resultSet.getString(2);
                         final int hitCount = resultSet.getInt(3);
-                        final Bug bug = new Bug(bugId, title, hitCount);
+                        final long maxHit = resultSet.getLong(4);
+                        Long lastReadHit = resultSet.getLong(5);
+                        if (resultSet.wasNull()) {
+                            lastReadHit = null;
+                        }
+                        final Bug bug = new Bug(bugId, title, hitCount, maxHit, lastReadHit);
                         ret.add(bug);
                     }
                 } finally {
@@ -641,6 +660,50 @@ public class JdbcStore extends Store {
         setUserPref(remoteUser, "FILTER_TITLE", filter.getTitle());
         setUserPref(remoteUser, "FILTER_DAYS", filter.getHitWithinDays());
         setUserPref(remoteUser, "FILTER_MULTI_USERS", Boolean.toString(filter.isReportedByMultiple()));
+    }
+
+    @Override
+    public void markRead(String userName, long bugId) {
+        final Connection connection = getConnection();
+        try {
+            long lastHit = 0;
+            final PreparedStatement selectStatement = connection.prepareStatement("SELECT MAX(HIT_ID) FROM HIT WHERE BUG_ID=?");
+            try {
+                selectStatement.setLong(1, bugId);
+                final ResultSet resultSet = selectStatement.executeQuery();
+                if (resultSet.next()) {
+                    lastHit = resultSet.getLong(1);
+                }
+            } finally {
+                selectStatement.close();
+            }
+
+            final PreparedStatement updateStatement = connection.prepareStatement("UPDATE USER_READ SET LAST_HIT_ID=? WHERE USER_NAME=? AND BUG_ID=?");
+            try {
+                updateStatement.setLong(1, lastHit);
+                updateStatement.setString(2, userName);
+                updateStatement.setLong(3, bugId);
+                final int updated = updateStatement.executeUpdate();
+                if (updated == 0) {
+                    final PreparedStatement insertStatement = connection.prepareStatement("INSERT INTO USER_READ(USER_NAME,BUG_ID,LAST_HIT_ID) VALUES (?,?,?)");
+                    try {
+                        insertStatement.setString(1, userName);
+                        insertStatement.setLong(2, bugId);
+                        insertStatement.setLong(3, lastHit);
+                        insertStatement.executeUpdate();
+                    } finally {
+                        insertStatement.close();
+                    }
+                }
+            } finally {
+                updateStatement.close();
+            }
+
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
+            DbUtils.closeQuietly(connection);
+        }
     }
 
     private String getAnyApp() {

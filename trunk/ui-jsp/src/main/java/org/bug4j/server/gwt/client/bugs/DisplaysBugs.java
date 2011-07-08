@@ -22,4 +22,6 @@ public interface DisplaysBugs {
     void whenBugListChanges();
 
     Bug4j getBug4J();
+
+    void redisplay();
 }

@@ -172,4 +172,15 @@ public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jServi
         final Store store = StoreFactory.getStore();
         return store.getBugHitAndStack(hitId);
     }
+
+    @Override
+    public void markRead(long bugId) throws Exception {
+        final Store store = StoreFactory.getStore();
+        try {
+            store.markRead(getUserName(), bugId);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
 }

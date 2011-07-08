@@ -79,8 +79,12 @@ div#main {
     cursor: pointer;
 }
 
-.bug-table {
+.BugView-table {
     cursor: pointer;
+}
+
+.BugView-row-unread {
+    font-weight: bold;
 }
 
 .app-pkg-name {
