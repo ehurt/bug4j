@@ -182,7 +182,7 @@ public class BugView implements DisplaysBugs {
             @Override
             public String getStyleNames(Bug row, int rowIndex) {
                 if (row.isRead()) {
-                    return "";
+                    return "BugView-row-read";
                 } else {
                     return "BugView-row-unread";
                 }

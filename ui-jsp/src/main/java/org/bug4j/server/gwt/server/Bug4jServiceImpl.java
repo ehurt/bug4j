@@ -104,7 +104,8 @@ public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jServi
     public List<Bug> getBugs(String app, Filter filter, final String sortBy) throws Exception {
         try {
             final Store store = StoreFactory.getStore();
-            return store.getBugs(app, filter, 0, Integer.MAX_VALUE, sortBy);
+            final String userName = getUserName();
+            return store.getBugs(userName, app, filter, 0, Integer.MAX_VALUE, sortBy);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             throw new Exception(e.getMessage(), e);

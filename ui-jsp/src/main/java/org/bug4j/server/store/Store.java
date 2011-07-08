@@ -26,7 +26,7 @@ public abstract class Store {
     protected Store() {
     }
 
-    public abstract List<Bug> getBugs(String app, Filter filter, int offset, int max, String orderBy);
+    public abstract List<Bug> getBugs(String userName, String app, Filter filter, int offset, int max, String orderBy);
 
     public abstract List<String> getPackages(String app);
 

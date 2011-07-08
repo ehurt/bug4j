@@ -74,7 +74,7 @@ public class ExportServlet extends HttpServlet {
                 try {
                     final Store store = StoreFactory.getStore();
                     final String app = request.getParameter("a");
-                    final List<Bug> bugs = store.getBugs(app, new Filter(), 0, Integer.MAX_VALUE, "");
+                    final List<Bug> bugs = store.getBugs("cda", app, new Filter(), 0, Integer.MAX_VALUE, "");
                     xmlStreamWriter.writeStartElement("bugs");
                     for (Bug bug : bugs) {
                         final long bugId = bug.getId();

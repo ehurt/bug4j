@@ -106,11 +106,13 @@ class BugDetailView {
         _cellTable.setRowStyles(new RowStyles<BugHit>() {
             @Override
             public String getStyleNames(BugHit bugHit, int rowIndex) {
-                String ret = "BugDetailView-hit-cell";
+                StringBuilder ret = new StringBuilder("BugDetailView-hit-cell ");
                 if (_unreadHits.contains(bugHit.getHitId())) {
-                    ret += " BugDetailView-hit-cell-unread";
+                    ret.append("BugDetailView-hit-cell-unread");
+                } else {
+                    ret.append("BugDetailView-hit-cell-read");
                 }
-                return ret;
+                return ret.toString();
             }
         });
         _cellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(_dateColumn, false));
