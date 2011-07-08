@@ -169,4 +169,8 @@ public class HotBugsGraphView implements DisplaysBugs {
     public Bug4j getBug4J() {
         return _bug4j;
     }
+
+    @Override
+    public void redisplay() {
+    }
 }

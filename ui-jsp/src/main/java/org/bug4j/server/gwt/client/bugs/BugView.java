@@ -22,6 +22,7 @@ import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortList;
+import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -47,6 +48,7 @@ public class BugView implements DisplaysBugs {
     private final Filter _filter = new Filter();
     private MenuItem _filterMenuItem;
     private final Bug4j _bug4j;
+    private Bug _lastSelectedBug;
 
     public BugView(Bug4j bug4j) {
         _bug4j = bug4j;
@@ -137,13 +139,18 @@ public class BugView implements DisplaysBugs {
         return _bug4j;
     }
 
+    @Override
+    public void redisplay() {
+        _cellTable.redraw();
+    }
+
     private CellTable<Bug> createTable() {
         _cellTable = new CellTable<Bug>(PAGE_SIZE);
         final Label noDataLabel = new Label("No data");
         noDataLabel.getElement().getStyle().setFontSize(20, Style.Unit.PT);
         _cellTable.setEmptyTableWidget(noDataLabel);
         _cellTable.setWidth("100%", true);
-        _cellTable.addStyleName("bug-table");
+        _cellTable.addStyleName("BugView-table");
         _cellTable.addColumn(BugViewColumn.ID, "ID");
         _cellTable.addColumn(BugViewColumn.TITLE, "Title");
         _cellTable.addColumn(BugViewColumn.HIT, "#");
@@ -168,6 +175,17 @@ public class BugView implements DisplaysBugs {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 whenTableSelectionChanges();
+            }
+        });
+
+        _cellTable.setRowStyles(new RowStyles<Bug>() {
+            @Override
+            public String getStyleNames(Bug row, int rowIndex) {
+                if (row.isRead()) {
+                    return "";
+                } else {
+                    return "BugView-row-unread";
+                }
             }
         });
 
@@ -205,9 +223,24 @@ public class BugView implements DisplaysBugs {
     }
 
     private void whenTableSelectionChanges() {
-        final Bug bug = _selectionModel.getSelectedObject();
-        if (bug != null) {
-            _bugDetailView.displayBug(_filter, bug);
+        if (_lastSelectedBug != null) {
+            if (!_lastSelectedBug.isRead()) {
+                _lastSelectedBug.setRead(true);
+                Bug4jService.App.getInstance().markRead(_lastSelectedBug.getId(), new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Window.alert(caught.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                    }
+                });
+            }
+        }
+        _lastSelectedBug = _selectionModel.getSelectedObject();
+        if (_lastSelectedBug != null) {
+            _bugDetailView.displayBug(_filter, _lastSelectedBug);
         } else {
             _bugDetailView.clear();
         }

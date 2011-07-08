@@ -72,4 +72,6 @@ public abstract class Store {
     public abstract Filter getDefaultFilter(String userName);
 
     public abstract void setDefaultFilter(String userName, Filter filter);
+
+    public abstract void markRead(String userName, long bugId);
 }

@@ -34,10 +34,9 @@ import org.bug4j.server.gwt.client.data.BugHit;
 import org.bug4j.server.gwt.client.data.BugHitAndStack;
 import org.bug4j.server.gwt.client.data.Filter;
 import org.bug4j.server.gwt.client.util.TextToLines;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @SuppressWarnings({"GWTStyleCheck"})
 class BugDetailView {
@@ -49,6 +48,9 @@ class BugDetailView {
     private CellTable<BugHit> _cellTable;
     private Filter _filter;
     private Bug _bug;
+    private final Set<Long> _unreadHits = new HashSet<Long>();
+    @Nullable
+    private BugHit _lastSelectedHit;
     private static final TextColumn<BugHit> _dateColumn = new TextColumn<BugHit>() {
         @Override
         public String getValue(BugHit bugHit) {
@@ -103,11 +105,11 @@ class BugDetailView {
 
         _cellTable.setRowStyles(new RowStyles<BugHit>() {
             @Override
-            public String getStyleNames(BugHit row, int rowIndex) {
+            public String getStyleNames(BugHit bugHit, int rowIndex) {
                 String ret = "BugDetailView-hit-cell";
-//                if (row.getHitId() % 2 == 0) {
-//                    ret += " BugDetailView-hit-cell-unread";
-//                }
+                if (_unreadHits.contains(bugHit.getHitId())) {
+                    ret += " BugDetailView-hit-cell-unread";
+                }
                 return ret;
             }
         });
@@ -135,6 +137,17 @@ class BugDetailView {
 
     private void whenHitSelectionChanges() {
         final BugHit bugHit = _selectionModel.getSelectedObject();
+        if (_lastSelectedHit != null) {
+            final long previousHitId = _lastSelectedHit.getHitId();
+            if (previousHitId != bugHit.getHitId()) {
+                _unreadHits.remove(previousHitId);
+                if (_unreadHits.isEmpty()) {
+                    _bug.setRead(true);
+                    _displaysBugs.redisplay();
+                }
+            }
+        }
+
         if (bugHit != null) {
             final long hitId = bugHit.getHitId();
             Bug4jService.App.getInstance().getBugHitAndStack(hitId, new AsyncCallback<BugHitAndStack>() {
@@ -150,7 +163,7 @@ class BugDetailView {
                 }
             });
         }
-
+        _lastSelectedHit = bugHit;
     }
 
     public Widget createBugHeader() {
@@ -219,6 +232,7 @@ class BugDetailView {
     public void displayBug(Filter filter, final Bug bug) {
         _filter = filter;
         _bug = bug;
+        _lastSelectedHit = null;
         refreshData();
     }
 
@@ -249,18 +263,30 @@ class BugDetailView {
 
                 @Override
                 public void onSuccess(List<BugHit> bugHits) {
-                    _cellTable.setRowData(bugHits);
-                    final SelectionModel<? super BugHit> selectionModel = _cellTable.getSelectionModel();
-                    if (!bugHits.isEmpty()) {
-                        final BugHit firstBugHit = bugHits.get(0);
-                        selectionModel.setSelected(firstBugHit, true);
-                    } else {
-                        selectionModel.setSelected(null, true);
-                    }
+                    setData(bugHits);
                 }
             });
         } else {
             _cellTable.setRowCount(0);
+        }
+    }
+
+    private void setData(List<BugHit> bugHits) {
+        _unreadHits.clear();
+        for (BugHit bugHit : bugHits) {
+            final long hitId = bugHit.getHitId();
+            if (hitId > _bug.getLastReadHit()) {
+                _unreadHits.add(hitId);
+            }
+        }
+
+        _cellTable.setRowData(bugHits);
+        final SelectionModel<? super BugHit> selectionModel = _cellTable.getSelectionModel();
+        if (!bugHits.isEmpty()) {
+            final BugHit firstBugHit = bugHits.get(0);
+            selectionModel.setSelected(firstBugHit, true);
+        } else {
+            selectionModel.setSelected(null, true);
         }
     }
 
