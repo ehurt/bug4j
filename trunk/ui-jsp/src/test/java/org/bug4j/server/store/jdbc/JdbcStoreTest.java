@@ -33,32 +33,32 @@ import java.util.List;
 
 public class JdbcStoreTest {
 
-    private static final String STACK_TEXT = "java.lang.IllegalStateException: java.lang.IndexOutOfBoundsException: Index: 1, Size: 0" +
-            "	at org.bug4j.common.Test0.dothis(Test0.java:44)" +
-            "	at org.bug4j.common.Test0.testX(Test0.java:37)" +
-            "	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)" +
-            "	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)" +
-            "	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)" +
-            "	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:44)" +
-            "	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:15)" +
-            "	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:41)" +
-            "	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:20)" +
-            "	at org.junit.runners.BlockJUnit4ClassRunner.runNotIgnored(BlockJUnit4ClassRunner.java:79)" +
-            "	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:71)" +
-            "	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:49)" +
-            "	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:193)" +
-            "	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:52)" +
-            "	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:191)" +
-            "	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:42)" +
-            "	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:184)" +
-            "	at org.junit.runners.ParentRunner.run(ParentRunner.java:236)" +
-            "	at org.junit.runner.JUnitCore.run(JUnitCore.java:157)" +
-            "	at com.intellij.rt.execution.junit.JUnitStarter.main(JUnitStarter.java:62)" +
-            "Caused by: java.lang.IndexOutOfBoundsException: Index: 1+ Size: 0" +
-            "	at java.util.ArrayList.RangeCheck(ArrayList.java:547)" +
-            "	at java.util.ArrayList.get(ArrayList.java:322)" +
-            "	at org.bug4j.common.Test0.doThat(Test0.java:49)" +
-            "	at org.bug4j.common.Test0.dothis(Test0.java:42)" +
+    private static final String STACK_TEXT = "java.lang.IllegalStateException: java.lang.IndexOutOfBoundsException: Index: 1, Size: 0\n" +
+            "	at org.bug4j.common.Test0.dothis(Test0.java:44)\n" +
+            "	at org.bug4j.common.Test0.testX(Test0.java:37)\n" +
+            "	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n" +
+            "	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)\n" +
+            "	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)\n" +
+            "	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:44)\n" +
+            "	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:15)\n" +
+            "	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:41)\n" +
+            "	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:20)\n" +
+            "	at org.junit.runners.BlockJUnit4ClassRunner.runNotIgnored(BlockJUnit4ClassRunner.java:79)\n" +
+            "	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:71)\n" +
+            "	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:49)\n" +
+            "	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:193)\n" +
+            "	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:52)\n" +
+            "	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:191)\n" +
+            "	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:42)\n" +
+            "	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:184)\n" +
+            "	at org.junit.runners.ParentRunner.run(ParentRunner.java:236)\n" +
+            "	at org.junit.runner.JUnitCore.run(JUnitCore.java:157)\n" +
+            "	at com.intellij.rt.execution.junit.JUnitStarter.main(JUnitStarter.java:62)\n" +
+            "Caused by: java.lang.IndexOutOfBoundsException: Index: 1+ Size: 0\n" +
+            "	at java.util.ArrayList.RangeCheck(ArrayList.java:547)\n" +
+            "	at java.util.ArrayList.get(ArrayList.java:322)\n" +
+            "	at org.bug4j.common.Test0.doThat(Test0.java:49)\n" +
+            "	at org.bug4j.common.Test0.dothis(Test0.java:42)\n" +
             "	... 22 more";
     private static final String APP = "My Application";
 

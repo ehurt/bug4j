@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="bug4j" default="dist" basedir=".">
+
+    <property name="home" location="."/>
+    <import file="build_include.xml"/>
+
+    <target name="dist" depends="clean,compile,test,package-dist"/>
+
+    <target name="package-dist">
+        <property name="dist" value="${out}/dist"/>
+
+        <mkdir dir="${dist}/client/lib"/>
+        <copy todir="${dist}/client" file="${artifacts.output}/bug4j.jar"/>
+        <zip destfile="${dist}/client/bug4j-src.zip">
+            <fileset dir="common/src/main/java/"/>
+            <fileset dir="client/src/main/java/"/>
+        </zip>
+        <copy todir="${dist}/client/lib">
+            <path refid="httpcomponents-client"/>
+        </copy>
+
+        <mkdir dir="${dist}/server"/>
+        <zip destfile="${dist}/server/bug4j.war" basedir="${artifacts.output}/ui_jsp_war_exploded"/>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="${production.output}"/>
+        <ant dir="common" target="compile"/>
+        <ant dir="client" target="compile"/>
+        <ant dir="ui-jsp" target="compile"/>
+    </target>
+    <target name="test">
+        <mkdir dir="${production.output}"/>
+        <ant dir="common" target="test"/>
+        <ant dir="client" target="test"/>
+        <ant dir="ui-jsp" target="test"/>
+    </target>
+
+    <target name="clean">
+        <ant dir="common" target="clean"/>
+        <ant dir="client" target="clean"/>
+        <ant dir="ui-jsp" target="clean"/>
+        <delete dir="${out}"/>
+    </target>
+</project>
