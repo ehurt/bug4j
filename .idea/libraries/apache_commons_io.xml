@@ -1,11 +1,11 @@
 <component name="libraryTable">
   <library name="apache-commons-io">
     <CLASSES>
-      <root url="jar://$DEPENDENCIES$/repository/commons-io/commons-io-1.4/commons-io-1.4.jar!/" />
+      <root url="jar://$dep-home$/commons-io-1.4/commons-io-1.4.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
-      <root url="jar://$DEPENDENCIES$/repository/commons-io/commons-io-1.4/commons-io-1.4-sources.jar!/" />
+      <root url="jar://$dep-home$/commons-io-1.4/commons-io-1.4-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

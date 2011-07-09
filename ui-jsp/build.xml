@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  ~ Copyright 2011 Cedric Dandoy
+  ~
+  ~    Licensed under the Apache License, Version 2.0 (the "License");
+  ~    you may not use this file except in compliance with the License.
+  ~    You may obtain a copy of the License at
+  ~
+  ~        http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~    Unless required by applicable law or agreed to in writing, software
+  ~    distributed under the License is distributed on an "AS IS" BASIS,
+  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~    See the License for the specific language governing permissions and
+  ~    limitations under the License.
+  -->
+
+<project name="ui-jsp" default="dist" basedir=".">
+
+    <property name="home" location=".."/>
+    <import file="../build_include.xml"/>
+
+    <property name="module" value="ui-jsp"/>
+    <property name="module.production.output" value="${production.output}/${module}"/>
+    <property name="module.test.output" value="${test.output}/${module}"/>
+    <property name="module.artifact.output" value="${artifacts.output}/ui_jsp_war_exploded"/>
+
+
+    <path id="project.libs">
+        <path refid="commons-io.lib"/>
+        <path refid="commons-dbutils.lib"/>
+        <path refid="gwt-server.lib"/>
+        <path refid="gwt-visualization.lib"/>
+    </path>
+
+    <path id="project.class.path">
+        <path refid="project.libs"/>
+        <path refid="jetbrains.annotations.lib"/>
+        <path refid="log4j.lib"/>
+        <pathelement location="${production.output}/common"/>
+    </path>
+
+    <path id="test.class.path">
+        <path refid="derby.lib"/>
+        <path refid="javaee"/>
+        <path refid="junit.lib"/>
+    </path>
+
+    <target name="dist">
+    </target>
+
+    <target name="compile" depends="javac,gwtc,copy-to-artifact">
+    </target>
+
+    <target name="test" depends="javac.tests,unit-test"/>
+
+    <target name="copy-to-artifact">
+        <copy todir="${module.artifact.output}">
+            <fileset dir="web"/>
+        </copy>
+
+        <mkdir dir="${module.artifact.output}/WEB-INF/classes"/>
+        <copy todir="${module.artifact.output}/WEB-INF/classes">
+            <fileset dir="${module.production.output}"/>
+            <fileset dir="${production.output}/common"/>
+        </copy>
+
+        <mkdir dir="${module.artifact.output}/WEB-INF/lib"/>
+        <copy todir="${module.artifact.output}/WEB-INF/lib">
+            <path refid="project.libs"/>
+            <path refid="derby.lib"/>
+        </copy>
+    </target>
+
+    <target name="clean">
+        <delete dir="${module.production.output}" failonerror="false"/>
+        <delete dir="${module.test.output}" failonerror="false"/>
+    </target>
+
+    <target name="javac">
+        <mkdir dir="${module.production.output}"/>
+        <javac includes="**" encoding="utf-8"
+               destdir="${module.production.output}"
+               source="1.6" target="1.6" nowarn="true"
+               debug="true" debuglevel="lines,vars,source"
+               includeantruntime="false">
+            <src path="src/main/java"/>
+            <classpath refid="project.class.path"/>
+            <classpath refid="javaee"/>
+        </javac>
+
+        <copy todir="${module.production.output}">
+            <fileset dir="src/main/java" includes="**/*.properties,**/*.xml,**/*.png"/>
+        </copy>
+    </target>
+
+    <target name="gwtc">
+        <java failonerror="true" fork="true" classname="com.google.gwt.dev.Compiler">
+            <classpath>
+                <pathelement location="src/main/java/"/>
+                <path refid="gwt-dev.lib"/>
+                <path refid="project.class.path"/>
+            </classpath>
+            <jvmarg value="-Xmx256M"/>
+            <arg value="org.bug4j.server.gwt.gwt"/>
+            <arg value="-war"/>
+            <arg value="${module.artifact.output}"/>
+        </java>
+    </target>
+
+    <target name="javac.tests" depends="javac" description="Compiles test code">
+        <mkdir dir="${module.test.output}"/>
+        <javac includes="**" encoding="utf-8"
+               destdir="${module.test.output}"
+               source="1.6" target="1.6" nowarn="true"
+               debug="true" debuglevel="lines,vars,source"
+               includeantruntime="false">
+            <src path="src/test/java"/>
+            <classpath refid="project.class.path"/>
+            <classpath refid="test.class.path"/>
+            <classpath location="${module.production.output}"/>
+        </javac>
+    </target>
+
+    <target name="unit-test">
+        <mkdir dir="${junit.output}"/>
+        <junit fork="yes" haltonfailure="no" showoutput="true">
+            <formatter type="xml"/>
+            <formatter type="plain"/>
+            <classpath>
+                <path refid="project.class.path"/>
+                <path refid="test.class.path"/>
+                <pathelement path="${module.production.output}"/>
+                <pathelement path="${module.test.output}"/>
+            </classpath>
+            <batchtest todir="${junit.output}">
+                <fileset dir="src/test/java/">
+                    <include name="org/bug4j/server/**/*Test.java"/>
+                </fileset>
+            </batchtest>
+        </junit>
+    </target>
+
+</project>
