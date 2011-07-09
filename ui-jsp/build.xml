@@ -15,7 +15,7 @@
   ~    limitations under the License.
   -->
 
-<project name="ui-jsp" default="dist" basedir=".">
+<project name="ui-jsp" default="compile" basedir=".">
 
     <property name="home" location=".."/>
     <import file="../build_include.xml"/>
@@ -31,12 +31,12 @@
         <path refid="commons-dbutils.lib"/>
         <path refid="gwt-server.lib"/>
         <path refid="gwt-visualization.lib"/>
+        <path refid="log4j.lib"/>
     </path>
 
     <path id="project.class.path">
         <path refid="project.libs"/>
         <path refid="jetbrains.annotations.lib"/>
-        <path refid="log4j.lib"/>
         <pathelement location="${production.output}/common"/>
     </path>
 
@@ -46,11 +46,7 @@
         <path refid="junit.lib"/>
     </path>
 
-    <target name="dist">
-    </target>
-
-    <target name="compile" depends="javac,gwtc,copy-to-artifact">
-    </target>
+    <target name="compile" depends="javac,gwtc,copy-to-artifact"/>
 
     <target name="test" depends="javac.tests,unit-test"/>
 

@@ -15,7 +15,7 @@
   ~    limitations under the License.
   -->
 
-<project name="common" default="dist" basedir=".">
+<project name="common" default="compile" basedir=".">
 
     <property name="home" location=".."/>
     <import file="../build_include.xml"/>
@@ -32,10 +32,6 @@
         <path refid="junit.lib"/>
         <path refid="commons-io.lib"/>
     </path>
-
-    <target name="dist">
-        <echo message="out:${junit.output}"/>
-    </target>
 
     <target name="compile" depends="javac"/>
     <target name="test" depends="javac.tests,unit-test"/>

@@ -57,7 +57,7 @@
     </path>
 
     <path id="javaee">
-        <filelist dir="${dep-home}/apache-tomcat-7.0.14/lib">
+        <filelist dir="${tomcat-home}/lib">
             <file name="servlet-api.jar"/>
         </filelist>
     </path>
@@ -70,5 +70,10 @@
 
     <path id="jetbrains.annotations.lib" location="${dep-home}/jetbrains/annotations.jar"/>
 
-    <path id="log4j.lib" location="${dep-home}/apache-log4j-1.2.16/log4j-1.2.16.jar"/>
+    <path id="log4j.lib">
+        <filelist dir="${dep-home}/apache-log4j-1.2.16/">
+            <file name="log4j-1.2.16.jar"/>
+        </filelist>
+    </path>
+
 </project>
