@@ -15,7 +15,7 @@
   ~    limitations under the License.
   -->
 
-<project name="client" default="dist" basedir=".">
+<project name="client" default="compile" basedir=".">
     <property name="home" location=".."/>
     <import file="../build_include.xml"/>
 
@@ -35,11 +35,7 @@
         <path refid="junit.lib"/>
     </path>
 
-    <target name="dist">
-    </target>
-
-    <target name="compile" depends="javac,jar">
-    </target>
+    <target name="compile" depends="javac,jar"/>
 
     <target name="test" depends="javac.tests,unit-test"/>
 

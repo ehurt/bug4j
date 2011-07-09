@@ -20,7 +20,22 @@
         </copy>
 
         <mkdir dir="${dist}/server"/>
-        <zip destfile="${dist}/server/bug4j.war" basedir="${artifacts.output}/ui_jsp_war_exploded"/>
+        <copy todir="${dist}/server">
+            <fileset dir="${tomcat-home}">
+                <exclude name="/bin/bug4j/"/>
+                <exclude name="/logs/**"/>
+                <exclude name="/temp/"/>
+                <exclude name="/webapps/bug4j/"/>
+                <exclude name="/webapps/bug4j.war"/>
+                <exclude name="/work/**"/>
+            </fileset>
+            <fileset dir="ui-jsp/src/main/resources/server/"/>
+        </copy>
+        <copy todir="${dist}" overwrite="true">
+            <fileset dir="ui-jsp/src/main/resources/"/>
+        </copy>
+        <replace file="${dist}/server/conf/server.xml" token="8080" value="8063"/>
+        <zip destfile="${dist}/server/webapps/bug4j.war" basedir="${artifacts.output}/ui_jsp_war_exploded"/>
     </target>
 
     <target name="compile">
