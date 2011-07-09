@@ -135,7 +135,7 @@ public class Bug4j implements EntryPoint {
         flowPanel.add(menuBar);
 
         dockLayoutPanel.addLineEnd(flowPanel, 20);
-        final HTML html = new HTML("<img src=\"../icons/splat.png\"/><span class=\"logo\">Bug4J</span>");
+        final HTML html = new HTML("<img src=\"../icons/splat.png\"/><span class=\"logo\">bug4j</span>");
         dockLayoutPanel.add(html);
 
         Bug4jService.App.getInstance().getDefaultApplication(new AsyncCallback<String>() {
