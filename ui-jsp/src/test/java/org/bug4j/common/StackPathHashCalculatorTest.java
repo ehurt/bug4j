@@ -16,6 +16,7 @@
 
 package org.bug4j.common;
 
+import org.bug4j.server.processor.StackPathHashCalculator;
 import org.junit.Assert;
 import org.junit.Test;
 

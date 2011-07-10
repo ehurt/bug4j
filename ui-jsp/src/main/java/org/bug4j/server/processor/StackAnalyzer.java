@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package org.bug4j.common;
+package org.bug4j.server.processor;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -22,6 +22,12 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Determines the title for a bug based on the stack trace.
+ * The title format will be something like "exception-name at class-file:line-number"
+ * The idea is that we get the deepest method call that matches the application's packages.
+ * Even if the application packages are not specified, we still consider that java.*, javax.* and sun.* are not part of the application.
+ */
 public class StackAnalyzer {
     private static final Pattern STACK_PATTERN = Pattern.compile("\tat ([^()]*)\\((.*)\\)");
     private static final String[] STD_PACKAGES = {
@@ -36,6 +42,12 @@ public class StackAnalyzer {
         _applicationPackages = applicationPackages;
     }
 
+    /**
+     * Analyzes the stack trace and determines a good title.
+     *
+     * @param stackLines
+     * @return
+     */
     public String getTitle(List<String> stackLines) {
         final Iterator<String> iterator = stackLines.iterator();
         if (iterator.hasNext()) {
@@ -47,6 +59,12 @@ public class StackAnalyzer {
         return null;
     }
 
+    /**
+     * Extracts the causes of a stack
+     *
+     * @param stackLines the stack trace
+     * @return a list of exception class names
+     */
     public List<String> getCauses(List<String> stackLines) {
         final List<String> ret = new ArrayList<String>();
         final Iterator<String> iterator = stackLines.iterator();

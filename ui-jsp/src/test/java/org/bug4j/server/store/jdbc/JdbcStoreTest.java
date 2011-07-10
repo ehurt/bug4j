@@ -17,11 +17,11 @@
 package org.bug4j.server.store.jdbc;
 
 import org.bug4j.common.FullStackHashCalculator;
-import org.bug4j.common.StackAnalyzer;
-import org.bug4j.common.StackPathHashCalculator;
 import org.bug4j.common.TextToLines;
 import org.bug4j.server.gwt.client.data.Stack;
 import org.bug4j.server.gwt.client.data.Strain;
+import org.bug4j.server.processor.StackAnalyzer;
+import org.bug4j.server.processor.StackPathHashCalculator;
 import org.bug4j.server.store.Store;
 import org.bug4j.server.store.TestingStore;
 import org.junit.After;
@@ -78,7 +78,7 @@ public class JdbcStoreTest {
 
     @Test
     public void test() throws Exception {
-        final List<String> stackLines = Arrays.asList(TextToLines.toLines(STACK_TEXT));
+        final List<String> stackLines = Arrays.asList(TextToLines.toLineArray(STACK_TEXT));
         final List<String> appPackages = _store.getPackages(APP);
         final StackAnalyzer stackAnalyzer = new StackAnalyzer();
         stackAnalyzer.setApplicationPackages(appPackages);

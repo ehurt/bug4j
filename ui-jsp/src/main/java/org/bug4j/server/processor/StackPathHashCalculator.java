@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package org.bug4j.common;
+package org.bug4j.server.processor;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -25,6 +25,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * The StackPathHashCalculator is used to de-duplicate bugs based on the method calls but without line numbers.
+ * This allows to match two hits reported by two slightly different versions of the application where one of the
+ * method calls might be off by a few lines.
+ */
 public class StackPathHashCalculator {
     private static final Pattern STACK_PATTERN = Pattern.compile("\tat ([^()]*)\\((.*)\\)");
 

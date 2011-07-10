@@ -22,6 +22,8 @@ import java.util.ArrayList;
 
 /**
  * This class demonstrates how to manually call the bug4j agent.
+ * This is probably the hardest way to instrument your application but also the most direct.
+ * See bug4j.properties
  */
 public class DemoManual {
     public static void main(String[] args) throws InterruptedException {

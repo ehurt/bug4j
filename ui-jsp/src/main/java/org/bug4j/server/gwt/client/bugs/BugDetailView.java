@@ -27,13 +27,13 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.*;
+import org.bug4j.common.TextToLines;
 import org.bug4j.server.gwt.client.Bug4j;
 import org.bug4j.server.gwt.client.Bug4jService;
 import org.bug4j.server.gwt.client.data.Bug;
 import org.bug4j.server.gwt.client.data.BugHit;
 import org.bug4j.server.gwt.client.data.BugHitAndStack;
 import org.bug4j.server.gwt.client.data.Filter;
-import org.bug4j.server.gwt.client.util.TextToLines;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -320,7 +320,7 @@ class BugDetailView {
             lineStarts.add("\tat " + appPackage);
         }
 
-        final String[] lines = TextToLines.toArray(stackText);
+        final String[] lines = TextToLines.toLineArray(stackText);
         for (String line : lines) {
             boolean isImportant = false;
             if (line.startsWith("\t")) {

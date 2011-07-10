@@ -23,6 +23,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * This demo program will create an exception and report it through log4j.
+ * bug4j will handle the error and report a hit to the server.
+ * See log4j.properties
+ */
 public class Log4jDemo {
     private static final Logger LOGGER = Logger.getLogger(Log4jDemo.class);
 
@@ -46,6 +51,7 @@ public class Log4jDemo {
 
     private static void elvis() {
         try {
+            // Create the exception.
             final InputStream inputStream = new FileInputStream("/is/anybody/home?");
             inputStream.close();
         } catch (IOException e) {
