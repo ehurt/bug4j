@@ -17,18 +17,19 @@
 package org.bug4j.server.processor;
 
 import org.bug4j.common.FullStackHashCalculator;
-import org.bug4j.common.StackAnalyzer;
-import org.bug4j.common.StackPathHashCalculator;
+import org.bug4j.common.TextToLines;
 import org.bug4j.server.gwt.client.data.BugHit;
 import org.bug4j.server.gwt.client.data.Stack;
 import org.bug4j.server.gwt.client.data.Strain;
-import org.bug4j.server.gwt.client.util.TextToLines;
 import org.bug4j.server.store.Store;
 import org.bug4j.server.store.StoreFactory;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+/**
+ * This is how we ingest a report.
+ */
 public final class BugProcessor {
     /**
      * When trying to match by title, how many stacks we want to look at.
@@ -43,26 +44,31 @@ public final class BugProcessor {
      */
     public static long process(String app, String version, @Nullable String message, @Nullable String user, String stackText) {
         final Store store = StoreFactory.getStore();
-        final List<String> stackLines = TextToLines.toList(stackText);
+        final List<String> stackLines = TextToLines.toLineList(stackText);
 
+        // First try based on the full hash of the exception.
+        // In theory the client should not have sent the stack if an exact match already existed.
         final String fullHash = FullStackHashCalculator.getTextHash(stackLines);
-
         Stack stack = store.getStackByHash(app, fullHash);
         if (stack == null) {
-            final List<String> appPackages = store.getPackages(app);
-            final StackAnalyzer stackAnalyzer = new StackAnalyzer();
-            stackAnalyzer.setApplicationPackages(appPackages);
-            final String title = stackAnalyzer.getTitle(stackLines);
-
-            if (title == null) {
-                throw new IllegalStateException("Failed to analyze a stack [\n" + stackText + "\n]");
-            }
-
+            // Try to find a matching strain.
             final String strainHash = StackPathHashCalculator.analyze(stackLines);
             Strain strain = store.getStrainByHash(app, strainHash);
             if (strain == null) {
+                // Determine the title that the bug would get.
+                final List<String> appPackages = store.getPackages(app);
+                final StackAnalyzer stackAnalyzer = new StackAnalyzer();
+                stackAnalyzer.setApplicationPackages(appPackages);
+                final String title = stackAnalyzer.getTitle(stackLines);
+
+                if (title == null) {
+                    throw new IllegalStateException("Failed to analyze a stack [\n" + stackText + "\n]");
+                }
+
+                // Try to find a bug with the exact same title
                 Long bugId = identifyBugByTitle(store, app, stackLines, title);
                 if (bugId == null) {
+                    // if everything failed then it is a new bug.
                     bugId = store.createBug(app, title);
                 }
                 strain = store.createStrain(bugId, strainHash);
@@ -88,7 +94,7 @@ public final class BugProcessor {
             for (BugHit hit : hits) {
                 final long hitId = hit.getHitId();
                 final String thatStackText = store.getStack(hitId);
-                final List<String> thatStackLines = TextToLines.toList(thatStackText);
+                final List<String> thatStackLines = TextToLines.toLineList(thatStackText);
                 final List<String> thatCauses = stackAnalyzer.getCauses(thatStackLines);
                 if (thisCauses.equals(thatCauses)) {
                     return bugId;

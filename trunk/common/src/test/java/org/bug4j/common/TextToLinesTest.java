@@ -22,27 +22,39 @@ import org.junit.Test;
 /**
  */
 public class TextToLinesTest {
+    /**
+     * Test with LF
+     */
     @Test
     public void testLf() throws Exception {
-        final String[] strings = TextToLines.toLines("line1\nline2\nline3\n");
+        final String[] strings = TextToLines.toLineArray("line1\nline2\nline3\n");
         Assert.assertArrayEquals(new String[]{"line1", "line2", "line3"}, strings);
     }
 
+    /**
+     * Test with CR+LF
+     */
     @Test
     public void testCrLf() throws Exception {
-        final String[] strings = TextToLines.toLines("line1\r\nline2\r\nline3\r\n");
+        final String[] strings = TextToLines.toLineArray("line1\r\nline2\r\nline3\r\n");
         Assert.assertArrayEquals(new String[]{"line1", "line2", "line3"}, strings);
     }
 
+    /**
+     * Test without an ending LF
+     */
     @Test
     public void testLfNoLast() throws Exception {
-        final String[] strings = TextToLines.toLines("line1\nline2\nline3");
+        final String[] strings = TextToLines.toLineArray("line1\nline2\nline3");
         Assert.assertArrayEquals(new String[]{"line1", "line2", "line3"}, strings);
     }
 
+    /**
+     * Test without an ending CR+LF
+     */
     @Test
     public void testCrLfNoLast() throws Exception {
-        final String[] strings = TextToLines.toLines("line1\r\nline2\r\nline3");
+        final String[] strings = TextToLines.toLineArray("line1\r\nline2\r\nline3");
         Assert.assertArrayEquals(new String[]{"line1", "line2", "line3"}, strings);
     }
 }

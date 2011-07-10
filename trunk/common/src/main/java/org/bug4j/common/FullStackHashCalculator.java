@@ -22,7 +22,17 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
+/**
+ * Calculates a hash code for a whole stack trace.
+ * This allows to quickly find exact bug duplicates
+ */
 public class FullStackHashCalculator {
+    /**
+     * Returns a MD5 of the full stack trace
+     *
+     * @param stackLines the stack trace
+     * @return the MD5
+     */
     public static String getTextHash(List<String> stackLines) {
         final String ret;
         try {

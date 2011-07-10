@@ -14,9 +14,10 @@
  *    limitations under the License.
  */
 
-package org.bug4j.common;
+package org.bug4j.server.processor;
 
 import org.apache.commons.io.IOUtils;
+import org.bug4j.common.TextToLines;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -54,7 +55,7 @@ public class StackAnalyzerTest {
             final PrintStream printStream = new PrintStream(byteArrayOutputStream);
             e.printStackTrace(printStream);
             final String stackTrace = byteArrayOutputStream.toString();
-            final String[] lines = TextToLines.toLines(stackTrace);
+            final String[] lines = TextToLines.toLineArray(stackTrace);
             final List<String> stackLines = Arrays.asList(lines);
 
             final StackAnalyzer stackAnalyzer = new StackAnalyzer();
@@ -89,7 +90,7 @@ public class StackAnalyzerTest {
             final PrintStream printStream = new PrintStream(byteArrayOutputStream);
             e.printStackTrace(printStream);
             final String stackTrace = byteArrayOutputStream.toString();
-            final String[] lines = TextToLines.toLines(stackTrace);
+            final String[] lines = TextToLines.toLineArray(stackTrace);
             final List<String> stackLines = Arrays.asList(lines);
 
             final StackAnalyzer stackAnalyzer = new StackAnalyzer();

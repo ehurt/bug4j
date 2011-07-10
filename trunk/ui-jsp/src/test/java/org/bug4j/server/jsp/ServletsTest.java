@@ -17,10 +17,10 @@
 package org.bug4j.server.jsp;
 
 import org.bug4j.common.FullStackHashCalculator;
+import org.bug4j.common.TextToLines;
 import org.bug4j.server.gwt.client.data.Bug;
 import org.bug4j.server.gwt.client.data.BugHit;
 import org.bug4j.server.gwt.client.data.Filter;
-import org.bug4j.server.gwt.client.util.TextToLines;
 import org.bug4j.server.processor.BugProcessor;
 import org.bug4j.server.store.Store;
 import org.bug4j.server.store.StoreFactory;
@@ -83,7 +83,7 @@ public class ServletsTest {
     @Test
     @Ignore("Broken")
     public void test1() throws Exception {
-        final List<String> stackLines = TextToLines.toList(STACK_TEXT);
+        final List<String> stackLines = TextToLines.toLineList(STACK_TEXT);
 
         { // Submit a new bug
             final String textHash = FullStackHashCalculator.getTextHash(stackLines);

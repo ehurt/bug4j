@@ -60,7 +60,7 @@ class ReportableEvent {
             printStream.close();
         }
         final String stackText = byteArrayOutputStream.toString();
-        ret = TextToLines.toLines(stackText);
+        ret = TextToLines.toLineArray(stackText);
         return ret;
     }
 }
