@@ -98,6 +98,7 @@ public class JdbcStore extends Store {
                         " APP_PACKAGE VARCHAR(64) NOT NULL" +
                         ")"
                 );
+                statement.execute("INSERT INTO APP_PACKAGES (APP,APP_PACKAGE)VALUES('bug4jDemo','org.bug4j.demo')");
             }
 
             if (!doesTableExist(statement, "BUG")) {
@@ -650,7 +651,7 @@ public class JdbcStore extends Store {
         final Filter ret = new Filter();
         final String title = getUserPref(remoteUser, "FILTER_TITLE", null);
         final Integer hitWithinDays = getUserPref_Integer(remoteUser, "FILTER_DAYS", 7);
-        final String multiUsers = getUserPref(remoteUser, "FILTER_MULTI_USERS", Boolean.TRUE.toString());
+        final String multiUsers = getUserPref(remoteUser, "FILTER_MULTI_USERS", Boolean.FALSE.toString());
         ret.setTitle(title);
         ret.setHitWithinDays(hitWithinDays);
         ret.setReportedByMultiple(Boolean.parseBoolean(multiUsers));

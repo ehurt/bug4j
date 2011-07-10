@@ -9,6 +9,7 @@
     <target name="package-dist">
         <property name="dist" value="${out}/dist"/>
 
+        <!-- client -->
         <mkdir dir="${dist}/client/lib"/>
         <copy todir="${dist}/client" file="${artifacts.output}/bug4j.jar"/>
         <zip destfile="${dist}/client/bug4j-src.zip">
@@ -17,8 +18,10 @@
         </zip>
         <copy todir="${dist}/client/lib">
             <path refid="httpcomponents-client"/>
+            <path refid="log4j.lib"/>
         </copy>
 
+        <!-- server -->
         <mkdir dir="${dist}/server"/>
         <copy todir="${dist}/server">
             <fileset dir="${tomcat-home}">
@@ -36,6 +39,17 @@
         </copy>
         <replace file="${dist}/server/conf/server.xml" token="8080" value="8063"/>
         <zip destfile="${dist}/server/webapps/bug4j.war" basedir="${artifacts.output}/ui_jsp_war_exploded"/>
+
+        <!-- demo -->
+        <copy todir="${dist}/demo/" overwrite="true">
+            <fileset dir="demo/">
+                <exclude name="/project/"/>
+            </fileset>
+        </copy>
+        <ant dir="${dist}/demo/log4j/" target="compile"/>
+        <delete dir="${dist}/demo/log4j/out/" failonerror="false"/>
+        <ant dir="${dist}/demo/manual/" target="compile"/>
+        <delete dir="${dist}/demo/manual/out/" failonerror="false"/>
     </target>
 
     <target name="compile">

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  ~ Copyright 2011 Cedric Dandoy
+  ~
+  ~    Licensed under the Apache License, Version 2.0 (the "License");
+  ~    you may not use this file except in compliance with the License.
+  ~    You may obtain a copy of the License at
+  ~
+  ~        http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~    Unless required by applicable law or agreed to in writing, software
+  ~    distributed under the License is distributed on an "AS IS" BASIS,
+  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~    See the License for the specific language governing permissions and
+  ~    limitations under the License.
+  -->
+
+<project name="demo-manual" default="all" basedir=".">
+
+    <target name="all" depends="clean,compile,run"/>
+
+    <target name="clean">
+        <delete dir="out" failonerror="false"/>
+        <delete file="demo-manual.jar" failonerror="false">
+        </delete>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="out"/>
+        <javac includes="**" encoding="utf-8"
+               destdir="out"
+               debug="true" debuglevel="lines,vars,source"
+               includeantruntime="false">
+            <src path="src"/>
+            <classpath>
+                <pathelement location="../../client/bug4j.jar"/>
+            </classpath>
+        </javac>
+        <copy todir="out" file="src/bug4j.properties"/>
+        <jar destfile="demo-manual.jar" basedir="out">
+            <manifest>
+                <attribute name="Main-Class" value="org.bug4j.demo.DemoManual"/>
+                <attribute name="Class-Path" value="../../client/bug4j.jar ../../client/lib/commons-logging-1.1.1.jar ../../client/lib/httpclient-4.1.1.jar ../../client/lib/httpcore-4.1.jar"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="run">
+        <java jar="demo-manual.jar" fork="true"/>
+    </target>
+
+</project>

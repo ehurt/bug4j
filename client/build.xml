@@ -41,7 +41,7 @@
 
     <target name="jar">
         <jar destfile="${module.jar}">
-            <fileset dir="${production.output}"/>
+            <fileset dir="${production.output}/client"/>
             <fileset dir="${production.output}/common"/>
         </jar>
     </target>
