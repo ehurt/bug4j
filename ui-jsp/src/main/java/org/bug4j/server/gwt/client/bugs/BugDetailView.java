@@ -320,7 +320,7 @@ class BugDetailView {
             lineStarts.add("\tat " + appPackage);
         }
 
-        final String[] lines = TextToLines.toLineArray(stackText);
+        final String[] lines = toLineArray(stackText);
         for (String line : lines) {
             boolean isImportant = false;
             if (line.startsWith("\t")) {
@@ -343,4 +343,40 @@ class BugDetailView {
         }
         return safeHtmlBuilder.toSafeHtml();
     }
+
+    /**
+     * Transforms a text string into an array of Strings.
+     * This code is "stolen" from {@link TextToLines} because sharing from another module did not work with GWT+IntelliJ.
+     *
+     * @param text input text
+     * @return an array of lines
+     */
+    public static String[] toLineArray(String text) {
+        final List<String> ret = new ArrayList<String>();
+        final int length = text.length();
+        int from = 0;
+        int to = 0;
+        while (to < length) {
+            final char c = text.charAt(to);
+            if (c == '\r') {
+                if (to + 1 < length && text.charAt(to + 1) == '\n') {
+                    final String line = text.substring(from, to);
+                    ret.add(line);
+                    to++;
+                    from = to + 1;
+                }
+            } else if (c == '\n') {
+                final String line = text.substring(from, to);
+                ret.add(line);
+                from = to + 1;
+            }
+            to++;
+        }
+        if (from < to) {
+            final String line = text.substring(from, to);
+            ret.add(line);
+        }
+        return ret.toArray(new String[ret.size()]);
+    }
+
 }
