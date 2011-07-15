@@ -143,12 +143,39 @@ div#main {
     color: #797979;
 }
 
-#dd-menu {
-    padding: 0 8px 0 0;
+.headerLabel {
+    display: inline;
+    color: #333;
+}
+
+.headerDropDown {
+    display: inline;
+    color: #333;
+    padding-right: 12px;
+    margin: 0 4px;
+    border-bottom: 1px solid white;
     background-image: url("../icons/dropdown.png");
     background-repeat: no-repeat;
     background-position: right center;
+    cursor: pointer;
 }
 
+.headerDropDown:hover {
+    color: #FF6600;
+    border-bottom: 1px solid #333;
+}
 
+.headerSelTitle {
+    background-color: #E3E8F3;
+}
+
+.headerSel {
+    color: #333;
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+.headerSel:hover {
+    background-color: #a9a9a9;
+}
 

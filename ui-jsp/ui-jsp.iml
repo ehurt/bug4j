@@ -19,7 +19,7 @@
       <configuration>
         <setting name="compilerParameters" value="-localWorkers 4" />
         <setting name="compilerMaxHeapSize" value="128" />
-        <setting name="gwtScriptOutputStyle" value="DETAILED" />
+        <setting name="gwtScriptOutputStyle" value="OBF" />
         <setting name="gwtSdkUrl" value="file://$dep-home$/gwt-2.3.0" />
         <setting name="webFacet" value="Web" />
       </configuration>

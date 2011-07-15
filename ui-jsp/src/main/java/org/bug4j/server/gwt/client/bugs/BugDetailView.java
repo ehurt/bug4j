@@ -17,8 +17,6 @@
 package org.bug4j.server.gwt.client.bugs;
 
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -94,6 +92,9 @@ class BugDetailView {
     private CellTable<BugHit> buildCellTable() {
         _cellTable = new CellTable<BugHit>(PAGE_SIZE);
         _cellTable.setWidth("100%", true);
+        final Label emptyTableWidget = new Label("No hits");
+        emptyTableWidget.getElement().getStyle().setFontSize(20, Style.Unit.PT);
+        _cellTable.setEmptyTableWidget(emptyTableWidget);
 
         _dateColumn.setSortable(true);
         _versionColumn.setSortable(true);
@@ -196,33 +197,6 @@ class BugDetailView {
         final ScrollPanel scrollPanel = new ScrollPanel(_stack);
         scrollPanel.addStyleName("BugDetailView-hit-stack-sp");
         return scrollPanel;
-    }
-
-    private Widget buildToolbar() {
-        final HorizontalPanel toolbar = new HorizontalPanel();
-        final Button delete = new Button("Delete");
-        delete.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                whenDelete();
-            }
-        });
-        toolbar.add(delete);
-        return toolbar;
-    }
-
-    private void whenDelete() {
-        Bug4jService.App.getInstance().deleteBug(_bug.getId(), new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert(caught.getMessage());
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-                _displaysBugs.whenBugListChanges();
-            }
-        });
     }
 
     public void clear() {
