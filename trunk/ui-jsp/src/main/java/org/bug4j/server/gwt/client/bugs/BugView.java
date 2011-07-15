@@ -55,7 +55,9 @@ public class BugView implements DisplaysBugs {
         _bug4j.addPropertyListener(new PropertyListener<String>() {
             @Override
             public void propertyChanged(String key, String value) {
-                refreshBugs();
+                if ("packages".equals(key)) {
+                    refreshBugs();
+                }
             }
         });
 
@@ -146,7 +148,7 @@ public class BugView implements DisplaysBugs {
 
     private CellTable<Bug> createTable() {
         _cellTable = new CellTable<Bug>(PAGE_SIZE);
-        final Label noDataLabel = new Label("No data");
+        final Label noDataLabel = new Label("No bugs");
         noDataLabel.getElement().getStyle().setFontSize(20, Style.Unit.PT);
         _cellTable.setEmptyTableWidget(noDataLabel);
         _cellTable.setWidth("100%", true);

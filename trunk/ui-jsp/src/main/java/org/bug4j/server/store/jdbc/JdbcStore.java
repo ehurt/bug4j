@@ -21,7 +21,6 @@ import org.apache.commons.io.IOUtils;
 import org.bug4j.server.gwt.client.data.*;
 import org.bug4j.server.gwt.client.data.Stack;
 import org.bug4j.server.store.Store;
-import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.Nullable;
 
 import javax.naming.Context;
@@ -36,7 +35,6 @@ import java.util.*;
 public class JdbcStore extends Store {
     private static JdbcStore INSTANCE;
     private static final int STACK_SIZE_LIMIT = 128 * 1024;
-    @NonNls
     private static final String PREF_DEFAULT_APP = "DEFAULT_APP";
     private final Set<String> _knownApps = new HashSet<String>();
     private static final long DAY = 1000L * 60 * 60 * 24;
@@ -89,6 +87,9 @@ public class JdbcStore extends Store {
                         " VER VARCHAR(32)" +
                         ")"
                 );
+            } else {
+                // TODO: Delete this
+                statement.execute("update APP set APP='Discovery Manager' where APP='My Application'");
             }
 
             if (!doesTableExist(statement, "APP_PACKAGES")) {
@@ -99,6 +100,8 @@ public class JdbcStore extends Store {
                         ")"
                 );
                 statement.execute("INSERT INTO APP_PACKAGES (APP,APP_PACKAGE)VALUES('bug4jDemo','org.bug4j.demo')");
+            } else { // TODO: Delete this
+                statement.execute("update APP_PACKAGES set APP='Discovery Manager' where APP='My Application'");
             }
 
             if (!doesTableExist(statement, "BUG")) {
@@ -111,6 +114,8 @@ public class JdbcStore extends Store {
                 );
                 statement.execute("CREATE INDEX BUG_ID_IDX ON BUG(BUG_ID)");
                 statement.execute("CREATE INDEX BUG_TITLE_IDX ON BUG(TITLE)");
+            } else { // TODO: Delete this
+                statement.execute("update BUG set APP='Discovery Manager' where APP='My Application'");
             }
 
             if (!doesTableExist(statement, "STRAIN")) {
@@ -179,6 +184,9 @@ public class JdbcStore extends Store {
                         ")"
                 );
                 statement.execute("CREATE INDEX USER_NAME_IDX ON USER_PREFS(USER_NAME,PREF_KEY)");
+            } else {
+                // TODO: Delete this
+                statement.execute("update USER_PREFS set PREF_VALUE='Discovery Manager' WHERE PREF_KEY='DEFAULT_APP' AND PREF_VALUE='My Application'");
             }
 
             if (!doesTableExist(statement, "USER_READ")) {

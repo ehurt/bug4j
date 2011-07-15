@@ -16,9 +16,12 @@
 
 package org.bug4j.server.gwt.client.settings;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
@@ -33,6 +36,7 @@ import java.util.List;
 public class SettingsDialog extends BaseDialog {
     private Grid _grid;
     private final List<String> _packages = new ArrayList<String>();
+    private TextBox _textBox;
 
     public SettingsDialog(Bug4j bug4j) {
         super("Setup", bug4j);
@@ -46,21 +50,29 @@ public class SettingsDialog extends BaseDialog {
         return ret;
     }
 
+    @Override
+    protected void onLoad() {
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                _textBox.setFocus(true);
+            }
+        });
+    }
+
     private Widget createPackagesPanel() {
         final DockLayoutPanel ret = new DockLayoutPanel(Style.Unit.EM);
         final DockLayoutPanel addPanel = new DockLayoutPanel(Style.Unit.PX);
         {
-            final TextBox textBox = new TextBox();
+            _textBox = new TextBox();
             final Button addButton = new Button("Add");
             addPanel.addEast(addButton, 75);
-            addPanel.add(textBox);
+            addPanel.add(_textBox);
 
             addButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    final String packageName = textBox.getText();
-                    textBox.setText("");
-                    whenAdd(packageName);
+                    whenAdd();
                 }
             });
         }
@@ -77,12 +89,14 @@ public class SettingsDialog extends BaseDialog {
         return ret;
     }
 
-    private void whenAdd(String packageName) {
+    private void whenAdd() {
+        final String packageName = _textBox.getText();
         if (!packageName.isEmpty()) {
             if (!_packages.contains(packageName)) {
                 _packages.add(packageName);
                 refreshUI();
             }
+            _textBox.setText("");
         }
     }
 
@@ -131,6 +145,24 @@ public class SettingsDialog extends BaseDialog {
     }
 
     @Override
+    protected void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+        boolean doAdd = false;
+        if (Event.ONKEYDOWN == event.getTypeInt()) {
+            if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
+                final String text = _textBox.getText();
+                if (!text.isEmpty()) {
+                    doAdd = true;
+                }
+            }
+        }
+        if (doAdd) {
+            whenAdd();
+        } else {
+            super.onPreviewNativeEvent(event);
+        }
+    }
+
+    @Override
     protected void whenOk() {
         final Bug4j bug4j = getBug4j();
         final String application = bug4j.getApplication();
@@ -148,5 +180,4 @@ public class SettingsDialog extends BaseDialog {
             });
         }
     }
-
 }
