@@ -44,6 +44,7 @@
         <path refid="derby.lib"/>
         <path refid="javaee"/>
         <path refid="junit.lib"/>
+        <pathelement location="src/test/java/"/>
     </path>
 
     <target name="compile" depends="javac,gwtc,copy-to-artifact"/>
@@ -136,5 +137,4 @@
             </batchtest>
         </junit>
     </target>
-
 </project>

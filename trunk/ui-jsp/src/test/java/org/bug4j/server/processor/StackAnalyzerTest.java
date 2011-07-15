@@ -70,7 +70,7 @@ public class StackAnalyzerTest {
 
         final StackAnalyzer stackAnalyzer = new StackAnalyzer();
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        final InputStream inputStream = classLoader.getResourceAsStream("org/bug4j/common/StackAnalyzerTest.1.txt");
+        final InputStream inputStream = classLoader.getResourceAsStream("org/bug4j/server/processor/StackAnalyzerTest.1.txt");
         try {
             final List lines = IOUtils.readLines(inputStream);
             final String title = stackAnalyzer.getTitle(lines);
