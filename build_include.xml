@@ -7,6 +7,11 @@
     <property name="dep-home" value="${env.dep-home}"/>
     <property file="${home}/build.properties"/>
 
+    <tstamp>
+        <format property="snapshot-timestamp" pattern="yyyyMMdd"/>
+    </tstamp>
+    <property name="bug4j-release-name" value="bug4j-0.0.1-SNAPSHOT-${snapshot-timestamp}"/>
+
     <path id="commons-io.lib">
         <filelist dir="${dep-home}/commons-io-1.4">
             <file name="commons-io-1.4.jar"/>

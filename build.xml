@@ -34,6 +34,7 @@
             </fileset>
             <fileset dir="ui-jsp/src/main/resources/server/"/>
         </copy>
+        <mkdir dir="${dist}/server/logs"/>
         <copy todir="${dist}" overwrite="true">
             <fileset dir="ui-jsp/src/main/resources/"/>
         </copy>
@@ -50,6 +51,10 @@
         <delete dir="${dist}/demo/log4j/out/" failonerror="false"/>
         <ant dir="${dist}/demo/manual/" target="compile"/>
         <delete dir="${dist}/demo/manual/out/" failonerror="false"/>
+        <zip destfile="${out}/${bug4j-release-name}.zip">
+            <zipfileset dir="${dist}" prefix="${bug4j-release-name}" excludes="server/bin/*.sh" filemode="644"/>
+            <zipfileset dir="${dist}" prefix="${bug4j-release-name}" includes="server/bin/*.sh" filemode="755"/>
+        </zip>
     </target>
 
     <target name="compile">
