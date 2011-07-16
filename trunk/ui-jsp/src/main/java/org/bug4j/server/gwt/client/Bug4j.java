@@ -59,7 +59,7 @@ public class Bug4j implements EntryPoint {
         Bug4jService.App.getInstance().getUserName(new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
-                Window.open("../j_spring_security_logout", "_self", "");
+                whenLogout();
             }
 
             @Override
