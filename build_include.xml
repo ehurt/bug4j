@@ -24,6 +24,12 @@
         </filelist>
     </path>
 
+    <path id="commons-logging.lib">
+        <filelist dir="${dep-home}/commons-logging-1.1.1">
+            <file name="commons-logging-1.1.1.jar"/>
+        </filelist>
+    </path>
+
     <path id="derby.lib">
         <filelist dir="${dep-home}/db-derby-10.7.1.1-bin/lib">
             <file name="derby.jar"/>
@@ -79,6 +85,18 @@
         <filelist dir="${dep-home}/apache-log4j-1.2.16/">
             <file name="log4j-1.2.16.jar"/>
         </filelist>
+    </path>
+
+    <path id="spring-framework.lib">
+        <fileset dir="${dep-home}/spring-framework-3.0.5.RELEASE/dist/">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+    <path id="spring-security.lib">
+        <fileset dir="${dep-home}/spring-security-3.0.5.RELEASE/dist/">
+            <include name="*RELEASE.jar"/>
+        </fileset>
     </path>
 
 </project>

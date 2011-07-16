@@ -29,9 +29,12 @@
     <path id="project.libs">
         <path refid="commons-io.lib"/>
         <path refid="commons-dbutils.lib"/>
+        <path refid="commons-logging.lib"/>
         <path refid="gwt-server.lib"/>
         <path refid="gwt-visualization.lib"/>
         <path refid="log4j.lib"/>
+        <path refid="spring-framework.lib"/>
+        <path refid="spring-security.lib"/>
     </path>
 
     <path id="project.class.path">

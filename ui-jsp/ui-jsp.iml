@@ -24,6 +24,9 @@
         <setting name="webFacet" value="Web" />
       </configuration>
     </facet>
+    <facet type="Spring" name="Spring">
+      <configuration />
+    </facet>
   </component>
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
@@ -60,6 +63,9 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="spring-framework" level="project" />
+    <orderEntry type="library" name="spring-security" level="project" />
+    <orderEntry type="library" name="apache-commons-logging" level="project" />
   </component>
 </module>
 
