@@ -35,6 +35,7 @@
             <fileset dir="ui-jsp/src/main/resources/server/"/>
         </copy>
         <mkdir dir="${dist}/server/logs"/>
+        <mkdir dir="${dist}/server/temp"/>
         <copy todir="${dist}" overwrite="true">
             <fileset dir="ui-jsp/src/main/resources/"/>
         </copy>

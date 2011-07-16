@@ -29,6 +29,26 @@
         <res-auth>Container</res-auth>
     </resource-ref>
 
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>
+            /WEB-INF/security-app-context.xml
+        </param-value>
+    </context-param>
+    <filter>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
     <servlet>
         <servlet-name>derbynet</servlet-name>
         <servlet-class>org.apache.derby.drda.NetServlet</servlet-class>
@@ -109,21 +129,4 @@
         <url-pattern>/bug/export</url-pattern>
     </servlet-mapping>
 
-    <security-role>
-        <role-name>bug4j-ui</role-name>
-    </security-role>
-    <security-constraint>
-        <web-resource-collection>
-            <web-resource-name>bug4j Console</web-resource-name>
-            <url-pattern>/ui/*</url-pattern>
-            <url-pattern>/gwt/Bug4jService</url-pattern>
-        </web-resource-collection>
-        <auth-constraint>
-            <role-name>bug4j-ui</role-name>
-        </auth-constraint>
-    </security-constraint>
-    <login-config>
-        <auth-method>BASIC</auth-method>
-        <realm-name>default</realm-name>
-    </login-config>
 </web-app>

@@ -15,6 +15,9 @@
           <element id="library" level="project" name="gwt-servlet" />
           <element id="library" level="project" name="gwt-visualization" />
           <element id="library" level="project" name="apache-commons-io" />
+          <element id="library" level="project" name="spring-security" />
+          <element id="library" level="project" name="spring-framework" />
+          <element id="library" level="project" name="apache-commons-logging" />
         </element>
       </element>
       <element id="gwt-compiler-output" facet="ui-jsp/gwt/GWT" />

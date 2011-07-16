@@ -56,7 +56,21 @@ public class Bug4j implements EntryPoint {
      * This is the entry point method.
      */
     public void onModuleLoad() {
+        Bug4jService.App.getInstance().getUserName(new AsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.open("../j_spring_security_logout", "_self", "");
+            }
 
+            @Override
+            public void onSuccess(String username) {
+                //TODO: Use that username
+                initialize();
+            }
+        });
+    }
+
+    private void initialize() {
         final DockLayoutPanel dockLayoutPanel = new DockLayoutPanel(Style.Unit.PX);
         final Widget northWidget = buildNorthWidget();
         dockLayoutPanel.addNorth(northWidget, 35);
@@ -92,7 +106,7 @@ public class Bug4j implements EntryPoint {
         Bug4jService.App.getInstance().getDefaultApplication(new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
-                Window.alert(caught.getMessage());
+                Window.alert("Failed to retrieve the default application");
             }
 
             @Override
@@ -101,7 +115,7 @@ public class Bug4j implements EntryPoint {
                 Bug4jService.App.getInstance().getUserName(new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        Window.alert(caught.getMessage());
+                        Window.alert("Failed to retrieve the user name");
                     }
 
                     @Override
@@ -179,7 +193,7 @@ public class Bug4j implements EntryPoint {
                 whenLogout();
                 popupPanel.hide();
             }
-        }).setEnabled(false);
+        });
         popup.setWidth("9em");
         popupPanel.setWidget(popup);
 
@@ -195,7 +209,7 @@ public class Bug4j implements EntryPoint {
         Bug4jService.App.getInstance().getApplications(new AsyncCallback<List<String>>() {
             @Override
             public void onFailure(Throwable caught) {
-                Window.alert(caught.getMessage());
+                Window.alert("Failed to get the list of applications");
             }
 
             @Override
@@ -263,7 +277,7 @@ public class Bug4j implements EntryPoint {
     }
 
     private void whenLogout() {
-        Window.open("../ui/logout.jsp", "_self", "");
+        Window.open("j_spring_security_logout", "_self", "");
     }
 
     private void whenSettings() {

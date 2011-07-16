@@ -89,10 +89,13 @@ public class ExportServlet extends HttpServlet {
                             final long hitId = hit.getHitId();
                             final long dateReported = hit.getDateReported();
                             final String stack = store.getStack(hitId);
+                            final String hitUser = hit.getUser();
                             xmlStreamWriter.writeStartElement("hit");
                             xmlStreamWriter.writeAttribute("id", Long.toString(hitId));
                             xmlStreamWriter.writeAttribute("date", dateFormat.format(new Date(dateReported)));
-                            xmlStreamWriter.writeAttribute("user", hit.getUser());
+                            if (hitUser != null) {
+                                xmlStreamWriter.writeAttribute("user", hitUser);
+                            }
                             xmlStreamWriter.writeCData(stack);
                             xmlStreamWriter.writeEndElement();
                         }
