@@ -88,7 +88,11 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>InServlet</servlet-name>
-        <url-pattern>/in</url-pattern>
+        <url-pattern>/br/in</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>InServlet</servlet-name>
+        <url-pattern>/bug4j/in</url-pattern>
     </servlet-mapping>
 
     <servlet>
@@ -97,7 +101,11 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>BugServlet</servlet-name>
-        <url-pattern>/bug</url-pattern>
+        <url-pattern>/br/bug</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>BugServlet</servlet-name>
+        <url-pattern>/bug4j/bug</url-pattern>
     </servlet-mapping>
 
     <servlet>

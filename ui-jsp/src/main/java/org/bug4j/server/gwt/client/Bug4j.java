@@ -128,7 +128,7 @@ public class Bug4j implements EntryPoint {
     }
 
     private Widget buildNorthWidget() {
-        final Image image = new Image("../icons/header.png");
+        final Image image = new Image(IMAGES.littleSplat());
 
         _applicationLabel = new Label("");
         _applicationLabel.setStylePrimaryName("headerDropDown");

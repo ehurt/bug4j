@@ -4,12 +4,13 @@
     <property name="home" location="."/>
     <import file="build_include.xml"/>
 
+    <property name="dist" value="${out}/dist"/>
+
     <target name="dist" depends="clean,compile,test,package-dist"/>
 
-    <target name="package-dist">
-        <property name="dist" value="${out}/dist"/>
+    <target name="package-dist" depends="package-dist-client,package-dist-demo,package-dist-server"/>
 
-        <!-- client -->
+    <target name="package-dist-client">
         <mkdir dir="${dist}/client/lib"/>
         <copy todir="${dist}/client" file="${artifacts.output}/bug4j.jar"/>
         <zip destfile="${dist}/client/bug4j-src.zip">
@@ -20,14 +21,16 @@
             <path refid="httpcomponents-client"/>
             <path refid="log4j.lib"/>
         </copy>
+    </target>
 
-        <!-- server -->
+    <target name="package-dist-server">
         <mkdir dir="${dist}/server"/>
         <copy todir="${dist}/server">
             <fileset dir="${tomcat-home}">
                 <exclude name="/bin/bug4j/"/>
                 <exclude name="/logs/**"/>
                 <exclude name="/temp/"/>
+                <exclude name="/webapps/ROOT/"/>
                 <exclude name="/webapps/bug4j/"/>
                 <exclude name="/webapps/bug4j.war"/>
                 <exclude name="/work/**"/>
@@ -40,9 +43,12 @@
             <fileset dir="ui-jsp/src/main/resources/"/>
         </copy>
         <replace file="${dist}/server/conf/server.xml" token="8080" value="8063"/>
-        <zip destfile="${dist}/server/webapps/bug4j.war" basedir="${artifacts.output}/ui_jsp_war_exploded"/>
+        <copy todir="${dist}/server/webapps/ROOT">
+            <fileset dir="${artifacts.output}/ui_jsp_war_exploded"/>
+        </copy>
+    </target>
 
-        <!-- demo -->
+    <target name="package-dist-demo">
         <copy todir="${dist}/demo/" overwrite="true">
             <fileset dir="demo/">
                 <exclude name="/project/"/>

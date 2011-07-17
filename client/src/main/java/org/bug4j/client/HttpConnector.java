@@ -76,7 +76,7 @@ class HttpConnector {
     }
 
     public boolean reportHit(String message, String user, String hash) {
-        final String response = send("/in",
+        final String response = send("/br/in",
                 "a", _applicationName,
                 "v", _applicationVersion,
                 "m", message,
@@ -90,7 +90,7 @@ class HttpConnector {
         final String stackText = toText(stackLines);
         final String applicationName = _applicationName;
         final String applicationVersion = _applicationVersion;
-        send("/bug",
+        send("/br/bug",
                 "a", applicationName,
                 "v", applicationVersion,
                 "m", message,

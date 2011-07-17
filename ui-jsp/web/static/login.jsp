@@ -19,7 +19,7 @@
     <title>Login Page</title>
     <style type="text/css">
         body {
-            background: url('../icons/grdback.png') repeat-x;
+            background: url('icons/grdback.png') repeat-x;
         }
 
         td {
@@ -105,7 +105,7 @@
             </tr>
             <tr>
                 <td colspan="2" align="right">
-                    <div id="sd"><input id="s" name="submit" type="image" src="../icons/splat.png"></div>
+                    <div id="sd"><input id="s" name="submit" type="image" src="icons/splat.png"></div>
                 </td>
             </tr>
         </table>

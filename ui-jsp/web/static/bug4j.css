@@ -154,7 +154,7 @@ div#main {
     padding-right: 12px;
     margin: 0 4px;
     border-bottom: 1px solid white;
-    background-image: url("../icons/dropdown.png");
+    background-image: url("icons/dropdown.png");
     background-repeat: no-repeat;
     background-position: right center;
     cursor: pointer;
