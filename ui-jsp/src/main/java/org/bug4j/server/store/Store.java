@@ -74,4 +74,6 @@ public abstract class Store {
     public abstract void setDefaultFilter(String userName, Filter filter);
 
     public abstract void markRead(String userName, long bugId);
+
+    public abstract List<BugCountByDate> getBugCountByDate(String app);
 }

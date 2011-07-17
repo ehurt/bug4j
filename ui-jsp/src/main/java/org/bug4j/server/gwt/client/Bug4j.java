@@ -33,7 +33,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import org.bug4j.server.gwt.client.bugs.BugView;
-import org.bug4j.server.gwt.client.bugs.HotBugsGraphView;
+import org.bug4j.server.gwt.client.graphs.TopGraphView;
 import org.bug4j.server.gwt.client.settings.SettingsDialog;
 import org.bug4j.server.gwt.client.util.PropertyListener;
 import org.jetbrains.annotations.Nullable;
@@ -65,7 +65,11 @@ public class Bug4j implements EntryPoint {
             @Override
             public void onSuccess(String username) {
                 //TODO: Use that username
-                initialize();
+                try {
+                    initialize();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
@@ -77,10 +81,10 @@ public class Bug4j implements EntryPoint {
 
         final TabLayoutPanel bugPanel = new TabLayoutPanel(2, Style.Unit.EM);
         final BugView bugView = new BugView(this);
-        final HotBugsGraphView hotBugsGraphView = new HotBugsGraphView(this);
+        final TopGraphView topGraphView = new TopGraphView(this);
 
         bugPanel.add(bugView.createWidget(), "Bugs");
-        bugPanel.add(hotBugsGraphView.createWidget(), "Top Chart");
+        bugPanel.add(topGraphView.createWidget(), "Chart");
 
         bugPanel.addSelectionHandler(new SelectionHandler<Integer>() {
             @Override
@@ -91,7 +95,7 @@ public class Bug4j implements EntryPoint {
                         bugView.whenBugListChanges();
                         break;
                     case 1:
-                        hotBugsGraphView.whenBugListChanges();
+                        topGraphView.whenBugListChanges();
                         break;
                 }
             }
@@ -319,7 +323,7 @@ public class Bug4j implements EntryPoint {
             _application = application;
             updateAppButtonText();
             refreshPackages();
-            firePropertyChange("application", application);
+            firePropertyChange(PropertyListener.APPLICATION, application);
         }
     }
 
@@ -339,7 +343,7 @@ public class Bug4j implements EntryPoint {
 
     private void setPackages(List<String> result) {
         _appPackages = result;
-        firePropertyChange("packages", null);
+        firePropertyChange(PropertyListener.PACKAGES, null);
     }
 
     private void firePropertyChange(String property, @Nullable String value) {

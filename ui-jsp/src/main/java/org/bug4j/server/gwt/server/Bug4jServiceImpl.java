@@ -19,10 +19,7 @@ package org.bug4j.server.gwt.server;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import org.apache.log4j.Logger;
 import org.bug4j.server.gwt.client.Bug4jService;
-import org.bug4j.server.gwt.client.data.Bug;
-import org.bug4j.server.gwt.client.data.BugHit;
-import org.bug4j.server.gwt.client.data.BugHitAndStack;
-import org.bug4j.server.gwt.client.data.Filter;
+import org.bug4j.server.gwt.client.data.*;
 import org.bug4j.server.store.Store;
 import org.bug4j.server.store.StoreFactory;
 import org.jetbrains.annotations.Nullable;
@@ -179,6 +176,17 @@ public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jServi
         final Store store = StoreFactory.getStore();
         try {
             store.markRead(getUserName(), bugId);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public List<BugCountByDate> getBugCountByDate(String app) {
+        try {
+            final Store store = StoreFactory.getStore();
+            return store.getBugCountByDate(app);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             throw new IllegalStateException(e.getMessage(), e);

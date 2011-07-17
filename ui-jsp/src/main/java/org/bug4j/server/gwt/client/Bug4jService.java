@@ -19,10 +19,7 @@ package org.bug4j.server.gwt.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import org.bug4j.server.gwt.client.data.Bug;
-import org.bug4j.server.gwt.client.data.BugHit;
-import org.bug4j.server.gwt.client.data.BugHitAndStack;
-import org.bug4j.server.gwt.client.data.Filter;
+import org.bug4j.server.gwt.client.data.*;
 
 import java.util.List;
 import java.util.Map;
@@ -57,6 +54,8 @@ public interface Bug4jService extends RemoteService {
     BugHitAndStack getBugHitAndStack(long hitId) throws Exception;
 
     void markRead(long bugId) throws Exception;
+
+    List<BugCountByDate> getBugCountByDate(String app);
 
     /**
      * Utility/Convenience class.

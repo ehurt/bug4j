@@ -179,3 +179,20 @@ div#main {
     background-color: #a9a9a9;
 }
 
+.topGraphView-label {
+    padding-left: 11px;
+    cursor: pointer;
+    color: #333;
+    width: 194px;
+    border-bottom: 1px solid white;
+}
+
+.topGraphView-label-selected {
+    background-image: url('icons/sel-triangle.png');
+    background-repeat: no-repeat;
+    background-position: left center;
+}
+
+.topGraphView-label:hover {
+    color: #FF6600;
+}
