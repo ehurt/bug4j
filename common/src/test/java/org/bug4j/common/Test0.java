@@ -16,20 +16,10 @@
 
 package org.bug4j.common;
 
+import org.junit.Test;
+
 public class Test0 {
-    private static String _s;
-
-    public static void main(String[] args) {
-        test("Hello");
-    }
-
-    private static void test(String s) {
-        if (_s != null) {
-            // not null
-        }
-        _s = s;
-        if (_s != null) {
-            // null
-        }
+    @Test
+    public void test() throws Exception {
     }
 }
