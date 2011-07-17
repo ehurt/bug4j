@@ -26,9 +26,8 @@
 
         <intercept-url pattern="/static/**" filters="none"/>
         <intercept-url pattern="/br/**" access="permitAll"/>
-        <!-- TODO: Remove those two /bug4j entries, they are there for backward compatibility -->
-        <intercept-url pattern="/bug4j/in" access="permitAll"/>
-        <intercept-url pattern="/bug4j/bug" access="permitAll"/>
+        <!-- TODO: Remove this /bug4j entries, which is there for backward compatibility -->
+        <intercept-url pattern="/bug4j/*" access="permitAll"/>
 
         <intercept-url pattern="/index.html" access="isAuthenticated()"/>
         <intercept-url pattern="/ui/**" access="isAuthenticated()"/>
