@@ -23,15 +23,18 @@
                     http://www.springframework.org/schema/security/spring-security-3.0.xsd">
 
     <http use-expressions="true">
+
+        <intercept-url pattern="/static/**" filters="none"/>
+        <intercept-url pattern="/br/**" access="permitAll"/>
+        <!-- TODO: Remove those two /bug4j entries, they are there for backward compatibility -->
+        <intercept-url pattern="/bug4j/in" access="permitAll"/>
+        <intercept-url pattern="/bug4j/bug" access="permitAll"/>
+
         <intercept-url pattern="/index.html" access="isAuthenticated()"/>
         <intercept-url pattern="/ui/**" access="isAuthenticated()"/>
         <intercept-url pattern="/gwt/Bug4jService" access="isAuthenticated()"/>
-        <intercept-url pattern="/icons/**" access="permitAll"/>
-        <intercept-url pattern="/static/**" access="permitAll"/>
         <intercept-url pattern="/favicon.ico" access="permitAll"/>
         <intercept-url pattern="/gwt/**" access="permitAll"/>
-        <intercept-url pattern="/bug/**" access="permitAll"/>
-        <intercept-url pattern="/in/**" access="permitAll"/>
         <intercept-url pattern="/**" access="denyAll"/>
         <form-login login-page="/static/login.jsp" authentication-failure-url="/static/login.jsp?login_error=1"/>
         <logout logout-success-url="/static/login.jsp"/>

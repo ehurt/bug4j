@@ -22,4 +22,7 @@ import com.google.gwt.resources.client.ImageResource;
 public interface Resources extends ClientBundle {
     @Source("icons/bin_closed.png")
     ImageResource binClosed();
+
+    @Source("icons/little_splat.png")
+    ImageResource littleSplat();
 }

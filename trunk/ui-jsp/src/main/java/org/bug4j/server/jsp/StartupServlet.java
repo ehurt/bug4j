@@ -29,7 +29,6 @@ public class StartupServlet extends HttpServlet {
 
     @Override
     public void init(ServletConfig config) throws ServletException {
-        LOGGER.info("Starting the application");
         try {
             StoreFactory.createJdbcStore();
         } catch (Throwable e) {
