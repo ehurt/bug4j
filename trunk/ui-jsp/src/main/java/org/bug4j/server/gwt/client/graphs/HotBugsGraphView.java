@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package org.bug4j.server.gwt.client.bugs;
+package org.bug4j.server.gwt.client.graphs;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsArray;
@@ -22,15 +22,18 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.visualization.client.*;
+import com.google.gwt.visualization.client.AbstractDataTable;
+import com.google.gwt.visualization.client.DataTable;
+import com.google.gwt.visualization.client.LegendPosition;
+import com.google.gwt.visualization.client.Selection;
 import com.google.gwt.visualization.client.events.SelectHandler;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import org.bug4j.server.gwt.client.Bug4j;
 import org.bug4j.server.gwt.client.Bug4jService;
+import org.bug4j.server.gwt.client.bugs.DisplaysBugs;
 import org.bug4j.server.gwt.client.data.Bug;
 
 import java.util.ArrayList;
@@ -40,39 +43,21 @@ import java.util.Map;
 
 import static com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
 
-public class HotBugsGraphView implements DisplaysBugs {
+public class HotBugsGraphView extends GraphView implements DisplaysBugs {
 
     private static final int DAYS_BACK = 7;
     private static final int MAX_BUGS = 5;
 
     private static final long DAY = 1000L * 60 * 60 * 24;
-    private SimpleLayoutPanel _simpleLayoutPanel;
     private LineChart _lineChart;
     private final List<Bug> _bugs = new ArrayList<Bug>();
-    private final Bug4j _bug4j;
 
     public HotBugsGraphView(Bug4j bug4j) {
-        _bug4j = bug4j;
+        super(bug4j, "Top bugs");
     }
 
-    public Widget createWidget() {
-        return createLazyContent();
-    }
-
-    private Widget createLazyContent() {
-        final Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                addOrReplaceGraph();
-            }
-        };
-        VisualizationUtils.loadVisualizationApi(runnable, LineChart.PACKAGE);
-
-        _simpleLayoutPanel = new SimpleLayoutPanel();
-        return _simpleLayoutPanel;
-    }
-
-    private void addOrReplaceGraph() {
+    @Override
+    protected void addOrReplaceGraph() {
         try {
             final String application = _bug4j.getApplication();
             if (application != null) {
@@ -85,10 +70,7 @@ public class HotBugsGraphView implements DisplaysBugs {
                     @Override
                     public void onSuccess(Map<Bug, int[]> topHits) {
                         final Widget widget = createGraph(DAYS_BACK, topHits);
-                        for (Widget oldWidget : _simpleLayoutPanel) {
-                            _simpleLayoutPanel.remove(oldWidget);
-                        }
-                        _simpleLayoutPanel.add(widget);
+                        setGraphWidget(widget);
                     }
                 });
             }
@@ -158,19 +140,5 @@ public class HotBugsGraphView implements DisplaysBugs {
             data.setValue(i, 0, s);
         }
         return data;
-    }
-
-    @Override
-    public void whenBugListChanges() {
-        addOrReplaceGraph();
-    }
-
-    @Override
-    public Bug4j getBug4J() {
-        return _bug4j;
-    }
-
-    @Override
-    public void redisplay() {
     }
 }

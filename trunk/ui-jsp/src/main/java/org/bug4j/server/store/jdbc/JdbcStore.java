@@ -716,6 +716,38 @@ public class JdbcStore extends Store {
         }
     }
 
+    @Override
+    public List<BugCountByDate> getBugCountByDate(String app) {
+        final List<BugCountByDate> ret = new ArrayList<BugCountByDate>();
+        final Connection connection = getConnection();
+        try {
+            final PreparedStatement preparedStatement = connection.prepareStatement("" +
+                    "select date(h.date_reported),count(*)" +
+                    "  from hit h, bug b" +
+                    "  where h.bug_id=b.bug_id" +
+                    "  and b.app=?" +
+                    "  group by date(h.date_reported)" +
+                    "  order by 1");
+            try {
+                preparedStatement.setString(1, app);
+                final ResultSet resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()) {
+                    final Date date = resultSet.getDate(1);
+                    final int count = resultSet.getInt(2);
+                    final long time = date.getTime();
+                    ret.add(new BugCountByDate(time, count));
+                }
+            } finally {
+                preparedStatement.close();
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
+            DbUtils.closeQuietly(connection);
+        }
+        return ret;
+    }
+
     private String getAnyApp() {
         String ret = null;
         final Connection connection = getConnection();

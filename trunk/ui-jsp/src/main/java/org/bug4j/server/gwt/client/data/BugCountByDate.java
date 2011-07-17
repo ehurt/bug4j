@@ -14,16 +14,27 @@
  *    limitations under the License.
  */
 
-package org.bug4j.server.gwt.client.util;
+package org.bug4j.server.gwt.client.data;
 
-import org.jetbrains.annotations.NonNls;
-import org.jetbrains.annotations.Nullable;
+import java.io.Serializable;
 
-public interface PropertyListener<T> {
-    @NonNls
-    String APPLICATION = "application";
-    @NonNls
-    String PACKAGES = "packages";
+public class BugCountByDate implements Serializable {
+    private long _date;
+    private int _count;
 
-    void propertyChanged(String key, @Nullable T value);
+    public BugCountByDate() {
+    }
+
+    public BugCountByDate(long date, int count) {
+        _date = date;
+        _count = count;
+    }
+
+    public long getDate() {
+        return _date;
+    }
+
+    public int getCount() {
+        return _count;
+    }
 }

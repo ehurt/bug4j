@@ -17,10 +17,7 @@
 package org.bug4j.server.gwt.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.bug4j.server.gwt.client.data.Bug;
-import org.bug4j.server.gwt.client.data.BugHit;
-import org.bug4j.server.gwt.client.data.BugHitAndStack;
-import org.bug4j.server.gwt.client.data.Filter;
+import org.bug4j.server.gwt.client.data.*;
 
 import java.util.List;
 import java.util.Map;
@@ -36,6 +33,8 @@ public interface Bug4jServiceAsync {
     void deleteBug(long bugId, AsyncCallback<Void> async);
 
     void getTopHits(String app, int daysBack, int max, AsyncCallback<Map<Bug, int[]>> async);
+
+    void getBugCountByDate(String app, AsyncCallback<List<BugCountByDate>> async);
 
     void getBugHitAndStack(long hitId, AsyncCallback<BugHitAndStack> async);
 
