@@ -84,7 +84,7 @@ public class Bug4j implements EntryPoint {
         final TopGraphView topGraphView = new TopGraphView(this);
 
         bugPanel.add(bugView.createWidget(), "Bugs");
-        bugPanel.add(topGraphView.createWidget(), "Chart");
+        bugPanel.add(topGraphView.createWidget(), "Charts");
 
         bugPanel.addSelectionHandler(new SelectionHandler<Integer>() {
             @Override
