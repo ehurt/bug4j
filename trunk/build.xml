@@ -8,7 +8,12 @@
 
     <target name="dist" depends="clean,compile,test,package-dist"/>
 
-    <target name="package-dist" depends="package-dist-client,package-dist-demo,package-dist-server"/>
+    <target name="package-dist" depends="package-dist-client,package-dist-demo,package-dist-server">
+        <zip destfile="${out}/${bug4j-release-name}.zip">
+            <zipfileset dir="${dist}" prefix="${bug4j-release-name}" excludes="server/bin/*.sh" filemode="644"/>
+            <zipfileset dir="${dist}" prefix="${bug4j-release-name}" includes="server/bin/*.sh" filemode="755"/>
+        </zip>
+    </target>
 
     <target name="package-dist-client">
         <mkdir dir="${dist}/client/lib"/>
@@ -58,10 +63,6 @@
         <delete dir="${dist}/demo/log4j/out/" failonerror="false"/>
         <ant dir="${dist}/demo/manual/" target="compile"/>
         <delete dir="${dist}/demo/manual/out/" failonerror="false"/>
-        <zip destfile="${out}/${bug4j-release-name}.zip">
-            <zipfileset dir="${dist}" prefix="${bug4j-release-name}" excludes="server/bin/*.sh" filemode="644"/>
-            <zipfileset dir="${dist}" prefix="${bug4j-release-name}" includes="server/bin/*.sh" filemode="755"/>
-        </zip>
     </target>
 
     <target name="compile">
