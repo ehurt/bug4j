@@ -16,7 +16,7 @@
 
 package org.bug4j.server.store;
 
-import org.bug4j.server.gwt.client.data.*;
+import org.bug4j.gwt.user.client.data.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;

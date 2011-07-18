@@ -18,8 +18,8 @@ package org.bug4j.server.store.jdbc;
 
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.io.IOUtils;
-import org.bug4j.server.gwt.client.data.*;
-import org.bug4j.server.gwt.client.data.Stack;
+import org.bug4j.gwt.user.client.data.*;
+import org.bug4j.gwt.user.client.data.Stack;
 import org.bug4j.server.store.Store;
 import org.jetbrains.annotations.Nullable;
 

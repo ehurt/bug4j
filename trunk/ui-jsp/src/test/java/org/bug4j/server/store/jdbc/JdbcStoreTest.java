@@ -18,8 +18,8 @@ package org.bug4j.server.store.jdbc;
 
 import org.bug4j.common.FullStackHashCalculator;
 import org.bug4j.common.TextToLines;
-import org.bug4j.server.gwt.client.data.Stack;
-import org.bug4j.server.gwt.client.data.Strain;
+import org.bug4j.gwt.user.client.data.Stack;
+import org.bug4j.gwt.user.client.data.Strain;
 import org.bug4j.server.processor.StackAnalyzer;
 import org.bug4j.server.processor.StackPathHashCalculator;
 import org.bug4j.server.store.Store;
