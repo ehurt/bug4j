@@ -121,11 +121,11 @@
 
     <servlet>
         <servlet-name>Bug4jService</servlet-name>
-        <servlet-class>org.bug4j.server.gwt.server.Bug4jServiceImpl</servlet-class>
+        <servlet-class>org.bug4j.gwt.user.server.Bug4jServiceImpl</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>Bug4jService</servlet-name>
-        <url-pattern>/gwt/Bug4jService</url-pattern>
+        <url-pattern>/user/Bug4jService</url-pattern>
     </servlet-mapping>
 
     <servlet>

@@ -18,9 +18,9 @@ package org.bug4j.server.jsp;
 
 import org.apache.commons.io.output.CloseShieldOutputStream;
 import org.apache.log4j.Logger;
-import org.bug4j.server.gwt.client.data.Bug;
-import org.bug4j.server.gwt.client.data.BugHit;
-import org.bug4j.server.gwt.client.data.Filter;
+import org.bug4j.gwt.user.client.data.Bug;
+import org.bug4j.gwt.user.client.data.BugHit;
+import org.bug4j.gwt.user.client.data.Filter;
 import org.bug4j.server.store.Store;
 import org.bug4j.server.store.StoreFactory;
 

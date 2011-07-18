@@ -17,8 +17,8 @@
 package org.bug4j.server.jsp;
 
 import org.apache.log4j.Logger;
+import org.bug4j.gwt.user.client.data.Stack;
 import org.bug4j.server.Configuration;
-import org.bug4j.server.gwt.client.data.Stack;
 import org.bug4j.server.store.Store;
 import org.bug4j.server.store.StoreFactory;
 import org.jetbrains.annotations.Nullable;
