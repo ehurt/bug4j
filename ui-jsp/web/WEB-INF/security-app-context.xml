@@ -45,5 +45,18 @@
                 <user name="bug4j" password="bug4j" authorities="user"/>
             </user-service>
         </authentication-provider>
+
+        <authentication-provider>
+<!--
+            <password-encoder hash="md5"/>
+-->
+            <jdbc-user-service data-source-ref="jndiDataSource"
+                               users-by-username-query="SELECT USER_NAME, USER_PASS, USER_ENABLED FROM BUG4J_USER WHERE USER_NAME=?"
+                               authorities-by-username-query="SELECT USER_NAME,AUTHORITY_NAME FROM BUG4J_AUTHORITIES WHERE USER_NAME=?"/>
+        </authentication-provider>
     </authentication-manager>
+
+    <beans:bean id="jndiDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <beans:property name="jndiName" value="java:comp/env/jdbc/bugDB"/>
+    </beans:bean>
 </beans:beans>
