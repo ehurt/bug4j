@@ -80,6 +80,27 @@ public class JdbcStore extends Store {
         final Statement statement = connection.createStatement();
 
         try {
+            if (!doesTableExist(statement, "BUG4J_USER")) {
+                statement.execute("" +
+                        "CREATE TABLE BUG4J_USER (" +
+                        " USER_NAME VARCHAR(128) NOT NULL PRIMARY KEY," +
+                        " USER_PASS VARCHAR(128) NOT NULL," +
+                        " USER_ENABLED CHAR(1) NOT NULL" +
+                        ")"
+                );
+            }
+
+            if (!doesTableExist(statement, "BUG4J_AUTHORITIES")) {
+                statement.execute("" +
+                        "CREATE TABLE BUG4J_AUTHORITIES (" +
+                        " USER_NAME VARCHAR(128) NOT NULL PRIMARY KEY," +
+                        " AUTHORITY_NAME VARCHAR(128) NOT NULL," +
+                        " constraint BUG4J_AUTHORITIES_USER_FK foreign key(USER_NAME) references BUG4J_USER(USER_NAME)" +
+                        ")"
+                );
+                statement.execute("CREATE UNIQUE INDEX BUG4J_AUTHORITIES_IDX ON BUG4J_AUTHORITIES (USER_NAME,AUTHORITY_NAME)");
+            }
+
             if (!doesTableExist(statement, "APP")) {
                 statement.execute("" +
                         "CREATE TABLE APP (" +
