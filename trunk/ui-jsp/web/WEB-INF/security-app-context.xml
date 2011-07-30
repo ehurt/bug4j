@@ -30,7 +30,7 @@
         <intercept-url pattern="/bug4j/*" access="permitAll"/>
 
         <intercept-url pattern="/index.html" access="isAuthenticated()"/>
-        <intercept-url pattern="/administration.html" access="isAuthenticated()"/>
+        <intercept-url pattern="/admin.html" access="isAuthenticated()"/>
         <intercept-url pattern="/ui/**" access="isAuthenticated()"/>
         <intercept-url pattern="/user/Bug4jService" access="isAuthenticated()"/>
         <intercept-url pattern="/favicon.ico" access="permitAll"/>
