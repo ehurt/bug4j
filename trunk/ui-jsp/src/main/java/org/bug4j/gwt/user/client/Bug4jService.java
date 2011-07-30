@@ -27,8 +27,6 @@ import java.util.Map;
 @RemoteServiceRelativePath("Bug4jService")
 public interface Bug4jService extends RemoteService {
 
-    String getUserName() throws Exception;
-
     List<String> getApplications() throws Exception;
 
     String getDefaultApplication() throws Exception;

@@ -1,0 +1,15 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Admin" type="GWT.ConfigurationType" factoryName="GWT Configuration">
+    <module name="ui-jsp" />
+    <option name="SHELL_PARAMETERS" value=" -noserver -port 8063" />
+    <option name="RUN_PAGE" value="Admin.html" />
+    <option name="GWT_MODULE" value="org.bug4j.gwt.admin.Admin" />
+    <RunnerSettings RunnerId="Debug">
+      <option name="DEBUG_PORT" value="62075" />
+      <option name="TRANSPORT" value="0" />
+      <option name="LOCAL" value="true" />
+    </RunnerSettings>
+    <ConfigurationWrapper RunnerId="Debug" />
+    <method />
+  </configuration>
+</component>

@@ -46,8 +46,6 @@ public interface Bug4jServiceAsync {
 
     void getDefaultApplication(AsyncCallback<String> async);
 
-    void getUserName(AsyncCallback<String> async);
-
     void getDefaultFilter(AsyncCallback<Filter> async);
 
     void setDefaultFilter(Filter filter, AsyncCallback<Void> async);

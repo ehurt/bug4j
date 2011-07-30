@@ -14,15 +14,10 @@
  *    limitations under the License.
  */
 
-package org.bug4j.gwt.user.client;
-
-import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.ImageResource;
-
-public interface Resources extends ClientBundle {
-    @Source("icons/bin_closed.png")
-    ImageResource binClosed();
-
-    @Source("icons/little_splat.png")
-    ImageResource littleSplat();
+body {
+    background-color: white;
+    color: black;
+    font-family: Arial, sans-serif;
+    font-size: small;
+    margin: 8px;
 }

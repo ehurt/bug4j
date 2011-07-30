@@ -31,8 +31,7 @@ import java.util.Map;
 public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jService {
     private static final Logger LOGGER = Logger.getLogger(Bug4jServiceImpl.class);
 
-    @Override
-    public String getUserName() throws Exception {
+    private String getUserName() throws Exception {
         final HttpServletRequest threadLocalRequest = getThreadLocalRequest();
         final String remoteUser = threadLocalRequest.getRemoteUser();
         return remoteUser;
