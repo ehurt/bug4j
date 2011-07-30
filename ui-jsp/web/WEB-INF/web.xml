@@ -129,9 +129,39 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>org.bug4j.gwt.admin.Admin AdminService</servlet-name>
+        <servlet-class>org.bug4j.gwt.admin.server.AdminServiceImpl</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>org.bug4j.gwt.admin.Admin AdminService</servlet-name>
+        <url-pattern>/admin/AdminService</url-pattern>
+    </servlet-mapping>
+
+
+    <servlet>
         <servlet-name>ExportServlet</servlet-name>
         <servlet-class>org.bug4j.server.jsp.ExportServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>org.bug4j.gwt.common.Common CommonService</servlet-name>
+        <servlet-class>org.bug4j.gwt.common.server.CommonServiceImpl</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>org.bug4j.gwt.common.Common CommonService</servlet-name>
+        <url-pattern>/common/CommonService</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>org.bug4j.gwt.common.Common CommonService</servlet-name>
+        <url-pattern>/user/CommonService</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>org.bug4j.gwt.common.Common CommonService</servlet-name>
+        <url-pattern>/admin/CommonService</url-pattern>
+    </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>ExportServlet</servlet-name>
         <url-pattern>/bug/export</url-pattern>

@@ -32,6 +32,8 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import org.bug4j.gwt.common.client.CommonService;
+import org.bug4j.gwt.common.client.Resources;
 import org.bug4j.gwt.user.client.bugs.BugView;
 import org.bug4j.gwt.user.client.graphs.TopGraphView;
 import org.bug4j.gwt.user.client.settings.SettingsDialog;
@@ -56,7 +58,7 @@ public class Bug4j implements EntryPoint {
      * This is the entry point method.
      */
     public void onModuleLoad() {
-        Bug4jService.App.getInstance().getUserName(new AsyncCallback<String>() {
+        CommonService.App.getInstance().getUserName(new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
                 whenLogout();
@@ -116,7 +118,7 @@ public class Bug4j implements EntryPoint {
             @Override
             public void onSuccess(String appName) {
                 setApplication(appName);
-                Bug4jService.App.getInstance().getUserName(new AsyncCallback<String>() {
+                CommonService.App.getInstance().getUserName(new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         Window.alert("Failed to retrieve the user name");

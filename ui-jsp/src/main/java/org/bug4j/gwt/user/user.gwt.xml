@@ -30,13 +30,13 @@
     -->
 
     <inherits name="com.google.gwt.visualization.Visualization"/>
+    <inherits name="org.bug4j.gwt.common.Common"/>
 
     <!-- Specify the app entry point class.                   -->
     <entry-point class='org.bug4j.gwt.user.client.Bug4j'/>
 
     <!-- Specify the app servlets.                   -->
     <servlet path='/Bug4jService' class='org.bug4j.gwt.user.server.Bug4jServiceImpl'/>
-    <!--
+
     <set-property name="user.agent" value="safari"/>
-    -->
 </module>
