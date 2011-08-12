@@ -34,6 +34,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import org.bug4j.gwt.common.client.CommonService;
 import org.bug4j.gwt.common.client.Resources;
+import org.bug4j.gwt.common.client.data.UserAuthorities;
 import org.bug4j.gwt.user.client.bugs.BugView;
 import org.bug4j.gwt.user.client.graphs.TopGraphView;
 import org.bug4j.gwt.user.client.settings.SettingsDialog;
@@ -49,25 +50,26 @@ import java.util.List;
 public class Bug4j implements EntryPoint {
     public static final Resources IMAGES = GWT.create(Resources.class);
     private static List<String> _appPackages;
+    private UserAuthorities _userAuthorities;
     private String _application;
     private final List<PropertyListener<String>> _propertyListeners = new ArrayList<PropertyListener<String>>();
     private Label _applicationLabel;
-    private Label _userLabel;
+    private Label _userLabel = new Label("");
 
     /**
      * This is the entry point method.
      */
     public void onModuleLoad() {
-        CommonService.App.getInstance().getUserName(new AsyncCallback<String>() {
+        CommonService.App.getInstance().getUserAuthorities(new AsyncCallback<UserAuthorities>() {
             @Override
             public void onFailure(Throwable caught) {
                 whenLogout();
             }
 
             @Override
-            public void onSuccess(String username) {
-                //TODO: Use that username
+            public void onSuccess(UserAuthorities userAuthorities) {
                 try {
+                    setUserAuthorities(userAuthorities);
                     initialize();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -145,7 +147,6 @@ public class Bug4j implements EntryPoint {
             }
         });
 
-        _userLabel = new Label("");
         _userLabel.setStylePrimaryName("headerDropDown");
         _userLabel.addClickHandler(new ClickHandler() {
             @Override
@@ -177,6 +178,14 @@ public class Bug4j implements EntryPoint {
                 popupPanel.hide();
             }
         });
+        if (_userAuthorities.isAdmin()) {
+            popup.addItem("Administration...", new Command() {
+                @Override
+                public void execute() {
+                    whenAdministration();
+                }
+            });
+        }
         popup.addSeparator();
         popup.addItem("Export", new Command() {
             @Override
@@ -200,14 +209,22 @@ public class Bug4j implements EntryPoint {
                 popupPanel.hide();
             }
         });
-        popup.setWidth("9em");
         popupPanel.setWidget(popup);
 
-        popupPanel.setPopupPosition(
-                userLabel.getAbsoluteLeft() + userLabel.getOffsetWidth() - 75 - (12 + 4),
-                userLabel.getAbsoluteTop() + userLabel.getOffsetHeight());
-        popupPanel.setSize("75px", "9em");
         popupPanel.show();
+
+        final int offsetWidth = popupPanel.getOffsetWidth();
+        popupPanel.setPopupPosition(
+                userLabel.getAbsoluteLeft() + userLabel.getOffsetWidth() - offsetWidth,
+                userLabel.getAbsoluteTop() + userLabel.getOffsetHeight());
+    }
+
+    private void whenAdministration() {
+        final String moduleBaseURL = GWT.getModuleBaseURL();
+        final String application = getApplication();
+        if (application != null) {
+            Window.open(moduleBaseURL + "../admin.html", "_self", "");
+        }
     }
 
     private void whenAppClicked(final Label app) {
@@ -365,5 +382,14 @@ public class Bug4j implements EntryPoint {
 
     private void updateAppButtonText() {
         _applicationLabel.setText(_application == null ? "< No Application >" : _application);
+    }
+
+    public UserAuthorities getUserAuthorities() {
+        return _userAuthorities;
+    }
+
+    private void setUserAuthorities(UserAuthorities userAuthorities) {
+        _userAuthorities = userAuthorities;
+        setUserName(_userAuthorities.getUserName());
     }
 }

@@ -30,13 +30,13 @@
         <intercept-url pattern="/bug4j/*" access="permitAll"/>
 
         <intercept-url pattern="/index.html" access="isAuthenticated()"/>
-        <intercept-url pattern="/admin.html" access="isAuthenticated()"/>
+        <intercept-url pattern="/admin.html" access="hasRole('admin')"/>
         <intercept-url pattern="/ui/**" access="isAuthenticated()"/>
         <intercept-url pattern="/user/Bug4jService" access="isAuthenticated()"/>
         <intercept-url pattern="/favicon.ico" access="permitAll"/>
         <intercept-url pattern="/common/**" access="permitAll"/>
         <intercept-url pattern="/user/**" access="permitAll"/>
-        <intercept-url pattern="/admin/**" access="isAuthenticated()"/>
+        <intercept-url pattern="/admin/**" access="hasRole('admin')"/>
         <intercept-url pattern="/**" access="denyAll"/>
         <form-login login-page="/static/login.jsp" authentication-failure-url="/static/login.jsp?login_error=1"/>
         <logout logout-success-url="/static/login.jsp"/>
@@ -50,11 +50,11 @@
         </authentication-provider>
 
         <authentication-provider>
-            <!--
-                        <password-encoder hash="md5"/>
-            -->
+            <password-encoder hash="md5">
+                <salt-source user-property="username"/>
+            </password-encoder>
             <jdbc-user-service data-source-ref="jndiDataSource"
-                               users-by-username-query="SELECT USER_NAME, USER_PASS, USER_ENABLED FROM BUG4J_USER WHERE USER_NAME=?"
+                               users-by-username-query="SELECT USER_NAME, USER_PASS, case WHEN USER_ENABLED = 'Y' THEN 'true' ELSE 'false' end FROM BUG4J_USER WHERE USER_NAME=?"
                                authorities-by-username-query="SELECT USER_NAME,AUTHORITY_NAME FROM BUG4J_AUTHORITIES WHERE USER_NAME=?"/>
         </authentication-provider>
     </authentication-manager>

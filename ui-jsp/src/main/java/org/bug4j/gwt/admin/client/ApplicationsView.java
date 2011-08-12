@@ -14,15 +14,20 @@
  *    limitations under the License.
  */
 
-package org.bug4j.gwt.common.client;
+package org.bug4j.gwt.admin.client;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.bug4j.gwt.common.client.data.UserAuthorities;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  */
-public interface CommonServiceAsync {
-    void getUserName(AsyncCallback<String> async);
+public class ApplicationsView extends AdminView {
+    protected ApplicationsView() {
+        super("Applications");
+    }
 
-    void getUserAuthorities(AsyncCallback<UserAuthorities> async);
+    @Override
+    protected Widget createView() {
+        return new Button("Applications");
+    }
 }

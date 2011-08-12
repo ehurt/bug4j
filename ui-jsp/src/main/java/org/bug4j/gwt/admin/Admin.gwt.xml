@@ -20,9 +20,13 @@
     <inherits name='com.google.gwt.user.User'/>
     <inherits name="org.bug4j.gwt.common.Common"/>
 
+    <inherits name="com.google.gwt.user.theme.standard.Standard"/>
+
     <entry-point class='org.bug4j.gwt.admin.client.Admin'/>
     <servlet path="/AdminService" class="org.bug4j.gwt.admin.server.AdminServiceImpl"/>
 
-    <set-property name="user.agent" value="safari"/>
+    <!--
+        <set-property name="user.agent" value="safari"/>
+    -->
 
 </module>

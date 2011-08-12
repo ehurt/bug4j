@@ -196,3 +196,27 @@ div#main {
 .topGraphView-label:hover {
     color: #FF6600;
 }
+
+.admin-label {
+    padding-top: 3px;
+    padding-left: 11px;
+    display: block;
+    cursor: pointer;
+    color: #333;
+    width: 194px;
+    border-bottom: 1px solid white;
+}
+
+.admin-label-selected {
+    background-image: url('icons/sel-triangle.png');
+    background-repeat: no-repeat;
+    background-position: left center;
+}
+
+.admin-label:hover {
+    color: #FF6600;
+}
+
+.admin-header {
+    border-bottom: 5px solid #D0E4F6;
+}
