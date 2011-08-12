@@ -19,12 +19,25 @@ package org.bug4j.gwt.admin.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import org.bug4j.gwt.admin.client.data.User;
+
+import java.util.List;
 
 /**
  */
 @RemoteServiceRelativePath("AdminService")
 public interface AdminService extends RemoteService {
     String getUserName();
+
+    List<User> getUsers();
+
+    void createUser(User user, String password);
+
+    void updateUser(User user);
+
+    void deleteUser(String userName);
+
+    String getRandomPassword();
 
     /**
      * Utility/Convenience class.

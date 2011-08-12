@@ -18,10 +18,12 @@ package org.bug4j.server.store.jdbc;
 
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.io.IOUtils;
+import org.bug4j.gwt.admin.client.data.User;
 import org.bug4j.gwt.user.client.data.*;
 import org.bug4j.gwt.user.client.data.Stack;
 import org.bug4j.server.store.Store;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.security.authentication.encoding.Md5PasswordEncoder;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -85,7 +87,11 @@ public class JdbcStore extends Store {
                         "CREATE TABLE BUG4J_USER (" +
                         " USER_NAME VARCHAR(128) NOT NULL PRIMARY KEY," +
                         " USER_PASS VARCHAR(128) NOT NULL," +
-                        " USER_ENABLED CHAR(1) NOT NULL" +
+                        " USER_EMAIL VARCHAR(128) NOT NULL," +
+                        " USER_ADMIN CHAR(1) NOT NULL," +
+                        " USER_BUILT_IN CHAR(1) NOT NULL," +
+                        " USER_ENABLED CHAR(1) NOT NULL," +
+                        " USER_LAST_SIGNED_IN TIMESTAMP" +
                         ")"
                 );
             }
@@ -750,6 +756,174 @@ public class JdbcStore extends Store {
             DbUtils.closeQuietly(connection);
         }
         return ret;
+    }
+
+    @Override
+    public List<User> getUsers() {
+        final ArrayList<User> ret = new ArrayList<User>();
+        final Connection connection = getConnection();
+        try {
+            try {
+                final PreparedStatement preparedStatement = connection.prepareStatement("" +
+                        "SELECT USER_NAME,USER_EMAIL,USER_ADMIN,USER_BUILT_IN,USER_ENABLED,USER_LAST_SIGNED_IN" +
+                        "   FROM BUG4J_USER" +
+                        "   ORDER BY USER_NAME");
+                try {
+                    final ResultSet resultSet = preparedStatement.executeQuery();
+                    try {
+                        while (resultSet.next()) {
+                            final String userName = resultSet.getString(1);
+                            final String email = resultSet.getString(1);
+                            final boolean isAdmin = "Y".equals(resultSet.getString(3));
+                            final boolean isBuiltIn = "Y".equals(resultSet.getString(4));
+                            final boolean isEnabled = "Y".equals(resultSet.getString(5));
+                            final Timestamp lastSignedIn = resultSet.getTimestamp(6);
+                            final User user = new User(userName, email, isAdmin, isBuiltIn, isEnabled, lastSignedIn == null ? null : lastSignedIn.getTime());
+                            ret.add(user);
+                        }
+                    } finally {
+                        resultSet.close();
+                    }
+                } finally {
+                    preparedStatement.close();
+                }
+            } finally {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+        return ret;
+    }
+
+    @Override
+    public void deleteUser(String userName) {
+        final Connection connection = getConnection();
+        try {
+            {
+                final PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM USER_READ WHERE USER_NAME=?");
+                try {
+                    preparedStatement.setString(1, userName);
+                    preparedStatement.executeUpdate();
+                } catch (SQLException e) {
+                    preparedStatement.close();
+                }
+            }
+
+            {
+                final PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM USER_PREFS WHERE USER_NAME=?");
+                try {
+                    preparedStatement.setString(1, userName);
+                    preparedStatement.executeUpdate();
+                } catch (SQLException e) {
+                    preparedStatement.close();
+                }
+            }
+
+            {
+                final PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM BUG4J_AUTHORITIES WHERE USER_NAME=?");
+                try {
+                    preparedStatement.setString(1, userName);
+                    preparedStatement.executeUpdate();
+                } catch (SQLException e) {
+                    preparedStatement.close();
+                }
+            }
+
+            {
+                final PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM BUG4J_USER WHERE USER_NAME=?");
+                try {
+                    preparedStatement.setString(1, userName);
+                    preparedStatement.executeUpdate();
+                } catch (SQLException e) {
+                    preparedStatement.close();
+                }
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
+            DbUtils.closeQuietly(connection);
+        }
+    }
+
+    @Override
+    public void updateUser(User user) {
+        final Connection connection = getConnection();
+        try {
+            {
+                final PreparedStatement preparedStatement = connection.prepareStatement("update BUG4J_USER set USER_EMAIL=?,USER_ADMIN=?,USER_BUILT_IN=?,USER_ENABLED=? WHERE USER_NAME=?");
+                try {
+                    preparedStatement.setString(1, user.getEmail());
+                    preparedStatement.setString(2, user.isAdmin() ? "Y" : "N");
+                    preparedStatement.setString(3, user.isBuiltIn() ? "Y" : "N");
+                    preparedStatement.setString(4, user.isEnabled() ? "Y" : "N");
+                    preparedStatement.setString(5, user.getUserName());
+                    preparedStatement.executeUpdate();
+                } finally {
+                    preparedStatement.close();
+                }
+            }
+
+            {
+                final PreparedStatement preparedStatement = connection.prepareStatement("delete from BUG4J_AUTHORITIES WHERE USER_NAME=?");
+                try {
+                    preparedStatement.setString(1, user.getUserName());
+                    preparedStatement.executeUpdate();
+                } finally {
+                    preparedStatement.close();
+                }
+            }
+
+            insertAuthorities(connection, user);
+
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
+            DbUtils.closeQuietly(connection);
+        }
+    }
+
+    @Override
+    public void createUser(User user, String password) {
+        final Connection connection = getConnection();
+        try {
+
+            {
+                final PreparedStatement preparedStatement = connection.prepareStatement("" +
+                        "INSERT INTO BUG4J_USER(USER_NAME,USER_PASS,USER_EMAIL,USER_ADMIN,USER_BUILT_IN,USER_ENABLED,USER_LAST_SIGNED_IN) VALUES (?,?,?,?,?,'Y',NULL)");
+                try {
+                    final String userName = user.getUserName();
+                    final String encodedPassword = new Md5PasswordEncoder().encodePassword(password, userName);
+                    preparedStatement.setString(1, userName);
+                    preparedStatement.setString(2, encodedPassword);
+                    preparedStatement.setString(3, user.getEmail());
+                    preparedStatement.setString(4, user.isAdmin() ? "Y" : "N");
+                    preparedStatement.setString(5, user.isBuiltIn() ? "Y" : "N");
+                    preparedStatement.executeUpdate();
+                } finally {
+                    preparedStatement.close();
+                }
+            }
+
+            insertAuthorities(connection, user);
+
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
+            DbUtils.closeQuietly(connection);
+        }
+    }
+
+    private void insertAuthorities(Connection connection, User user) throws SQLException {
+        final PreparedStatement preparedStatement = connection.prepareStatement("" +
+                "INSERT INTO BUG4J_AUTHORITIES(USER_NAME,AUTHORITY_NAME) VALUES (?,?)");
+        try {
+            preparedStatement.setString(1, user.getUserName());
+            preparedStatement.setString(2, user.isAdmin() ? "admin" : "user");
+            preparedStatement.executeUpdate();
+        } finally {
+            preparedStatement.close();
+        }
     }
 
     private String getAnyApp() {

@@ -18,8 +18,15 @@ package org.bug4j.gwt.common.server;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import org.bug4j.gwt.common.client.CommonService;
+import org.bug4j.gwt.common.client.data.UserAuthorities;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 
 import javax.servlet.http.HttpServletRequest;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  */
@@ -28,6 +35,24 @@ public class CommonServiceImpl extends RemoteServiceServlet implements CommonSer
     public String getUserName() {
         final HttpServletRequest threadLocalRequest = getThreadLocalRequest();
         final String remoteUser = threadLocalRequest.getRemoteUser();
+        final Principal userPrincipal = threadLocalRequest.getUserPrincipal();
+        final Authentication authentication = (UsernamePasswordAuthenticationToken) userPrincipal;
+        final Collection<GrantedAuthority> authorities = authentication.getAuthorities();
         return remoteUser;
+    }
+
+    @Override
+    public UserAuthorities getUserAuthorities() {
+        final HttpServletRequest threadLocalRequest = getThreadLocalRequest();
+        final String remoteUser = threadLocalRequest.getRemoteUser();
+        final Principal userPrincipal = threadLocalRequest.getUserPrincipal();
+        final Authentication authentication = (UsernamePasswordAuthenticationToken) userPrincipal;
+        final Collection<GrantedAuthority> authorities = authentication.getAuthorities();
+        final Collection<String> authorityNames = new ArrayList<String>();
+        for (GrantedAuthority authority : authorities) {
+            final String authorityName = authority.getAuthority();
+            authorityNames.add(authorityName);
+        }
+        return new UserAuthorities(remoteUser, authorityNames);
     }
 }

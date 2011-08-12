@@ -17,13 +17,77 @@
 package org.bug4j.gwt.admin.server;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import org.apache.log4j.Logger;
 import org.bug4j.gwt.admin.client.AdminService;
+import org.bug4j.gwt.admin.client.data.User;
+import org.bug4j.server.store.Store;
+import org.bug4j.server.store.StoreFactory;
+
+import java.util.List;
 
 /**
  */
 public class AdminServiceImpl extends RemoteServiceServlet implements AdminService {
+    private static final Logger LOGGER = Logger.getLogger(AdminServiceImpl.class);
+
     @Override
     public String getUserName() {
         return "Cedric";
+    }
+
+    @Override
+    public List<User> getUsers() {
+        final Store store = StoreFactory.getStore();
+        try {
+            return store.getUsers();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void createUser(User user, String password) {
+        final Store store = StoreFactory.getStore();
+        try {
+            store.createUser(user, password);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void updateUser(User user) {
+        final Store store = StoreFactory.getStore();
+        try {
+            store.updateUser(user);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void deleteUser(String userName) {
+        final Store store = StoreFactory.getStore();
+        try {
+            store.deleteUser(userName);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public String getRandomPassword() {
+        final String digits = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        final StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < 8; i++) {
+            final int pos = (int) (digits.length() * Math.random());
+            final char c = digits.charAt(pos);
+            stringBuilder.append(c);
+        }
+        return stringBuilder.toString();
     }
 }

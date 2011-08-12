@@ -17,10 +17,22 @@
 package org.bug4j.gwt.admin.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.bug4j.gwt.admin.client.data.User;
+
+import java.util.List;
 
 /**
  */
 public interface AdminServiceAsync {
     void getUserName(AsyncCallback<String> async);
 
+    void getUsers(AsyncCallback<List<User>> async);
+
+    void deleteUser(String userName, AsyncCallback<Void> async);
+
+    void updateUser(User user, AsyncCallback<Void> async);
+
+    void createUser(User user, String password, AsyncCallback<Void> async);
+
+    void getRandomPassword(AsyncCallback<String> async);
 }

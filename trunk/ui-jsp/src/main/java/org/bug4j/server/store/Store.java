@@ -16,6 +16,7 @@
 
 package org.bug4j.server.store;
 
+import org.bug4j.gwt.admin.client.data.User;
 import org.bug4j.gwt.user.client.data.*;
 import org.jetbrains.annotations.Nullable;
 
@@ -76,4 +77,12 @@ public abstract class Store {
     public abstract void markRead(String userName, long bugId);
 
     public abstract List<BugCountByDate> getBugCountByDate(String app);
+
+    public abstract List<User> getUsers();
+
+    public abstract void deleteUser(String userName);
+
+    public abstract void updateUser(User user);
+
+    public abstract void createUser(User user, String password);
 }
