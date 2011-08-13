@@ -40,7 +40,7 @@ public class FilterDialog extends DialogBox {
     }
 
     private Widget createWidget() {
-        final VerticalPanel ret = new VerticalPanel();
+        final FlowPanel ret = new FlowPanel();
 
         ret.add(createContent());
         ret.add(createOkCancel());
@@ -49,7 +49,7 @@ public class FilterDialog extends DialogBox {
     }
 
     private Widget createContent() {
-        final VerticalPanel ret = new VerticalPanel();
+        final FlowPanel ret = new FlowPanel();
         final Grid grid = new Grid(2, 3);
 
         { // Hit days

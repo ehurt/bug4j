@@ -20,7 +20,6 @@ import org.bug4j.gwt.admin.client.data.User;
 import org.bug4j.gwt.user.client.data.*;
 import org.jetbrains.annotations.Nullable;
 
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -90,7 +89,7 @@ public abstract class Store {
 
     public abstract void createUser(User user, String password);
 
-    public abstract void updatePassword(String userName, String oldPassword, String newPassword) throws SQLException;
+    public abstract void updatePassword(String userName, String oldPassword, String newPassword);
 
     public abstract void createApplication(String applicationName);
 
