@@ -79,22 +79,25 @@ public class JdbcStore extends Store {
         return ret;
     }
 
-    private static void createTables(Connection connection) throws SQLException {
+    private void createTables(Connection connection) throws SQLException {
+        boolean mustCreateDefaultAdminUser = false;
         final Statement statement = connection.createStatement();
 
         try {
             if (!doesTableExist(statement, "BUG4J_USER")) {
+                mustCreateDefaultAdminUser = true;
                 statement.execute("" +
                         "CREATE TABLE BUG4J_USER (" +
                         " USER_NAME VARCHAR(128) NOT NULL PRIMARY KEY," +
                         " USER_PASS VARCHAR(128) NOT NULL," +
-                        " USER_EMAIL VARCHAR(128) NOT NULL," +
+                        " USER_EMAIL VARCHAR(128)," +
                         " USER_ADMIN CHAR(1) NOT NULL," +
                         " USER_BUILT_IN CHAR(1) NOT NULL," +
                         " USER_ENABLED CHAR(1) NOT NULL," +
                         " USER_LAST_SIGNED_IN TIMESTAMP" +
                         ")"
                 );
+
             }
 
             if (!doesTableExist(statement, "BUG4J_AUTHORITIES")) {
@@ -210,9 +213,19 @@ public class JdbcStore extends Store {
                 );
                 statement.execute("CREATE INDEX USER_READ_IDX ON USER_READ(USER_NAME,BUG_ID)");
             }
+
+            if (mustCreateDefaultAdminUser) {
+                createDefaultAdminUser();
+            }
+
         } finally {
             DbUtils.closeQuietly(statement);
         }
+    }
+
+    private void createDefaultAdminUser() {
+        final User user = new User("bug4j", null, true, true, true, null);
+        createUser(user, "admin");
     }
 
     private static boolean doesTableExist(Statement statement, String tableName) {
