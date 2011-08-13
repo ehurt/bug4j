@@ -32,14 +32,22 @@ import org.bug4j.gwt.common.client.CommonService;
 import org.bug4j.gwt.common.client.Resources;
 import org.bug4j.gwt.common.client.data.UserAuthorities;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 /**
  */
 public class Admin implements EntryPoint {
     public static final Resources IMAGES = GWT.create(Resources.class);
     private Label _userLabel;
-    private SimpleLayoutPanel _simpleLayoutPanel;
+    private SimpleLayoutPanel _centerLayoutPanel;
     private AdminView _currentAdminView;
     private UserAuthorities _userAuthorities;
+    private final Collection<ApplicationView> _applicationViews = new ArrayList<ApplicationView>();
+    private SimpleLayoutPanel _navigationHost;
+    private final UserView _userView = new UserView();
+    private final ApplicationsView _applicationsView = new ApplicationsView(this);
 
     public void onModuleLoad() {
         final DockLayoutPanel dockLayoutPanel = new DockLayoutPanel(Style.Unit.PX);
@@ -47,13 +55,17 @@ public class Admin implements EntryPoint {
         dockLayoutPanel.addNorth(northWidget, 35);
 
         final SplitLayoutPanel splitLayoutPanel = new SplitLayoutPanel(4);
-        _simpleLayoutPanel = new SimpleLayoutPanel();
-        final Widget navigationWidget = buildNavigation();
-        splitLayoutPanel.addWest(navigationWidget, 100);
-        splitLayoutPanel.add(_simpleLayoutPanel);
+
+        _navigationHost = new SimpleLayoutPanel();
+        splitLayoutPanel.addWest(_navigationHost, 200);
+        refreshNavigation(_userView);
+
+        _centerLayoutPanel = new SimpleLayoutPanel();
+        splitLayoutPanel.add(_centerLayoutPanel);
         dockLayoutPanel.add(splitLayoutPanel);
 
-        RootLayoutPanel.get().add(dockLayoutPanel);
+        final RootLayoutPanel rootLayoutPanel = RootLayoutPanel.get();
+        rootLayoutPanel.add(dockLayoutPanel);
         final Element loadingElement = DOM.getElementById("loading");
         DOM.removeChild(DOM.getParent(loadingElement), loadingElement);
 
@@ -74,27 +86,42 @@ public class Admin implements EntryPoint {
         });
     }
 
-    private Widget buildNavigation() {
+    private Widget buildNavigation(final AdminView defaultView) {
         final FlowPanel flowPanel = new FlowPanel();
 
-        final AdminView[] adminViews = {
-                new UserView(),
-                new ApplicationsView(),
-        };
-        for (final AdminView adminView : adminViews) {
-            final Label label = adminView.getLabel();
-            label.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    setView(adminView);
+        CommonService.App.getInstance().getApplications(new AsyncCallback<List<String>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert("Failed to get the list of applications");
+            }
+
+            @Override
+            public void onSuccess(List<String> applicationNames) {
+                addNavigationLabel(flowPanel, _userView);
+                addNavigationLabel(flowPanel, _applicationsView);
+
+                _applicationViews.clear();
+                for (String applicationName : applicationNames) {
+                    final ApplicationView applicationView = new ApplicationView(applicationName);
+                    addNavigationLabel(flowPanel, applicationView);
+                    _applicationViews.add(applicationView);
                 }
-            });
+                setView(defaultView);
+            }
+        });
 
-            flowPanel.add(label);
-        }
-
-        setView(adminViews[0]);
         return flowPanel;
+    }
+
+    private void addNavigationLabel(final FlowPanel flowPanel, final AdminView adminView) {
+        final Label label = adminView.getLabel();
+        label.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                setView(adminView);
+            }
+        });
+        flowPanel.add(adminView.getLabel());
     }
 
     private void setView(AdminView newView) {
@@ -109,7 +136,7 @@ public class Admin implements EntryPoint {
 
         if (_currentAdminView != null) {
             final Widget widget = _currentAdminView.getWidget();
-            _simpleLayoutPanel.setWidget(widget);
+            _centerLayoutPanel.setWidget(widget);
             _currentAdminView.setSelected(true);
         }
     }
@@ -200,5 +227,23 @@ public class Admin implements EntryPoint {
         _userAuthorities = userAuthorities;
         final String userName = _userAuthorities.getUserName();
         whenUserNameChanged(userName);
+    }
+
+    public void edit(String applicationName) {
+        for (ApplicationView applicationView : _applicationViews) {
+            if (applicationView.getApplicationName().equals(applicationName)) {
+                setView(applicationView);
+                break;
+            }
+        }
+    }
+
+    private void refreshNavigation(AdminView defaultView) {
+        final Widget navigationWidget = buildNavigation(defaultView);
+        _navigationHost.setWidget(navigationWidget);
+    }
+
+    public void whenApplicationsChanged() {
+        refreshNavigation(_applicationsView);
     }
 }

@@ -207,6 +207,10 @@ div#main {
     border-bottom: 1px solid white;
 }
 
+.admin-label-app {
+    padding-left: 20px;
+}
+
 .admin-label-selected {
     background-image: url('icons/sel-triangle.png');
     background-repeat: no-repeat;
@@ -219,4 +223,14 @@ div#main {
 
 .admin-header {
     border-bottom: 5px solid #D0E4F6;
+}
+
+.admin-appview-label {
+    font-size: 1.7em;
+    padding-left: 5px;
+}
+
+.usersettings-error-label {
+    color: red;
+    margin: 0 10px;
 }

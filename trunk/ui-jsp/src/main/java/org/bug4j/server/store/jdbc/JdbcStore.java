@@ -19,6 +19,7 @@ package org.bug4j.server.store.jdbc;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.io.IOUtils;
 import org.bug4j.gwt.admin.client.data.User;
+import org.bug4j.gwt.common.client.data.UserException;
 import org.bug4j.gwt.user.client.data.*;
 import org.bug4j.gwt.user.client.data.Stack;
 import org.bug4j.server.store.Store;
@@ -553,7 +554,7 @@ public class JdbcStore extends Store {
         final List<String> ret = new ArrayList<String>();
         final Connection connection = getConnection();
         try {
-            final PreparedStatement preparedStatement = connection.prepareStatement("SELECT DISTINCT APP FROM APP ORDER BY 1");
+            final PreparedStatement preparedStatement = connection.prepareStatement("SELECT DISTINCT APP FROM APP");
             try {
                 final ResultSet resultSet = preparedStatement.executeQuery();
                 try {
@@ -571,6 +572,7 @@ public class JdbcStore extends Store {
         } finally {
             DbUtils.closeQuietly(connection);
         }
+        Collections.sort(ret, String.CASE_INSENSITIVE_ORDER);
         return ret;
     }
 
@@ -847,6 +849,13 @@ public class JdbcStore extends Store {
     }
 
     @Override
+    public void deleteUsers(Collection<String> userNames) {
+        for (String userName : userNames) {
+            deleteUser(userName);
+        }
+    }
+
+    @Override
     public void updateUser(User user) {
         final Connection connection = getConnection();
         try {
@@ -914,6 +923,85 @@ public class JdbcStore extends Store {
         }
     }
 
+    @Override
+    public void updatePassword(String userName, String oldPassword, String newPassword) throws SQLException {
+        final Connection connection = getConnection();
+        try {
+            final PreparedStatement preparedStatement = connection.prepareStatement("UPDATE BUG4J_USER SET USER_PASS=? WHERE USER_NAME=? AND USER_PASS=?");
+            try {
+                final String oldEncodedPassword = new Md5PasswordEncoder().encodePassword(oldPassword, userName);
+                final String newEncodedPassword = new Md5PasswordEncoder().encodePassword(newPassword, userName);
+                preparedStatement.setString(1, newEncodedPassword);
+                preparedStatement.setString(2, userName);
+                preparedStatement.setString(3, oldEncodedPassword);
+                final int count = preparedStatement.executeUpdate();
+                if (count != 1) {
+                    throw new UserException(1, "Invalid password");
+                }
+            } finally {
+                preparedStatement.close();
+            }
+        } finally {
+            connection.close();
+        }
+    }
+
+    @Override
+    public void createApplication(String applicationName) {
+        final Connection connection = getConnection();
+        try {
+            try {
+                final PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO APP(APP,VER)VALUES(?,?)");
+                try {
+                    preparedStatement.setString(1, applicationName);
+                    preparedStatement.setString(2, "0");
+                    preparedStatement.executeUpdate();
+                } finally {
+                    preparedStatement.close();
+                }
+            } finally {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void deleteApplication(String applicationName) {
+        final Connection connection = getConnection();
+        try {
+            try {
+                deleteAppTable(connection, applicationName, "DELETE FROM STACK_TEXT WHERE STACK_ID IN (SELECT S.STACK_ID FROM STACK S, BUG B WHERE B.APP=? AND S.BUG_ID=B.BUG_ID)");
+                deleteAppTable(connection, applicationName, "DELETE FROM STACK WHERE BUG_ID IN (SELECT BUG_ID FROM BUG WHERE APP=?)");
+                deleteAppTable(connection, applicationName, "DELETE FROM HIT WHERE BUG_ID IN (SELECT BUG_ID FROM BUG WHERE APP=?)");
+                deleteAppTable(connection, applicationName, "DELETE FROM STRAIN WHERE BUG_ID IN (SELECT BUG_ID FROM BUG WHERE APP=?)");
+                deleteAppTable(connection, applicationName, "DELETE FROM USER_READ WHERE BUG_ID IN (SELECT BUG_ID FROM BUG WHERE APP=?)");
+                deleteAppTable(connection, applicationName, "DELETE FROM BUG WHERE APP=?");
+                deleteAppTable(connection, applicationName, "DELETE FROM APP_PACKAGES WHERE APP=?");
+                deleteAppTable(connection, applicationName, "DELETE FROM APP WHERE APP=?");
+            } finally {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    private void deleteAppTable(Connection connection, String applicationName, String statement) {
+        try {
+            final PreparedStatement preparedStatement = connection.prepareStatement(statement);
+            try {
+                preparedStatement.setString(1, applicationName);
+                preparedStatement.executeUpdate();
+            } finally {
+                preparedStatement.close();
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
     private void insertAuthorities(Connection connection, User user) throws SQLException {
         final PreparedStatement preparedStatement = connection.prepareStatement("" +
                 "INSERT INTO BUG4J_AUTHORITIES(USER_NAME,AUTHORITY_NAME) VALUES (?,?)");
@@ -945,6 +1033,28 @@ public class JdbcStore extends Store {
             DbUtils.closeQuietly(connection);
         }
         return ret;
+    }
+
+    @Override
+    public void resetPassword(String userName, String password) {
+        try {
+            final Connection connection = getConnection();
+            try {
+                final PreparedStatement preparedStatement = connection.prepareStatement("UPDATE BUG4J_USER SET USER_PASS=? WHERE USER_NAME=?");
+                try {
+                    final String encodedPassword = new Md5PasswordEncoder().encodePassword(password, userName);
+                    preparedStatement.setString(1, encodedPassword);
+                    preparedStatement.setString(2, userName);
+                    preparedStatement.executeUpdate();
+                } finally {
+                    preparedStatement.close();
+                }
+            } finally {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
     }
 
     @Override

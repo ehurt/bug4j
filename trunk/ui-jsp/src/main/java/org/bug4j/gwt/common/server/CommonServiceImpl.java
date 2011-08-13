@@ -17,8 +17,12 @@
 package org.bug4j.gwt.common.server;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import org.apache.log4j.Logger;
 import org.bug4j.gwt.common.client.CommonService;
+import org.bug4j.gwt.common.client.data.AppPkg;
 import org.bug4j.gwt.common.client.data.UserAuthorities;
+import org.bug4j.server.store.Store;
+import org.bug4j.server.store.StoreFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -27,10 +31,13 @@ import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  */
 public class CommonServiceImpl extends RemoteServiceServlet implements CommonService {
+    private static final Logger LOGGER = Logger.getLogger(CommonServiceImpl.class);
+
     @Override
     public String getUserName() {
         final HttpServletRequest threadLocalRequest = getThreadLocalRequest();
@@ -55,4 +62,33 @@ public class CommonServiceImpl extends RemoteServiceServlet implements CommonSer
         }
         return new UserAuthorities(remoteUser, authorityNames);
     }
+
+    @Override
+    public List<String> getApplications() throws Exception {
+        try {
+            final Store store = StoreFactory.getStore();
+            return store.getApplications();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    @Override
+    public List<AppPkg> getPackages(String app) throws Exception {
+        final Store store = StoreFactory.getStore();
+        final List<AppPkg> ret;
+        try {
+            final List<String> packages = store.getPackages(app);
+            ret = new ArrayList<AppPkg>();
+            for (String pkg : packages) {
+                ret.add(new AppPkg(pkg));
+            }
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new Exception(e.getMessage(), e);
+        }
+        return ret;
+    }
+
 }

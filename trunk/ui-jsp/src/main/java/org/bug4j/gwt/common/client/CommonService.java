@@ -19,7 +19,10 @@ package org.bug4j.gwt.common.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import org.bug4j.gwt.common.client.data.AppPkg;
 import org.bug4j.gwt.common.client.data.UserAuthorities;
+
+import java.util.List;
 
 /**
  */
@@ -28,6 +31,10 @@ public interface CommonService extends RemoteService {
     String getUserName();
 
     UserAuthorities getUserAuthorities();
+
+    List<String> getApplications() throws Exception;
+
+    List<AppPkg> getPackages(String app) throws Exception;
 
     /**
      * Utility/Convenience class.

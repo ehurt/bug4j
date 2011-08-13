@@ -20,14 +20,15 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import org.bug4j.gwt.admin.client.data.User;
+import org.bug4j.gwt.common.client.data.AppPkg;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
  */
 @RemoteServiceRelativePath("AdminService")
 public interface AdminService extends RemoteService {
-    String getUserName();
 
     List<User> getUsers();
 
@@ -35,9 +36,17 @@ public interface AdminService extends RemoteService {
 
     void updateUser(User user);
 
-    void deleteUser(String userName);
+    void deleteUsers(Collection<String> userNames);
 
     String getRandomPassword();
+
+    String resetPassword(User user) throws Exception;
+
+    public void createApplication(String applicationName) throws Exception;
+
+    public void deleteApplication(String applicationName) throws Exception;
+
+    void setPackages(String app, List<AppPkg> packages) throws Exception;
 
     /**
      * Utility/Convenience class.

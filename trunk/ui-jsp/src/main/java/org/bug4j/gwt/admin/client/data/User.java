@@ -19,7 +19,14 @@ package org.bug4j.gwt.admin.client.data;
 import java.io.Serializable;
 
 public class User implements Serializable {
-    public static final boolean SUPPORTS_LDAP = false;
+    public static final boolean SUPPORTS_LDAP;
+    public static final boolean USER_EMAIL;
+
+    static {
+        SUPPORTS_LDAP = false;
+        USER_EMAIL = false;
+    }
+
     private String _userName;
     private String _email;
     private boolean _admin;

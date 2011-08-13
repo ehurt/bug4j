@@ -21,8 +21,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.layout.client.Layout;
@@ -34,10 +32,11 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import org.bug4j.gwt.common.client.CommonService;
 import org.bug4j.gwt.common.client.Resources;
+import org.bug4j.gwt.common.client.data.AppPkg;
 import org.bug4j.gwt.common.client.data.UserAuthorities;
 import org.bug4j.gwt.user.client.bugs.BugView;
 import org.bug4j.gwt.user.client.graphs.TopGraphView;
-import org.bug4j.gwt.user.client.settings.SettingsDialog;
+import org.bug4j.gwt.user.client.settings.UserDialog;
 import org.bug4j.gwt.user.client.util.PropertyListener;
 import org.jetbrains.annotations.Nullable;
 
@@ -49,7 +48,7 @@ import java.util.List;
  */
 public class Bug4j implements EntryPoint {
     public static final Resources IMAGES = GWT.create(Resources.class);
-    private static List<String> _appPackages;
+    private static List<AppPkg> _appPackages;
     private UserAuthorities _userAuthorities;
     private String _application;
     private final List<PropertyListener<String>> _propertyListeners = new ArrayList<PropertyListener<String>>();
@@ -171,10 +170,10 @@ public class Bug4j implements EntryPoint {
     private void whenUserClicked(Label userLabel) {
         final PopupPanel popupPanel = new PopupPanel(true, true);
         final MenuBar popup = new MenuBar(true);
-        popup.addItem("Settings...", new Command() {
+        popup.addItem("User Settings...", new Command() {
             @Override
             public void execute() {
-                whenSettings();
+                whenUserSettings();
                 popupPanel.hide();
             }
         });
@@ -219,6 +218,11 @@ public class Bug4j implements EntryPoint {
                 userLabel.getAbsoluteTop() + userLabel.getOffsetHeight());
     }
 
+    private void whenUserSettings() {
+        final UserDialog userDialog = new UserDialog();
+        userDialog.show();
+    }
+
     private void whenAdministration() {
         final String moduleBaseURL = GWT.getModuleBaseURL();
         final String application = getApplication();
@@ -229,7 +233,7 @@ public class Bug4j implements EntryPoint {
 
     private void whenAppClicked(final Label app) {
 
-        Bug4jService.App.getInstance().getApplications(new AsyncCallback<List<String>>() {
+        CommonService.App.getInstance().getApplications(new AsyncCallback<List<String>>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert("Failed to get the list of applications");
@@ -303,27 +307,16 @@ public class Bug4j implements EntryPoint {
         Window.open("j_spring_security_logout", "_self", "");
     }
 
-    private void whenSettings() {
-        final SettingsDialog settingsDialog = new SettingsDialog(this);
-        settingsDialog.show();
-        settingsDialog.addCloseHandler(new CloseHandler<PopupPanel>() {
-            @Override
-            public void onClose(CloseEvent<PopupPanel> popupPanelCloseEvent) {
-                refreshPackages();
-            }
-        });
-    }
-
-    public synchronized void withAppPackages(final AsyncCallback<List<String>> asyncCallback) {
+    public synchronized void withAppPackages(final AsyncCallback<List<AppPkg>> asyncCallback) {
         if (_appPackages == null) {
-            Bug4jService.App.getInstance().getPackages(_application, new AsyncCallback<List<String>>() {
+            CommonService.App.getInstance().getPackages(_application, new AsyncCallback<List<AppPkg>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     asyncCallback.onFailure(caught);
                 }
 
                 @Override
-                public void onSuccess(List<String> result) {
+                public void onSuccess(List<AppPkg> result) {
                     _appPackages = result;
                     asyncCallback.onSuccess(_appPackages);
                 }
@@ -347,20 +340,20 @@ public class Bug4j implements EntryPoint {
     }
 
     private void refreshPackages() {
-        Bug4jService.App.getInstance().getPackages(_application, new AsyncCallback<List<String>>() {
+        CommonService.App.getInstance().getPackages(_application, new AsyncCallback<List<AppPkg>>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
             }
 
             @Override
-            public void onSuccess(List<String> result) {
+            public void onSuccess(List<AppPkg> result) {
                 setPackages(result);
             }
         });
     }
 
-    private void setPackages(List<String> result) {
+    private void setPackages(List<AppPkg> result) {
         _appPackages = result;
         firePropertyChange(PropertyListener.PACKAGES, null);
     }

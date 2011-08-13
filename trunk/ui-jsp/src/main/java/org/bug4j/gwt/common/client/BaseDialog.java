@@ -14,22 +14,20 @@
  *    limitations under the License.
  */
 
-package org.bug4j.gwt.user.client.settings;
+package org.bug4j.gwt.common.client;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.*;
-import org.bug4j.gwt.user.client.Bug4j;
+import org.jetbrains.annotations.Nullable;
 
 /**
  */
 public abstract class BaseDialog extends DialogBox {
-    private final Bug4j _bug4j;
 
-    protected BaseDialog(String title, Bug4j bug4j) {
-        _bug4j = bug4j;
+    protected BaseDialog(String title) {
         setText(title);
 
         final Widget widget = createWidget();
@@ -43,10 +41,22 @@ public abstract class BaseDialog extends DialogBox {
         hide(true);
     }
 
-    protected Widget createOkCancel() {
+    protected Widget createButtons() {
+        return createOkCancelButtons();
+    }
+
+    protected final Widget createOkCancelButtons() {
+        return createButtons("OK", "Cancel");
+    }
+
+    protected final Widget createOkButton() {
+        return createButtons("OK", null);
+    }
+
+    private Widget createButtons(final String okText, @Nullable final String cancelText) {
         final HorizontalPanel horizontalPanel = new HorizontalPanel();
 
-        final Button ok = new Button("OK");
+        final Button ok = new Button(okText);
         ok.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -55,18 +65,25 @@ public abstract class BaseDialog extends DialogBox {
         });
         ok.setWidth("75px");
 
-        final Button cancel = new Button("Cancel");
-        cancel.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                whenCancel();
-            }
-        });
-        cancel.setWidth("75px");
+        final Button cancel;
+        if (cancelText != null) {
+            cancel = new Button(cancelText);
+            cancel.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    whenCancel();
+                }
+            });
+            cancel.setWidth("75px");
+        } else {
+            cancel = null;
+        }
 
         horizontalPanel.setSpacing(5);
         horizontalPanel.add(ok);
-        horizontalPanel.add(cancel);
+        if (cancel != null) {
+            horizontalPanel.add(cancel);
+        }
 
         final HorizontalPanel ret = new HorizontalPanel();
         ret.setWidth("400px");
@@ -96,14 +113,10 @@ public abstract class BaseDialog extends DialogBox {
         final VerticalPanel ret = new VerticalPanel();
 
         ret.add(createContent());
-        ret.add(createOkCancel());
+        ret.add(createButtons());
 
         return ret;
     }
 
     protected abstract Widget createContent();
-
-    protected Bug4j getBug4j() {
-        return _bug4j;
-    }
 }

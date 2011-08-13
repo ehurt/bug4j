@@ -14,23 +14,22 @@
  *    limitations under the License.
  */
 
-package org.bug4j.gwt.common.client;
+package org.bug4j.gwt.common.client.data;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.bug4j.gwt.common.client.data.AppPkg;
-import org.bug4j.gwt.common.client.data.UserAuthorities;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+public class UserException extends IllegalStateException {
+    private int _type;
 
-/**
- */
-public interface CommonServiceAsync {
-    void getUserName(AsyncCallback<String> async);
+    public UserException() {
+    }
 
-    void getUserAuthorities(AsyncCallback<UserAuthorities> async);
+    public UserException(int type, @Nullable String s) {
+        super(s);
+        _type = type;
+    }
 
-    void getApplications(AsyncCallback<List<String>> async);
-
-
-    void getPackages(String app, AsyncCallback<List<AppPkg>> async);
+    public int getType() {
+        return _type;
+    }
 }
