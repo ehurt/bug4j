@@ -26,8 +26,6 @@ public interface Bug4jServiceAsync {
 
     void getBugs(String app, Filter filter, String sortBy, AsyncCallback<List<Bug>> async);
 
-    void getPackages(String app, AsyncCallback<List<String>> async);
-
     void getHits(long bugId, Filter filter, int offset, int max, String orderBy, AsyncCallback<List<BugHit>> async);
 
     void deleteBug(long bugId, AsyncCallback<Void> async);
@@ -38,10 +36,6 @@ public interface Bug4jServiceAsync {
 
     void getBugHitAndStack(long hitId, AsyncCallback<BugHitAndStack> async);
 
-    void setPackages(String app, List<String> packages, AsyncCallback<Void> async);
-
-    void getApplications(AsyncCallback<List<String>> async);
-
     void setDefaultApplication(String app, AsyncCallback<Void> async);
 
     void getDefaultApplication(AsyncCallback<String> async);
@@ -51,4 +45,6 @@ public interface Bug4jServiceAsync {
     void setDefaultFilter(Filter filter, AsyncCallback<Void> async);
 
     void markRead(long bugId, AsyncCallback<Void> async);
+
+    void updatePassword(String oldPassword, String newPassword, AsyncCallback<Void> async);
 }

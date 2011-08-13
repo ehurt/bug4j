@@ -19,12 +19,9 @@
       <configuration>
         <setting name="compilerParameters" value="-localWorkers 4" />
         <setting name="compilerMaxHeapSize" value="128" />
-        <setting name="gwtScriptOutputStyle" value="OBF" />
+        <setting name="gwtScriptOutputStyle" value="PRETTY" />
         <setting name="gwtSdkUrl" value="file://$dep-home$/gwt-2.3.0" />
         <setting name="webFacet" value="Web" />
-        <packaging>
-          <module name="org.bug4j.gwt.user.user" path="/user" />
-        </packaging>
       </configuration>
     </facet>
     <facet type="Spring" name="Spring">

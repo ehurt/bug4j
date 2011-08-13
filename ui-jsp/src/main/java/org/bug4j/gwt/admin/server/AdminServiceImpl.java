@@ -20,20 +20,18 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import org.apache.log4j.Logger;
 import org.bug4j.gwt.admin.client.AdminService;
 import org.bug4j.gwt.admin.client.data.User;
+import org.bug4j.gwt.common.client.data.AppPkg;
 import org.bug4j.server.store.Store;
 import org.bug4j.server.store.StoreFactory;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
  */
 public class AdminServiceImpl extends RemoteServiceServlet implements AdminService {
     private static final Logger LOGGER = Logger.getLogger(AdminServiceImpl.class);
-
-    @Override
-    public String getUserName() {
-        return "Cedric";
-    }
 
     @Override
     public List<User> getUsers() {
@@ -69,10 +67,10 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
     }
 
     @Override
-    public void deleteUser(String userName) {
+    public void deleteUsers(Collection<String> userNames) {
         final Store store = StoreFactory.getStore();
         try {
-            store.deleteUser(userName);
+            store.deleteUsers(userNames);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             throw new IllegalStateException(e.getMessage(), e);
@@ -89,5 +87,55 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
             stringBuilder.append(c);
         }
         return stringBuilder.toString();
+    }
+
+    @Override
+    public String resetPassword(User user) throws Exception {
+        final Store store = StoreFactory.getStore();
+        try {
+            final String userName = user.getUserName();
+            final String randomPassword = getRandomPassword();
+            store.resetPassword(userName, randomPassword);
+            return randomPassword;
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    @Override
+    public void createApplication(String applicationName) throws Exception {
+        final Store store = StoreFactory.getStore();
+        try {
+            store.createApplication(applicationName);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    @Override
+    public void deleteApplication(String applicationName) throws Exception {
+        final Store store = StoreFactory.getStore();
+        try {
+            store.deleteApplication(applicationName);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    @Override
+    public void setPackages(String app, List<AppPkg> pkgs) throws Exception {
+        final Store store = StoreFactory.getStore();
+        try {
+            final ArrayList<String> packages = new ArrayList<String>();
+            for (AppPkg pkg : pkgs) {
+                packages.add(pkg.getPkg());
+            }
+            store.setPackages(app, packages);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
     }
 }

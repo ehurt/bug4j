@@ -16,17 +16,17 @@
 
 package org.bug4j.gwt.admin.client;
 
-import com.google.gwt.cell.client.CheckboxCell;
-import com.google.gwt.cell.client.FieldUpdater;
-import com.google.gwt.cell.client.SelectionCell;
-import com.google.gwt.cell.client.TextInputCell;
+import com.google.gwt.cell.client.*;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.text.shared.AbstractSafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -38,11 +38,9 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import org.bug4j.gwt.admin.client.data.User;
+import org.bug4j.gwt.common.client.BaseDialog;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  */
@@ -57,7 +55,7 @@ public class UserView extends AdminView {
     }
 
     @Override
-    protected Widget createView() {
+    protected Widget createWidget() {
         final DockLayoutPanel dockLayoutPanel = new DockLayoutPanel(Style.Unit.EM);
 
         final Widget buttonPanel = createButtonPanel();
@@ -123,7 +121,7 @@ public class UserView extends AdminView {
             cellTable.addColumn(userNameColumn, "Username");
         }
 
-        {   // email
+        if (User.USER_EMAIL) {   // email
             final TextInputCell textInputCell = new TextInputCell();
             final Column<User, String> emailColumn = new Column<User, String>(textInputCell) {
                 @Override
@@ -193,22 +191,52 @@ public class UserView extends AdminView {
             cellTable.addColumn(column, "Enabled");
         }
 
-        cellTable.addColumn(new TextColumn<User>() {
-            @Override
-            public String getValue(User object) {
-                final Long lastSignedIn = object.getLastSignedIn();
-                final String s;
-                if (lastSignedIn != null) {
-                    s = DateTimeFormat
-                            .getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_MEDIUM)
-                            .format(new Date(lastSignedIn));
-                } else {
-                    s = "";
+        {
+            cellTable.addColumn(new TextColumn<User>() {
+                @Override
+                public String getValue(User object) {
+                    final Long lastSignedIn = object.getLastSignedIn();
+                    final String s;
+                    if (lastSignedIn != null) {
+                        s = DateTimeFormat
+                                .getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_MEDIUM)
+                                .format(new Date(lastSignedIn));
+                    } else {
+                        s = "";
+                    }
+                    return s;
                 }
-                return s;
-            }
-        }, "Last Signed In");
+            }, "Last Signed In");
+        }
 
+        {
+            final ClickableTextCell clickableTextCell = new ClickableTextCell(new AbstractSafeHtmlRenderer<String>() {
+                @Override
+                public SafeHtml render(String object) {
+                    return new SafeHtmlBuilder()
+                            .appendHtmlConstant("<a href=\"#\">Reset Password</a>")
+                            .toSafeHtml();
+                }
+            });
+
+            final Column<User, String> column = new Column<User, String>(clickableTextCell) {
+                @Override
+                public String getValue(User object) {
+                    return "";
+                }
+            };
+
+            column.setFieldUpdater(new FieldUpdater<User, String>() {
+                @Override
+                public void update(int index, User user, String value) {
+                    whenResetPassword(user);
+                }
+            });
+
+            cellTable.addColumn(column);
+
+            cellTable.setColumnWidth(column, 300, Style.Unit.PX);
+        }
 
         refreshData();
         return cellTable;
@@ -302,19 +330,58 @@ public class UserView extends AdminView {
 
     private void whenDelete() {
         final Set<User> selectedSet = _selectionModel.getSelectedSet();
+        final HashSet<String> userNames = new HashSet<String>(selectedSet.size());
         for (User user : selectedSet) {
-            final String userName = user.getUserName();
-            AdminService.App.getInstance().deleteUser(userName, new AsyncCallback<Void>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    Window.alert(caught.getMessage());
-                }
-
-                @Override
-                public void onSuccess(Void result) {
-                    refreshData();
-                }
-            });
+            userNames.add(user.getUserName());
         }
+        AdminService.App.getInstance().deleteUsers(userNames, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert(caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                refreshData();
+            }
+        });
+    }
+
+    private void whenResetPassword(User user) {
+        AdminService.App.getInstance().resetPassword(user, new AsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert("Server failure.");
+            }
+
+            @Override
+            public void onSuccess(final String newPassword) {
+                final BaseDialog baseDialog = new BaseDialog("Password Reset") {
+
+                    @Override
+                    protected Widget createContent() {
+                        final Grid grid = new Grid(1, 2);
+                        grid.setWidget(0, 0, new Label("New Password:"));
+                        grid.setWidget(0, 1, new Label(newPassword));
+
+                        return grid;
+                    }
+
+                    @Override
+                    protected void whenOk() {
+                        hide();
+                    }
+
+                    @Override
+                    protected Widget createButtons() {
+                        final Widget ret = super.createOkButton();
+                        ret.setWidth("300px");
+                        return ret;
+                    }
+                };
+                baseDialog.show();
+
+            }
+        });
     }
 }

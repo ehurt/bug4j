@@ -16,21 +16,20 @@
 
 package org.bug4j.gwt.common.client;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.bug4j.gwt.common.client.data.AppPkg;
-import org.bug4j.gwt.common.client.data.UserAuthorities;
+import com.google.gwt.user.client.ui.Widget;
 
-import java.util.List;
+public abstract class View {
+    private Widget _widget;
 
-/**
- */
-public interface CommonServiceAsync {
-    void getUserName(AsyncCallback<String> async);
+    protected View() {
+    }
 
-    void getUserAuthorities(AsyncCallback<UserAuthorities> async);
+    public final Widget getWidget() {
+        if (_widget == null) {
+            _widget = createWidget();
+        }
+        return _widget;
+    }
 
-    void getApplications(AsyncCallback<List<String>> async);
-
-
-    void getPackages(String app, AsyncCallback<List<AppPkg>> async);
+    protected abstract Widget createWidget();
 }

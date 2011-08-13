@@ -26,6 +26,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.*;
 import org.bug4j.common.TextToLines;
+import org.bug4j.gwt.common.client.data.AppPkg;
 import org.bug4j.gwt.user.client.Bug4j;
 import org.bug4j.gwt.user.client.Bug4jService;
 import org.bug4j.gwt.user.client.data.Bug;
@@ -268,30 +269,30 @@ class BugDetailView {
 
     private void render(final String stackText) {
         final Bug4j bug4J = _displaysBugs.getBug4J();
-        bug4J.withAppPackages(new AsyncCallback<List<String>>() {
+        bug4J.withAppPackages(new AsyncCallback<List<AppPkg>>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
             }
 
             @Override
-            public void onSuccess(List<String> appPackages) {
+            public void onSuccess(List<AppPkg> appPackages) {
                 renderWithAppPackages(appPackages, stackText);
             }
         });
     }
 
-    private void renderWithAppPackages(List<String> appPackages, String stackText) {
+    private void renderWithAppPackages(List<AppPkg> appPackages, String stackText) {
         final SafeHtml safeHtml = buildStack(appPackages, stackText);
         _stack.setHTML(safeHtml);
     }
 
-    private static SafeHtml buildStack(List<String> appPackages, String stackText) {
+    private static SafeHtml buildStack(List<AppPkg> appPkgs, String stackText) {
         final SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
 
-        List<String> lineStarts = new ArrayList<String>(appPackages);
-        for (String appPackage : appPackages) {
-            lineStarts.add("\tat " + appPackage);
+        List<String> lineStarts = new ArrayList<String>(appPkgs.size());
+        for (AppPkg appPkg : appPkgs) {
+            lineStarts.add("\tat " + appPkg.getPkg());
         }
 
         final String[] lines = toLineArray(stackText);

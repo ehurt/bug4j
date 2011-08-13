@@ -16,6 +16,7 @@
 
 package org.bug4j.gwt.admin.client;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
@@ -59,11 +60,16 @@ public class UserDialog extends DialogBox {
 
         pos++;
         grid.setWidget(pos, 0, new Label("Password:"));
-        grid.setWidget(pos, 1, _password);
+        final FlowPanel passwordFlowPanel = new FlowPanel();
+        _password.getElement().getStyle().setDisplay(Style.Display.INLINE);
+        passwordFlowPanel.add(_password);
+        grid.setWidget(pos, 1, passwordFlowPanel);
 
-        pos++;
-        grid.setWidget(pos, 0, new Label("Email:"));
-        grid.setWidget(pos, 1, _email);
+        if (User.USER_EMAIL) {
+            pos++;
+            grid.setWidget(pos, 0, new Label("Email:"));
+            grid.setWidget(pos, 1, _email);
+        }
 
         if (User.SUPPORTS_LDAP) {
             pos++;
@@ -109,6 +115,13 @@ public class UserDialog extends DialogBox {
         setText("New User");
         center();
 
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                _userName.setFocus(true);
+            }
+        });
+
         AdminService.App.getInstance().getRandomPassword(new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -125,7 +138,7 @@ public class UserDialog extends DialogBox {
     private void whenOk() {
         if (_userName.getText().trim().isEmpty()) {
             _error.setText("Invalid Username");
-        } else if (!_email.getText().contains("@")) {
+        } else if (User.USER_EMAIL && !_email.getText().contains("@")) {
             _error.setText("Invalid Email");
         } else {
             hide(false);

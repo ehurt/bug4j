@@ -18,6 +18,7 @@ package org.bug4j.gwt.user.server;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import org.apache.log4j.Logger;
+import org.bug4j.gwt.common.client.data.UserException;
 import org.bug4j.gwt.user.client.Bug4jService;
 import org.bug4j.gwt.user.client.data.*;
 import org.bug4j.server.store.Store;
@@ -35,17 +36,6 @@ public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jServi
         final HttpServletRequest threadLocalRequest = getThreadLocalRequest();
         final String remoteUser = threadLocalRequest.getRemoteUser();
         return remoteUser;
-    }
-
-    @Override
-    public List<String> getApplications() throws Exception {
-        try {
-            final Store store = StoreFactory.getStore();
-            return store.getApplications();
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
-            throw e;
-        }
     }
 
     @Override
@@ -120,29 +110,6 @@ public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jServi
     }
 
     @Override
-    public List<String> getPackages(String app) throws Exception {
-        final Store store = StoreFactory.getStore();
-        final List<String> ret;
-        try {
-            ret = store.getPackages(app);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
-            throw new Exception(e.getMessage(), e);
-        }
-        return ret;
-    }
-
-    @Override
-    public void setPackages(String app, List<String> packages) throws Exception {
-        final Store store = StoreFactory.getStore();
-        try {
-            store.setPackages(app, packages);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-    }
-
-    @Override
     public List<BugHit> getHits(long bugId, Filter filter, int offset, int max, String orderBy) throws Exception {
         try {
             final Store store = StoreFactory.getStore();
@@ -186,6 +153,20 @@ public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jServi
         try {
             final Store store = StoreFactory.getStore();
             return store.getBugCountByDate(app);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void updatePassword(String oldPassword, String newPassword) throws UserException {
+        try {
+            final Store store = StoreFactory.getStore();
+            final String userName = getUserName();
+            store.updatePassword(userName, oldPassword, newPassword);
+        } catch (UserException e) {
+            throw e;
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             throw new IllegalStateException(e.getMessage(), e);

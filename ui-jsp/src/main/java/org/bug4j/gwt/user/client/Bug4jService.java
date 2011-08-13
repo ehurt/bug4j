@@ -19,6 +19,7 @@ package org.bug4j.gwt.user.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import org.bug4j.gwt.common.client.data.UserException;
 import org.bug4j.gwt.user.client.data.*;
 
 import java.util.List;
@@ -26,8 +27,6 @@ import java.util.Map;
 
 @RemoteServiceRelativePath("Bug4jService")
 public interface Bug4jService extends RemoteService {
-
-    List<String> getApplications() throws Exception;
 
     String getDefaultApplication() throws Exception;
 
@@ -41,10 +40,6 @@ public interface Bug4jService extends RemoteService {
 
     void deleteBug(long bugId) throws Exception;
 
-    List<String> getPackages(String app) throws Exception;
-
-    void setPackages(String app, List<String> packages) throws Exception;
-
     List<BugHit> getHits(long bugId, Filter filter, int offset, int max, String orderBy) throws Exception;
 
     Map<Bug, int[]> getTopHits(String app, int daysBack, int max) throws Exception;
@@ -54,6 +49,8 @@ public interface Bug4jService extends RemoteService {
     void markRead(long bugId) throws Exception;
 
     List<BugCountByDate> getBugCountByDate(String app);
+
+    void updatePassword(String oldPassword, String newPassword) throws UserException;
 
     /**
      * Utility/Convenience class.

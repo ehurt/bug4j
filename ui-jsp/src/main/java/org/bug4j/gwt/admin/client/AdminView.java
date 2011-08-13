@@ -18,14 +18,19 @@ package org.bug4j.gwt.admin.client;
 
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import org.bug4j.gwt.common.client.View;
 
-public abstract class AdminView {
+public abstract class AdminView extends View {
     private final Label _label;
-    private Widget _widget;
 
     protected AdminView(String labelText) {
-        _label = new Label(labelText);
-        _label.setStylePrimaryName("admin-label");
+        _label = createLabel(labelText);
+    }
+
+    protected Label createLabel(String labelText) {
+        final Label ret = new Label(labelText);
+        ret.setStylePrimaryName("admin-label");
+        return ret;
     }
 
     public Label getLabel() {
@@ -36,12 +41,5 @@ public abstract class AdminView {
         _label.setStyleDependentName("selected", selected);
     }
 
-    public final Widget getWidget() {
-        if (_widget == null) {
-            _widget = createView();
-        }
-        return _widget;
-    }
-
-    protected abstract Widget createView();
+    protected abstract Widget createWidget();
 }
