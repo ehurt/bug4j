@@ -102,9 +102,11 @@
                 <path refid="project.class.path"/>
             </classpath>
             <jvmarg value="-Xmx256M"/>
-            <arg value="org.bug4j.gwt.user.user"/>
             <arg value="-war"/>
             <arg value="${module.artifact.output}"/>
+            <arg value="org.bug4j.gwt.common.Common"/>
+            <arg value="org.bug4j.gwt.user.user"/>
+            <arg value="org.bug4j.gwt.admin.Admin"/>
         </java>
     </target>
 

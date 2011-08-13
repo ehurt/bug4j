@@ -225,10 +225,7 @@ public class Bug4j implements EntryPoint {
 
     private void whenAdministration() {
         final String moduleBaseURL = GWT.getModuleBaseURL();
-        final String application = getApplication();
-        if (application != null) {
-            Window.open(moduleBaseURL + "../admin.html", "_self", "");
-        }
+        Window.open(moduleBaseURL + "../admin.html", "_self", "");
     }
 
     private void whenAppClicked(final Label app) {
