@@ -111,12 +111,9 @@ div#main {
 .BugDetailView-title {
     font-size: large;
     padding: 5px;
-}
-
-.BugDetailView-bug-header {
     margin: 3px;
     border-bottom: 1px solid #a9a9a9;
-    padding: 3px;
+    white-space: nowrap;
 }
 
 .BugDetailView-hit-stack {

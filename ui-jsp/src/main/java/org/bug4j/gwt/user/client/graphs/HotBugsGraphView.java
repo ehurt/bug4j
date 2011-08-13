@@ -21,8 +21,8 @@ import com.google.gwt.core.client.JsArray;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.DataTable;
@@ -99,10 +99,10 @@ public class HotBugsGraphView extends GraphView implements DisplaysBugs {
                 }
             }
         });
-        final VerticalPanel verticalPanel = new VerticalPanel();
-        verticalPanel.add(new HTML("<H1>Top " + MAX_BUGS + " bugs in the last " + DAYS_BACK + " days.</H1>"));
-        verticalPanel.add(_lineChart);
-        return verticalPanel;
+        final FlowPanel flowPanel = new FlowPanel();
+        flowPanel.add(new HTML("<H1>Top " + MAX_BUGS + " bugs in the last " + DAYS_BACK + " days.</H1>"));
+        flowPanel.add(_lineChart);
+        return flowPanel;
     }
 
     @SuppressWarnings({"UnusedDeclaration"})

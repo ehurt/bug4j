@@ -42,12 +42,11 @@
         <logout logout-success-url="/static/login.jsp"/>
     </http>
 
+    <beans:bean id="jndiDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <beans:property name="jndiName" value="java:comp/env/jdbc/bugDB"/>
+    </beans:bean>
+
     <authentication-manager>
-        <authentication-provider>
-            <user-service>
-                <user name="bug4j" password="bug4j" authorities="user"/>
-            </user-service>
-        </authentication-provider>
 
         <authentication-provider>
             <password-encoder hash="md5">
@@ -59,7 +58,4 @@
         </authentication-provider>
     </authentication-manager>
 
-    <beans:bean id="jndiDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-        <beans:property name="jndiName" value="java:comp/env/jdbc/bugDB"/>
-    </beans:bean>
 </beans:beans>

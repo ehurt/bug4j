@@ -628,32 +628,34 @@ public class JdbcStore extends Store {
     }
 
     public void setUserPref(String remoteUser, String key, String value) {
-        final Connection connection = getConnection();
         try {
-            final PreparedStatement updateStatement = connection.prepareStatement("UPDATE USER_PREFS SET PREF_VALUE=? WHERE USER_NAME=? AND PREF_KEY=?");
+            final Connection connection = getConnection();
             try {
-                updateStatement.setString(1, value);
-                updateStatement.setString(2, remoteUser);
-                updateStatement.setString(3, key);
-                final int updated = updateStatement.executeUpdate();
-                if (updated == 0) {
-                    final PreparedStatement insertStatement = connection.prepareStatement("INSERT INTO USER_PREFS(USER_NAME,PREF_KEY,PREF_VALUE) VALUES(?,?,?)");
-                    try {
-                        insertStatement.setString(1, remoteUser);
-                        insertStatement.setString(2, key);
-                        insertStatement.setString(3, value);
-                        insertStatement.executeUpdate();
-                    } finally {
-                        insertStatement.close();
+                final PreparedStatement updateStatement = connection.prepareStatement("UPDATE USER_PREFS SET PREF_VALUE=? WHERE USER_NAME=? AND PREF_KEY=?");
+                try {
+                    updateStatement.setString(1, value);
+                    updateStatement.setString(2, remoteUser);
+                    updateStatement.setString(3, key);
+                    final int updated = updateStatement.executeUpdate();
+                    if (updated == 0) {
+                        final PreparedStatement insertStatement = connection.prepareStatement("INSERT INTO USER_PREFS(USER_NAME,PREF_KEY,PREF_VALUE) VALUES(?,?,?)");
+                        try {
+                            insertStatement.setString(1, remoteUser);
+                            insertStatement.setString(2, key);
+                            insertStatement.setString(3, value);
+                            insertStatement.executeUpdate();
+                        } finally {
+                            insertStatement.close();
+                        }
                     }
+                } finally {
+                    updateStatement.close();
                 }
             } finally {
-                updateStatement.close();
+                connection.close();
             }
         } catch (SQLException e) {
             throw new IllegalStateException(e.getMessage(), e);
-        } finally {
-            DbUtils.closeQuietly(connection);
         }
     }
 
@@ -870,38 +872,39 @@ public class JdbcStore extends Store {
 
     @Override
     public void updateUser(User user) {
-        final Connection connection = getConnection();
         try {
-            {
-                final PreparedStatement preparedStatement = connection.prepareStatement("update BUG4J_USER set USER_EMAIL=?,USER_ADMIN=?,USER_BUILT_IN=?,USER_ENABLED=? WHERE USER_NAME=?");
-                try {
-                    preparedStatement.setString(1, user.getEmail());
-                    preparedStatement.setString(2, user.isAdmin() ? "Y" : "N");
-                    preparedStatement.setString(3, user.isBuiltIn() ? "Y" : "N");
-                    preparedStatement.setString(4, user.isEnabled() ? "Y" : "N");
-                    preparedStatement.setString(5, user.getUserName());
-                    preparedStatement.executeUpdate();
-                } finally {
-                    preparedStatement.close();
+            final Connection connection = getConnection();
+            try {
+                {
+                    final PreparedStatement preparedStatement = connection.prepareStatement("update BUG4J_USER set USER_EMAIL=?,USER_ADMIN=?,USER_BUILT_IN=?,USER_ENABLED=? WHERE USER_NAME=?");
+                    try {
+                        preparedStatement.setString(1, user.getEmail());
+                        preparedStatement.setString(2, user.isAdmin() ? "Y" : "N");
+                        preparedStatement.setString(3, user.isBuiltIn() ? "Y" : "N");
+                        preparedStatement.setString(4, user.isEnabled() ? "Y" : "N");
+                        preparedStatement.setString(5, user.getUserName());
+                        preparedStatement.executeUpdate();
+                    } finally {
+                        preparedStatement.close();
+                    }
                 }
-            }
 
-            {
-                final PreparedStatement preparedStatement = connection.prepareStatement("delete from BUG4J_AUTHORITIES WHERE USER_NAME=?");
-                try {
-                    preparedStatement.setString(1, user.getUserName());
-                    preparedStatement.executeUpdate();
-                } finally {
-                    preparedStatement.close();
+                {
+                    final PreparedStatement preparedStatement = connection.prepareStatement("delete from BUG4J_AUTHORITIES WHERE USER_NAME=?");
+                    try {
+                        preparedStatement.setString(1, user.getUserName());
+                        preparedStatement.executeUpdate();
+                    } finally {
+                        preparedStatement.close();
+                    }
                 }
+
+                insertAuthorities(connection, user);
+            } finally {
+                connection.close();
             }
-
-            insertAuthorities(connection, user);
-
         } catch (SQLException e) {
             throw new IllegalStateException(e.getMessage(), e);
-        } finally {
-            DbUtils.closeQuietly(connection);
         }
     }
 
@@ -937,25 +940,29 @@ public class JdbcStore extends Store {
     }
 
     @Override
-    public void updatePassword(String userName, String oldPassword, String newPassword) throws SQLException {
-        final Connection connection = getConnection();
+    public void updatePassword(String userName, String oldPassword, String newPassword) {
         try {
-            final PreparedStatement preparedStatement = connection.prepareStatement("UPDATE BUG4J_USER SET USER_PASS=? WHERE USER_NAME=? AND USER_PASS=?");
+            final Connection connection = getConnection();
             try {
-                final String oldEncodedPassword = new Md5PasswordEncoder().encodePassword(oldPassword, userName);
-                final String newEncodedPassword = new Md5PasswordEncoder().encodePassword(newPassword, userName);
-                preparedStatement.setString(1, newEncodedPassword);
-                preparedStatement.setString(2, userName);
-                preparedStatement.setString(3, oldEncodedPassword);
-                final int count = preparedStatement.executeUpdate();
-                if (count != 1) {
-                    throw new UserException(1, "Invalid password");
+                final PreparedStatement preparedStatement = connection.prepareStatement("UPDATE BUG4J_USER SET USER_PASS=? WHERE USER_NAME=? AND USER_PASS=?");
+                try {
+                    final String oldEncodedPassword = new Md5PasswordEncoder().encodePassword(oldPassword, userName);
+                    final String newEncodedPassword = new Md5PasswordEncoder().encodePassword(newPassword, userName);
+                    preparedStatement.setString(1, newEncodedPassword);
+                    preparedStatement.setString(2, userName);
+                    preparedStatement.setString(3, oldEncodedPassword);
+                    final int count = preparedStatement.executeUpdate();
+                    if (count != 1) {
+                        throw new UserException(1, "Invalid password");
+                    }
+                } finally {
+                    preparedStatement.close();
                 }
             } finally {
-                preparedStatement.close();
+                connection.close();
             }
-        } finally {
-            connection.close();
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 
@@ -982,8 +989,8 @@ public class JdbcStore extends Store {
 
     @Override
     public void deleteApplication(String applicationName) {
-        final Connection connection = getConnection();
         try {
+            final Connection connection = getConnection();
             try {
                 deleteAppTable(connection, applicationName, "DELETE FROM STACK_TEXT WHERE STACK_ID IN (SELECT S.STACK_ID FROM STACK S, BUG B WHERE B.APP=? AND S.BUG_ID=B.BUG_ID)");
                 deleteAppTable(connection, applicationName, "DELETE FROM STACK WHERE BUG_ID IN (SELECT BUG_ID FROM BUG WHERE APP=?)");
@@ -1123,40 +1130,44 @@ public class JdbcStore extends Store {
     @Override
     public Map<Bug, int[]> getTopHits(String app, int daysBack, int max) {
         final Map<Bug, int[]> ret = new HashMap<Bug, int[]>();
-        final Connection connection = getConnection();
         try {
-            final long now = System.currentTimeMillis();
-            final long tFrom = adjustToMidnight(now - daysBack * DAY);
-            final long tTo = adjustToMidnight(now) + DAY;
-            final Date from = new Date(tFrom);
-            final Date to = new Date(tTo);
-            final List<Bug> bugs = getTopBugs(connection, app, max, from, to);
-            final PreparedStatement datesReportedStatement = connection.prepareStatement("" +
-                    "select DATE_REPORTED" +
-                    " from hit " +
-                    " where bug_id=? " +
-                    " and DATE_REPORTED BETWEEN ? AND ?");
+            final Connection connection = getConnection();
             try {
-                datesReportedStatement.setDate(2, from);
-                datesReportedStatement.setDate(3, to);
-                for (Bug bug : bugs) {
-                    datesReportedStatement.setLong(1, bug.getId());
-                    final ResultSet resultSet = datesReportedStatement.executeQuery();
-                    final int[] hitCounts = new int[daysBack + 1]; // if we go 0 days back we still 1: today
-                    try {
-                        while (resultSet.next()) {
-                            final Date date = resultSet.getDate(1);
-                            final long time = date.getTime();
-                            final int day = daysBack - (int) ((tTo - time) / DAY);
-                            hitCounts[day + 1]++;
+                final long now = System.currentTimeMillis();
+                final long tFrom = adjustToMidnight(now - daysBack * DAY);
+                final long tTo = adjustToMidnight(now) + DAY;
+                final Date from = new Date(tFrom);
+                final Date to = new Date(tTo);
+                final List<Bug> bugs = getTopBugs(connection, app, max, from, to);
+                final PreparedStatement datesReportedStatement = connection.prepareStatement("" +
+                        "select DATE_REPORTED" +
+                        " from hit " +
+                        " where bug_id=? " +
+                        " and DATE_REPORTED BETWEEN ? AND ?");
+                try {
+                    datesReportedStatement.setDate(2, from);
+                    datesReportedStatement.setDate(3, to);
+                    for (Bug bug : bugs) {
+                        datesReportedStatement.setLong(1, bug.getId());
+                        final ResultSet resultSet = datesReportedStatement.executeQuery();
+                        final int[] hitCounts = new int[daysBack + 1]; // if we go 0 days back we still 1: today
+                        try {
+                            while (resultSet.next()) {
+                                final Date date = resultSet.getDate(1);
+                                final long time = date.getTime();
+                                final int day = daysBack - (int) ((tTo - time) / DAY);
+                                hitCounts[day + 1]++;
+                            }
+                        } finally {
+                            resultSet.close();
                         }
-                    } finally {
-                        resultSet.close();
+                        ret.put(bug, hitCounts);
                     }
-                    ret.put(bug, hitCounts);
+                } finally {
+                    datesReportedStatement.close();
                 }
-            } finally {
-                datesReportedStatement.close();
+            } catch (SQLException e) {
+                connection.close();
             }
         } catch (SQLException e) {
             throw new IllegalStateException(e.getMessage(), e);

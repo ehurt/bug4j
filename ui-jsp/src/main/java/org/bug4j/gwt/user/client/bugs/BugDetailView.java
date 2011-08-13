@@ -171,24 +171,10 @@ class BugDetailView {
     }
 
     public Widget createBugHeader() {
-        final VerticalPanel verticalPanel = new VerticalPanel();
-
-/* Remove the "Delete button for now.
-        {
-            verticalPanel.add(buildToolbar());
-        }
-*/
-
-        {
-            _label = new Label();
-            _label.addStyleName("BugDetailView-title");
-            verticalPanel.add(_label);
-        }
-
+        _label = new Label();
+        _label.addStyleName("BugDetailView-title");
         final SimpleLayoutPanel simpleLayoutPanel = new SimpleLayoutPanel();
-        simpleLayoutPanel.addStyleName("BugDetailView-bug-header");
-        simpleLayoutPanel.add(verticalPanel);
-
+        simpleLayoutPanel.setWidget(_label);
         return simpleLayoutPanel;
     }
 

@@ -40,8 +40,7 @@ public class TopGraphView implements DisplaysBugs {
     }
 
     private Widget buildNavigationWidget() {
-        final VerticalPanel ret = new VerticalPanel();
-        ret.setVerticalAlignment(HasVerticalAlignment.ALIGN_TOP);
+        final FlowPanel ret = new FlowPanel();
         final GraphView[] graphViews = {
                 new HotBugsGraphView(_bug4j),
                 new AllTimeBugsGraphView(_bug4j)

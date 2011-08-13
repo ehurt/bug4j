@@ -20,8 +20,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.DataTable;
@@ -74,10 +74,10 @@ public class AllTimeBugsGraphView extends GraphView implements DisplaysBugs {
         final AbstractDataTable data = createData(bugCountByDates);
         final LineChart lineChart = new LineChart(data, options);
         lineChart.setSize("100%", "100%");
-        final VerticalPanel verticalPanel = new VerticalPanel();
-        verticalPanel.add(new HTML("<H1>Number of hits per day.</H1>"));
-        verticalPanel.add(lineChart);
-        return verticalPanel;
+        final FlowPanel panel = new FlowPanel();
+        panel.add(new HTML("<H1>Number of hits per day.</H1>"));
+        panel.add(lineChart);
+        return panel;
     }
 
     private AbstractDataTable createData(List<BugCountByDate> bugCountByDates) {

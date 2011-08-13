@@ -110,7 +110,7 @@ public abstract class BaseDialog extends DialogBox {
     }
 
     private Widget createWidget() {
-        final VerticalPanel ret = new VerticalPanel();
+        final FlowPanel ret = new FlowPanel();
 
         ret.add(createContent());
         ret.add(createButtons());

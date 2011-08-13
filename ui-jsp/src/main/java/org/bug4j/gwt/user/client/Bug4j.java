@@ -18,6 +18,7 @@ package org.bug4j.gwt.user.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -86,8 +87,10 @@ public class Bug4j implements EntryPoint {
         final BugView bugView = new BugView(this);
         final TopGraphView topGraphView = new TopGraphView(this);
 
-        bugPanel.add(bugView.createWidget(), "Bugs");
-        bugPanel.add(topGraphView.createWidget(), "Charts");
+        final Widget bugViewWidget = bugView.createWidget();
+        final Widget topGraphViewWidget = topGraphView.createWidget();
+        bugPanel.add(bugViewWidget, "Bugs");
+        bugPanel.add(topGraphViewWidget, "Charts");
 
         bugPanel.addSelectionHandler(new SelectionHandler<Integer>() {
             @Override
@@ -103,6 +106,19 @@ public class Bug4j implements EntryPoint {
                 }
             }
         });
+
+        // TODO: Find a better fix
+        if (getUserAgent().contains("msie")) {
+            // IE bug: The bug title does not appear (tested in ie8)
+            bugPanel.selectTab(1);
+            final Scheduler scheduler = Scheduler.get();
+            scheduler.scheduleDeferred(new Scheduler.ScheduledCommand() {
+                @Override
+                public void execute() {
+                    bugPanel.selectTab(0);
+                }
+            });
+        }
 
         dockLayoutPanel.add(bugPanel);
 
@@ -133,6 +149,10 @@ public class Bug4j implements EntryPoint {
             }
         });
     }
+
+    public static native String getUserAgent() /*-{
+        return navigator.userAgent.toLowerCase();
+    }-*/;
 
     private Widget buildNorthWidget() {
         final Image image = new Image(IMAGES.littleSplat());
@@ -251,14 +271,14 @@ public class Bug4j implements EntryPoint {
         popupPanel.setSize("200px", appNames.size() + 3 + "em");
 
         if (!appNames.isEmpty()) {
-            final VerticalPanel verticalPanel = new VerticalPanel();
+            final FlowPanel panel = new FlowPanel();
             final Label popupTitle = new Label("Application:");
             popupTitle.setStylePrimaryName("headerSelTitle");
-            verticalPanel.add(popupTitle);
+            panel.add(popupTitle);
             for (final String appName : appNames) {
                 final Label appLabel = new Label(appName);
                 appLabel.setStylePrimaryName("headerSel");
-                verticalPanel.add(appLabel);
+                panel.add(appLabel);
                 appLabel.addClickHandler(new ClickHandler() {
                     @Override
                     public void onClick(ClickEvent event) {
@@ -267,7 +287,7 @@ public class Bug4j implements EntryPoint {
                     }
                 });
             }
-            popupPanel.setWidget(verticalPanel);
+            popupPanel.setWidget(panel);
         } else {
             popupPanel.setWidget(new Label("There are no applications configured in the system"));
         }
