@@ -17,6 +17,7 @@
 package org.bug4j.server.jsp;
 
 import org.apache.log4j.Logger;
+import org.bug4j.server.migration.Migrator;
 import org.bug4j.server.store.Store;
 import org.bug4j.server.store.StoreFactory;
 
@@ -29,8 +30,14 @@ public class StartupServlet extends HttpServlet {
 
     @Override
     public void init(ServletConfig config) throws ServletException {
+        final Migrator migrator = Migrator.getInstance();
+
+        migrator.preOpenDB();
+
         try {
             StoreFactory.createJdbcStore();
+
+            migrator.completeMigration();
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
         }

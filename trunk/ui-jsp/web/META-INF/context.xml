@@ -23,6 +23,6 @@
               maxIdle="30"
               maxWait="10000"
               driverClassName="org.apache.derby.jdbc.ClientDriver"
-              url="jdbc:derby://localhost:1528/bug4j;create=true"
+              url="jdbc:derby://localhost:1528/${catalina.home}/bug4jdb;create=true"
             />
 </Context>
