@@ -18,7 +18,9 @@ package org.bug4j.gwt.common.client.data;
 
 import org.jetbrains.annotations.Nullable;
 
-public class UserException extends IllegalStateException {
+import java.io.Serializable;
+
+public class UserException extends IllegalStateException implements Serializable {
     private int _type;
 
     public UserException() {

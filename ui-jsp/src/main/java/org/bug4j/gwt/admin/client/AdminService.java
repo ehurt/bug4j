@@ -21,6 +21,7 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import org.bug4j.gwt.admin.client.data.User;
 import org.bug4j.gwt.common.client.data.AppPkg;
+import org.bug4j.gwt.common.client.data.UserException;
 
 import java.util.Collection;
 import java.util.List;
@@ -36,7 +37,7 @@ public interface AdminService extends RemoteService {
 
     void updateUser(User user);
 
-    void deleteUsers(Collection<String> userNames);
+    void deleteUsers(Collection<String> userNames) throws UserException;
 
     String getRandomPassword();
 
