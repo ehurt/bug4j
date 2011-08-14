@@ -18,7 +18,6 @@ package org.bug4j.server.jsp;
 
 import org.apache.log4j.Logger;
 import org.bug4j.gwt.user.client.data.Stack;
-import org.bug4j.server.Configuration;
 import org.bug4j.server.store.Store;
 import org.bug4j.server.store.StoreFactory;
 import org.jetbrains.annotations.Nullable;
@@ -45,7 +44,7 @@ public class InServlet extends HttpServlet {
         response.setContentType("text/plain");
         final PrintWriter out = response.getWriter();
 
-        final String app = Configuration.translateAppName(request.getParameter("a"));
+        final String app = request.getParameter("a");
         final String version = request.getParameter("v");
         final String message = request.getParameter("m");
         final String user = request.getParameter("u");

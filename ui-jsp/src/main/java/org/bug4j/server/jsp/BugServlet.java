@@ -17,7 +17,6 @@
 package org.bug4j.server.jsp;
 
 import org.apache.log4j.Logger;
-import org.bug4j.server.Configuration;
 import org.bug4j.server.processor.BugProcessor;
 
 import javax.servlet.ServletException;
@@ -41,7 +40,7 @@ public class BugServlet extends HttpServlet {
 
         response.setContentType("text/plain");
         try {
-            final String app = Configuration.translateAppName(request.getParameter("a"));
+            final String app = request.getParameter("a");
             final String version = request.getParameter("v");
             final String message = request.getParameter("m");
             final String user = request.getParameter("u");
