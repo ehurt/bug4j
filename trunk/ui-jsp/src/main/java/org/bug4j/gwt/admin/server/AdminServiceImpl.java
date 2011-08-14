@@ -21,9 +21,11 @@ import org.apache.log4j.Logger;
 import org.bug4j.gwt.admin.client.AdminService;
 import org.bug4j.gwt.admin.client.data.User;
 import org.bug4j.gwt.common.client.data.AppPkg;
+import org.bug4j.gwt.common.client.data.UserException;
 import org.bug4j.server.store.Store;
 import org.bug4j.server.store.StoreFactory;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -32,6 +34,12 @@ import java.util.List;
  */
 public class AdminServiceImpl extends RemoteServiceServlet implements AdminService {
     private static final Logger LOGGER = Logger.getLogger(AdminServiceImpl.class);
+
+    private String getUserName() {
+        final HttpServletRequest threadLocalRequest = getThreadLocalRequest();
+        final String remoteUser = threadLocalRequest.getRemoteUser();
+        return remoteUser;
+    }
 
     @Override
     public List<User> getUsers() {
@@ -67,13 +75,18 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
     }
 
     @Override
-    public void deleteUsers(Collection<String> userNames) {
+    public void deleteUsers(Collection<String> userNames) throws UserException {
+        final String userName = getUserName();
+        final boolean triedToDeleteSelf = userNames.remove(userName);
         final Store store = StoreFactory.getStore();
         try {
             store.deleteUsers(userNames);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             throw new IllegalStateException(e.getMessage(), e);
+        }
+        if (triedToDeleteSelf) {
+            throw new UserException(1, "You cannot delete yourself.");
         }
     }
 
