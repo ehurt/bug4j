@@ -17,7 +17,6 @@
 
 <project name="ui-jsp" default="compile" basedir=".">
 
-    <!-- test -->
     <property name="home" location=".."/>
     <import file="../build_include.xml"/>
 
