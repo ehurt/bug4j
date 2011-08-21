@@ -71,7 +71,7 @@ public class ServletsTest {
 
     @Before
     public void setUp() throws Exception {
-        _store = new TestingStore();
+        _store = TestingStore.createMemStore();
         StoreFactory.setStore(_store);
     }
 
@@ -90,7 +90,8 @@ public class ServletsTest {
             final String s = InServlet.doit(APP, APP_VERSION, null, null, textHash);
             assertEquals("New", s);
 
-            BugProcessor.process(APP, APP_VERSION, null, null, STACK_TEXT);
+            final long dateReported = System.currentTimeMillis();
+            BugProcessor.process(APP, APP_VERSION, null, dateReported, null, STACK_TEXT);
         }
 
         { // Submit the same bug

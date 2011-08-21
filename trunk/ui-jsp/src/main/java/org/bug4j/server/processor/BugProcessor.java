@@ -42,7 +42,7 @@ public final class BugProcessor {
     /**
      * @return the bugid that was matched.
      */
-    public static long process(String app, String version, @Nullable String message, @Nullable String user, String stackText) {
+    public static long process(String app, String version, @Nullable String message, long dateReported, @Nullable String user, String stackText) {
         final Store store = StoreFactory.getStore();
         final List<String> stackLines = TextToLines.toLineList(stackText);
 
@@ -75,7 +75,7 @@ public final class BugProcessor {
             }
             stack = store.createStack(strain.getBugId(), strain.getStrainId(), fullHash, stackText);
         }
-        store.reportHitOnStack(app, version, message, user, stack);
+        store.reportHitOnStack(app, version, message, dateReported, user, stack);
 
         return stack.getBugId();
     }

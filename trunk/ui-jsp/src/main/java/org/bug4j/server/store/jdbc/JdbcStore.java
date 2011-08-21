@@ -18,10 +18,12 @@ package org.bug4j.server.store.jdbc;
 
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 import org.bug4j.gwt.admin.client.data.User;
 import org.bug4j.gwt.common.client.data.UserException;
 import org.bug4j.gwt.user.client.data.*;
 import org.bug4j.gwt.user.client.data.Stack;
+import org.bug4j.server.store.HitsCallback;
 import org.bug4j.server.store.Store;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.security.authentication.encoding.Md5PasswordEncoder;
@@ -36,6 +38,7 @@ import java.sql.Date;
 import java.util.*;
 
 public class JdbcStore extends Store {
+    private static final Logger LOGGER = Logger.getLogger(JdbcStore.class);
     private static JdbcStore INSTANCE;
     private static final int STACK_SIZE_LIMIT = 128 * 1024;
     private static final String PREF_DEFAULT_APP = "DEFAULT_APP";
@@ -384,6 +387,41 @@ public class JdbcStore extends Store {
         return ret;
     }
 
+    /**
+     * Get all the bugs for one app
+     */
+    @Override
+    public void fetchBugs(String app, BugCallback bugCallback) {
+        try {
+            final Connection connection = getConnection();
+            try {
+                final PreparedStatement preparedStatement = connection.prepareStatement("" +
+                        "SELECT b.bug_id, b.title" +
+                        "  FROM bug b" +
+                        "  WHERE b.app=?");
+                try {
+                    preparedStatement.setString(1, app);
+                    final ResultSet resultSet = preparedStatement.executeQuery();
+                    try {
+                        while (resultSet.next()) {
+                            final long bugId = resultSet.getLong(1);
+                            final String title = resultSet.getString(2);
+                            bugCallback.bug(app, bugId, title);
+                        }
+                    } finally {
+                        resultSet.close();
+                    }
+                } finally {
+                    preparedStatement.close();
+                }
+            } finally {
+                connection.close();
+            }
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
     @Override
     public List<String> getPackages(String app) {
         final List<String> ret = new ArrayList<String>();
@@ -516,6 +554,50 @@ public class JdbcStore extends Store {
             DbUtils.closeQuietly(connection);
         }
         return ret;
+    }
+
+    @Override
+    public void fetchHits(long bugId, HitsCallback hitsCallback) {
+        try {
+            final Connection connection = getConnection();
+            try {
+                final PreparedStatement preparedStatement = connection.prepareStatement("" +
+                        "SELECT H.HIT_ID,H.APP_VER,H.DATE_REPORTED,H.REPORTED_BY,H.MESSAGE,S.STACK_TEXT" +
+                        " FROM HIT H,STACK_TEXT S" +
+                        " WHERE H.HIT_ID=?" +
+                        " AND H.STACK_ID=S.STACK_ID");
+                try {
+                    preparedStatement.setLong(1, bugId);
+                    final ResultSet resultSet = preparedStatement.executeQuery();
+                    try {
+                        while (resultSet.next()) {
+                            final long hitId = resultSet.getLong(1);
+                            final String appVer = resultSet.getString(2);
+                            final Timestamp dateReportedValue = resultSet.getTimestamp(3);
+                            final long dateReported = dateReportedValue.getTime();
+                            final String user = resultSet.getString(4);
+                            final String message = resultSet.getString(5);
+                            final Clob clob = resultSet.getClob(6);
+                            final Reader characterStream = clob.getCharacterStream();
+                            try {
+                                final String stack = IOUtils.toString(characterStream);
+                                hitsCallback.hit(hitId, appVer, dateReported, user, message, stack);
+                            } catch (IOException e) {
+                                LOGGER.error("Failed to read the stack trace for bug " + bugId + " hit " + hitId);
+                            }
+                        }
+                    } finally {
+                        resultSet.close();
+                    }
+                } finally {
+                    preparedStatement.close();
+                }
+            } finally {
+                connection.close();
+            }
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
     }
 
     private static Timestamp getPrevDaysTimestamp(int days) {
@@ -790,7 +872,7 @@ public class JdbcStore extends Store {
                     try {
                         while (resultSet.next()) {
                             final String userName = resultSet.getString(1);
-                            final String email = resultSet.getString(1);
+                            final String email = resultSet.getString(2);
                             final boolean isAdmin = "Y".equals(resultSet.getString(3));
                             final boolean isBuiltIn = "Y".equals(resultSet.getString(4));
                             final boolean isEnabled = "Y".equals(resultSet.getString(5));
@@ -912,14 +994,13 @@ public class JdbcStore extends Store {
     public void createUser(User user, String password) {
         final Connection connection = getConnection();
         try {
-
             {
                 final PreparedStatement preparedStatement = connection.prepareStatement("" +
                         "INSERT INTO BUG4J_USER(USER_NAME,USER_PASS,USER_EMAIL,USER_ADMIN,USER_BUILT_IN,USER_ENABLED,USER_LAST_SIGNED_IN) VALUES (?,?,?,?,?,'Y',NULL)");
                 try {
                     final String userName = user.getUserName();
-                    final String encodedPassword = new Md5PasswordEncoder().encodePassword(password, userName);
                     preparedStatement.setString(1, userName);
+                    final String encodedPassword = new Md5PasswordEncoder().encodePassword(password, userName);
                     preparedStatement.setString(2, encodedPassword);
                     preparedStatement.setString(3, user.getEmail());
                     preparedStatement.setString(4, user.isAdmin() ? "Y" : "N");
@@ -1394,7 +1475,7 @@ public class JdbcStore extends Store {
     }
 
     @Override
-    public void reportHitOnStack(String app, String appVersion, String message, String user, Stack stack) {
+    public void reportHitOnStack(String app, String appVersion, String message, long dateReported, String user, Stack stack) {
         final Connection connection = getConnection();
 
         declareApp(connection, app, appVersion);
@@ -1404,7 +1485,7 @@ public class JdbcStore extends Store {
             try {
                 final long bugId = stack.getBugId();
                 final long stackId = stack.getStackId();
-                final Timestamp now = new Timestamp(System.currentTimeMillis());
+                final Timestamp now = new Timestamp(dateReported);
 
                 preparedStatement.setLong(1, bugId);
                 preparedStatement.setLong(2, stackId);
@@ -1499,7 +1580,7 @@ public class JdbcStore extends Store {
         final Connection connection = getConnection();
         try {
             final PreparedStatement preparedStatement = connection.prepareStatement("" +
-                    "SELECT H.APP_VER,H.DATE_REPORTED,H.REPORTED_BY,S.STACK_TEXT" +
+                    "SELECT H.APP_VER,H.DATE_REPORTED,H.REPORTED_BY,H.MESSAGE,S.STACK_TEXT" +
                     " FROM STACK_TEXT S, HIT H" +
                     " WHERE H.HIT_ID=?" +
                     " AND H.STACK_ID=S.STACK_ID");
@@ -1512,8 +1593,9 @@ public class JdbcStore extends Store {
                         final Timestamp timestamp = resultSet.getTimestamp(2);
                         final long dateReported = timestamp.getTime();
                         final String user = resultSet.getString(3);
-                        final String stack = resultSet.getString(4);
-                        ret = new BugHitAndStack(hitId, appVer, dateReported, user, stack);
+                        final String message = resultSet.getString(4);
+                        final String stack = resultSet.getString(5);
+                        ret = new BugHitAndStack(hitId, appVer, dateReported, user, message, stack);
                     }
                 } finally {
                     DbUtils.closeQuietly(resultSet);

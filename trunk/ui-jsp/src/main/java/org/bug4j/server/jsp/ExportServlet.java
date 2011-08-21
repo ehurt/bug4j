@@ -18,26 +18,17 @@ package org.bug4j.server.jsp;
 
 import org.apache.commons.io.output.CloseShieldOutputStream;
 import org.apache.log4j.Logger;
-import org.bug4j.gwt.user.client.data.Bug;
-import org.bug4j.gwt.user.client.data.BugHit;
-import org.bug4j.gwt.user.client.data.Filter;
 import org.bug4j.server.store.Store;
 import org.bug4j.server.store.StoreFactory;
+import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -55,34 +46,28 @@ public class ExportServlet extends HttpServlet {
     }
 
     private void doit(HttpServletRequest request, HttpServletResponse response) {
+        final String app = request.getParameter("a");
+        export(response, app);
+    }
 
+    static void export(HttpServletResponse response, @Nullable String app) {
         try {
             response.setHeader("Expires", "-1");
             response.setHeader("Cache-Control", "private, max-age=0");
             response.setHeader("Content-Type", "text/xml");
             response.setHeader("Content-Disposition", "attachment; filename=\"bugs.zip\"");
 
-            final String remoteUser = request.getRemoteUser();
-
-            final XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newInstance();
             final ServletOutputStream outputStream = response.getOutputStream();
             final ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
-            zipOutputStream.putNextEntry(new ZipEntry("bugs.xml"));
             try {
+                zipOutputStream.putNextEntry(new ZipEntry("bugs.xml"));
                 final CloseShieldOutputStream closeShieldOutputStream = new CloseShieldOutputStream(zipOutputStream);
-                final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(closeShieldOutputStream);
-                final XMLStreamWriter xmlStreamWriter = xmlOutputFactory.createXMLStreamWriter(bufferedOutputStream);
-
-                try {
-                    final Store store = StoreFactory.getStore();
-                    final String app = request.getParameter("a");
-                    if (app != null) {
-                        export(remoteUser, xmlStreamWriter, store, app);
-                    } else {
-                        throw new IllegalStateException("Application not specified");
-                    }
-                } finally {
-                    xmlStreamWriter.close();
+                final Store store = StoreFactory.getStore();
+                final Exporter exporter = new Exporter(store);
+                if (app != null) {
+                    exporter.exportApplicationBugs(closeShieldOutputStream, app);
+                } else {
+                    exporter.exportAll(closeShieldOutputStream);
                 }
             } catch (XMLStreamException e) {
                 response.sendError(500);
@@ -94,39 +79,5 @@ public class ExportServlet extends HttpServlet {
             LOGGER.error("Failed to export", e);
             throw new IllegalStateException("Failed to export", e);
         }
-    }
-
-    private void export(String remoteUser, XMLStreamWriter xmlStreamWriter, Store store, String app) throws XMLStreamException {
-        final DateFormat dateFormat = SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.FULL, SimpleDateFormat.FULL);
-        final List<Bug> bugs = store.getBugs(remoteUser, app, new Filter(), 0, Integer.MAX_VALUE, "");
-        xmlStreamWriter.writeStartElement("bugs");
-        xmlStreamWriter.writeAttribute("app", app);
-        for (Bug bug : bugs) {
-            final long bugId = bug.getId();
-            final String bugTitle = bug.getTitle();
-            xmlStreamWriter.writeStartElement("bug");
-            xmlStreamWriter.writeAttribute("id", Long.toString(bugId));
-            xmlStreamWriter.writeAttribute("title", bugTitle);
-
-            final List<BugHit> hits = store.getHits(bugId, null, 0, Integer.MAX_VALUE, "");
-            xmlStreamWriter.writeStartElement("hits");
-            for (BugHit hit : hits) {
-                final long hitId = hit.getHitId();
-                final long dateReported = hit.getDateReported();
-                final String stack = store.getStack(hitId);
-                final String hitUser = hit.getUser();
-                xmlStreamWriter.writeStartElement("hit");
-                xmlStreamWriter.writeAttribute("id", Long.toString(hitId));
-                xmlStreamWriter.writeAttribute("date", dateFormat.format(new Date(dateReported)));
-                if (hitUser != null) {
-                    xmlStreamWriter.writeAttribute("user", hitUser);
-                }
-                xmlStreamWriter.writeCData(stack);
-                xmlStreamWriter.writeEndElement();
-            }
-            xmlStreamWriter.writeEndElement();
-            xmlStreamWriter.writeEndElement();
-        }
-        xmlStreamWriter.writeEndElement();
     }
 }

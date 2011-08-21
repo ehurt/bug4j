@@ -68,7 +68,7 @@ public class JdbcStoreTest {
 
     @Before
     public void setUp() throws Exception {
-        _store = new TestingStore();
+        _store = TestingStore.createMemStore();
     }
 
     @After
@@ -98,7 +98,8 @@ public class JdbcStoreTest {
             }
             stack = _store.createStack(bugid, strain.getStrainId(), fullHash, STACK_TEXT);
         }
-        _store.reportHitOnStack(APP, APP_VERSION, null, null, stack);
+        final long dateReported = System.currentTimeMillis();
+        _store.reportHitOnStack(APP, APP_VERSION, null, dateReported, null, stack);
         bugid = stack.getBugId();
         System.out.println("bugid = " + bugid);
     }

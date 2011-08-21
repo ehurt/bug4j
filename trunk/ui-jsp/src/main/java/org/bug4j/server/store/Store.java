@@ -18,6 +18,7 @@ package org.bug4j.server.store;
 
 import org.bug4j.gwt.admin.client.data.User;
 import org.bug4j.gwt.user.client.data.*;
+import org.bug4j.server.store.jdbc.BugCallback;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -30,6 +31,8 @@ public abstract class Store {
 
     public abstract List<Bug> getBugs(String userName, String app, Filter filter, int offset, int max, String orderBy);
 
+    public abstract void fetchBugs(String app, BugCallback bugCallback);
+
     public abstract List<String> getPackages(String app);
 
     public abstract void setPackages(String app, List<String> packages);
@@ -40,6 +43,8 @@ public abstract class Store {
      * @param orderBy i[d], a[pplication version] or d[ate reported], lowercase=ascending
      */
     public abstract List<BugHit> getHits(long bugId, @Nullable Filter filter, int offset, int max, String orderBy);
+
+    public abstract void fetchHits(long bugId, HitsCallback hitsCallback);
 
     public abstract void deleteBug(long bugId);
 
@@ -55,7 +60,7 @@ public abstract class Store {
 
     public abstract Stack createStack(long bugId, long strainId, String fullHash, String stackText);
 
-    public abstract void reportHitOnStack(String app, String version, @Nullable String message, @Nullable String user, Stack stack);
+    public abstract void reportHitOnStack(String app, String version, @Nullable String message, long dateReported, @Nullable String user, Stack stack);
 
     public abstract BugHit getLastHit(long bugId);
 

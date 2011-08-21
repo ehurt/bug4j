@@ -212,7 +212,7 @@ public class Admin implements EntryPoint {
 
     private void whenExport() {
         final String moduleBaseURL = GWT.getModuleBaseURL();
-        Window.open(moduleBaseURL + "../bug/export", "_self", "");
+        Window.open(moduleBaseURL + "../user/export", "_self", "");
     }
 
     private void whenLogout() {

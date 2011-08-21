@@ -18,11 +18,10 @@
       </library>
     </orderEntry>
     <orderEntry type="module" module-name="common" />
-    <orderEntry type="library" scope="PROVIDED" name="log4j" level="application" />
-    <orderEntry type="library" name="httpcomponents-client" level="application" />
-    <orderEntry type="library" name="jetbrains" level="application" />
+    <orderEntry type="library" name="log4j" level="project" />
+    <orderEntry type="library" name="httpcomponents-client" level="project" />
+    <orderEntry type="library" name="jetbrains" level="project" />
     <orderEntry type="library" name="gwt-visualization" level="project" />
-    <orderEntry type="library" name="jetbrains" level="application" />
   </component>
 </module>
 
