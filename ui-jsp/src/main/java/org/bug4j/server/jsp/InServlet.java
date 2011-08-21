@@ -63,7 +63,8 @@ public class InServlet extends HttpServlet {
         final Store store = StoreFactory.getStore();
         final Stack stack = store.getStackByHash(app, hash);
         if (stack != null) {
-            store.reportHitOnStack(app, version, message, user, stack);
+            final long dateReported = System.currentTimeMillis();
+            store.reportHitOnStack(app, version, message, dateReported, user, stack);
             ret = "Old";
         } else {
             ret = "New";

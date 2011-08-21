@@ -14,27 +14,19 @@
  *    limitations under the License.
  */
 
-package org.bug4j.gwt.user.client.data;
+package org.bug4j.server.jsp;
 
-public class BugHitAndStack extends BugHit {
-    private String _message;
-    private String _stack;
+import org.bug4j.server.processor.BugProcessor;
 
-    @SuppressWarnings({"UnusedDeclaration"})
-    public BugHitAndStack() {
+/**
+ * An importer that re-dedigests the hits
+ */
+public class InjectImporter extends Importer {
+    public InjectImporter() {
     }
 
-    public BugHitAndStack(long hitId, String appVer, long dateReported, String user, String message, String stack) {
-        super(hitId, appVer, dateReported, user);
-        _message = message;
-        _stack = stack;
-    }
-
-    public String getMessage() {
-        return _message;
-    }
-
-    public String getStack() {
-        return _stack;
+    @Override
+    protected void whenHit(String app, int bugId, String title, long hitId, long dateReported, String appVer, String user, String message, String stack) {
+        BugProcessor.process(app, appVer, message, dateReported, user, stack);
     }
 }

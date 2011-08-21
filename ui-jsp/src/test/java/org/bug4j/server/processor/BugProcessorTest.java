@@ -32,7 +32,7 @@ public class BugProcessorTest {
 
     @Before
     public void setUp() throws Exception {
-        _store = new TestingStore();
+        _store = TestingStore.createMemStore();
         StoreFactory.setStore(_store);
     }
 
@@ -44,7 +44,8 @@ public class BugProcessorTest {
     @Test
     public void testDedupeByTitle_1() throws Exception {
         // Initial exception
-        final long bug_0 = BugProcessor.process(APP, APP_VERSION, null, null, "" +
+        final long dateReported = System.currentTimeMillis();
+        final long bug_0 = BugProcessor.process(APP, APP_VERSION, null, dateReported, null, "" +
                 "java.lang.IllegalStateException: oh oh!\n" +
                 "\tat org.bug4j.SomeClass.someMethod(SomeClass.java:100)\n" +
                 "\tat org.bug4j.SomeClass.someMethod(SomeClass.java:200)\n" +
@@ -54,7 +55,7 @@ public class BugProcessorTest {
                 "\t... 22 more");
 
         // Same IllegalStateException but with a different code path. Should match the first one
-        final long bug_1 = BugProcessor.process(APP, APP_VERSION, null, null, "" +
+        final long bug_1 = BugProcessor.process(APP, APP_VERSION, null, dateReported, null, "" +
                 "java.lang.IllegalStateException: oh oh!\n" +
                 "\tat org.bug4j.SomeClass.someMethod(SomeClass.java:100)\n" +
                 "\tat org.bug4j.SomeClass.someOtherMethod(SomeClass.java:500)\n" +
@@ -65,7 +66,7 @@ public class BugProcessorTest {
         Assert.assertEquals(bug_0, bug_1);
 
         // Same IllegalStateException bug with a different cause. Should be a different bug
-        final long bug_2 = BugProcessor.process(APP, APP_VERSION, null, null, "" +
+        final long bug_2 = BugProcessor.process(APP, APP_VERSION, null, dateReported, null, "" +
                 "java.lang.IllegalStateException: oh oh!\n" +
                 "\tat org.bug4j.SomeClass.someMethod(SomeClass.java:100)\n" +
                 "\tat org.bug4j.SomeClass.someOtherMethod(SomeClass.java:500)\n" +

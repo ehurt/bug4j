@@ -14,27 +14,8 @@
  *    limitations under the License.
  */
 
-package org.bug4j.gwt.user.client.data;
+package org.bug4j.server.store;
 
-public class BugHitAndStack extends BugHit {
-    private String _message;
-    private String _stack;
-
-    @SuppressWarnings({"UnusedDeclaration"})
-    public BugHitAndStack() {
-    }
-
-    public BugHitAndStack(long hitId, String appVer, long dateReported, String user, String message, String stack) {
-        super(hitId, appVer, dateReported, user);
-        _message = message;
-        _stack = stack;
-    }
-
-    public String getMessage() {
-        return _message;
-    }
-
-    public String getStack() {
-        return _stack;
-    }
+public interface HitsCallback {
+    void hit(long hitId, String appVer, long dateReported, String user, String message, String stack) throws Exception;
 }

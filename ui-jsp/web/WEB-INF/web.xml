@@ -142,11 +142,24 @@
         <servlet-name>ExportServlet</servlet-name>
         <servlet-class>org.bug4j.server.jsp.ExportServlet</servlet-class>
     </servlet>
+    <servlet-mapping>
+        <servlet-name>ExportServlet</servlet-name>
+        <url-pattern>/user/export</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>DownloadServlet</servlet-name>
+        <servlet-class>org.bug4j.server.jsp.DownloadServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DownloadServlet</servlet-name>
+        <url-pattern>/user/download</url-pattern>
+    </servlet-mapping>
+
     <servlet>
         <servlet-name>org.bug4j.gwt.common.Common CommonService</servlet-name>
         <servlet-class>org.bug4j.gwt.common.server.CommonServiceImpl</servlet-class>
     </servlet>
-
     <servlet-mapping>
         <servlet-name>org.bug4j.gwt.common.Common CommonService</servlet-name>
         <url-pattern>/common/CommonService</url-pattern>
@@ -162,9 +175,5 @@
         <url-pattern>/admin/CommonService</url-pattern>
     </servlet-mapping>
 
-    <servlet-mapping>
-        <servlet-name>ExportServlet</servlet-name>
-        <url-pattern>/bug/export</url-pattern>
-    </servlet-mapping>
 
 </web-app>

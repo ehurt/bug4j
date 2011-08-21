@@ -13,8 +13,8 @@
     <property name="bug4j-release-name" value="bug4j-0.0.1-SNAPSHOT-${snapshot-timestamp}"/>
 
     <path id="commons-io.lib">
-        <filelist dir="${dep-home}/commons-io-1.4">
-            <file name="commons-io-1.4.jar"/>
+        <filelist dir="${dep-home}/commons-io-2.0.1">
+            <file name="commons-io-2.0.1.jar"/>
         </filelist>
     </path>
 
@@ -27,6 +27,12 @@
     <path id="commons-logging.lib">
         <filelist dir="${dep-home}/commons-logging-1.1.1">
             <file name="commons-logging-1.1.1.jar"/>
+        </filelist>
+    </path>
+
+    <path id="commons-lang.lib">
+        <filelist dir="${dep-home}/commons-lang3-3.0.1">
+            <file name="commons-lang3-3.0.1.jar"/>
         </filelist>
     </path>
 
@@ -79,7 +85,11 @@
         </filelist>
     </path>
 
-    <path id="jetbrains.annotations.lib" location="${dep-home}/jetbrains/annotations.jar"/>
+    <path id="jetbrains.annotations.lib">
+        <filelist dir="${dep-home}/jetbrains/jetbrains-10.5/">
+            <file name="annotations.jar"/>
+        </filelist>
+    </path>
 
     <path id="log4j.lib">
         <filelist dir="${dep-home}/apache-log4j-1.2.16/">

@@ -16,17 +16,15 @@
 
 package org.bug4j.server.jsp;
 
-import org.apache.log4j.Logger;
-import org.bug4j.server.processor.BugProcessor;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class BugServlet extends HttpServlet {
-    private static final Logger LOGGER = Logger.getLogger(BugServlet.class);
+/**
+ */
+public class DownloadServlet extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         doit(request, response);
@@ -37,19 +35,7 @@ public class BugServlet extends HttpServlet {
     }
 
     private void doit(HttpServletRequest request, HttpServletResponse response) {
-
-        response.setContentType("text/plain");
-        try {
-            final String app = request.getParameter("a");
-            final String version = request.getParameter("v");
-            final String message = request.getParameter("m");
-            final long dateReported = System.currentTimeMillis();
-            final String user = request.getParameter("u");
-            final String stackText = request.getParameter("s");
-
-            BugProcessor.process(app, version, message, dateReported, user, stackText);
-        } catch (Throwable e) {
-            LOGGER.error(e.getMessage(), e);
-        }
+        final String app = request.getParameter("a");
+        ExportServlet.export(response, app);
     }
 }

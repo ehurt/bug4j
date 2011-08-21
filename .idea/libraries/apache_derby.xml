@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="apache-derby">
+    <CLASSES>
+      <root url="jar://$dep-home$/db-derby-10.7.1.1-bin/lib/derbynet.jar!/" />
+      <root url="jar://$dep-home$/db-derby-10.7.1.1-bin/lib/derbyclient.jar!/" />
+      <root url="jar://$dep-home$/db-derby-10.7.1.1-bin/lib/derby.war!/" />
+      <root url="jar://$dep-home$/db-derby-10.7.1.1-bin/lib/derby.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

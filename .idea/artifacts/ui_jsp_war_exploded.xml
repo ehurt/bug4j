@@ -9,15 +9,16 @@
           <element id="module-output" name="common" />
         </element>
         <element id="directory" name="lib">
-          <element id="library" level="application" name="apache-derby" />
-          <element id="library" level="application" name="apache-commons-dbutils" />
-          <element id="library" level="application" name="log4j" />
           <element id="library" level="project" name="gwt-servlet" />
           <element id="library" level="project" name="gwt-visualization" />
           <element id="library" level="project" name="apache-commons-io" />
           <element id="library" level="project" name="spring-security" />
           <element id="library" level="project" name="spring-framework" />
           <element id="library" level="project" name="apache-commons-logging" />
+          <element id="library" level="project" name="commons-dbutils" />
+          <element id="library" level="project" name="log4j" />
+          <element id="library" level="project" name="apache-derby" />
+          <element id="library" level="project" name="apache-commons-lang" />
         </element>
       </element>
       <element id="gwt-compiler-output" facet="ui-jsp/gwt/GWT" />

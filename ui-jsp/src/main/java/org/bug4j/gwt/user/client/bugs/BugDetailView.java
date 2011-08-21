@@ -37,7 +37,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-@SuppressWarnings({"GWTStyleCheck"})
 class BugDetailView {
 
     private static final int PAGE_SIZE = 200;
@@ -212,8 +211,8 @@ class BugDetailView {
                 final ColumnSortList.ColumnSortInfo columnSortInfo = sortList.get(i);
                 final Column<?, ?> column = columnSortInfo.getColumn();
                 final char c = column == _dateColumn ? 'd' :
-                               column == _versionColumn ? 'v' :
-                               column == _userColumn ? 'b' : 'X';
+                        column == _versionColumn ? 'v' :
+                                column == _userColumn ? 'b' : 'X';
                 final boolean ascending = columnSortInfo.isAscending();
                 sortBy.append(ascending ? c : Character.toUpperCase(c));
             }
