@@ -76,7 +76,8 @@ public class StackPathHashCalculator {
                 if (matcher.matches()) {
                     final String methodCall = matcher.group(1);
                     if (!isSyntheticProxyMethod(methodCall)) {
-                        messageDigest.update(methodCall.getBytes("UTF-8"));
+                        final String cleaned = methodCall.replaceAll("[0-9]", "");
+                        messageDigest.update(cleaned.getBytes("UTF-8"));
                     }
                 }
             }
@@ -86,7 +87,8 @@ public class StackPathHashCalculator {
     private static boolean isSyntheticProxyMethod(String methodCall) {
         final String[] prefixes = {
                 "sun.reflect.",
-                "$Proxy"
+                "$Proxy",
+                "org.jboss.aop.advice.org.jboss.ejb3.interceptors.aop.InvocationContextInterceptor"
         };
         for (String prefix : prefixes) {
             if (methodCall.startsWith(prefix)) {

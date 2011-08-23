@@ -20,7 +20,6 @@ import org.apache.log4j.Logger;
 import org.bug4j.gwt.user.client.data.Stack;
 import org.bug4j.server.store.Store;
 import org.bug4j.server.store.StoreFactory;
-import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -50,25 +49,22 @@ public class InServlet extends HttpServlet {
         final String user = request.getParameter("u");
         final String hash = request.getParameter("h");
 
-        final String s = doit(app, version, message, user, hash);
-        out.print(s);
-    }
-
-    static String doit(String app, String version, @Nullable String message, @Nullable String user, String hash) {
-        final String ret;
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace(String.format("in :%s-%s-%s", app, version, hash));
         }
 
         final Store store = StoreFactory.getStore();
-        final Stack stack = store.getStackByHash(app, hash);
-        if (stack != null) {
-            final long dateReported = System.currentTimeMillis();
-            store.reportHitOnStack(app, version, message, dateReported, user, stack);
-            ret = "Old";
+        if (store.doesAppExist(app)) {
+            final Stack stack = store.getStackByHash(app, hash);
+            if (stack != null) {
+                final long dateReported = System.currentTimeMillis();
+                store.reportHitOnStack(version, message, dateReported, user, stack);
+                out.print("Old");
+            } else {
+                out.print("New");
+            }
         } else {
-            ret = "New";
+            response.sendError(403, "Unknown application");
         }
-        return ret;
     }
 }

@@ -148,6 +148,15 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>ImportServlet</servlet-name>
+        <servlet-class>org.bug4j.server.jsp.ImportServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ImportServlet</servlet-name>
+        <url-pattern>/admin/import</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>DownloadServlet</servlet-name>
         <servlet-class>org.bug4j.server.jsp.DownloadServlet</servlet-class>
     </servlet>

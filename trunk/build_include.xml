@@ -36,6 +36,12 @@
         </filelist>
     </path>
 
+    <path id="tomcat-coyote.lib">
+        <filelist dir="${tomcat-home}/lib">
+            <file name="tomcat-coyote.jar"/>
+        </filelist>
+    </path>
+
     <path id="derby.lib">
         <filelist dir="${dep-home}/db-derby-10.7.1.1-bin/lib">
             <file name="derby.jar"/>

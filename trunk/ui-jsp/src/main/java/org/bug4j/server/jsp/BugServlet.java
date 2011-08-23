@@ -18,6 +18,8 @@ package org.bug4j.server.jsp;
 
 import org.apache.log4j.Logger;
 import org.bug4j.server.processor.BugProcessor;
+import org.bug4j.server.store.Store;
+import org.bug4j.server.store.StoreFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -47,7 +49,8 @@ public class BugServlet extends HttpServlet {
             final String user = request.getParameter("u");
             final String stackText = request.getParameter("s");
 
-            BugProcessor.process(app, version, message, dateReported, user, stackText);
+            final Store store = StoreFactory.getStore();
+            BugProcessor.process(store, app, version, message, dateReported, user, stackText);
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
         }

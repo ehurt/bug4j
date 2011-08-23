@@ -25,6 +25,7 @@ import org.bug4j.gwt.user.client.data.*;
 import org.bug4j.gwt.user.client.data.Stack;
 import org.bug4j.server.store.HitsCallback;
 import org.bug4j.server.store.Store;
+import org.bug4j.server.store.UserEx;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.security.authentication.encoding.Md5PasswordEncoder;
 
@@ -41,8 +42,6 @@ public class JdbcStore extends Store {
     private static final Logger LOGGER = Logger.getLogger(JdbcStore.class);
     private static JdbcStore INSTANCE;
     private static final int STACK_SIZE_LIMIT = 128 * 1024;
-    private static final String PREF_DEFAULT_APP = "DEFAULT_APP";
-    private final Set<String> _knownApps = new HashSet<String>();
     private static final long DAY = 1000L * 60 * 60 * 24;
 
     protected JdbcStore() {
@@ -52,7 +51,6 @@ public class JdbcStore extends Store {
         final Connection connection = getConnection();
         try {
             createTables(connection);
-            loadApps(connection);
         } catch (SQLException e) {
             throw new IllegalStateException(e.getMessage(), e);
         } finally {
@@ -83,12 +81,12 @@ public class JdbcStore extends Store {
     }
 
     private void createTables(Connection connection) throws SQLException {
-        boolean mustCreateDefaultAdminUser = false;
+        boolean isInstall = false;
         final Statement statement = connection.createStatement();
 
         try {
             if (!doesTableExist(statement, "BUG4J_USER")) {
-                mustCreateDefaultAdminUser = true;
+                isInstall = true;
                 statement.execute("" +
                         "CREATE TABLE BUG4J_USER (" +
                         " USER_NAME VARCHAR(128) NOT NULL PRIMARY KEY," +
@@ -117,8 +115,7 @@ public class JdbcStore extends Store {
             if (!doesTableExist(statement, "APP")) {
                 statement.execute("" +
                         "CREATE TABLE APP (" +
-                        " APP VARCHAR(32) NOT NULL," +
-                        " VER VARCHAR(32)" +
+                        " APP VARCHAR(32) NOT NULL" +
                         ")"
                 );
             }
@@ -130,7 +127,6 @@ public class JdbcStore extends Store {
                         " APP_PACKAGE VARCHAR(64) NOT NULL" +
                         ")"
                 );
-                statement.execute("INSERT INTO APP_PACKAGES (APP,APP_PACKAGE)VALUES('bug4jDemo','org.bug4j.demo')");
             }
 
             if (!doesTableExist(statement, "BUG")) {
@@ -217,8 +213,10 @@ public class JdbcStore extends Store {
                 statement.execute("CREATE INDEX USER_READ_IDX ON USER_READ(USER_NAME,BUG_ID)");
             }
 
-            if (mustCreateDefaultAdminUser) {
+            if (isInstall) {
                 createDefaultAdminUser();
+                createApplication("bug4jDemo");
+                setPackages("bug4jDemo", Arrays.asList("org.bug4j.demo"));
             }
 
         } finally {
@@ -247,47 +245,6 @@ public class JdbcStore extends Store {
             }
         }
         return s;
-    }
-
-    private void loadApps(Connection connection) throws SQLException {
-        final Statement statement = connection.createStatement();
-        try {
-            final ResultSet resultSet = statement.executeQuery("select * from APP");
-            try {
-                while (resultSet.next()) {
-                    final String app = resultSet.getString(1);
-                    final String ver = resultSet.getString(2);
-                    final String key = app + '\0' + ver;
-                    _knownApps.add(key);
-                }
-            } finally {
-                DbUtils.closeQuietly(resultSet);
-            }
-        } finally {
-            DbUtils.closeQuietly(statement);
-        }
-    }
-
-    private void declareApp(Connection connection, String app, String ver) {
-        final String key = app + '\0' + ver;
-        final boolean isNew;
-        synchronized (JdbcStore.class) {
-            isNew = _knownApps.add(key);
-        }
-        if (isNew) {
-            try {
-                final PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO APP (APP, VER) VALUES(?,?)");
-                try {
-                    preparedStatement.setString(1, app);
-                    preparedStatement.setString(2, ver);
-                    preparedStatement.execute();
-                } finally {
-                    preparedStatement.close();
-                }
-            } catch (SQLException e) {
-                throw new IllegalStateException(e.getMessage(), e);
-            }
-        }
     }
 
     /**
@@ -396,9 +353,10 @@ public class JdbcStore extends Store {
             final Connection connection = getConnection();
             try {
                 final PreparedStatement preparedStatement = connection.prepareStatement("" +
-                        "SELECT b.bug_id, b.title" +
-                        "  FROM bug b" +
-                        "  WHERE b.app=?");
+                        "SELECT B.BUG_ID, B.TITLE" +
+                        "  FROM BUG B" +
+                        "  WHERE B.APP=?" +
+                        "  ORDER BY B.BUG_ID");
                 try {
                     preparedStatement.setString(1, app);
                     final ResultSet resultSet = preparedStatement.executeQuery();
@@ -564,8 +522,9 @@ public class JdbcStore extends Store {
                 final PreparedStatement preparedStatement = connection.prepareStatement("" +
                         "SELECT H.HIT_ID,H.APP_VER,H.DATE_REPORTED,H.REPORTED_BY,H.MESSAGE,S.STACK_TEXT" +
                         " FROM HIT H,STACK_TEXT S" +
-                        " WHERE H.HIT_ID=?" +
-                        " AND H.STACK_ID=S.STACK_ID");
+                        " WHERE H.BUG_ID=?" +
+                        " AND H.STACK_ID=S.STACK_ID" +
+                        " ORDER BY H.HIT_ID");
                 try {
                     preparedStatement.setLong(1, bugId);
                     final ResultSet resultSet = preparedStatement.executeQuery();
@@ -671,6 +630,30 @@ public class JdbcStore extends Store {
         return ret;
     }
 
+    @Override
+    public boolean doesAppExist(String app) {
+        boolean ret = false;
+        final Connection connection = getConnection();
+        try {
+            final PreparedStatement preparedStatement = connection.prepareStatement("SELECT APP FROM APP WHERE APP=?");
+            try {
+                preparedStatement.setString(1, app);
+                final ResultSet resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    ret = true;
+                }
+            } finally {
+                preparedStatement.close();
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
+            DbUtils.closeQuietly(connection);
+        }
+        return ret;
+    }
+
+    @Override
     @Nullable
     public String getUserPref(String remoteUser, String key, @Nullable String defaultValue) {
         String ret = defaultValue;
@@ -695,6 +678,7 @@ public class JdbcStore extends Store {
         return ret;
     }
 
+    @Override
     @Nullable
     public Integer getUserPref_Integer(String remoteUser, String key, @Nullable Integer defaultValue) {
         Integer ret = defaultValue;
@@ -709,6 +693,7 @@ public class JdbcStore extends Store {
         return ret;
     }
 
+    @Override
     public void setUserPref(String remoteUser, String key, String value) {
         try {
             final Connection connection = getConnection();
@@ -741,44 +726,33 @@ public class JdbcStore extends Store {
         }
     }
 
+    @Override
     public void setUserPref(String remoteUser, String key, Integer value) {
         String stringValue = value == null ? null : value.toString();
         setUserPref(remoteUser, key, stringValue);
     }
 
     @Override
-    public void setDefaultApplication(String remoteUser, String app) {
-        setUserPref(remoteUser, PREF_DEFAULT_APP, app);
-    }
-
-    @Override
-    @Nullable
-    public String getDefaultApplication(String remoteUser) {
-        String ret = getUserPref(remoteUser, PREF_DEFAULT_APP, null);
-        if (ret == null) {
-            ret = getAnyApp();
-            if (ret != null) {
-                setDefaultApplication(remoteUser, ret);
+    public boolean doesUserExist(String userName) {
+        boolean ret = false;
+        final Connection connection = getConnection();
+        try {
+            final PreparedStatement preparedStatement = connection.prepareStatement("SELECT USER_NAME FROM BUG4J_USER WHERE USER_NAME=?");
+            try {
+                preparedStatement.setString(1, userName);
+                final ResultSet resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    ret = true;
+                }
+            } finally {
+                preparedStatement.close();
             }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
+            DbUtils.closeQuietly(connection);
         }
         return ret;
-    }
-
-    public Filter getDefaultFilter(String remoteUser) {
-        final Filter ret = new Filter();
-        final String title = getUserPref(remoteUser, "FILTER_TITLE", null);
-        final Integer hitWithinDays = getUserPref_Integer(remoteUser, "FILTER_DAYS", 7);
-        final String multiUsers = getUserPref(remoteUser, "FILTER_MULTI_USERS", Boolean.FALSE.toString());
-        ret.setTitle(title);
-        ret.setHitWithinDays(hitWithinDays);
-        ret.setReportedByMultiple(Boolean.parseBoolean(multiUsers));
-        return ret;
-    }
-
-    public void setDefaultFilter(String remoteUser, Filter filter) {
-        setUserPref(remoteUser, "FILTER_TITLE", filter.getTitle());
-        setUserPref(remoteUser, "FILTER_DAYS", filter.getHitWithinDays());
-        setUserPref(remoteUser, "FILTER_MULTI_USERS", Boolean.toString(filter.isReportedByMultiple()));
     }
 
     @Override
@@ -896,6 +870,45 @@ public class JdbcStore extends Store {
     }
 
     @Override
+    public List<UserEx> getUserExes() {
+        final ArrayList<UserEx> ret = new ArrayList<UserEx>();
+        final Connection connection = getConnection();
+        try {
+            try {
+                final PreparedStatement preparedStatement = connection.prepareStatement("" +
+                        "SELECT USER_NAME,USER_PASS,USER_EMAIL,USER_ADMIN,USER_BUILT_IN,USER_ENABLED,USER_LAST_SIGNED_IN" +
+                        "   FROM BUG4J_USER" +
+                        "   ORDER BY USER_NAME");
+                try {
+                    final ResultSet resultSet = preparedStatement.executeQuery();
+                    try {
+                        while (resultSet.next()) {
+                            final String userName = resultSet.getString(1);
+                            final String userPass = resultSet.getString(2);
+                            final String email = resultSet.getString(3);
+                            final boolean isAdmin = "Y".equals(resultSet.getString(4));
+                            final boolean isBuiltIn = "Y".equals(resultSet.getString(5));
+                            final boolean isEnabled = "Y".equals(resultSet.getString(6));
+                            final Timestamp lastSignedIn = resultSet.getTimestamp(7);
+                            final UserEx user = new UserEx(userName, userPass, email, isAdmin, isBuiltIn, isEnabled, lastSignedIn == null ? null : lastSignedIn.getTime());
+                            ret.add(user);
+                        }
+                    } finally {
+                        resultSet.close();
+                    }
+                } finally {
+                    preparedStatement.close();
+                }
+            } finally {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+        return ret;
+    }
+
+    @Override
     public void deleteUser(String userName) {
         final Connection connection = getConnection();
         try {
@@ -992,15 +1005,18 @@ public class JdbcStore extends Store {
 
     @Override
     public void createUser(User user, String password) {
+        final String encodedPassword = new Md5PasswordEncoder().encodePassword(password, user.getUserName());
+        createUserWithEncryptedPassword(user, encodedPassword);
+    }
+
+    public void createUserWithEncryptedPassword(User user, String encodedPassword) {
         final Connection connection = getConnection();
         try {
             {
                 final PreparedStatement preparedStatement = connection.prepareStatement("" +
                         "INSERT INTO BUG4J_USER(USER_NAME,USER_PASS,USER_EMAIL,USER_ADMIN,USER_BUILT_IN,USER_ENABLED,USER_LAST_SIGNED_IN) VALUES (?,?,?,?,?,'Y',NULL)");
                 try {
-                    final String userName = user.getUserName();
-                    preparedStatement.setString(1, userName);
-                    final String encodedPassword = new Md5PasswordEncoder().encodePassword(password, userName);
+                    preparedStatement.setString(1, user.getUserName());
                     preparedStatement.setString(2, encodedPassword);
                     preparedStatement.setString(3, user.getEmail());
                     preparedStatement.setString(4, user.isAdmin() ? "Y" : "N");
@@ -1052,10 +1068,9 @@ public class JdbcStore extends Store {
         final Connection connection = getConnection();
         try {
             try {
-                final PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO APP(APP,VER)VALUES(?,?)");
+                final PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO APP(APP)VALUES(?)");
                 try {
                     preparedStatement.setString(1, applicationName);
-                    preparedStatement.setString(2, "0");
                     preparedStatement.executeUpdate();
                 } finally {
                     preparedStatement.close();
@@ -1115,27 +1130,6 @@ public class JdbcStore extends Store {
         }
     }
 
-    private String getAnyApp() {
-        String ret = null;
-        final Connection connection = getConnection();
-        try {
-            final PreparedStatement preparedStatement = connection.prepareStatement("SELECT APP FROM BUG");
-            try {
-                final ResultSet resultSet = preparedStatement.executeQuery();
-                if (resultSet.next()) {
-                    ret = resultSet.getString(1);
-                }
-            } finally {
-                preparedStatement.close();
-            }
-        } catch (SQLException e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        } finally {
-            DbUtils.closeQuietly(connection);
-        }
-        return ret;
-    }
-
     @Override
     public void resetPassword(String userName, String password) {
         try {
@@ -1160,51 +1154,53 @@ public class JdbcStore extends Store {
 
     @Override
     public void deleteBug(long bugId) {
-        final Connection connection = getConnection();
         try {
-            final PreparedStatement deleteHitsStatement = connection.prepareStatement("DELETE FROM HIT WHERE BUG_ID=?");
+            final Connection connection = getConnection();
             try {
-                deleteHitsStatement.setLong(1, bugId);
-                deleteHitsStatement.executeUpdate();
-            } finally {
-                DbUtils.closeQuietly(deleteHitsStatement);
-            }
+                final PreparedStatement deleteHitsStatement = connection.prepareStatement("DELETE FROM HIT WHERE BUG_ID=?");
+                try {
+                    deleteHitsStatement.setLong(1, bugId);
+                    deleteHitsStatement.executeUpdate();
+                } finally {
+                    deleteHitsStatement.close();
+                }
 
-            final PreparedStatement deleteStackTextStatement = connection.prepareStatement("DELETE FROM STACK_TEXT WHERE STACK_ID IN (select DISTINCT S.STACK_ID from STACK S WHERE BUG_ID=?)");
-            try {
-                deleteStackTextStatement.setLong(1, bugId);
-                deleteStackTextStatement.executeUpdate();
-            } finally {
-                DbUtils.closeQuietly(deleteStackTextStatement);
-            }
+                final PreparedStatement deleteStackTextStatement = connection.prepareStatement("DELETE FROM STACK_TEXT WHERE STACK_ID IN (select DISTINCT S.STACK_ID from STACK S WHERE BUG_ID=?)");
+                try {
+                    deleteStackTextStatement.setLong(1, bugId);
+                    deleteStackTextStatement.executeUpdate();
+                } finally {
+                    deleteStackTextStatement.close();
+                }
 
-            final PreparedStatement deleteStackStatement = connection.prepareStatement("DELETE FROM STACK WHERE BUG_ID=?");
-            try {
-                deleteStackStatement.setLong(1, bugId);
-                deleteStackStatement.executeUpdate();
-            } finally {
-                DbUtils.closeQuietly(deleteStackStatement);
-            }
+                final PreparedStatement deleteStackStatement = connection.prepareStatement("DELETE FROM STACK WHERE BUG_ID=?");
+                try {
+                    deleteStackStatement.setLong(1, bugId);
+                    deleteStackStatement.executeUpdate();
+                } finally {
+                    deleteStackStatement.close();
+                }
 
-            final PreparedStatement deleteStrainStatement = connection.prepareStatement("DELETE FROM STRAIN WHERE BUG_ID=?");
-            try {
-                deleteStrainStatement.setLong(1, bugId);
-                deleteStrainStatement.executeUpdate();
-            } finally {
-                DbUtils.closeQuietly(deleteStrainStatement);
-            }
+                final PreparedStatement deleteStrainStatement = connection.prepareStatement("DELETE FROM STRAIN WHERE BUG_ID=?");
+                try {
+                    deleteStrainStatement.setLong(1, bugId);
+                    deleteStrainStatement.executeUpdate();
+                } finally {
+                    deleteStrainStatement.close();
+                }
 
-            final PreparedStatement deleteBugStatement = connection.prepareStatement("DELETE FROM BUG WHERE BUG_ID=?");
-            try {
-                deleteBugStatement.setLong(1, bugId);
-                deleteBugStatement.executeUpdate();
+                final PreparedStatement deleteBugStatement = connection.prepareStatement("DELETE FROM BUG WHERE BUG_ID=?");
+                try {
+                    deleteBugStatement.setLong(1, bugId);
+                    deleteBugStatement.executeUpdate();
+                } finally {
+                    deleteBugStatement.close();
+                }
             } finally {
-                DbUtils.closeQuietly(deleteBugStatement);
+                connection.close();
             }
         } catch (SQLException e) {
             throw new IllegalStateException(e.getMessage(), e);
-        } finally {
-            DbUtils.closeQuietly(connection);
         }
     }
 
@@ -1475,10 +1471,8 @@ public class JdbcStore extends Store {
     }
 
     @Override
-    public void reportHitOnStack(String app, String appVersion, String message, long dateReported, String user, Stack stack) {
+    public void reportHitOnStack(String appVersion, String message, long dateReported, String user, Stack stack) {
         final Connection connection = getConnection();
-
-        declareApp(connection, app, appVersion);
 
         try {
             final PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO HIT (BUG_ID,STACK_ID,APP_VER,DATE_REPORTED,MESSAGE,REPORTED_BY) VALUES(?,?,?,?,?,?)");
@@ -1504,49 +1498,13 @@ public class JdbcStore extends Store {
         }
     }
 
-    @Override
-    public BugHit getLastHit(long bugId) {
-        BugHit ret = null;
-        final Connection connection = getConnection();
-        try {
-            final PreparedStatement preparedStatement = connection.prepareStatement("" +
-                    "SELECT H.HIT_ID, H.APP_VER, H.DATE_REPORTED,H.REPORTED_BY" +
-                    " FROM HIT H" +
-                    " WHERE H.BUG_ID=?" +
-                    " ORDER BY DATE_REPORTED DESC");
-            try {
-                preparedStatement.setLong(1, bugId);
-                final ResultSet resultSet = preparedStatement.executeQuery();
-                try {
-                    if (resultSet.next()) {
-                        final long hitId = resultSet.getLong(1);
-                        final String appVer = resultSet.getString(2);
-                        final Timestamp timestamp = resultSet.getTimestamp(3);
-                        final long dateReported = timestamp.getTime();
-                        final String user = resultSet.getString(4);
-                        ret = new BugHit(hitId, appVer, dateReported, user);
-                    }
-                } finally {
-                    DbUtils.closeQuietly(resultSet);
-                }
-            } finally {
-                DbUtils.closeQuietly(preparedStatement);
-            }
-        } catch (SQLException e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        } finally {
-            DbUtils.closeQuietly(connection);
-        }
-        return ret;
-    }
-
     public String getStack(long hitId) {
         String ret = null;
         final Connection connection = getConnection();
         try {
             final PreparedStatement preparedStatement = connection.prepareStatement("" +
                     "SELECT S.STACK_TEXT" +
-                    " FROM STACK_TEXT S, HIT H" +
+                    " FROM HIT H, STACK_TEXT S" +
                     " WHERE H.HIT_ID=?" +
                     " AND H.STACK_ID=S.STACK_ID");
             try {

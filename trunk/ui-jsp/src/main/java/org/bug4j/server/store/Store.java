@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class Store {
+    private static final String PREF_DEFAULT_APP = "DEFAULT_APP";
+
     protected Store() {
     }
 
@@ -60,9 +62,7 @@ public abstract class Store {
 
     public abstract Stack createStack(long bugId, long strainId, String fullHash, String stackText);
 
-    public abstract void reportHitOnStack(String app, String version, @Nullable String message, long dateReported, @Nullable String user, Stack stack);
-
-    public abstract BugHit getLastHit(long bugId);
+    public abstract void reportHitOnStack(String version, @Nullable String message, long dateReported, @Nullable String user, Stack stack);
 
     public abstract String getStack(long hitId);
 
@@ -72,19 +72,47 @@ public abstract class Store {
 
     public abstract List<String> getApplications();
 
-    public abstract void setDefaultApplication(String remoteUser, String app);
+    public void setDefaultApplication(String remoteUser, String app) {
+        setUserPref(remoteUser, Store.PREF_DEFAULT_APP, app);
+    }
 
-    public abstract String getDefaultApplication(String remoteUser);
+    @Nullable
+    public String getDefaultApplication(String remoteUser) {
+        String ret = getUserPref(remoteUser, Store.PREF_DEFAULT_APP, null);
+        if (ret == null) {
+            final List<String> applications = getApplications();
+            if (!applications.isEmpty()) {
+                ret = applications.get(0);
+                setDefaultApplication(remoteUser, ret);
+            }
+        }
+        return ret;
+    }
 
-    public abstract Filter getDefaultFilter(String userName);
+    public Filter getDefaultFilter(String remoteUser) {
+        final Filter ret = new Filter();
+        final String title = getUserPref(remoteUser, "FILTER_TITLE", null);
+        final Integer hitWithinDays = getUserPref_Integer(remoteUser, "FILTER_DAYS", 7);
+        final String multiUsers = getUserPref(remoteUser, "FILTER_MULTI_USERS", Boolean.FALSE.toString());
+        ret.setTitle(title);
+        ret.setHitWithinDays(hitWithinDays);
+        ret.setReportedByMultiple(Boolean.parseBoolean(multiUsers));
+        return ret;
+    }
 
-    public abstract void setDefaultFilter(String userName, Filter filter);
+    public void setDefaultFilter(String remoteUser, Filter filter) {
+        setUserPref(remoteUser, "FILTER_TITLE", filter.getTitle());
+        setUserPref(remoteUser, "FILTER_DAYS", filter.getHitWithinDays());
+        setUserPref(remoteUser, "FILTER_MULTI_USERS", Boolean.toString(filter.isReportedByMultiple()));
+    }
 
     public abstract void markRead(String userName, long bugId);
 
     public abstract List<BugCountByDate> getBugCountByDate(String app);
 
     public abstract List<User> getUsers();
+
+    public abstract List<UserEx> getUserExes();
 
     public abstract void deleteUser(String userName);
 
@@ -94,6 +122,8 @@ public abstract class Store {
 
     public abstract void createUser(User user, String password);
 
+    public abstract void createUserWithEncryptedPassword(User user, String encodedPassword);
+
     public abstract void updatePassword(String userName, String oldPassword, String newPassword);
 
     public abstract void createApplication(String applicationName);
@@ -101,4 +131,18 @@ public abstract class Store {
     public abstract void deleteApplication(String applicationName);
 
     public abstract void resetPassword(String userName, String randomPassword);
+
+    public abstract boolean doesAppExist(String app);
+
+    @Nullable
+    public abstract String getUserPref(String remoteUser, String key, @Nullable String defaultValue);
+
+    @Nullable
+    public abstract Integer getUserPref_Integer(String remoteUser, String key, @Nullable Integer defaultValue);
+
+    public abstract void setUserPref(String remoteUser, String key, String value);
+
+    public abstract void setUserPref(String remoteUser, String key, Integer value);
+
+    public abstract boolean doesUserExist(String userName);
 }

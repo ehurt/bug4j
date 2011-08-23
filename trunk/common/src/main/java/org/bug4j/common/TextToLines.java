@@ -36,7 +36,7 @@ public final class TextToLines {
         final List<String> ret = new ArrayList<String>();
         final int length = text.length();
         int from = 0;
-        int to = 0;
+        int to = from;
         while (to < length) {
             final char c = text.charAt(to);
             if (c == '\r') {
@@ -70,7 +70,7 @@ public final class TextToLines {
         final List<String> ret = new ArrayList<String>();
         final int length = text.length();
         int from = 0;
-        int to = 0;
+        int to = from;
         while (to < length) {
             final char c = text.charAt(to);
             if (c == '\r') {

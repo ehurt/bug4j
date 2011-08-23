@@ -32,7 +32,6 @@
         <mkdir dir="${dist}/server"/>
         <copy todir="${dist}/server">
             <fileset dir="${tomcat-home}">
-                <exclude name="/bin/bug4j/"/>
                 <exclude name="/logs/**"/>
                 <exclude name="/temp/"/>
                 <exclude name="/webapps/ROOT/"/>
