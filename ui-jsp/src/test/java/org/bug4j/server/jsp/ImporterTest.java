@@ -28,15 +28,18 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class ImporterTest {
+
+    private TestingStore _store;
+
     @Before
     public void setUp() throws Exception {
-        final TestingStore store = TestingStore.createEmbeddedStore();
-        StoreFactory.setStore(store);
+        _store = TestingStore.createMemStore();
+        StoreFactory.setStore(_store);
     }
 
     @Test
     public void testReinject() throws IOException, SAXException, ParserConfigurationException {
-        final Importer importer = new InjectImporter();
+        final Importer importer = new InjectImporter(_store);
         final ClassLoader classLoader = getClass().getClassLoader();
         final InputStream inputStream = classLoader.getResourceAsStream("import/bugs.xml");
         try {

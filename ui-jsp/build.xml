@@ -27,7 +27,6 @@
 
 
     <path id="project.libs">
-        <fileset file="C:/Java/jdk1.6.0_23/jre/lib/rt.jar"/>
         <path refid="commons-io.lib"/>
         <path refid="commons-dbutils.lib"/>
         <path refid="commons-lang.lib"/>
@@ -37,6 +36,7 @@
         <path refid="log4j.lib"/>
         <path refid="spring-framework.lib"/>
         <path refid="spring-security.lib"/>
+        <path refid="tomcat-coyote.lib"/>
     </path>
 
     <path id="project.class.path">

@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 /*
@@ -42,19 +43,21 @@ import java.util.Date;
         </bug>
     </bugs>
  */
+@SuppressWarnings({"UnusedParameters"})
 public abstract class Importer {
     private static final Logger LOGGER = Logger.getLogger(Importer.class);
 
-    private final DateFormat _dateFormat = SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.FULL, SimpleDateFormat.FULL);
-    private String _app;
-    private int _bugId;
-    private String _title;
-    private boolean _inHit;
-    private long _hitId;
-    private Date _date;
-    private String _appVer;
-    private String _user;
-    private String _message;
+    protected final DateFormat _dateFormat = SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.FULL, SimpleDateFormat.FULL);
+    protected String _appName;
+    protected long _bugId;
+    protected String _title;
+    protected StringBuilder _stack;
+    protected long _hitId;
+    protected Date _date;
+    protected String _appVer;
+    protected String _user;
+    protected String _message;
+    protected ArrayList<String> _packages;
 
     public Importer() {
     }
@@ -65,8 +68,21 @@ public abstract class Importer {
         saxParser.parse(inputStream, new DefaultHandler() {
             @Override
             public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-                if ("bugs".equals(qName)) {
-                    startBugs(attributes);
+                if ("bug4j".equals(qName)) {
+                } else if ("users".equals(qName)) {
+                    startUsers();
+                } else if ("user".equals(qName)) {
+                    startUser(attributes);
+                } else if ("apps".equals(qName)) {
+                    startApps();
+                } else if ("app".equals(qName)) {
+                    startApp(attributes);
+                } else if ("packages".equals(qName)) {
+                    startPackages();
+                } else if ("package".equals(qName)) {
+                    startPackage(attributes);
+                } else if ("bugs".equals(qName)) {
+                    startBugs();
                 } else if ("bug".equals(qName)) {
                     startBug(attributes);
                 } else if ("hits".equals(qName)) {
@@ -78,7 +94,16 @@ public abstract class Importer {
 
             @Override
             public void endElement(String uri, String localName, String qName) throws SAXException {
-                if ("bugs".equals(qName)) {
+                if ("bug4j".equals(qName)) {
+                } else if ("users".equals(qName)) {
+                    endUsers();
+                } else if ("apps".equals(qName)) {
+                    endApps();
+                } else if ("app".equals(qName)) {
+                    endApp();
+                } else if ("packages".equals(qName)) {
+                    endPackages();
+                } else if ("bugs".equals(qName)) {
                     endBugs();
                 } else if ("bug".equals(qName)) {
                     endBug();
@@ -96,19 +121,70 @@ public abstract class Importer {
         });
     }
 
-    private void startBugs(Attributes attributes) {
-        _app = attributes.getValue("app");
-        whenApp(_app);
+    protected void whenCharacters(char[] ch, int start, int length) {
+        if (_stack != null) {
+            final String stack = new String(ch, start, length);
+            _stack.append(stack);
+        }
     }
 
-    protected void endBugs() {
-        _app = null;
+    protected void startUsers() {
+    }
+
+    protected void startUser(Attributes attributes) {
+        final String userName = attributes.getValue("userName");
+        final String password = attributes.getValue("password");
+        final String email = attributes.getValue("email");
+        final boolean admin = Boolean.parseBoolean(attributes.getValue("admin"));
+        final boolean external = Boolean.parseBoolean(attributes.getValue("external"));
+        final boolean disabled = Boolean.parseBoolean(attributes.getValue("disabled"));
+        whenUser(userName, password, email, admin, external, disabled);
+    }
+
+    protected void whenUser(String userName, String password, String email, boolean admin, boolean external, boolean disabled) {
+    }
+
+    protected void endUsers() {
+    }
+
+    protected void startApps() {
+    }
+
+    protected void startApp(Attributes attributes) {
+        _appName = attributes.getValue("name");
+        whenApp(_appName);
+    }
+
+    protected void whenApp(String appName) {
+    }
+
+    protected void startPackages() {
+        _packages = new ArrayList<String>();
+    }
+
+    protected void startPackage(Attributes attributes) {
+        final String name = attributes.getValue("name");
+        whenPackage(name);
+    }
+
+    protected void whenPackage(String packageName) {
+        _packages.add(packageName);
+    }
+
+    protected void endPackages() {
+        _packages = null;
+    }
+
+    protected void startBugs() {
     }
 
     protected void startBug(Attributes attributes) {
-        _bugId = Integer.parseInt(attributes.getValue("id"));
+        _bugId = Long.parseLong(attributes.getValue("id"));
         _title = attributes.getValue("title");
-        whenBug(_app, _bugId);
+        whenBug(_bugId, _title);
+    }
+
+    protected void whenBug(long bugId, String title) {
     }
 
     protected void endBug() {
@@ -117,9 +193,6 @@ public abstract class Importer {
     }
 
     protected void startHits() {
-    }
-
-    protected void endHits() {
     }
 
     protected void startHit(Attributes attributes) {
@@ -132,7 +205,7 @@ public abstract class Importer {
                 _appVer = attributes.getValue("appVer");
                 _user = attributes.getValue("user");
                 _message = attributes.getValue("message");
-                _inHit = true;
+                _stack = new StringBuilder();
             } catch (ParseException e) {
                 LOGGER.error("Failed to parse the date '" + dateValue + "'");
             }
@@ -142,22 +215,30 @@ public abstract class Importer {
     }
 
     protected void endHit() {
-        _inHit = false;
+        final long dateReported = _date.getTime();
+        final String stack = _stack.toString();
+        whenHit(_appName, _bugId, _title, _hitId, dateReported, _appVer, _user, _message, stack);
+
+        _hitId = 0;
+        _date = null;
+        _appVer = null;
+        _user = null;
+        _message = null;
+        _stack = null;
     }
 
-    protected void whenCharacters(char[] ch, int start, int length) {
-        if (_inHit) {
-            final String stack = new String(ch, start, length);
-            final long dateReported = _date.getTime();
-            whenHit(_app, _bugId, _title, _hitId, dateReported, _appVer, _user, _message, stack);
-        }
+    protected void endHits() {
     }
 
-    protected void whenApp(String app) {
+    protected void endBugs() {
     }
 
-    protected void whenBug(String app, int bugId) {
+    protected void endApp() {
+        _appName = null;
     }
 
-    protected abstract void whenHit(String app, int bugId, String title, long hitId, long dateReported, String appVer, String user, String message, String stack);
+    protected void endApps() {
+    }
+
+    protected abstract void whenHit(String app, long bugId, String title, long hitId, long dateReported, String appVer, String user, String message, String stack);
 }

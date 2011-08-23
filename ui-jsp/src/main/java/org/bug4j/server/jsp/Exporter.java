@@ -21,9 +21,9 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.text.translate.AggregateTranslator;
 import org.apache.commons.lang3.text.translate.LookupTranslator;
 import org.apache.commons.lang3.text.translate.UnicodeEscaper;
-import org.bug4j.gwt.admin.client.data.User;
 import org.bug4j.server.store.HitsCallback;
 import org.bug4j.server.store.Store;
+import org.bug4j.server.store.UserEx;
 import org.bug4j.server.store.jdbc.BugCallback;
 
 import javax.xml.stream.XMLOutputFactory;
@@ -102,7 +102,7 @@ public class Exporter {
     private void exportAll(final XMLStreamWriter xmlStreamWriter) throws XMLStreamException {
         xmlStreamWriter.writeStartElement("bug4j");
 
-        final List<User> users = _store.getUsers();
+        final List<UserEx> users = _store.getUserExes();
         exportUsers(xmlStreamWriter, users);
 
         final List<String> applications = _store.getApplications();
@@ -140,20 +140,24 @@ public class Exporter {
         }
     }
 
-    private void exportUsers(XMLStreamWriter xmlStreamWriter, List<User> users) throws XMLStreamException {
+    private void exportUsers(XMLStreamWriter xmlStreamWriter, List<UserEx> users) throws XMLStreamException {
         xmlStreamWriter.writeStartElement("users");
-        for (User user : users) {
+        for (UserEx user : users) {
             exportUser(xmlStreamWriter, user);
         }
         xmlStreamWriter.writeEndElement();
     }
 
-    private void exportUser(XMLStreamWriter xmlStreamWriter, User user) throws XMLStreamException {
+    private void exportUser(XMLStreamWriter xmlStreamWriter, UserEx user) throws XMLStreamException {
         xmlStreamWriter.writeStartElement("user");
 
         final String userName = user.getUserName();
         final String escapedUserName = StringEscapeUtils.escapeXml(userName);
         xmlStreamWriter.writeAttribute("userName", escapedUserName);
+
+        final String password = user.getPassword();
+        final String escapedPassword = StringEscapeUtils.escapeXml(password);
+        xmlStreamWriter.writeAttribute("password", escapedPassword);
 
         final String email = user.getEmail();
         final String escapedEmail = StringEscapeUtils.escapeXml(email);
@@ -165,12 +169,12 @@ public class Exporter {
             xmlStreamWriter.writeAttribute("admin", "true");
         }
 
-        if (!user.isBuiltIn()) {
-            xmlStreamWriter.writeAttribute("builtin", "false");
+        if (user.isBuiltIn()) {
+            xmlStreamWriter.writeAttribute("external", "true");
         }
 
         if (!user.isEnabled()) {
-            xmlStreamWriter.writeAttribute("enabled", "false");
+            xmlStreamWriter.writeAttribute("disabled", "true");
         }
 
         final Long lastSignedIn = user.getLastSignedIn();

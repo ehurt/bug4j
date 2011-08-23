@@ -28,6 +28,7 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import org.bug4j.gwt.common.client.BaseDialog;
 import org.bug4j.gwt.common.client.CommonService;
 import org.bug4j.gwt.common.client.Resources;
 import org.bug4j.gwt.common.client.data.UserAuthorities;
@@ -187,7 +188,7 @@ public class Admin implements EntryPoint {
                 whenImport();
                 popupPanel.hide();
             }
-        }).setEnabled(false);
+        });
         popup.addSeparator();
         popup.addItem("Logout", new Command() {
             @Override
@@ -207,7 +208,40 @@ public class Admin implements EntryPoint {
     }
 
     private void whenImport() {
-        Window.alert("Not implemented yet");
+
+        final DialogBox dialogBox = new BaseDialog("Import") {
+
+            private FormPanel _formPanel;
+
+            @Override
+            protected Widget createContent() {
+                final String moduleBaseURL = GWT.getModuleBaseURL();
+                final FileUpload fileUpload = new FileUpload();
+                fileUpload.setName("upload");
+                _formPanel = new FormPanel();
+                final String action = moduleBaseURL + "../admin/import";
+                _formPanel.setAction(action);
+                _formPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
+                _formPanel.setMethod(FormPanel.METHOD_POST);
+
+                _formPanel.add(fileUpload);
+
+                _formPanel.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
+                    @Override
+                    public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
+                        hide();
+                    }
+                });
+
+                return _formPanel;
+            }
+
+            @Override
+            protected void whenOk() {
+                _formPanel.submit();
+            }
+        };
+        dialogBox.center();
     }
 
     private void whenExport() {

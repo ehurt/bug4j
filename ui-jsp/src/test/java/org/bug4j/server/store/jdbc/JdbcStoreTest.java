@@ -99,7 +99,7 @@ public class JdbcStoreTest {
             stack = _store.createStack(bugid, strain.getStrainId(), fullHash, STACK_TEXT);
         }
         final long dateReported = System.currentTimeMillis();
-        _store.reportHitOnStack(APP, APP_VERSION, null, dateReported, null, stack);
+        _store.reportHitOnStack(APP_VERSION, null, dateReported, null, stack);
         bugid = stack.getBugId();
         System.out.println("bugid = " + bugid);
     }

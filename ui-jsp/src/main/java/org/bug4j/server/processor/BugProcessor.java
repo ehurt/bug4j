@@ -22,7 +22,6 @@ import org.bug4j.gwt.user.client.data.BugHit;
 import org.bug4j.gwt.user.client.data.Stack;
 import org.bug4j.gwt.user.client.data.Strain;
 import org.bug4j.server.store.Store;
-import org.bug4j.server.store.StoreFactory;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -34,7 +33,7 @@ public final class BugProcessor {
     /**
      * When trying to match by title, how many stacks we want to look at.
      */
-    private static final int MATCH_BY_TITLE_LOOK_BACK_MAX = 30;
+    private static final int MATCH_BY_TITLE_LOOK_BACK_MAX = 5;
 
     private BugProcessor() {
     }
@@ -42,8 +41,8 @@ public final class BugProcessor {
     /**
      * @return the bugid that was matched.
      */
-    public static long process(String app, String version, @Nullable String message, long dateReported, @Nullable String user, String stackText) {
-        final Store store = StoreFactory.getStore();
+    public static long process(final Store store, String app, String version, @Nullable String message, long dateReported, @Nullable String user, String stackText) {
+        stackText = stackText.trim();
         final List<String> stackLines = TextToLines.toLineList(stackText);
 
         // First try based on the full hash of the exception.
@@ -75,7 +74,7 @@ public final class BugProcessor {
             }
             stack = store.createStack(strain.getBugId(), strain.getStrainId(), fullHash, stackText);
         }
-        store.reportHitOnStack(app, version, message, dateReported, user, stack);
+        store.reportHitOnStack(version, message, dateReported, user, stack);
 
         return stack.getBugId();
     }
