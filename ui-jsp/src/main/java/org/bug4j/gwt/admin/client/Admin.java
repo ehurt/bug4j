@@ -212,6 +212,7 @@ public class Admin implements EntryPoint {
         final DialogBox dialogBox = new BaseDialog("Import") {
 
             private FormPanel _formPanel;
+            private PopupPanel _loadingPanel;
 
             @Override
             protected Widget createContent() {
@@ -229,6 +230,8 @@ public class Admin implements EntryPoint {
                 _formPanel.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
                     @Override
                     public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
+                        whenApplicationsChanged();
+                        _loadingPanel.hide();
                         hide();
                     }
                 });
@@ -238,7 +241,16 @@ public class Admin implements EntryPoint {
 
             @Override
             protected void whenOk() {
+                // Cannot hide the panel or the submit will fail.
+                setPopupPosition(-1000, -1000);
                 _formPanel.submit();
+
+                _loadingPanel = new PopupPanel();
+                final FlowPanel flowPanel = new FlowPanel();
+                flowPanel.add(new Image(IMAGES.loading32x32()));
+                flowPanel.add(new Label("Importing..."));
+                _loadingPanel.setWidget(flowPanel);
+                _loadingPanel.center();
             }
         };
         dialogBox.center();
@@ -279,5 +291,6 @@ public class Admin implements EntryPoint {
 
     public void whenApplicationsChanged() {
         refreshNavigation(_applicationsView);
+        _applicationsView.refreshData();
     }
 }
