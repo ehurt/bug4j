@@ -24,6 +24,7 @@ import org.bug4j.gwt.user.client.data.Strain;
 import org.bug4j.server.store.Store;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -58,7 +59,13 @@ public final class BugProcessor {
                 final List<String> appPackages = store.getPackages(app);
                 final StackAnalyzer stackAnalyzer = new StackAnalyzer();
                 stackAnalyzer.setApplicationPackages(appPackages);
-                final String title = stackAnalyzer.getTitle(stackLines);
+
+                String title = stackAnalyzer.getTitle(stackLines);
+                if (title == null) { // This may happen if the stack does not contain any of the application packages.
+                    // Try again without application packages
+                    stackAnalyzer.setApplicationPackages(Collections.<String>emptyList());
+                    title = stackAnalyzer.getTitle(stackLines);
+                }
 
                 if (title == null) {
                     throw new IllegalStateException("Failed to analyze a stack [\n" + stackText + "\n]");

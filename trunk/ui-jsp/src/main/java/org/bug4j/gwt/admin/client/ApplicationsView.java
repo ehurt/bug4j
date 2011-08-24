@@ -143,7 +143,7 @@ public class ApplicationsView extends AdminView {
         return cellTable;
     }
 
-    private void refreshData() {
+    void refreshData() {
         CommonService.App.getInstance().getApplications(new AsyncCallback<List<String>>() {
             @Override
             public void onFailure(Throwable caught) {
