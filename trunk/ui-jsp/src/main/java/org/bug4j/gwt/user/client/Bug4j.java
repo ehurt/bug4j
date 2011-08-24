@@ -213,13 +213,6 @@ public class Bug4j implements EntryPoint {
                 popupPanel.hide();
             }
         });
-        popup.addItem("Import", new Command() {
-            @Override
-            public void execute() {
-                whenImport();
-                popupPanel.hide();
-            }
-        }).setEnabled(false);
         popup.addSeparator();
         popup.addItem("Logout", new Command() {
             @Override
@@ -306,10 +299,6 @@ public class Bug4j implements EntryPoint {
                 setApplication(appName);
             }
         });
-    }
-
-    private void whenImport() {
-        Window.alert("Not implemented yet");
     }
 
     private void whenExport() {
