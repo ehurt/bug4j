@@ -33,7 +33,7 @@ public final class BugProcessor {
     /**
      * When trying to match by title, how many stacks we want to look at.
      */
-    private static final int MATCH_BY_TITLE_LOOK_BACK_MAX = 5;
+    private static final int MATCH_BY_TITLE_LOOK_BACK_MAX = 1;
 
     private BugProcessor() {
     }
