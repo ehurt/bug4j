@@ -27,7 +27,7 @@
     <path id="project.class.path">
         <path refid="jetbrains.annotations.lib"/>
         <path refid="log4j.lib"/>
-        <path refid="httpcomponents-client"/>
+        <path refid="httpcomponents-client.lib"/>
         <pathelement location="${production.output}/common"/>
     </path>
 

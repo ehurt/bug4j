@@ -33,6 +33,7 @@
         <path refid="commons-logging.lib"/>
         <path refid="gwt-server.lib"/>
         <path refid="gwt-visualization.lib"/>
+        <path refid="httpcomponents-client.lib"/>
         <path refid="log4j.lib"/>
         <path refid="spring-framework.lib"/>
         <path refid="spring-security.lib"/>
