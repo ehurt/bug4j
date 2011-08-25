@@ -19,6 +19,7 @@
           <element id="library" level="project" name="log4j" />
           <element id="library" level="project" name="apache-derby" />
           <element id="library" level="project" name="apache-commons-lang" />
+          <element id="library" level="project" name="httpcomponents-client" />
         </element>
       </element>
       <element id="gwt-compiler-output" facet="ui-jsp/gwt/GWT" />

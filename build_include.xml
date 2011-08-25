@@ -71,7 +71,7 @@
         </filelist>
     </path>
 
-    <path id="httpcomponents-client">
+    <path id="httpcomponents-client.lib">
         <filelist dir="${dep-home}/httpcomponents-client-4.1.1/lib">
             <file name="commons-logging-1.1.1.jar"/>
             <file name="httpclient-4.1.1.jar"/>

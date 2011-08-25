@@ -68,6 +68,7 @@
     <orderEntry type="library" name="spring-security" level="project" />
     <orderEntry type="library" name="apache-commons-logging" level="project" />
     <orderEntry type="library" name="apache-commons-lang" level="project" />
+    <orderEntry type="library" name="httpcomponents-client" level="project" />
   </component>
 </module>
 

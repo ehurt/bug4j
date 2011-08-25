@@ -23,7 +23,7 @@
             <fileset dir="client/src/main/java/"/>
         </zip>
         <copy todir="${dist}/client/lib">
-            <path refid="httpcomponents-client"/>
+            <path refid="httpcomponents-client.lib"/>
             <path refid="log4j.lib"/>
         </copy>
     </target>
