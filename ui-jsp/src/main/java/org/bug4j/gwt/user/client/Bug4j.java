@@ -24,7 +24,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.layout.client.Layout;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
@@ -156,6 +155,14 @@ public class Bug4j implements EntryPoint {
 
     private Widget buildNorthWidget() {
         final Image image = new Image(IMAGES.littleSplat());
+        image.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                final String url = GWT.getHostPageBaseURL();
+                Window.open(url, "_self", "");
+            }
+        });
+        image.getElement().getStyle().setCursor(Style.Cursor.POINTER);
 
         _applicationLabel = new Label("");
         _applicationLabel.setStylePrimaryName("headerDropDown");
@@ -174,17 +181,15 @@ public class Bug4j implements EntryPoint {
             }
         });
 
+        final DockLayoutPanel ret = new DockLayoutPanel(Style.Unit.EM);
         final FlowPanel flowPanel = new FlowPanel();
+        flowPanel.getElement().getStyle().setProperty("text-align", "right");
         flowPanel.add(_applicationLabel);
         flowPanel.add(_userLabel);
 
-        final LayoutPanel layoutPanel = new LayoutPanel();
-        layoutPanel.add(image);
-        layoutPanel.add(flowPanel);
-
-        layoutPanel.setWidgetLeftWidth(image, 0, Style.Unit.PX, 110, Style.Unit.PX);
-        layoutPanel.setWidgetHorizontalPosition(flowPanel, Layout.Alignment.END);
-        return layoutPanel;
+        ret.addEast(flowPanel, 100);
+        ret.add(image);
+        return ret;
     }
 
     private void whenUserClicked(Label userLabel) {
