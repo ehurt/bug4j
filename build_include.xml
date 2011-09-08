@@ -10,10 +10,10 @@
     <tstamp>
         <format property="snapshot-timestamp" pattern="yyyyMMdd"/>
     </tstamp>
+    <property name="bug4j-release-name" value="bug4j-0.0.2-SNAPSHOT-${snapshot-timestamp}"/>
     <!--
-        <property name="bug4j-release-name" value="bug4j-0.0.1-SNAPSHOT-${snapshot-timestamp}"/>
+        <property name="bug4j-release-name" value="bug4j-0.0.2"/>
     -->
-    <property name="bug4j-release-name" value="bug4j-0.0.2"/>
 
     <path id="commons-io.lib">
         <filelist dir="${dep-home}/commons-io-2.0.1">
