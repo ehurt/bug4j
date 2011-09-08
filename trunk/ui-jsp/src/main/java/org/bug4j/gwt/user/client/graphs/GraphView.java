@@ -21,32 +21,29 @@ import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
-import org.bug4j.gwt.user.client.Bug4j;
+import org.bug4j.gwt.user.client.BugModel;
 import org.bug4j.gwt.user.client.bugs.DisplaysBugs;
 import org.bug4j.gwt.user.client.util.PropertyListener;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class GraphView implements DisplaysBugs {
-    protected final Bug4j _bug4j;
     private SimpleLayoutPanel _simpleLayoutPanel;
     private final Label _anchor;
+    protected final BugModel _bugModel;
 
-    public GraphView(Bug4j bug4j, String label) {
-        _bug4j = bug4j;
+    public GraphView(BugModel bugModel, String label) {
+        _bugModel = bugModel;
         _anchor = createAnchor(label);
-        _bug4j.addPropertyListener(new PropertyListener<String>() {
+        bugModel.addPropertyListener(new PropertyListener() {
             @Override
-            public void propertyChanged(String key, @Nullable String value) {
-                if (PropertyListener.APPLICATION.equals(key)) {
-                    whenBugListChanges();
+            public void propertyChanged(String key, @Nullable Object oldValue, @Nullable Object newValue) {
+                if (APPLICATION.equals(key)) {
+                    addOrReplaceGraph();
+                } else if (BUG_LIST.equals(key)) {
+                    addOrReplaceGraph();
                 }
             }
         });
-    }
-
-    @Override
-    public final Bug4j getBug4J() {
-        return _bug4j;
     }
 
     public Label getAnchor() {
@@ -88,10 +85,5 @@ public abstract class GraphView implements DisplaysBugs {
 
     @Override
     public final void redisplay() {
-    }
-
-    @Override
-    public final void whenBugListChanges() {
-        addOrReplaceGraph();
     }
 }

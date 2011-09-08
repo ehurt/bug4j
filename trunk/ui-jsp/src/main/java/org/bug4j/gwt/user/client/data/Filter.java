@@ -22,6 +22,7 @@ import java.io.Serializable;
 
 public class Filter implements Serializable {
     private String _title;
+    private Long _bugId;
     private Integer _hitWithinDays = 7;
     private boolean _reportedByMultiple = false;
 
@@ -70,6 +71,14 @@ public class Filter implements Serializable {
 
     public void setTitle(@Nullable String title) {
         _title = title;
+    }
+
+    public Long getBugId() {
+        return _bugId;
+    }
+
+    public void setBugId(Long bugId) {
+        _bugId = bugId;
     }
 
     public boolean isReportedByMultiple() {

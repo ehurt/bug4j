@@ -31,31 +31,34 @@ import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
-import org.bug4j.gwt.user.client.Bug4j;
 import org.bug4j.gwt.user.client.Bug4jService;
+import org.bug4j.gwt.user.client.BugModel;
 import org.bug4j.gwt.user.client.data.Bug;
 import org.bug4j.gwt.user.client.data.Filter;
 import org.bug4j.gwt.user.client.util.PropertyListener;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class BugView implements DisplaysBugs {
 
     private static final int PAGE_SIZE = 100;
+    private final BugModel _bugModel;
     private SingleSelectionModel<Bug> _selectionModel;
     private BugDetailView _bugDetailView;
     private CellTable<Bug> _cellTable;
     private final Filter _filter = new Filter();
     private MenuItem _filterMenuItem;
-    private final Bug4j _bug4j;
     private Bug _lastSelectedBug;
 
-    public BugView(Bug4j bug4j) {
-        _bug4j = bug4j;
-        _bug4j.addPropertyListener(new PropertyListener<String>() {
+    public BugView(BugModel bugModel) {
+        _bugModel = bugModel;
+        bugModel.addPropertyListener(new PropertyListener() {
             @Override
-            public void propertyChanged(String key, String value) {
-                if ("packages".equals(key)) {
+            public void propertyChanged(String key, @Nullable Object oldValue, @Nullable Object newValue) {
+                if (PropertyListener.APPLICATION.equals(key)) {
+                    refreshBugs();
+                } else if (PropertyListener.BUG_LIST.equals(key)) {
                     refreshBugs();
                 }
             }
@@ -73,7 +76,6 @@ public class BugView implements DisplaysBugs {
                 refreshBugs();
             }
         });
-
     }
 
     public Widget createWidget() {
@@ -93,7 +95,7 @@ public class BugView implements DisplaysBugs {
 
         dockLayoutPanel.add(scrollPanel);
 
-        _bugDetailView = new BugDetailView(this);
+        _bugDetailView = new BugDetailView(_bugModel);
 
         final SplitLayoutPanel splitLayoutPanel = new SplitLayoutPanel(5);
         splitLayoutPanel.addWest(dockLayoutPanel, 600);
@@ -130,15 +132,6 @@ public class BugView implements DisplaysBugs {
 
     private void updateFilterMenuItem() {
         _filterMenuItem.setText("Filter" + (_filter.isFiltering() ? "*" : ""));
-    }
-
-    public void whenBugListChanges() {
-        refreshBugs();
-    }
-
-    @Override
-    public Bug4j getBug4J() {
-        return _bug4j;
     }
 
     @Override
@@ -198,7 +191,7 @@ public class BugView implements DisplaysBugs {
         if (_cellTable != null && _selectionModel != null) {
             final ColumnSortList sortList = _cellTable.getColumnSortList();
             final String sortBy = BugViewColumn.sortBy(sortList);
-            final String application = _bug4j.getApplication();
+            final String application = _bugModel.getApplication();
             if (application != null) {
                 Bug4jService.App.getInstance().getBugs(application, _filter, sortBy, new AsyncCallback<List<Bug>>() {
                     @Override

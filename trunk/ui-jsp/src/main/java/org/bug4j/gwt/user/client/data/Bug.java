@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.Serializable;
 
 public class Bug implements Serializable {
+    private String _app;
     private long _id;
     private String _title;
     private int _hitCount;
@@ -32,13 +33,15 @@ public class Bug implements Serializable {
     public Bug() {
     }
 
-    public Bug(long id, String title, int hitCount) {
+    public Bug(String app, long id, String title, int hitCount) {
+        _app = app;
         _id = id;
         _title = title;
         _hitCount = hitCount;
     }
 
-    public Bug(long id, String title, int hitCount, long maxHit, Long lastReadHit) {
+    public Bug(String app, long id, String title, int hitCount, long maxHit, Long lastReadHit) {
+        _app = app;
         _id = id;
         _title = title;
         _hitCount = hitCount;
@@ -49,6 +52,10 @@ public class Bug implements Serializable {
     @Override
     public String toString() {
         return _id + "-" + _title;
+    }
+
+    public String getApp() {
+        return _app;
     }
 
     public long getId() {

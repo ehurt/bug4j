@@ -28,8 +28,8 @@ import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.LegendPosition;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
-import org.bug4j.gwt.user.client.Bug4j;
 import org.bug4j.gwt.user.client.Bug4jService;
+import org.bug4j.gwt.user.client.BugModel;
 import org.bug4j.gwt.user.client.bugs.DisplaysBugs;
 import org.bug4j.gwt.user.client.data.BugCountByDate;
 
@@ -40,13 +40,13 @@ import static com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
 
 public class AllTimeBugsGraphView extends GraphView implements DisplaysBugs {
 
-    public AllTimeBugsGraphView(Bug4j bug4j) {
-        super(bug4j, "Number of hits per day");
+    public AllTimeBugsGraphView(BugModel bugModel) {
+        super(bugModel, "Number of hits per day");
     }
 
     protected void addOrReplaceGraph() {
         try {
-            final String application = _bug4j.getApplication();
+            final String application = _bugModel.getApplication();
             if (application != null) {
                 Bug4jService.App.getInstance().getBugCountByDate(application, new AsyncCallback<List<BugCountByDate>>() {
                     @Override

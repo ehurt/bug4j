@@ -34,13 +34,15 @@ import org.bug4j.gwt.common.client.CommonService;
 import org.bug4j.gwt.common.client.Resources;
 import org.bug4j.gwt.common.client.data.AppPkg;
 import org.bug4j.gwt.common.client.data.UserAuthorities;
+import org.bug4j.gwt.user.client.bugs.BugDetailView;
 import org.bug4j.gwt.user.client.bugs.BugView;
+import org.bug4j.gwt.user.client.data.Bug;
+import org.bug4j.gwt.user.client.data.Filter;
 import org.bug4j.gwt.user.client.graphs.TopGraphView;
 import org.bug4j.gwt.user.client.settings.UserDialog;
 import org.bug4j.gwt.user.client.util.PropertyListener;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -48,10 +50,8 @@ import java.util.List;
  */
 public class Bug4j implements EntryPoint {
     public static final Resources IMAGES = GWT.create(Resources.class);
-    private static List<AppPkg> _appPackages;
+    private final BugModel _bugModel = new BugModel();
     private UserAuthorities _userAuthorities;
-    private String _application;
-    private final List<PropertyListener<String>> _propertyListeners = new ArrayList<PropertyListener<String>>();
     private Label _applicationLabel;
     private Label _userLabel = new Label("");
 
@@ -69,7 +69,27 @@ public class Bug4j implements EntryPoint {
             public void onSuccess(UserAuthorities userAuthorities) {
                 try {
                     setUserAuthorities(userAuthorities);
-                    initialize();
+                    Bug4jService.App.getInstance().getDefaultApplication(new AsyncCallback<String>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            fail();
+                        }
+
+                        @Override
+                        public void onSuccess(final String appName) {
+                            setApplication(appName, new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    fail();
+                                }
+
+                                @Override
+                                public void onSuccess(Void result) {
+                                    initialize();
+                                }
+                            });
+                        }
+                    });
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -77,76 +97,105 @@ public class Bug4j implements EntryPoint {
         });
     }
 
+    private void fail() {
+        Window.alert("Server failure");
+    }
+
     private void initialize() {
         final DockLayoutPanel dockLayoutPanel = new DockLayoutPanel(Style.Unit.PX);
         final Widget northWidget = buildNorthWidget();
         dockLayoutPanel.addNorth(northWidget, 35);
 
-        final TabLayoutPanel bugPanel = new TabLayoutPanel(2, Style.Unit.EM);
-        final BugView bugView = new BugView(this);
-        final TopGraphView topGraphView = new TopGraphView(this);
+        Long bugId = getBugIdParam();
+        if (bugId == null) {
+            createTabbedContent(dockLayoutPanel);
+        } else {
+            createOneBugContent(dockLayoutPanel, bugId);
+        }
+
+        RootLayoutPanel.get().add(dockLayoutPanel);
+        final Element loadingElement = DOM.getElementById("loading");
+        DOM.removeChild(DOM.getParent(loadingElement), loadingElement);
+
+        _bugModel.addPropertyListener(new PropertyListener() {
+            @Override
+            public void propertyChanged(String key, @Nullable Object oldValue, @Nullable Object newValue) {
+                if (APPLICATION.equals(key)) {
+                    updateAppButtonText();
+                }
+            }
+        });
+    }
+
+    private static Long getBugIdParam() {
+        Long bugId = null;
+        final String bug = Window.Location.getParameter("bug");
+        if (bug != null) {
+            try {
+                bugId = Long.parseLong(bug);
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        return bugId;
+    }
+
+    private void createOneBugContent(DockLayoutPanel dockLayoutPanel, long bugId) {
+        final BugDetailView bugDetailView = new BugDetailView(_bugModel);
+        final Widget widget = bugDetailView.createWidget();
+        dockLayoutPanel.add(widget);
+
+        final Filter filter = new Filter();
+        filter.setBugId(bugId);
+        Bug4jService.App.getInstance().getBugs(null, filter, "", new AsyncCallback<List<Bug>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                fail();
+            }
+
+            @Override
+            public void onSuccess(List<Bug> result) {
+                if (!result.isEmpty()) {
+                    final Bug bug = result.get(0);
+                    final String app = bug.getApp();
+                    setApplication(app, null);
+                    bugDetailView.displayBug(filter, bug);
+                }
+            }
+        });
+    }
+
+    private void createTabbedContent(DockLayoutPanel dockLayoutPanel) {
+        final TabLayoutPanel tabLayoutPanel = new TabLayoutPanel(2, Style.Unit.EM);
+        final BugView bugView = new BugView(_bugModel);
+        final TopGraphView topGraphView = new TopGraphView(_bugModel);
 
         final Widget bugViewWidget = bugView.createWidget();
         final Widget topGraphViewWidget = topGraphView.createWidget();
-        bugPanel.add(bugViewWidget, "Bugs");
-        bugPanel.add(topGraphViewWidget, "Charts");
+        tabLayoutPanel.add(bugViewWidget, "Bugs");
+        tabLayoutPanel.add(topGraphViewWidget, "Charts");
 
-        bugPanel.addSelectionHandler(new SelectionHandler<Integer>() {
+        // Refresh the data when the tab selection changes
+        tabLayoutPanel.addSelectionHandler(new SelectionHandler<Integer>() {
             @Override
             public void onSelection(SelectionEvent<Integer> integerSelectionEvent) {
-                final int selectedItem = integerSelectionEvent.getSelectedItem();
-                switch (selectedItem) {
-                    case 0:
-                        bugView.whenBugListChanges();
-                        break;
-                    case 1:
-                        topGraphView.whenBugListChanges();
-                        break;
-                }
+                _bugModel.firePropertyChange(PropertyListener.BUG_LIST, null, null);
             }
         });
 
         // TODO: Find a better fix
         if (getUserAgent().contains("msie")) {
             // IE bug: The bug title does not appear (tested in ie8)
-            bugPanel.selectTab(1);
+            tabLayoutPanel.selectTab(1);
             final Scheduler scheduler = Scheduler.get();
             scheduler.scheduleDeferred(new Scheduler.ScheduledCommand() {
                 @Override
                 public void execute() {
-                    bugPanel.selectTab(0);
+                    tabLayoutPanel.selectTab(0);
                 }
             });
         }
 
-        dockLayoutPanel.add(bugPanel);
-
-        RootLayoutPanel.get().add(dockLayoutPanel);
-        final Element loadingElement = DOM.getElementById("loading");
-        DOM.removeChild(DOM.getParent(loadingElement), loadingElement);
-
-        Bug4jService.App.getInstance().getDefaultApplication(new AsyncCallback<String>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert("Failed to retrieve the default application");
-            }
-
-            @Override
-            public void onSuccess(String appName) {
-                setApplication(appName);
-                CommonService.App.getInstance().getUserName(new AsyncCallback<String>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        Window.alert("Failed to retrieve the user name");
-                    }
-
-                    @Override
-                    public void onSuccess(String userName) {
-                        setUserName(userName);
-                    }
-                });
-            }
-        });
+        dockLayoutPanel.add(tabLayoutPanel);
     }
 
     public static native String getUserAgent() /*-{
@@ -158,7 +207,10 @@ public class Bug4j implements EntryPoint {
         image.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                final String url = GWT.getHostPageBaseURL();
+                final String url = Window.Location
+                        .createUrlBuilder()
+                        .removeParameter("bug")
+                        .buildString();
                 Window.open(url, "_self", "");
             }
         });
@@ -172,6 +224,7 @@ public class Bug4j implements EntryPoint {
                 whenAppClicked(_applicationLabel);
             }
         });
+        updateAppButtonText();
 
         _userLabel.setStylePrimaryName("headerDropDown");
         _userLabel.addClickHandler(new ClickHandler() {
@@ -183,11 +236,11 @@ public class Bug4j implements EntryPoint {
 
         final DockLayoutPanel ret = new DockLayoutPanel(Style.Unit.EM);
         final FlowPanel flowPanel = new FlowPanel();
-        flowPanel.getElement().getStyle().setProperty("text-align", "right");
+        flowPanel.setStyleName("headerMenuPanel");
         flowPanel.add(_applicationLabel);
         flowPanel.add(_userLabel);
 
-        ret.addEast(flowPanel, 100);
+        ret.addEast(flowPanel, 30);
         ret.add(image);
         return ret;
     }
@@ -301,14 +354,14 @@ public class Bug4j implements EntryPoint {
 
             @Override
             public void onSuccess(Void result) {
-                setApplication(appName);
+                setApplication(appName, null);
             }
         });
     }
 
     private void whenExport() {
         final String moduleBaseURL = GWT.getModuleBaseURL();
-        final String application = getApplication();
+        final String application = _bugModel.getApplication();
         if (application != null) {
             Window.open(moduleBaseURL + "../user/download?a=" + application, "_self", "");
         }
@@ -318,65 +371,25 @@ public class Bug4j implements EntryPoint {
         Window.open("j_spring_security_logout", "_self", "");
     }
 
-    public synchronized void withAppPackages(final AsyncCallback<List<AppPkg>> asyncCallback) {
-        if (_appPackages == null) {
-            CommonService.App.getInstance().getPackages(_application, new AsyncCallback<List<AppPkg>>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    asyncCallback.onFailure(caught);
-                }
-
-                @Override
-                public void onSuccess(List<AppPkg> result) {
-                    _appPackages = result;
-                    asyncCallback.onSuccess(_appPackages);
-                }
-            });
-        } else {
-            asyncCallback.onSuccess(_appPackages);
-        }
-    }
-
-    public String getApplication() {
-        return _application;
-    }
-
-    public void setApplication(final String application) {
-        if (_application == null || !_application.equals(application)) {
-            _application = application;
-            updateAppButtonText();
-            refreshPackages();
-            firePropertyChange(PropertyListener.APPLICATION, application);
-        }
-    }
-
-    private void refreshPackages() {
-        CommonService.App.getInstance().getPackages(_application, new AsyncCallback<List<AppPkg>>() {
+    private void setApplication(final String appName, @Nullable final AsyncCallback<Void> asyncCallback) {
+        CommonService.App.getInstance().getPackages(appName, new AsyncCallback<List<AppPkg>>() {
             @Override
             public void onFailure(Throwable caught) {
-                Window.alert(caught.getMessage());
+                if (asyncCallback == null) {
+                    fail();
+                } else {
+                    asyncCallback.onFailure(caught);
+                }
             }
 
             @Override
-            public void onSuccess(List<AppPkg> result) {
-                setPackages(result);
+            public void onSuccess(List<AppPkg> appPkgs) {
+                _bugModel.setApplication(appName, appPkgs);
+                if (asyncCallback != null) {
+                    asyncCallback.onSuccess(null);
+                }
             }
         });
-    }
-
-    private void setPackages(List<AppPkg> result) {
-        _appPackages = result;
-        firePropertyChange(PropertyListener.PACKAGES, null);
-    }
-
-    private void firePropertyChange(String property, @Nullable String value) {
-        for (PropertyListener<String> applicationListener : _propertyListeners) {
-            applicationListener.propertyChanged(property, value);
-        }
-    }
-
-    public void addPropertyListener(PropertyListener<String> listener) {
-        _propertyListeners.add(listener);
     }
 
     private void setUserName(String userName) {
@@ -385,7 +398,8 @@ public class Bug4j implements EntryPoint {
     }
 
     private void updateAppButtonText() {
-        _applicationLabel.setText(_application == null ? "< No Application >" : _application);
+        final String application = _bugModel.getApplication();
+        _applicationLabel.setText(application == null ? "< No Application >" : application);
     }
 
     public UserAuthorities getUserAuthorities() {

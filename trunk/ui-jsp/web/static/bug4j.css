@@ -176,6 +176,10 @@ div#main {
     background-color: #a9a9a9;
 }
 
+.headerMenuPanel {
+    text-align: right;
+}
+
 .topGraphView-label {
     padding-left: 11px;
     cursor: pointer;
