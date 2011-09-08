@@ -165,7 +165,7 @@ public class Bug4j implements EntryPoint {
                     final Bug bug = result.get(0);
                     final String app = bug.getApp();
                     setApplication(app, null);
-                    bugDetailView.displayBug(filter, bug);
+                    bugDetailView.displayBug(bug);
                 }
             }
         });

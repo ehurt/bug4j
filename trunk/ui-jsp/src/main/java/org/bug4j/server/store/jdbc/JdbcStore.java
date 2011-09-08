@@ -472,15 +472,11 @@ public class JdbcStore extends Store {
     }
 
     @Override
-    public List<BugHit> getHits(long bugId, @Nullable Filter filter, int offset, int max, String orderBy) {
+    public List<BugHit> getHits(long bugId, int offset, int max, String orderBy) {
         final List<BugHit> ret = new ArrayList<BugHit>();
         final Connection connection = getConnection();
         try {
             StringBuilder sql = new StringBuilder("select H.HIT_ID,H.APP_VER,H.DATE_REPORTED,H.REPORTED_BY from HIT H WHERE H.BUG_ID=:bugId\n");
-            final boolean hasHitWithinDays = filter != null && filter.hasHitWithinDays();
-            if (hasHitWithinDays) {
-                sql.append(" AND H.DATE_REPORTED > :hitDateMin");
-            }
             String sep = " order by ";
             for (int i = 0; i < orderBy.length(); i++) {
                 final char c = orderBy.charAt(i);
@@ -498,11 +494,6 @@ public class JdbcStore extends Store {
             final PreparedStatement preparedStatement = connection.prepareStatement(jdbcSql);
 
             namedParameterProcessor.setParameter(preparedStatement, "bugId", bugId);
-            if (hasHitWithinDays) {
-                final Integer hitWithinDays = filter.getHitWithinDays();
-                final Timestamp timestamp = getPrevDaysTimestamp(hitWithinDays);
-                namedParameterProcessor.setParameter(preparedStatement, "hitDateMin", timestamp);
-            }
             try {
                 final ResultSet resultSet = preparedStatement.executeQuery();
                 try {

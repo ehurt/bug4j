@@ -40,7 +40,7 @@ public interface Bug4jService extends RemoteService {
 
     void deleteBug(long bugId) throws Exception;
 
-    List<BugHit> getHits(long bugId, Filter filter, int offset, int max, String orderBy) throws Exception;
+    List<BugHit> getHits(long bugId, int offset, int max, String orderBy) throws Exception;
 
     Map<Bug, int[]> getTopHits(String app, int daysBack, int max) throws Exception;
 

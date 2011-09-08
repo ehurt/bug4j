@@ -44,7 +44,7 @@ public abstract class Store {
     /**
      * @param orderBy i[d], a[pplication version] or d[ate reported], lowercase=ascending
      */
-    public abstract List<BugHit> getHits(long bugId, @Nullable Filter filter, int offset, int max, String orderBy);
+    public abstract List<BugHit> getHits(long bugId, int offset, int max, String orderBy);
 
     public abstract void fetchHits(long bugId, HitsCallback hitsCallback);
 
