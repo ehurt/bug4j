@@ -55,6 +55,13 @@ public class Bug4j implements EntryPoint {
     private Label _applicationLabel;
     private Label _userLabel = new Label("");
 
+    public static String createBugLink(long bugId) {
+        return Window.Location
+                .createUrlBuilder()
+                .setParameter("bug", Long.toString(bugId))
+                .buildString();
+    }
+
     /**
      * This is the entry point method.
      */
