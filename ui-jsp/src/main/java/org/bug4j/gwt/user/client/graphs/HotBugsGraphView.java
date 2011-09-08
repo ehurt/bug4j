@@ -31,8 +31,8 @@ import com.google.gwt.visualization.client.Selection;
 import com.google.gwt.visualization.client.events.SelectHandler;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
-import org.bug4j.gwt.user.client.Bug4j;
 import org.bug4j.gwt.user.client.Bug4jService;
+import org.bug4j.gwt.user.client.BugModel;
 import org.bug4j.gwt.user.client.bugs.DisplaysBugs;
 import org.bug4j.gwt.user.client.data.Bug;
 
@@ -52,14 +52,14 @@ public class HotBugsGraphView extends GraphView implements DisplaysBugs {
     private LineChart _lineChart;
     private final List<Bug> _bugs = new ArrayList<Bug>();
 
-    public HotBugsGraphView(Bug4j bug4j) {
-        super(bug4j, "Top bugs");
+    public HotBugsGraphView(BugModel bugModel) {
+        super(bugModel, "Top bugs");
     }
 
     @Override
     protected void addOrReplaceGraph() {
         try {
-            final String application = _bug4j.getApplication();
+            final String application = _bugModel.getApplication();
             if (application != null) {
                 Bug4jService.App.getInstance().getTopHits(application, DAYS_BACK, MAX_BUGS, new AsyncCallback<Map<Bug, int[]>>() {
                     @Override

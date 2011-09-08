@@ -16,14 +16,12 @@
 
 package org.bug4j.gwt.user.client.util;
 
-import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.Nullable;
 
-public interface PropertyListener<T> {
-    @NonNls
+public interface PropertyListener {
     String APPLICATION = "application";
-    @NonNls
-    String PACKAGES = "packages";
+    String BUG_LIST = "bug-list";
+    String BUG_PROPERTIES = "bug-properties";
 
-    void propertyChanged(String key, @Nullable T value);
+    void propertyChanged(String key, @Nullable Object oldValue, @Nullable Object newValue);
 }

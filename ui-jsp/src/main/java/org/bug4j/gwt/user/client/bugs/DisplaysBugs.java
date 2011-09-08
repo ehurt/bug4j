@@ -16,12 +16,6 @@
 
 package org.bug4j.gwt.user.client.bugs;
 
-import org.bug4j.gwt.user.client.Bug4j;
-
 public interface DisplaysBugs {
-    void whenBugListChanges();
-
-    Bug4j getBug4J();
-
     void redisplay();
 }

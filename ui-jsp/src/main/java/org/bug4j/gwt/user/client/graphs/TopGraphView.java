@@ -19,16 +19,16 @@ package org.bug4j.gwt.user.client.graphs;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
-import org.bug4j.gwt.user.client.Bug4j;
+import org.bug4j.gwt.user.client.BugModel;
 import org.bug4j.gwt.user.client.bugs.DisplaysBugs;
 
 public class TopGraphView implements DisplaysBugs {
-    private final Bug4j _bug4j;
     private SimpleLayoutPanel _simpleLayoutPanel;
     private GraphView _graphView;
+    private final BugModel _bugModel;
 
-    public TopGraphView(Bug4j bug4j) {
-        _bug4j = bug4j;
+    public TopGraphView(BugModel bugModel) {
+        _bugModel = bugModel;
     }
 
     public Widget createWidget() {
@@ -42,8 +42,8 @@ public class TopGraphView implements DisplaysBugs {
     private Widget buildNavigationWidget() {
         final FlowPanel ret = new FlowPanel();
         final GraphView[] graphViews = {
-                new HotBugsGraphView(_bug4j),
-                new AllTimeBugsGraphView(_bug4j)
+                new HotBugsGraphView(_bugModel),
+                new AllTimeBugsGraphView(_bugModel)
         };
         for (final GraphView graphView : graphViews) {
             final Label anchor = graphView.getAnchor();
@@ -77,18 +77,6 @@ public class TopGraphView implements DisplaysBugs {
             final Label anchor = _graphView.getAnchor();
             anchor.setStyleDependentName("selected", true);
         }
-    }
-
-    @Override
-    public void whenBugListChanges() {
-        if (_graphView != null) {
-            _graphView.whenBugListChanges();
-        }
-    }
-
-    @Override
-    public Bug4j getBug4J() {
-        return _bug4j;
     }
 
     @Override

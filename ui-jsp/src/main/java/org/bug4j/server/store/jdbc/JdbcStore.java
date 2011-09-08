@@ -18,6 +18,7 @@ package org.bug4j.server.store.jdbc;
 
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.bug4j.gwt.admin.client.data.User;
 import org.bug4j.gwt.common.client.data.UserException;
@@ -263,20 +264,32 @@ public class JdbcStore extends Store {
                     "        b.title," +
                     "        COUNT(h.hit_id) AS hit_count," +
                     "        MAX(h.hit_id) AS hit_max," +
-                    "        ur.last_hit_id" +
+                    "        ur.last_hit_id," +
+                    "        b.app" +
                     "  FROM bug b" +
                     "    LEFT OUTER JOIN hit h ON b.bug_id = h.bug_id" +
-                    "    LEFT OUTER JOIN user_read ur ON b.bug_id = ur.bug_id AND ur.user_name=:userName" +
-                    "  WHERE b.app = :app");
+                    "    LEFT OUTER JOIN user_read ur ON b.bug_id = ur.bug_id AND ur.user_name=:userName"
+            );
 
+            final List<String> conditions = new ArrayList<String>();
+            if (app != null) {
+                conditions.add("b.app = :app");
+            }
             if (filter.hasHitWithinDays()) {
-                sql.append(" AND h.date_reported > :hitDateMin");
+                conditions.add("h.date_reported > :hitDateMin");
             }
             if (filter.hasTitle()) {
-                sql.append(" AND upper(b.title) like :titleFilter");
+                conditions.add("upper(b.title) like :titleFilter");
+            }
+            if (filter.getBugId() != null) {
+                conditions.add("b.bug_id=:bugId");
+            }
+            if (!conditions.isEmpty()) {
+                final String whereClause = StringUtils.join(conditions, " AND ");
+                sql.append(" WHERE ").append(whereClause);
             }
 
-            sql.append("  GROUP BY b.bug_id, b.title,ur.last_hit_id");
+            sql.append("  GROUP BY b.app,b.bug_id, b.title,ur.last_hit_id");
 
             sql.append("  HAVING COUNT(h.hit_id) > 0");
             if (filter.isReportedByMultiple()) {
@@ -301,16 +314,25 @@ public class JdbcStore extends Store {
 
             final String jdbcSql = namedParameterProcessor.getJdbcSql();
             final PreparedStatement preparedStatement = connection.prepareStatement(jdbcSql);
-            namedParameterProcessor.setParameter(preparedStatement, "app", app);
+            if (app != null) {
+                namedParameterProcessor.setParameter(preparedStatement, "app", app);
+            }
             namedParameterProcessor.setParameter(preparedStatement, "userName", userName);
+
             if (filter.hasHitWithinDays()) {
                 final Integer hitWithinDays = filter.getHitWithinDays();
                 final Timestamp timestamp = getPrevDaysTimestamp(hitWithinDays);
                 namedParameterProcessor.setParameter(preparedStatement, "hitDateMin", timestamp);
             }
+
             if (filter.hasTitle()) {
                 namedParameterProcessor.setParameter(preparedStatement, "titleFilter", "%" + filter.getTitle().toUpperCase() + "%");
             }
+
+            if (filter.getBugId() != null) {
+                namedParameterProcessor.setParameter(preparedStatement, "bugId", filter.getBugId());
+            }
+
             try {
                 final ResultSet resultSet = preparedStatement.executeQuery();
                 try {
@@ -327,7 +349,8 @@ public class JdbcStore extends Store {
                         if (resultSet.wasNull()) {
                             lastReadHit = null;
                         }
-                        final Bug bug = new Bug(bugId, title, hitCount, maxHit, lastReadHit);
+                        final String bugApp = resultSet.getString(6);
+                        final Bug bug = new Bug(bugApp, bugId, title, hitCount, maxHit, lastReadHit);
                         ret.add(bug);
                     }
                 } finally {
@@ -1281,7 +1304,7 @@ public class JdbcStore extends Store {
                     final long bugId = resultSet.getLong(1);
                     final String title = resultSet.getString(2);
                     final int count = resultSet.getInt(3);
-                    final Bug bug = new Bug(bugId, title, count);
+                    final Bug bug = new Bug(app, bugId, title, count);
                     ret.add(bug);
                 }
             } finally {

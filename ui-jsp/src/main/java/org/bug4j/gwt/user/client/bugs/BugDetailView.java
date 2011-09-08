@@ -27,21 +27,21 @@ import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.*;
 import org.bug4j.common.TextToLines;
 import org.bug4j.gwt.common.client.data.AppPkg;
-import org.bug4j.gwt.user.client.Bug4j;
 import org.bug4j.gwt.user.client.Bug4jService;
+import org.bug4j.gwt.user.client.BugModel;
 import org.bug4j.gwt.user.client.data.Bug;
 import org.bug4j.gwt.user.client.data.BugHit;
 import org.bug4j.gwt.user.client.data.BugHitAndStack;
 import org.bug4j.gwt.user.client.data.Filter;
+import org.bug4j.gwt.user.client.util.PropertyListener;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-class BugDetailView {
+public class BugDetailView {
 
     private static final int PAGE_SIZE = 200;
-    private final DisplaysBugs _displaysBugs;
-    private Label _label;
+    private Anchor _anchor;
     private HTML _stack;
     private CellTable<BugHit> _cellTable;
     private Filter _filter;
@@ -72,9 +72,10 @@ class BugDetailView {
         }
     };
     private SingleSelectionModel<BugHit> _selectionModel;
+    private final BugModel _bugModel;
 
-    public BugDetailView(DisplaysBugs displaysBugs) {
-        _displaysBugs = displaysBugs;
+    public BugDetailView(BugModel bugModel) {
+        _bugModel = bugModel;
     }
 
     public Widget createWidget() {
@@ -146,7 +147,7 @@ class BugDetailView {
                 _unreadHits.remove(previousHitId);
                 if (_unreadHits.isEmpty()) {
                     _bug.setRead(true);
-                    _displaysBugs.redisplay();
+                    _bugModel.firePropertyChange(PropertyListener.BUG_PROPERTIES, _bug.getId(), null);
                 }
             }
         }
@@ -170,10 +171,11 @@ class BugDetailView {
     }
 
     public Widget createBugHeader() {
-        _label = new Label();
-        _label.addStyleName("BugDetailView-title");
+        _anchor = new Anchor();
+        _anchor.addStyleName("BugDetailView-title");
+
         final SimpleLayoutPanel simpleLayoutPanel = new SimpleLayoutPanel();
-        simpleLayoutPanel.setWidget(_label);
+        simpleLayoutPanel.setWidget(_anchor);
         return simpleLayoutPanel;
     }
 
@@ -186,7 +188,7 @@ class BugDetailView {
     }
 
     public void clear() {
-        _label.setText("");
+        _anchor.setText("");
         _cellTable.setRowCount(0);
         _stack.setHTML("");
     }
@@ -202,8 +204,13 @@ class BugDetailView {
         if (_bug != null) {
             final long bugId = _bug.getId();
 
-            final String s = bugId + "-" + _bug.getTitle();
-            _label.setText(s);
+            final String bugTitle = bugId + "-" + _bug.getTitle();
+            _anchor.setText(bugTitle);
+            final String url = Window.Location
+                    .createUrlBuilder()
+                    .setParameter("bug", Long.toString(_bug.getId()))
+                    .buildString();
+            _anchor.setHref(url);
 
             final StringBuilder sortBy = new StringBuilder();
             final ColumnSortList sortList = _cellTable.getColumnSortList();
@@ -211,8 +218,8 @@ class BugDetailView {
                 final ColumnSortList.ColumnSortInfo columnSortInfo = sortList.get(i);
                 final Column<?, ?> column = columnSortInfo.getColumn();
                 final char c = column == _dateColumn ? 'd' :
-                        column == _versionColumn ? 'v' :
-                                column == _userColumn ? 'b' : 'X';
+                               column == _versionColumn ? 'v' :
+                               column == _userColumn ? 'b' : 'X';
                 final boolean ascending = columnSortInfo.isAscending();
                 sortBy.append(ascending ? c : Character.toUpperCase(c));
             }
@@ -253,22 +260,8 @@ class BugDetailView {
     }
 
     private void render(final String stackText) {
-        final Bug4j bug4J = _displaysBugs.getBug4J();
-        bug4J.withAppPackages(new AsyncCallback<List<AppPkg>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert(caught.getMessage());
-            }
-
-            @Override
-            public void onSuccess(List<AppPkg> appPackages) {
-                renderWithAppPackages(appPackages, stackText);
-            }
-        });
-    }
-
-    private void renderWithAppPackages(List<AppPkg> appPackages, String stackText) {
-        final SafeHtml safeHtml = buildStack(appPackages, stackText);
+        List<AppPkg> appPkgs = _bugModel.getAppPkgs();
+        final SafeHtml safeHtml = buildStack(appPkgs, stackText);
         _stack.setHTML(safeHtml);
     }
 

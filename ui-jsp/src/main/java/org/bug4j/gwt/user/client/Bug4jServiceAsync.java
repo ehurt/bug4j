@@ -18,13 +18,14 @@ package org.bug4j.gwt.user.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.bug4j.gwt.user.client.data.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
 
 public interface Bug4jServiceAsync {
 
-    void getBugs(String app, Filter filter, String sortBy, AsyncCallback<List<Bug>> async);
+    void getBugs(@Nullable String app, Filter filter, String sortBy, AsyncCallback<List<Bug>> async);
 
     void getHits(long bugId, Filter filter, int offset, int max, String orderBy, AsyncCallback<List<BugHit>> async);
 
