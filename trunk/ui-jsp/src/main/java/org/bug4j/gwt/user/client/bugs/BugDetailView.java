@@ -27,6 +27,7 @@ import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.*;
 import org.bug4j.common.TextToLines;
 import org.bug4j.gwt.common.client.data.AppPkg;
+import org.bug4j.gwt.user.client.Bug4j;
 import org.bug4j.gwt.user.client.Bug4jService;
 import org.bug4j.gwt.user.client.BugModel;
 import org.bug4j.gwt.user.client.data.Bug;
@@ -206,10 +207,7 @@ public class BugDetailView {
 
             final String bugTitle = bugId + "-" + _bug.getTitle();
             _anchor.setText(bugTitle);
-            final String url = Window.Location
-                    .createUrlBuilder()
-                    .setParameter("bug", Long.toString(_bug.getId()))
-                    .buildString();
+            final String url = Bug4j.createBugLink(bugId);
             _anchor.setHref(url);
 
             final StringBuilder sortBy = new StringBuilder();

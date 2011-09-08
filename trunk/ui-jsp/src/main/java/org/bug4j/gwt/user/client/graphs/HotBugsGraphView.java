@@ -23,6 +23,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.DataTable;
@@ -33,8 +34,10 @@ import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import org.bug4j.gwt.user.client.Bug4jService;
 import org.bug4j.gwt.user.client.BugModel;
+import org.bug4j.gwt.user.client.bugs.BugDetailView;
 import org.bug4j.gwt.user.client.bugs.DisplaysBugs;
 import org.bug4j.gwt.user.client.data.Bug;
+import org.bug4j.gwt.user.client.data.Filter;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -105,10 +108,16 @@ public class HotBugsGraphView extends GraphView implements DisplaysBugs {
         return flowPanel;
     }
 
-    @SuppressWarnings({"UnusedDeclaration"})
     private void whenBugSelected(Bug bug) {
-        final long bugId = bug.getId();
-//        _bugDetailView.displayBug(bugId);
+        final PopupPanel popupPanel = new PopupPanel(true, true);
+        final int clientWidth = (int) (Window.getClientWidth() * .8);
+        final int clientHeight = (int) (Window.getClientHeight() * .8);
+        popupPanel.setSize(clientWidth + "px", clientHeight + "px");
+        final BugDetailView bugDetailView = new BugDetailView(_bugModel);
+        final Widget widget = bugDetailView.createWidget();
+        popupPanel.setWidget(widget);
+        popupPanel.center();
+        bugDetailView.displayBug(new Filter(), bug);
     }
 
     private AbstractDataTable createData(int daysBack, Map<Bug, int[]> topHits) {
