@@ -235,7 +235,7 @@ public class BugView implements DisplaysBugs {
         }
         _lastSelectedBug = _selectionModel.getSelectedObject();
         if (_lastSelectedBug != null) {
-            _bugDetailView.displayBug(_filter, _lastSelectedBug);
+            _bugDetailView.displayBug(_lastSelectedBug);
         } else {
             _bugDetailView.clear();
         }

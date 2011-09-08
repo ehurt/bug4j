@@ -110,10 +110,10 @@ public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jServi
     }
 
     @Override
-    public List<BugHit> getHits(long bugId, Filter filter, int offset, int max, String orderBy) throws Exception {
+    public List<BugHit> getHits(long bugId, int offset, int max, String orderBy) throws Exception {
         try {
             final Store store = StoreFactory.getStore();
-            return store.getHits(bugId, filter, offset, max, orderBy);
+            return store.getHits(bugId, offset, max, orderBy);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             throw new IllegalStateException(e.getMessage(), e);

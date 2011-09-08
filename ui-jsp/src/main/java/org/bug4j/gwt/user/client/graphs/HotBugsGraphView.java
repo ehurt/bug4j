@@ -37,7 +37,6 @@ import org.bug4j.gwt.user.client.BugModel;
 import org.bug4j.gwt.user.client.bugs.BugDetailView;
 import org.bug4j.gwt.user.client.bugs.DisplaysBugs;
 import org.bug4j.gwt.user.client.data.Bug;
-import org.bug4j.gwt.user.client.data.Filter;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -117,7 +116,7 @@ public class HotBugsGraphView extends GraphView implements DisplaysBugs {
         final Widget widget = bugDetailView.createWidget();
         popupPanel.setWidget(widget);
         popupPanel.center();
-        bugDetailView.displayBug(new Filter(), bug);
+        bugDetailView.displayBug(bug);
     }
 
     private AbstractDataTable createData(int daysBack, Map<Bug, int[]> topHits) {

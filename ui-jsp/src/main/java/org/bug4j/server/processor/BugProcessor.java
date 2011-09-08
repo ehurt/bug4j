@@ -96,7 +96,7 @@ public final class BugProcessor {
         final List<String> thisCauses = stackAnalyzer.getCauses(thisStackLines);
         final List<Long> bugIds = store.getBugIdByTitle(app, title);
         for (long bugId : bugIds) {
-            final List<BugHit> hits = store.getHits(bugId, null, 0, MATCH_BY_TITLE_LOOK_BACK_MAX, "D"); // only look back at the last hits
+            final List<BugHit> hits = store.getHits(bugId, 0, MATCH_BY_TITLE_LOOK_BACK_MAX, "D"); // only look back at the last hits
             for (BugHit hit : hits) {
                 final long hitId = hit.getHitId();
                 final String thatStackText = store.getStack(hitId);

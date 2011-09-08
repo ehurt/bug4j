@@ -33,7 +33,6 @@ import org.bug4j.gwt.user.client.BugModel;
 import org.bug4j.gwt.user.client.data.Bug;
 import org.bug4j.gwt.user.client.data.BugHit;
 import org.bug4j.gwt.user.client.data.BugHitAndStack;
-import org.bug4j.gwt.user.client.data.Filter;
 import org.bug4j.gwt.user.client.util.PropertyListener;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,7 +44,6 @@ public class BugDetailView {
     private Anchor _anchor;
     private HTML _stack;
     private CellTable<BugHit> _cellTable;
-    private Filter _filter;
     private Bug _bug;
     private final Set<Long> _unreadHits = new HashSet<Long>();
     @Nullable
@@ -194,8 +192,7 @@ public class BugDetailView {
         _stack.setHTML("");
     }
 
-    public void displayBug(Filter filter, final Bug bug) {
-        _filter = filter;
+    public void displayBug(final Bug bug) {
         _bug = bug;
         _lastSelectedHit = null;
         refreshData();
@@ -222,7 +219,7 @@ public class BugDetailView {
                 sortBy.append(ascending ? c : Character.toUpperCase(c));
             }
 
-            Bug4jService.App.getInstance().getHits(bugId, _filter, 0, PAGE_SIZE, sortBy.toString(), new AsyncCallback<List<BugHit>>() {
+            Bug4jService.App.getInstance().getHits(bugId, 0, PAGE_SIZE, sortBy.toString(), new AsyncCallback<List<BugHit>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     Window.alert(caught.getMessage());
