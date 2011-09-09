@@ -23,6 +23,10 @@
         </element>
       </element>
       <element id="gwt-compiler-output" facet="ui-jsp/gwt/GWT" />
+      <element id="directory" name="static">
+        <element id="file-copy" path="$dep-home$/zeroclipboard-1.0.7/zeroclipboard/ZeroClipboard.js" />
+        <element id="file-copy" path="$dep-home$/zeroclipboard-1.0.7/zeroclipboard/ZeroClipboard.swf" />
+      </element>
     </root>
   </artifact>
 </component>

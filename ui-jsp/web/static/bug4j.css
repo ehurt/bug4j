@@ -125,6 +125,7 @@ div#main {
 .BugDetailView-hit-stack-sp {
     margin: 3px;
     padding: 3px;
+    border-bottom: 1px solid #a9a9a9;
 }
 
 .BugDetailView-hit-cell {

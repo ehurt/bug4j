@@ -178,13 +178,29 @@ public class BugDetailView {
         return simpleLayoutPanel;
     }
 
-    private ScrollPanel buildStackPanel() {
+    private Widget buildStackPanel() {
+        final DockLayoutPanel ret = new DockLayoutPanel(Style.Unit.EM);
+
         _stack = new HTML();
         _stack.addStyleName("BugDetailView-hit-stack");
         final ScrollPanel scrollPanel = new ScrollPanel(_stack);
         scrollPanel.addStyleName("BugDetailView-hit-stack-sp");
-        return scrollPanel;
+
+        final Anchor copy = new Anchor("Copy");
+        copy.getElement().setId("copyId");
+        final FlowPanel bottomButtons = new FlowPanel();
+        bottomButtons.add(copy);
+
+        ret.addSouth(bottomButtons, 1.5);
+        ret.add(scrollPanel);
+        return ret;
     }
+
+    public static native void glueCopy(String text) /*-{
+        var clip = new $wnd.ZeroClipboard.Client();
+        clip.setText(text);
+        clip.glue('copyId');
+    }-*/;
 
     public void clear() {
         _anchor.setText("");
@@ -258,6 +274,7 @@ public class BugDetailView {
         List<AppPkg> appPkgs = _bugModel.getAppPkgs();
         final SafeHtml safeHtml = buildStack(appPkgs, stackText);
         _stack.setHTML(safeHtml);
+        glueCopy(stackText);
     }
 
     private static SafeHtml buildStack(List<AppPkg> appPkgs, String stackText) {
