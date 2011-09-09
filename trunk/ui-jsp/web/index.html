@@ -24,10 +24,14 @@
     <link type="text/css" rel="stylesheet" href="static/bug4j.css">
 
     <script type="text/javascript" language="javascript" src="user/user.nocache.js"></script>
+    <script type="text/javascript" src="static/ZeroClipboard.js"></script>
+    <script type="text/javascript">
+        function initZeroClipboard() {
+            ZeroClipboard.setMoviePath('static/ZeroClipboard.swf');
+        }
+    </script>
 </head>
-<body>
-
+<body onload="initZeroClipboard();">
 <div id="loading">Loading...</div>
-
 </body>
 </html>
