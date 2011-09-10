@@ -56,15 +56,30 @@
             margin-bottom: 5px;
         }
 
-        #sd {
-            margin: 1px 1px 0 0;
-        }
-
-        #sd:hover {
-            margin: 0 0 1px 1px;
-        }
-
         #s:hover {
+        }
+
+        .btn {
+            white-space: nowrap;
+            padding: 1px 15px;
+            color: #333;
+            background-color: #f9f9f9;
+            border-width: 1px;
+            border-style: solid;
+            border-color: #ccc #bbb #a0a0a0;
+            text-decoration: none;
+            background-image: -moz-linear-gradient(0% 100% 90deg, #e3e3e3, #f9f9f9);
+            background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#f9f9f9), to(#e3e3e3));
+            border-radius: 3px;
+            -moz-border-radius: 3px;
+            -webkit-border-radius: 3px;
+        }
+
+        .btn:hover {
+            border-color: #a0a0a0;
+            text-decoration: none;
+            background: transparent -moz-linear-gradient(0% 100% 90deg, #d9d9d9, #f5f5f5);
+            background: transparent -webkit-gradient(linear, 0% 0%, 0% 100%, to(#d9d9d9), from(#f5f5f5));
         }
 
         label {
@@ -72,16 +87,27 @@
         }
 
         #footer {
+            background-color: #ffffff;
             position: absolute;
             bottom: 0;
             right: 1px;
-            width: 99%;
             height: 1.5em;
             text-align: right;
+            padding: 1px 5px;
         }
 
         #footer a:visited {
             color: #ff6600;
+        }
+
+        #login_back {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 642px;
+            z-index: -1;
+            background: url("icons/login_back.png") top left no-repeat;
         }
     </style>
 </head>
@@ -105,7 +131,7 @@
             </tr>
             <tr>
                 <td colspan="2" align="right">
-                    <div id="sd"><input id="s" name="submit" type="image" src="icons/splat.png"></div>
+                    <input id="s" class="btn" name="submit" type="submit" value="Login">
                 </td>
             </tr>
         </table>
@@ -119,5 +145,6 @@
     </div>
     <div id="footer"><a href="http://www.bug4j.org">bug4j</a></div>
 </form>
+<div id="login_back"></div>
 </body>
 </html>
