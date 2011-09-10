@@ -36,11 +36,19 @@ class HttpConnector {
     private final String _serverUri;
     private final String _applicationName;
     private final String _applicationVersion;
+    private long _sessionId;
 
-    public HttpConnector(String serverUrl, String applicationName, String applicationVersion) {
+    private HttpConnector(String serverUrl, String applicationName, String applicationVersion) {
         _serverUri = serverUrl;
         _applicationName = applicationName;
         _applicationVersion = applicationVersion;
+    }
+
+    public static HttpConnector createHttpConnector(String serverUrl, String applicationName, String applicationVersion) {
+        final HttpConnector httpConnector = new HttpConnector(serverUrl, applicationName, applicationVersion);
+        httpConnector.createSession();
+
+        return httpConnector;
     }
 
     private String send(String endpoint, String... nameValuePairs) {
@@ -75,9 +83,9 @@ class HttpConnector {
         return ret;
     }
 
-    public boolean reportHit(long sessionId, String message, String user, String hash) {
+    public boolean reportHit(String message, String user, String hash) {
         final String response = send("/br/in",
-                "e", Long.toString(sessionId),
+                "e", Long.toString(_sessionId),
                 "a", _applicationName,
                 "v", _applicationVersion,
                 "m", message,
@@ -87,10 +95,10 @@ class HttpConnector {
         return response.equals("New");
     }
 
-    public void reportBug(long sessionId, String message, String user, String[] stackLines) {
+    public void reportBug(String message, String user, String[] stackLines) {
         final String stackText = toText(stackLines);
         send("/br/bug",
-                "e", Long.toString(sessionId),
+                "e", Long.toString(_sessionId),
                 "a", _applicationName,
                 "v", _applicationVersion,
                 "m", message,
@@ -108,18 +116,17 @@ class HttpConnector {
         return stringBuilder.toString();
     }
 
-    public Long createSession() {
-        Long ret = null;
+    private void createSession() {
         final String response = send("/br/ses",
                 "a", _applicationName,
                 "v", _applicationVersion
         );
         if (response != null) {
             try {
-                ret = Long.parseLong(response.trim());
-            } catch (NumberFormatException ignored) {
+                _sessionId = Long.parseLong(response.trim());
+            } catch (NumberFormatException e) {
+                throw new IllegalStateException(e.getMessage(), e);
             }
         }
-        return ret;
     }
 }
