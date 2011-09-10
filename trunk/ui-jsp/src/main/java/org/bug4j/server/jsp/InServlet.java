@@ -48,6 +48,7 @@ public class InServlet extends HttpServlet {
         final String message = request.getParameter("m");
         final String user = request.getParameter("u");
         final String hash = request.getParameter("h");
+        final Long sessionId = getLongParameter(request, "e");
 
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace(String.format("in :%s-%s-%s", app, version, hash));
@@ -58,7 +59,7 @@ public class InServlet extends HttpServlet {
             final Stack stack = store.getStackByHash(app, hash);
             if (stack != null) {
                 final long dateReported = System.currentTimeMillis();
-                store.reportHitOnStack(version, message, dateReported, user, stack);
+                store.reportHitOnStack(sessionId, version, message, dateReported, user, stack);
                 out.print("Old");
             } else {
                 out.print("New");
@@ -66,5 +67,17 @@ public class InServlet extends HttpServlet {
         } else {
             response.sendError(403, "Unknown application");
         }
+    }
+
+    static Long getLongParameter(HttpServletRequest request, String name) {
+        Long ret = null;
+        final String sessionValue = request.getParameter(name);
+        if (sessionValue != null) {
+            try {
+                ret = Long.parseLong(sessionValue);
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        return ret;
     }
 }

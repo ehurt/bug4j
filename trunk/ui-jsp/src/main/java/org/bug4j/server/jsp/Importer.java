@@ -58,6 +58,7 @@ public abstract class Importer {
     protected String _user;
     protected String _message;
     protected ArrayList<String> _packages;
+    private Long _sessionId;
 
     public Importer() {
     }
@@ -199,15 +200,23 @@ public abstract class Importer {
         final String hitIdValue = attributes.getValue("id");
         try {
             _hitId = Long.parseLong(hitIdValue);
-            final String dateValue = attributes.getValue("date");
+            final String sessionIdValue = attributes.getValue("sessionId");
             try {
-                _date = _dateFormat.parse(dateValue);
-                _appVer = attributes.getValue("appVer");
-                _user = attributes.getValue("user");
-                _message = attributes.getValue("message");
-                _stack = new StringBuilder();
-            } catch (ParseException e) {
-                LOGGER.error("Failed to parse the date '" + dateValue + "'");
+                if (sessionIdValue != null) {
+                    _sessionId = Long.parseLong(sessionIdValue);
+                }
+                final String dateValue = attributes.getValue("date");
+                try {
+                    _date = _dateFormat.parse(dateValue);
+                    _appVer = attributes.getValue("appVer");
+                    _user = attributes.getValue("user");
+                    _message = attributes.getValue("message");
+                    _stack = new StringBuilder();
+                } catch (ParseException e) {
+                    LOGGER.error("Failed to parse the date '" + dateValue + "'");
+                }
+            } catch (NumberFormatException e) {
+                LOGGER.error("Failed to parse session of hit id='" + hitIdValue + "'");
             }
         } catch (NumberFormatException e) {
             LOGGER.error("Failed to parse the hit id='" + hitIdValue + "'");
@@ -217,9 +226,11 @@ public abstract class Importer {
     protected void endHit() {
         final long dateReported = _date.getTime();
         final String stack = _stack.toString();
-        whenHit(_appName, _bugId, _title, _hitId, dateReported, _appVer, _user, _message, stack);
+        _sessionId = 0L;
+        whenHit(_appName, _sessionId, _bugId, _title, _hitId, dateReported, _appVer, _user, _message, stack);
 
         _hitId = 0;
+        _sessionId = null;
         _date = null;
         _appVer = null;
         _user = null;
@@ -240,5 +251,5 @@ public abstract class Importer {
     protected void endApps() {
     }
 
-    protected abstract void whenHit(String app, long bugId, String title, long hitId, long dateReported, String appVer, String user, String message, String stack);
+    protected abstract void whenHit(String app, Long sessionId, long bugId, String title, long hitId, long dateReported, String appVer, String user, String message, String stack);
 }

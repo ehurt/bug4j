@@ -38,6 +38,7 @@ public class Bug4jAgent {
 
     private HttpConnector _connector;
     private boolean _report = true;
+    private Long _sessionId;
 
     private Bug4jAgent(boolean anonymousReports) {
         _anonymousReports = anonymousReports;
@@ -111,7 +112,14 @@ public class Bug4jAgent {
         }
     }
 
+    private void createSession() {
+        _sessionId = _connector.createSession();
+    }
+
     private void processSafely(ReportableEvent reportableEvent) {
+        if (_sessionId == null) {
+            createSession();
+        }
         if (_report) {
             try {
                 process(reportableEvent);
@@ -141,9 +149,10 @@ public class Bug4jAgent {
             if (_reportLRU.put(textHash)) { // Refrain from sending the same eror
                 final String message = reportableEvent.getMessage();
                 final String user = _anonymousReports ? "anonymous" : reportableEvent.getUser();
-                final boolean isNew = _connector.reportHit(message, user, textHash);
+                final boolean isNew = _connector.reportHit(_sessionId, message, user, textHash);
                 if (isNew) {
                     _connector.reportBug(
+                            _sessionId,
                             message,
                             user,
                             reportableEvent.getThrowableStrRep()

@@ -180,6 +180,7 @@ public class JdbcStore extends Store {
                 statement.execute("" +
                         "CREATE TABLE HIT (" +
                         " HIT_ID INT GENERATED ALWAYS AS IDENTITY," +
+                        " SESSION_ID INT," +
                         " BUG_ID INT," +
                         " STACK_ID INT," +
                         " APP_VER VARCHAR(32)," +
@@ -213,6 +214,20 @@ public class JdbcStore extends Store {
                 );
                 statement.execute("CREATE INDEX USER_READ_IDX ON USER_READ(USER_NAME,BUG_ID)");
             }
+
+            if (!doesTableExist(statement, "CLIENT_SESSION")) {
+                statement.execute("" +
+                        "CREATE TABLE CLIENT_SESSION (" +
+                        " SESSION_ID INT GENERATED ALWAYS AS IDENTITY," +
+                        " APP VARCHAR(32) NOT NULL," +
+                        " APP_VER VARCHAR(32)," +
+                        " HOST_NAME VARCHAR(255)," +
+                        " FIRST_HIT TIMESTAMP" +
+                        ")"
+                );
+                statement.execute("CREATE INDEX CLIENT_SESSION_IDX1 ON CLIENT_SESSION(SESSION_ID)");
+            }
+
 
             if (isInstall) {
                 createDefaultAdminUser();
@@ -1485,22 +1500,27 @@ public class JdbcStore extends Store {
     }
 
     @Override
-    public void reportHitOnStack(String appVersion, String message, long dateReported, String user, Stack stack) {
+    public void reportHitOnStack(Long sessionId, String appVersion, String message, long dateReported, String user, Stack stack) {
         final Connection connection = getConnection();
 
         try {
-            final PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO HIT (BUG_ID,STACK_ID,APP_VER,DATE_REPORTED,MESSAGE,REPORTED_BY) VALUES(?,?,?,?,?,?)");
+            final PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO HIT (SESSION_ID, BUG_ID,STACK_ID,APP_VER,DATE_REPORTED,MESSAGE,REPORTED_BY) VALUES(?,?,?,?,?,?,?)");
             try {
                 final long bugId = stack.getBugId();
                 final long stackId = stack.getStackId();
                 final Timestamp now = new Timestamp(dateReported);
 
-                preparedStatement.setLong(1, bugId);
-                preparedStatement.setLong(2, stackId);
-                preparedStatement.setString(3, appVersion);
-                preparedStatement.setTimestamp(4, now);
-                preparedStatement.setString(5, truncate(message, 1024));
-                preparedStatement.setString(6, truncate(user, 1024));
+                if (sessionId != null) {
+                    preparedStatement.setLong(1, sessionId);
+                } else {
+                    preparedStatement.setNull(1, Types.INTEGER);
+                }
+                preparedStatement.setLong(2, bugId);
+                preparedStatement.setLong(3, stackId);
+                preparedStatement.setString(4, appVersion);
+                preparedStatement.setTimestamp(5, now);
+                preparedStatement.setString(6, truncate(message, 1024));
+                preparedStatement.setString(7, truncate(user, 1024));
                 preparedStatement.executeUpdate();
             } finally {
                 DbUtils.closeQuietly(preparedStatement);
@@ -1581,5 +1601,52 @@ public class JdbcStore extends Store {
             DbUtils.closeQuietly(connection);
         }
         return ret;
+    }
+
+
+    @Override
+    public long createSession(String app, String version, long now, String remoteAddr) {
+        long ret;
+        try {
+            final Connection connection = getConnection();
+            try {
+                final PreparedStatement preparedStatement = connection.prepareStatement(
+                        "INSERT INTO CLIENT_SESSION(APP,APP_VER,HOST_NAME,FIRST_HIT) VALUES(?,?,?,?)",
+                        Statement.RETURN_GENERATED_KEYS);
+                try {
+                    preparedStatement.setString(1, app);
+                    preparedStatement.setString(2, version);
+                    preparedStatement.setString(3, remoteAddr);
+                    preparedStatement.setTimestamp(4, new Timestamp(now));
+                    preparedStatement.executeUpdate();
+                    final ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+                    if (!generatedKeys.next()) {
+                        throw new IllegalStateException("Failed to get the generated bug ID");
+                    }
+                    ret = generatedKeys.getLong(1);
+                } finally {
+                    preparedStatement.close();
+                }
+            } finally {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+        return ret;
+    }
+
+    public void migrate_addHitSession() {
+        try {
+            final Connection connection = getConnection();
+            try {
+                final Statement statement = connection.createStatement();
+                statement.execute("ALTER TABLE HIT ADD COLUMN SESSION_ID INT");
+            } finally {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
     }
 }
