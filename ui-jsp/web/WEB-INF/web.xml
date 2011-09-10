@@ -109,6 +109,15 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>SessionServlet</servlet-name>
+        <servlet-class>org.bug4j.server.jsp.SessionServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SessionServlet</servlet-name>
+        <url-pattern>/br/ses</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>StartupServlet</servlet-name>
         <servlet-class>org.bug4j.server.jsp.StartupServlet</servlet-class>
         <load-on-startup>1</load-on-startup>

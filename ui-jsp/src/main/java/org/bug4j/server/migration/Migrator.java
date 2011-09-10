@@ -18,18 +18,24 @@ package org.bug4j.server.migration;
 
 import org.apache.commons.io.FileUtils;
 import org.bug4j.server.Configuration;
+import org.bug4j.server.store.jdbc.JdbcStore;
 
 import java.io.File;
 import java.io.IOException;
 
 public class Migrator {
-    private static final int TIC = 1;
+    private static final int TIC = 2;
 
     /**
-     * 2001-08-14 Database used to be stored in the default location wich would usually end-up in .../server/bin/bug4j.
+     * 2011-08-14 Database used to be stored in the default location wich would usually end-up in .../server/bin/bug4j.
      * The database has now been moved to .../server/bug4jdb
      */
     private static final int TIC_DB_IN_BIN = 0;
+
+    /**
+     * 2011-09-10 Added the SESSION_ID to the HIT table
+     */
+    private static final int TIC_SESSION_ID = 1;
 
     private static Migrator INSTANCE;
     private static final String KEY_MIGRATION_TIC = "migration.tic";
@@ -53,7 +59,17 @@ public class Migrator {
     }
 
     public void preOpenDB() {
-        migrateDatabaseLocation();
+        switch (_migrateFrom) {
+            case TIC_DB_IN_BIN:
+                migrateDatabaseLocation();
+        }
+    }
+
+    public void postOpenDB() {
+        switch (_migrateFrom) {
+            case TIC_SESSION_ID:
+                addHitSession();
+        }
     }
 
     /**
@@ -61,17 +77,20 @@ public class Migrator {
      * The database has now been moved to .../server/bug4jdb
      */
     private void migrateDatabaseLocation() {
-        if (_migrateFrom <= TIC_DB_IN_BIN) {
-            final String catalinaHome = System.getProperty("catalina.home", null);
-            final File oldFile = new File(catalinaHome, "bin/bug4j");
-            if (oldFile.isDirectory()) {
-                final File newFile = new File(catalinaHome, "bug4jdb");
-                try {
-                    FileUtils.moveDirectory(oldFile, newFile);
-                } catch (IOException e) {
-                    throw new IllegalStateException(e.getMessage(), e);
-                }
+        final String catalinaHome = System.getProperty("catalina.home", null);
+        final File oldFile = new File(catalinaHome, "bin/bug4j");
+        if (oldFile.isDirectory()) {
+            final File newFile = new File(catalinaHome, "bug4jdb");
+            try {
+                FileUtils.moveDirectory(oldFile, newFile);
+            } catch (IOException e) {
+                throw new IllegalStateException(e.getMessage(), e);
             }
         }
+    }
+
+    private void addHitSession() {
+        final JdbcStore jdbcStore = JdbcStore.getInstance();
+        jdbcStore.migrate_addHitSession();
     }
 }

@@ -17,7 +17,6 @@
 package org.bug4j.server.jsp;
 
 import org.apache.log4j.Logger;
-import org.bug4j.server.processor.BugProcessor;
 import org.bug4j.server.store.Store;
 import org.bug4j.server.store.StoreFactory;
 
@@ -26,9 +25,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 
-public class BugServlet extends HttpServlet {
-    private static final Logger LOGGER = Logger.getLogger(BugServlet.class);
+public class SessionServlet extends HttpServlet {
+    private static final Logger LOGGER = Logger.getLogger(SessionServlet.class);
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         doit(request, response);
@@ -44,14 +44,18 @@ public class BugServlet extends HttpServlet {
         try {
             final String app = request.getParameter("a");
             final String version = request.getParameter("v");
-            final String message = request.getParameter("m");
-            final long dateReported = System.currentTimeMillis();
-            final String user = request.getParameter("u");
-            final String stackText = request.getParameter("s");
-            final Long sessionId = InServlet.getLongParameter(request, "e");
+//            final String user = request.getParameter("u");
+            final long now = System.currentTimeMillis();
+            final String remoteAddr = request.getRemoteAddr();
 
             final Store store = StoreFactory.getStore();
-            BugProcessor.process(store, sessionId, app, version, message, dateReported, user, stackText);
+            if (store.doesAppExist(app)) {
+                final long sessionId = store.createSession(app, version, now, remoteAddr);
+                final PrintWriter writer = response.getWriter();
+                writer.println(sessionId);
+            } else {
+                response.sendError(403, "Unknown application");
+            }
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
         }

@@ -75,8 +75,9 @@ class HttpConnector {
         return ret;
     }
 
-    public boolean reportHit(String message, String user, String hash) {
+    public boolean reportHit(long sessionId, String message, String user, String hash) {
         final String response = send("/br/in",
+                "e", Long.toString(sessionId),
                 "a", _applicationName,
                 "v", _applicationVersion,
                 "m", message,
@@ -86,13 +87,12 @@ class HttpConnector {
         return response.equals("New");
     }
 
-    public void reportBug(String message, String user, String[] stackLines) {
+    public void reportBug(long sessionId, String message, String user, String[] stackLines) {
         final String stackText = toText(stackLines);
-        final String applicationName = _applicationName;
-        final String applicationVersion = _applicationVersion;
         send("/br/bug",
-                "a", applicationName,
-                "v", applicationVersion,
+                "e", Long.toString(sessionId),
+                "a", _applicationName,
+                "v", _applicationVersion,
                 "m", message,
                 "u", user,
                 "s", stackText
@@ -106,5 +106,20 @@ class HttpConnector {
             stringBuilder.append("\n");
         }
         return stringBuilder.toString();
+    }
+
+    public Long createSession() {
+        Long ret = null;
+        final String response = send("/br/ses",
+                "a", _applicationName,
+                "v", _applicationVersion
+        );
+        if (response != null) {
+            try {
+                ret = Long.parseLong(response.trim());
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        return ret;
     }
 }

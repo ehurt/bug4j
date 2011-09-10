@@ -41,6 +41,7 @@ public class StartupServlet extends HttpServlet {
         try {
             StoreFactory.createJdbcStore();
 
+            migrator.postOpenDB();
             migrator.completeMigration();
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
