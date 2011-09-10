@@ -210,7 +210,7 @@ public class Bug4j implements EntryPoint {
     }-*/;
 
     private Widget buildNorthWidget() {
-        final Image image = new Image(IMAGES.littleSplat());
+        final Image image = new Image(IMAGES.littleSwatter());
         image.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
