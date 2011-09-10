@@ -23,8 +23,8 @@ public interface Resources extends ClientBundle {
     @Source("icons/bin_closed.png")
     ImageResource binClosed();
 
-    @Source("icons/little_splat.png")
-    ImageResource littleSplat();
+    @Source("icons/little_swatter.png")
+    ImageResource littleSwatter();
 
     @Source("icons/loading_32_32.gif")
     ImageResource loading32x32();

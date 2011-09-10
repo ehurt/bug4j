@@ -147,7 +147,7 @@ public class Admin implements EntryPoint {
     }
 
     private Widget buildNorthWidget() {
-        final Image image = new Image(IMAGES.littleSplat());
+        final Image image = new Image(IMAGES.littleSwatter());
 
         _userLabel = new Label("");
         _userLabel.setStylePrimaryName("headerDropDown");
