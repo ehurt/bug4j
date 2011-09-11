@@ -37,31 +37,22 @@ public final class Bug4jStarter {
 
     private void readDefaultSettings() {
         final Properties properties = readProperties();
-
-        final String server = properties.getProperty("server");
-        if (server != null) {
-            setServerUrl(server);
-            System.err.println("bug4j warning: property 'server' is deprecated. Please use 'server.url' instead");
-        }
-
-        final String serverUrl = properties.getProperty("server.url");
-        if (serverUrl != null) {
-            setServerUrl(serverUrl);
-        }
-
-        final String appName = properties.getProperty("application.name");
-        if (appName != null) {
-            setApplicationName(appName);
-        }
-
-        final String appVersion = properties.getProperty("application.version");
-        if (appVersion != null) {
-            setApplicationVersion(appVersion);
-        }
-
-        final String anonymousReports = properties.getProperty("reports.anonymous");
-        if (anonymousReports != null) {
-            setAnonymousReports(Boolean.valueOf(anonymousReports));
+        for (String name : properties.stringPropertyNames()) {
+            final String value = properties.getProperty(name);
+            if ("server".equals(name)) {
+                setServerUrl(value);
+                SimpleLogger.error("bug4j warning: property 'server' is deprecated. Please use 'server.url' instead");
+            } else if ("server.url".equals(name)) {
+                setServerUrl(value);
+            } else if ("application.name".equals(name)) {
+                setApplicationName(value);
+            } else if ("application.version".equals(name)) {
+                setApplicationVersion(value);
+            } else if ("proxy".equals(name)) {
+                setProxy(value);
+            } else {
+                SimpleLogger.error("Unknown property: " + name);
+            }
         }
     }
 
@@ -78,7 +69,7 @@ public final class Bug4jStarter {
                 }
             } catch (IOException e) {
                 final String message = e.getMessage();
-                System.err.println(message);
+                SimpleLogger.error(message);
             }
         }
         return ret;
@@ -111,11 +102,31 @@ public final class Bug4jStarter {
     }
 
     /**
-     * Determines if the user name can be sent with the exception.
-     * The default is false
+     * Set the proxy.
+     *
+     * @param proxy the proxy host name and port separated by a ':'. <br/>For example "proxy.example.com:8080".
      */
-    public Bug4jStarter setAnonymousReports(boolean anonymousReports) {
-        _settings.setAnonymousReports(anonymousReports);
+    public Bug4jStarter setProxy(String proxy) {
+
+        final String proxyHost;
+        int proxyPort = 80;
+
+        final int pos = proxy.indexOf(':');
+        if (pos > -1) {
+            proxyHost = proxy.substring(0, pos);
+            final String portValue = proxy.substring(pos + 1);
+            try {
+                proxyPort = Integer.parseInt(portValue);
+            } catch (NumberFormatException e) {
+                SimpleLogger.error("Invalid proxy port: " + portValue);
+            }
+        } else {
+            proxyHost = proxy;
+        }
+
+        _settings.setProxyHost(proxyHost);
+        _settings.setProxyPort(proxyPort);
+
         return this;
     }
 
