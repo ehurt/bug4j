@@ -20,12 +20,13 @@ class Settings {
     private String _serverUrl;
     private String _applicationName;
     private String _applicationVersion;
-    private boolean _anonymousReports;
+    private String _proxyHost;
+    private int _proxyPort = 80;
 
     Settings() {
         _applicationName = "no-name";
         _applicationVersion = "1.0";
-        _serverUrl = "http://localhost:8063/bug4j/";
+        _serverUrl = "http://report.bug4j.org:8063/bug4j/";
     }
 
     public String getServerUrl() {
@@ -52,11 +53,19 @@ class Settings {
         _applicationVersion = applicationVersion;
     }
 
-    public boolean isAnonymousReports() {
-        return _anonymousReports;
+    public String getProxyHost() {
+        return _proxyHost;
     }
 
-    public void setAnonymousReports(boolean anonymousReports) {
-        _anonymousReports = anonymousReports;
+    public void setProxyHost(String proxyHost) {
+        _proxyHost = proxyHost;
+    }
+
+    public int getProxyPort() {
+        return _proxyPort;
+    }
+
+    public void setProxyPort(int proxyPort) {
+        _proxyPort = proxyPort;
     }
 }

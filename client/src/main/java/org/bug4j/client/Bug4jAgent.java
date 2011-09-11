@@ -22,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Reports exceptions to the bug4j server.
@@ -29,11 +30,14 @@ import java.util.concurrent.LinkedBlockingQueue;
  * The Bug4jAgent will be started automatically with the first exception report.
  */
 public class Bug4jAgent {
+    /**
+     * Avoid re-entrance caused by calls to log4j during the initialization
+     */
+    private static AtomicBoolean _isEntered = new AtomicBoolean(false);
     private static final BlockingQueue<ReportableEvent> _queue = new LinkedBlockingQueue<ReportableEvent>();
     private static final ReportableEvent STOP = new ReportableEvent("stop", new String[0], "stop");
     private static Thread _clientThread;
     private static int _reported;
-    private final boolean _anonymousReports;
     private final ReportLRU _reportLRU = new ReportLRU();
 
     private HttpConnector _connector;
@@ -42,37 +46,44 @@ public class Bug4jAgent {
 
     private Bug4jAgent(Settings settings) {
         _settings = settings;
-        _anonymousReports = settings.isAnonymousReports();
     }
 
-    static synchronized void start(Settings settings) {
-        if (!isStarted()) {
-            _reported = 0;
+    static void start(Settings settings) {
+        if (_isEntered.compareAndSet(false, true)) {
+            try {
+                if (!isStarted()) {
+                    synchronized (Bug4jAgent.class) {
+                        _reported = 0;
 
-            final Bug4jAgent client = new Bug4jAgent(settings);
+                        final Bug4jAgent client = new Bug4jAgent(settings);
 
-            final Object tellMeWhenYouAreReady = new Object();
-            final Thread thread = new Thread() {
-                @Override
-                public void run() {
-                    synchronized (tellMeWhenYouAreReady) {
-                        tellMeWhenYouAreReady.notify();
+                        final Object tellMeWhenYouAreReady = new Object();
+                        final Thread thread = new Thread() {
+                            @Override
+                            public void run() {
+                                synchronized (tellMeWhenYouAreReady) {
+                                    tellMeWhenYouAreReady.notify();
+                                }
+
+                                client.run();
+                            }
+                        };
+                        thread.setName("bug4j");
+                        thread.setDaemon(true);
+                        thread.start();
+                        //noinspection SynchronizationOnLocalVariableOrMethodParameter
+                        synchronized (tellMeWhenYouAreReady) {
+                            try {
+                                tellMeWhenYouAreReady.wait();
+                                _clientThread = thread;
+                            } catch (InterruptedException e) {
+                                throw new IllegalStateException(e);
+                            }
+                        }
                     }
-
-                    client.run();
                 }
-            };
-            thread.setName("bug4j");
-            thread.setDaemon(true);
-            thread.start();
-            //noinspection SynchronizationOnLocalVariableOrMethodParameter
-            synchronized (tellMeWhenYouAreReady) {
-                try {
-                    tellMeWhenYouAreReady.wait();
-                    _clientThread = thread;
-                } catch (InterruptedException e) {
-                    throw new IllegalStateException(e);
-                }
+            } finally {
+                _isEntered.set(false);
             }
         }
     }
@@ -86,23 +97,32 @@ public class Bug4jAgent {
             final String serverUrl = _settings.getServerUrl();
             final String applicationName = _settings.getApplicationName();
             final String applicationVersion = _settings.getApplicationVersion();
-            _connector = HttpConnector.createHttpConnector(serverUrl, applicationName, applicationVersion);
+            final String proxyHost = _settings.getProxyHost();
+            final int proxyPort = _settings.getProxyPort();
+            _connector = HttpConnector.createHttpConnector(serverUrl, applicationName, applicationVersion, proxyHost, proxyPort);
         }
     }
 
     /**
      * Shuts down the bug4j thread.
      */
-    public synchronized static void shutdown() {
-        if (_clientThread != null) {
-            enqueue(STOP);
-            try {
-                _clientThread.join();
-                _clientThread = null;
-            } catch (InterruptedException e) {
-                //
+    public static void shutdown() {
+
+        // if the client thread has not been started yet then there is nothing to stop
+        // but the client may be starting up => sync.
+        synchronized (Bug4jAgent.class) {
+            if (_clientThread == null) {
+                return;
             }
         }
+
+        enqueue(STOP);
+        try {
+            _clientThread.join();
+        } catch (InterruptedException e) {
+            //
+        }
+        _queue.clear();
     }
 
     private void run() {
@@ -145,7 +165,7 @@ public class Bug4jAgent {
         if (textHash != null) {
             if (_reportLRU.put(textHash)) { // Refrain from sending the same eror
                 final String message = reportableEvent.getMessage();
-                final String user = _anonymousReports ? "anonymous" : reportableEvent.getUser();
+                final String user = reportableEvent.getUser();
                 final boolean isNew = _connector.reportHit(message, user, textHash);
                 if (isNew) {
                     _connector.reportBug(

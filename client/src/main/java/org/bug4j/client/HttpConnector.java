@@ -16,15 +16,14 @@
 
 package org.bug4j.client;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.StatusLine;
+import org.apache.http.*;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
@@ -32,20 +31,26 @@ import java.util.Arrays;
 import java.util.List;
 
 class HttpConnector {
-    final HttpClient _httpClient = new DefaultHttpClient();
+    final HttpClient _httpClient;
     private final String _serverUri;
     private final String _applicationName;
     private final String _applicationVersion;
     private long _sessionId;
 
-    private HttpConnector(String serverUrl, String applicationName, String applicationVersion) {
+    private HttpConnector(String serverUrl, String applicationName, String applicationVersion, String proxyHost, int proxyPort) {
         _serverUri = serverUrl;
         _applicationName = applicationName;
         _applicationVersion = applicationVersion;
+        _httpClient = new DefaultHttpClient();
+        if (proxyHost != null) {
+            final HttpHost proxyHttpHost = new HttpHost(proxyHost, proxyPort);
+            final HttpParams httpClientParams = _httpClient.getParams();
+            httpClientParams.setParameter(ConnRoutePNames.DEFAULT_PROXY, proxyHttpHost);
+        }
     }
 
-    public static HttpConnector createHttpConnector(String serverUrl, String applicationName, String applicationVersion) {
-        final HttpConnector httpConnector = new HttpConnector(serverUrl, applicationName, applicationVersion);
+    public static HttpConnector createHttpConnector(String serverUrl, String applicationName, String applicationVersion, String proxyHost, int proxyPort) {
+        final HttpConnector httpConnector = new HttpConnector(serverUrl, applicationName, applicationVersion, proxyHost, proxyPort);
         httpConnector.createSession();
 
         return httpConnector;

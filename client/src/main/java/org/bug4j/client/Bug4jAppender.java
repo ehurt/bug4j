@@ -83,8 +83,13 @@ public class Bug4jAppender extends AppenderSkeleton {
         _bug4jStarter.setApplicationVersion(applicationVersion);
     }
 
+    /**
+     * Set the proxy.
+     *
+     * @param proxy the proxy host name and port separated by a ':'. <br/>For example "proxy.example.com:8080".
+     */
     @SuppressWarnings({"UnusedDeclaration"})
-    public void setAnonymousReports(String anonymousReports) {
-        _bug4jStarter.setAnonymousReports(Boolean.valueOf(anonymousReports));
+    public void setProxy(String proxy) {
+        _bug4jStarter.setProxy(proxy);
     }
 }
