@@ -18,10 +18,6 @@
 <head>
     <title>Login Page</title>
     <style type="text/css">
-        body {
-            background: url('icons/grdback.png') repeat-x;
-        }
-
         td {
             padding: 0;
         }
@@ -90,7 +86,7 @@
             background-color: #ffffff;
             position: absolute;
             bottom: 0;
-            right: 1px;
+            right: 5px;
             height: 1.5em;
             text-align: right;
             padding: 1px 5px;
@@ -100,13 +96,28 @@
             color: #ff6600;
         }
 
+        #login_img_top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            z-index: -1;
+            background: url('icons/grdback.png') repeat-x;
+            overflow-y: hidden;
+            overflow: hidden;
+        }
+
         #login_back {
             position: absolute;
+            margin: 0;
+            padding: 0;
+            border: 0;
             bottom: 0;
             left: 0;
             width: 100%;
             height: 642px;
-            z-index: -1;
+            z-index: -2;
             background: url("icons/login_back.png") top left no-repeat;
         }
     </style>
@@ -145,6 +156,7 @@
     </div>
     <div id="footer"><a href="http://www.bug4j.org">bug4j</a></div>
 </form>
+<div id="login_img_top"></div>
 <div id="login_back"></div>
 </body>
 </html>
