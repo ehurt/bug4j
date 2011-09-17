@@ -27,6 +27,7 @@ import org.bug4j.gwt.user.client.data.Stack;
 import org.bug4j.server.store.HitsCallback;
 import org.bug4j.server.store.Store;
 import org.bug4j.server.store.UserEx;
+import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.security.authentication.encoding.Md5PasswordEncoder;
 
@@ -107,7 +108,7 @@ public class JdbcStore extends Store {
                         "CREATE TABLE BUG4J_AUTHORITIES (" +
                         " USER_NAME VARCHAR(128) NOT NULL PRIMARY KEY," +
                         " AUTHORITY_NAME VARCHAR(128) NOT NULL," +
-                        " constraint BUG4J_AUTHORITIES_USER_FK foreign key(USER_NAME) references BUG4J_USER(USER_NAME)" +
+                        " CONSTRAINT BUG4J_AUTHORITIES_USER_FK FOREIGN KEY(USER_NAME) REFERENCES BUG4J_USER(USER_NAME)" +
                         ")"
                 );
                 statement.execute("CREATE UNIQUE INDEX BUG4J_AUTHORITIES_IDX ON BUG4J_AUTHORITIES (USER_NAME,AUTHORITY_NAME)");
@@ -275,44 +276,44 @@ public class JdbcStore extends Store {
         final Connection connection = getConnection();
         try {
             StringBuilder sql = new StringBuilder("" +
-                    "SELECT b.bug_id," +
-                    "        b.title," +
-                    "        COUNT(h.hit_id) AS hit_count," +
-                    "        MAX(h.hit_id) AS hit_max," +
-                    "        ur.last_hit_id," +
-                    "        b.app" +
-                    "  FROM bug b" +
-                    "    LEFT OUTER JOIN hit h ON b.bug_id = h.bug_id" +
-                    "    LEFT OUTER JOIN user_read ur ON b.bug_id = ur.bug_id AND ur.user_name=:userName"
+                    "SELECT B.BUG_ID," +
+                    "        B.TITLE," +
+                    "        COUNT(H.HIT_ID) AS HIT_COUNT," +
+                    "        MAX(H.HIT_ID) AS HIT_MAX," +
+                    "        UR.LAST_HIT_ID," +
+                    "        B.APP" +
+                    "  FROM BUG B" +
+                    "    LEFT OUTER JOIN HIT H ON B.BUG_ID = H.BUG_ID" +
+                    "    LEFT OUTER JOIN USER_READ UR ON B.BUG_ID = UR.BUG_ID AND UR.USER_NAME=:userName"
             );
 
             final List<String> conditions = new ArrayList<String>();
             if (app != null) {
-                conditions.add("b.app = :app");
+                conditions.add("B.APP = :app");
             }
             if (filter.hasHitWithinDays()) {
-                conditions.add("h.date_reported > :hitDateMin");
+                conditions.add("H.DATE_REPORTED > :hitDateMin");
             }
             if (filter.hasTitle()) {
-                conditions.add("upper(b.title) like :titleFilter");
+                conditions.add("UPPER(B.TITLE) LIKE :titleFilter");
             }
             if (filter.getBugId() != null) {
-                conditions.add("b.bug_id=:bugId");
+                conditions.add("B.BUG_ID=:bugId");
             }
             if (!conditions.isEmpty()) {
                 final String whereClause = StringUtils.join(conditions, " AND ");
                 sql.append(" WHERE ").append(whereClause);
             }
 
-            sql.append("  GROUP BY b.app,b.bug_id, b.title,ur.last_hit_id");
+            sql.append("  GROUP BY B.APP,B.BUG_ID, B.TITLE,UR.LAST_HIT_ID");
 
-            sql.append("  HAVING COUNT(h.hit_id) > 0");
+            sql.append("  HAVING COUNT(H.HIT_ID) > 0");
             if (filter.isReportedByMultiple()) {
                 sql.append(" AND");
-                sql.append(" COUNT(distinct h.reported_by) > 1");
+                sql.append(" COUNT(DISTINCT H.REPORTED_BY) > 1");
             }
 
-            String orderBySep = " order by ";
+            String orderBySep = " ORDER BY ";
             for (int i = 0; i < orderBy.length(); i++) {
                 final char c = orderBy.charAt(i);
                 final char lc = Character.toLowerCase(c);
@@ -491,8 +492,8 @@ public class JdbcStore extends Store {
         final List<BugHit> ret = new ArrayList<BugHit>();
         final Connection connection = getConnection();
         try {
-            StringBuilder sql = new StringBuilder("select H.HIT_ID,H.APP_VER,H.DATE_REPORTED,H.REPORTED_BY from HIT H WHERE H.BUG_ID=:bugId\n");
-            String sep = " order by ";
+            StringBuilder sql = new StringBuilder("SELECT H.HIT_ID,H.APP_VER,H.DATE_REPORTED,H.REPORTED_BY FROM HIT H WHERE H.BUG_ID=:bugId\n");
+            String sep = " ORDER BY ";
             for (int i = 0; i < orderBy.length(); i++) {
                 final char c = orderBy.charAt(i);
                 final char lc = Character.toLowerCase(c);
@@ -834,12 +835,12 @@ public class JdbcStore extends Store {
         final Connection connection = getConnection();
         try {
             final PreparedStatement preparedStatement = connection.prepareStatement("" +
-                    "select date(h.date_reported),count(*)" +
-                    "  from hit h, bug b" +
-                    "  where h.bug_id=b.bug_id" +
-                    "  and b.app=?" +
-                    "  group by date(h.date_reported)" +
-                    "  order by 1");
+                    "SELECT DATE(H.DATE_REPORTED),COUNT(*)" +
+                    "  FROM HIT H, BUG B" +
+                    "  WHERE H.BUG_ID=B.BUG_ID" +
+                    "  AND B.APP=?" +
+                    "  GROUP BY DATE(H.DATE_REPORTED)" +
+                    "  ORDER BY 1");
             try {
                 preparedStatement.setString(1, app);
                 final ResultSet resultSet = preparedStatement.executeQuery();
@@ -1000,7 +1001,7 @@ public class JdbcStore extends Store {
             final Connection connection = getConnection();
             try {
                 {
-                    final PreparedStatement preparedStatement = connection.prepareStatement("update BUG4J_USER set USER_EMAIL=?,USER_ADMIN=?,USER_BUILT_IN=?,USER_ENABLED=? WHERE USER_NAME=?");
+                    final PreparedStatement preparedStatement = connection.prepareStatement("UPDATE BUG4J_USER SET USER_EMAIL=?,USER_ADMIN=?,USER_BUILT_IN=?,USER_ENABLED=? WHERE USER_NAME=?");
                     try {
                         preparedStatement.setString(1, user.getEmail());
                         preparedStatement.setString(2, user.isAdmin() ? "Y" : "N");
@@ -1014,7 +1015,7 @@ public class JdbcStore extends Store {
                 }
 
                 {
-                    final PreparedStatement preparedStatement = connection.prepareStatement("delete from BUG4J_AUTHORITIES WHERE USER_NAME=?");
+                    final PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM BUG4J_AUTHORITIES WHERE USER_NAME=?");
                     try {
                         preparedStatement.setString(1, user.getUserName());
                         preparedStatement.executeUpdate();
@@ -1133,7 +1134,7 @@ public class JdbcStore extends Store {
         }
     }
 
-    private void deleteAppTable(Connection connection, String applicationName, String statement) {
+    private void deleteAppTable(Connection connection, String applicationName, @Language("SQL92") String statement) {
         try {
             final PreparedStatement preparedStatement = connection.prepareStatement(statement);
             try {
@@ -1194,7 +1195,7 @@ public class JdbcStore extends Store {
                     deleteHitsStatement.close();
                 }
 
-                final PreparedStatement deleteStackTextStatement = connection.prepareStatement("DELETE FROM STACK_TEXT WHERE STACK_ID IN (select DISTINCT S.STACK_ID from STACK S WHERE BUG_ID=?)");
+                final PreparedStatement deleteStackTextStatement = connection.prepareStatement("DELETE FROM STACK_TEXT WHERE STACK_ID IN (SELECT DISTINCT S.STACK_ID FROM STACK S WHERE BUG_ID=?)");
                 try {
                     deleteStackTextStatement.setLong(1, bugId);
                     deleteStackTextStatement.executeUpdate();
@@ -1246,10 +1247,10 @@ public class JdbcStore extends Store {
                 final Date to = new Date(tTo);
                 final List<Bug> bugs = getTopBugs(connection, app, max, from, to);
                 final PreparedStatement datesReportedStatement = connection.prepareStatement("" +
-                        "select DATE_REPORTED" +
-                        " from hit " +
-                        " where bug_id=? " +
-                        " and DATE_REPORTED BETWEEN ? AND ?");
+                        "SELECT DATE_REPORTED" +
+                        " FROM HIT " +
+                        " WHERE BUG_ID=? " +
+                        " AND DATE_REPORTED BETWEEN ? AND ?");
                 try {
                     datesReportedStatement.setDate(2, from);
                     datesReportedStatement.setDate(3, to);
@@ -1293,13 +1294,13 @@ public class JdbcStore extends Store {
 
     private List<Bug> getTopBugs(Connection connection, String app, int max, Date from, Date to) throws SQLException {
         final List<Bug> ret = new ArrayList<Bug>();
-        final PreparedStatement countStatement = connection.prepareStatement("select H.BUG_ID, B.TITLE, count(*) \"CNT\" " +
-                "  from HIT H,BUG B" +
-                "  where H.BUG_ID=B.BUG_ID" +
-                "  and H.DATE_REPORTED BETWEEN ? AND ?" +
-                "  and B.APP=?" +
-                "  group by H.BUG_ID,B.TITLE" +
-                "  order by CNT DESC");
+        final PreparedStatement countStatement = connection.prepareStatement("SELECT H.BUG_ID, B.TITLE, COUNT(*) \"CNT\" " +
+                "  FROM HIT H,BUG B" +
+                "  WHERE H.BUG_ID=B.BUG_ID" +
+                "  AND H.DATE_REPORTED BETWEEN ? AND ?" +
+                "  AND B.APP=?" +
+                "  GROUP BY H.BUG_ID,B.TITLE" +
+                "  ORDER BY CNT DESC");
         try {
             countStatement.setDate(1, from);
             countStatement.setDate(2, to);
@@ -1504,7 +1505,8 @@ public class JdbcStore extends Store {
         final Connection connection = getConnection();
 
         try {
-            final PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO HIT (SESSION_ID, BUG_ID,STACK_ID,APP_VER,DATE_REPORTED,MESSAGE,REPORTED_BY) VALUES(?,?,?,?,?,?,?)");
+            final PreparedStatement preparedStatement = connection.prepareStatement(
+                    "INSERT INTO HIT (SESSION_ID, BUG_ID,STACK_ID,APP_VER,DATE_REPORTED,MESSAGE,REPORTED_BY) VALUES(?,?,?,?,?,?,?)");
             try {
                 final long bugId = stack.getBugId();
                 final long stackId = stack.getStackId();
