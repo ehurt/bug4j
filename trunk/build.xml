@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <project name="bug4j" default="dist" basedir=".">
 
+    <!-- test -->
     <property name="home" location="."/>
     <import file="build_include.xml"/>
 
