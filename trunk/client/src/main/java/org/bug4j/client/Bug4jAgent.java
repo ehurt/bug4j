@@ -119,6 +119,7 @@ public class Bug4jAgent {
         enqueue(STOP);
         try {
             _clientThread.join();
+            _clientThread = null;
         } catch (InterruptedException e) {
             //
         }
