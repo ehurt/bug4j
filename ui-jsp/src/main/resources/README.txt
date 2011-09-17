@@ -1,7 +1,7 @@
 1) Running the server
 o Run server/bin/startup.bat or bin/startup.sh
 o Open http://localhost:8063/
-o The userid/password is bug4j/bug4j
+o The userid/password is bug4j/admin
 
 2) Creating some bugs
 o Go to demo/log4j/ and run "java -jar demo-log4j.jar"
