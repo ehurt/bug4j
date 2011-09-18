@@ -165,6 +165,11 @@ public class Bug4jTest {
         Assert.assertEquals(1, Bug4jAgent.getReported());
     }
 
+    @Test
+    public void testNoStack() throws Exception {
+        Bug4jAgent.report("Just a message", null);
+        Bug4jAgent.shutdown();
+    }
 
     @Test
     @Ignore

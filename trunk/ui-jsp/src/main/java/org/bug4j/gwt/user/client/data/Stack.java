@@ -20,13 +20,13 @@ import java.io.Serializable;
 
 public class Stack implements Serializable {
     private long _bugId;
-    private long _stackId;
+    private Long _stackId;
 
     @SuppressWarnings({"UnusedDeclaration"})
     public Stack() {
     }
 
-    public Stack(long bugId, long stackId) {
+    public Stack(long bugId, Long stackId) {
         _bugId = bugId;
         _stackId = stackId;
     }
@@ -35,7 +35,7 @@ public class Stack implements Serializable {
         return _bugId;
     }
 
-    public long getStackId() {
+    public Long getStackId() {
         return _stackId;
     }
 }

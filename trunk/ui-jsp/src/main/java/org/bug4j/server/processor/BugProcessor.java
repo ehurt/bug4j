@@ -44,46 +44,66 @@ public final class BugProcessor {
      */
     public static long process(final Store store, @Nullable Long sessionId, String app, String version, @Nullable String message, long dateReported, @Nullable String user, String stackText) {
         stackText = stackText.trim();
-        final List<String> stackLines = TextToLines.toLineList(stackText);
+        final List<String> stackLines = stackText.isEmpty() ? null : TextToLines.toLineList(stackText);
 
         // First try based on the full hash of the exception.
         // In theory the client should not have sent the stack if an exact match already existed.
-        final String fullHash = FullStackHashCalculator.getTextHash(stackLines);
+        final String fullHash = hash(message, stackLines);
         Stack stack = store.getStackByHash(app, fullHash);
         if (stack == null) {
-            // Try to find a matching strain.
-            final String strainHash = StackPathHashCalculator.analyze(stackLines);
-            Strain strain = store.getStrainByHash(app, strainHash);
-            if (strain == null) {
-                // Determine the title that the bug would get.
-                final List<String> appPackages = store.getPackages(app);
-                final StackAnalyzer stackAnalyzer = new StackAnalyzer();
-                stackAnalyzer.setApplicationPackages(appPackages);
+            if (stackLines != null) {
+                // Try to find a matching strain.
+                final String strainHash = StackPathHashCalculator.analyze(stackLines);
+                Strain strain = store.getStrainByHash(app, strainHash);
+                if (strain == null) {
+                    // Determine the title that the bug would get.
+                    final List<String> appPackages = store.getPackages(app);
+                    final StackAnalyzer stackAnalyzer = new StackAnalyzer();
+                    stackAnalyzer.setApplicationPackages(appPackages);
 
-                String title = stackAnalyzer.getTitle(stackLines);
-                if (title == null) { // This may happen if the stack does not contain any of the application packages.
-                    // Try again without application packages
-                    stackAnalyzer.setApplicationPackages(Collections.<String>emptyList());
-                    title = stackAnalyzer.getTitle(stackLines);
+                    String title = stackAnalyzer.getTitle(stackLines);
+                    if (title == null) { // This may happen if the stack does not contain any of the application packages.
+                        // Try again without application packages
+                        stackAnalyzer.setApplicationPackages(Collections.<String>emptyList());
+                        title = stackAnalyzer.getTitle(stackLines);
+                    }
+
+                    if (title == null) {
+                        throw new IllegalStateException("Failed to analyze a stack [\n" + stackText + "\n]");
+                    }
+
+                    // Try to find a bug with the exact same title
+                    Long bugId = identifyBugByTitle(store, app, stackLines, title);
+                    if (bugId == null) {
+                        // if everything failed then it is a new bug.
+                        bugId = store.createBug(app, title);
+                    }
+                    strain = store.createStrain(bugId, strainHash);
                 }
-
-                if (title == null) {
-                    throw new IllegalStateException("Failed to analyze a stack [\n" + stackText + "\n]");
-                }
-
-                // Try to find a bug with the exact same title
-                Long bugId = identifyBugByTitle(store, app, stackLines, title);
+                stack = store.createStack(strain.getBugId(), strain.getStrainId(), fullHash, stackText);
+            } else {
+                Long bugId = identifyBugByTitle(store, app, message);
                 if (bugId == null) {
-                    // if everything failed then it is a new bug.
-                    bugId = store.createBug(app, title);
+                    bugId = store.createBug(app, message);
                 }
-                strain = store.createStrain(bugId, strainHash);
+                stack = new Stack(bugId, null);
             }
-            stack = store.createStack(strain.getBugId(), strain.getStrainId(), fullHash, stackText);
         }
         store.reportHitOnStack(sessionId, version, message, dateReported, user, stack);
 
         return stack.getBugId();
+    }
+
+    private static String hash(@Nullable String message, @Nullable List<String> stackLines) {
+        final String ret;
+        final List<String> hashable;
+        if (stackLines != null) {
+            hashable = stackLines;
+        } else {
+            hashable = Collections.singletonList(message);
+        }
+        ret = FullStackHashCalculator.getTextHash(hashable);
+        return ret;
     }
 
     /**
@@ -108,5 +128,18 @@ public final class BugProcessor {
             }
         }
         return null;
+    }
+
+    /**
+     * Tries to deduplicate based on the exact title.
+     * This is used only when there is no stack trace
+     */
+    private static Long identifyBugByTitle(Store store, String app, String title) {
+        Long ret = null;
+        final List<Long> bugIds = store.getBugIdByTitle(app, title);
+        if (bugIds.size() == 1) {
+            ret = bugIds.get(0);
+        }
+        return ret;
     }
 }

@@ -17,9 +17,12 @@
 package org.bug4j.client;
 
 import org.bug4j.common.FullStackHashCalculator;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -176,23 +179,32 @@ public class Bug4jAgent {
     }
 
     private void process(ReportableEvent reportableEvent) {
-        final String[] throwableStrRep = reportableEvent.getThrowableStrRep();
-        final String textHash = FullStackHashCalculator.getTextHash(Arrays.asList(throwableStrRep));
-        if (textHash != null) {
-            if (_reportLRU.put(textHash)) { // Refrain from sending the same eror
-                final String message = reportableEvent.getMessage();
-                final String user = reportableEvent.getUser();
-                final boolean isNew = _connector.reportHit(message, user, textHash);
-                if (isNew) {
-                    _connector.reportBug(
-                            message,
-                            user,
-                            reportableEvent.getThrowableStrRep()
-                    );
-                }
-                _reported++;
+        final String textHash = hash(reportableEvent);
+        if (_reportLRU.put(textHash)) { // Refrain from sending the same eror
+            final String message = reportableEvent.getMessage();
+            final String user = reportableEvent.getUser();
+            final boolean isNew = _connector.reportHit(message, user, textHash);
+            if (isNew) {
+                final String[] throwableStrRep = reportableEvent.getThrowableStrRep();
+                _connector.reportBug(
+                        message,
+                        user,
+                        throwableStrRep
+                );
             }
+            _reported++;
         }
+    }
+
+    @NotNull
+    private static String hash(ReportableEvent reportableEvent) {
+        final String ret;
+        final String[] throwableStrRep = reportableEvent.getThrowableStrRep();
+        final List<String> hashable = throwableStrRep == null
+                                      ? Collections.singletonList(reportableEvent.getMessage())
+                                      : Arrays.asList(throwableStrRep);
+        ret = FullStackHashCalculator.getTextHash(hashable);
+        return ret;
     }
 
     /**
@@ -201,9 +213,11 @@ public class Bug4jAgent {
      * @param message   An error message
      * @param throwable the exception to report
      */
-    public static void report(@Nullable String message, Throwable throwable) {
-        final ReportableEvent reportableEvent = ReportableEvent.createReportableEvent(message, throwable);
-        enqueue(reportableEvent);
+    public static void report(@Nullable String message, @Nullable Throwable throwable) {
+        if (message != null || throwable != null) { // do not allow both to be null. We wouldn't have much to do
+            final ReportableEvent reportableEvent = ReportableEvent.createReportableEvent(message, throwable);
+            enqueue(reportableEvent);
+        }
     }
 
     /**

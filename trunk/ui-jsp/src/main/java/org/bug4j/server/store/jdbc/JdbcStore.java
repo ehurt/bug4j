@@ -551,10 +551,9 @@ public class JdbcStore extends Store {
             try {
                 final PreparedStatement preparedStatement = connection.prepareStatement("" +
                         "SELECT H.HIT_ID,H.APP_VER,H.DATE_REPORTED,H.REPORTED_BY,H.MESSAGE,S.STACK_TEXT" +
-                        " FROM HIT H,STACK_TEXT S" +
-                        " WHERE H.BUG_ID=?" +
-                        " AND H.STACK_ID=S.STACK_ID" +
-                        " ORDER BY H.HIT_ID");
+                        "   FROM HIT H LEFT OUTER JOIN STACK_TEXT S ON H.STACK_ID=S.STACK_ID" +
+                        "   WHERE H.BUG_ID=?" +
+                        "   ORDER BY H.HIT_ID");
                 try {
                     preparedStatement.setLong(1, bugId);
                     final ResultSet resultSet = preparedStatement.executeQuery();
@@ -567,13 +566,16 @@ public class JdbcStore extends Store {
                             final String user = resultSet.getString(4);
                             final String message = resultSet.getString(5);
                             final Clob clob = resultSet.getClob(6);
-                            final Reader characterStream = clob.getCharacterStream();
-                            try {
-                                final String stack = IOUtils.toString(characterStream);
-                                hitsCallback.hit(hitId, appVer, dateReported, user, message, stack);
-                            } catch (IOException e) {
-                                LOGGER.error("Failed to read the stack trace for bug " + bugId + " hit " + hitId);
+                            String stack = null;
+                            if (clob != null) {
+                                final Reader characterStream = clob.getCharacterStream();
+                                try {
+                                    stack = IOUtils.toString(characterStream);
+                                } catch (IOException e) {
+                                    LOGGER.error("Failed to read the stack trace for bug " + bugId + " hit " + hitId);
+                                }
                             }
+                            hitsCallback.hit(hitId, appVer, dateReported, user, message, stack);
                         }
                     } finally {
                         resultSet.close();
@@ -1454,7 +1456,8 @@ public class JdbcStore extends Store {
         try {
             ret = insertStack(connection, bugId, strainId, fullHash);
 
-            insertStackText(connection, ret.getStackId(), stackText);
+            final Long stackId = ret.getStackId();
+            insertStackText(connection, stackId, stackText);
         } catch (SQLException e) {
             throw new IllegalStateException(e.getMessage(), e);
         } finally {
@@ -1509,7 +1512,7 @@ public class JdbcStore extends Store {
                     "INSERT INTO HIT (SESSION_ID, BUG_ID,STACK_ID,APP_VER,DATE_REPORTED,MESSAGE,REPORTED_BY) VALUES(?,?,?,?,?,?,?)");
             try {
                 final long bugId = stack.getBugId();
-                final long stackId = stack.getStackId();
+                final Long stackId = stack.getStackId();
                 final Timestamp now = new Timestamp(dateReported);
 
                 if (sessionId != null) {
@@ -1518,7 +1521,11 @@ public class JdbcStore extends Store {
                     preparedStatement.setNull(1, Types.INTEGER);
                 }
                 preparedStatement.setLong(2, bugId);
-                preparedStatement.setLong(3, stackId);
+                if (stackId != null) {
+                    preparedStatement.setLong(3, stackId);
+                } else {
+                    preparedStatement.setNull(3, Types.INTEGER);
+                }
                 preparedStatement.setString(4, appVersion);
                 preparedStatement.setTimestamp(5, now);
                 preparedStatement.setString(6, truncate(message, 1024));
@@ -1540,9 +1547,9 @@ public class JdbcStore extends Store {
         try {
             final PreparedStatement preparedStatement = connection.prepareStatement("" +
                     "SELECT S.STACK_TEXT" +
-                    " FROM HIT H, STACK_TEXT S" +
-                    " WHERE H.HIT_ID=?" +
-                    " AND H.STACK_ID=S.STACK_ID");
+                    "   FROM HIT H " +
+                    "       LEFT OUTER JOIN STACK_TEXT S ON H.STACK_ID=S.STACK_ID " +
+                    "   WHERE H.HIT_ID=?");
             try {
                 preparedStatement.setLong(1, hitId);
                 final ResultSet resultSet = preparedStatement.executeQuery();
@@ -1574,10 +1581,10 @@ public class JdbcStore extends Store {
         final Connection connection = getConnection();
         try {
             final PreparedStatement preparedStatement = connection.prepareStatement("" +
-                    "SELECT H.APP_VER,H.DATE_REPORTED,H.REPORTED_BY,H.MESSAGE,S.STACK_TEXT" +
-                    " FROM STACK_TEXT S, HIT H" +
-                    " WHERE H.HIT_ID=?" +
-                    " AND H.STACK_ID=S.STACK_ID");
+                    "SELECT H.APP_VER,H.DATE_REPORTED,H.REPORTED_BY,H.MESSAGE,S.STACK_TEXT\n" +
+                    "  FROM HIT H " +
+                    "   LEFT OUTER JOIN STACK_TEXT S ON H.STACK_ID=S.STACK_ID \n" +
+                    "  WHERE H.HIT_ID=?");
             try {
                 preparedStatement.setLong(1, hitId);
                 final ResultSet resultSet = preparedStatement.executeQuery();

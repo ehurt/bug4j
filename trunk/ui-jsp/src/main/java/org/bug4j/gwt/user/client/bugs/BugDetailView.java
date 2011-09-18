@@ -271,8 +271,13 @@ public class BugDetailView {
     }
 
     private void render(final String stackText) {
-        List<AppPkg> appPkgs = _bugModel.getAppPkgs();
-        final SafeHtml safeHtml = buildStack(appPkgs, stackText);
+        final SafeHtml safeHtml;
+        if (stackText != null) {
+            List<AppPkg> appPkgs = _bugModel.getAppPkgs();
+            safeHtml = buildStack(appPkgs, stackText);
+        } else {
+            safeHtml = new SafeHtmlBuilder().toSafeHtml();
+        }
         _stack.setHTML(safeHtml);
         glueCopy(stackText);
     }

@@ -113,12 +113,16 @@ class HttpConnector {
     }
 
     private String toText(String[] stackLines) {
-        final StringBuilder stringBuilder = new StringBuilder();
-        for (String stackLine : stackLines) {
-            stringBuilder.append(stackLine);
-            stringBuilder.append("\n");
+        String ret = null;
+        if (stackLines != null) {
+            final StringBuilder stringBuilder = new StringBuilder();
+            for (String stackLine : stackLines) {
+                stringBuilder.append(stackLine);
+                stringBuilder.append("\n");
+            }
+            ret = stringBuilder.toString();
         }
-        return stringBuilder.toString();
+        return ret;
     }
 
     private void createSession() {
