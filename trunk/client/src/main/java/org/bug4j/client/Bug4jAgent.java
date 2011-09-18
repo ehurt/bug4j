@@ -31,6 +31,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class Bug4jAgent {
     /**
+     * Maximum number of reports to enqueue when the server is not responding.
+     */
+    private static final int MAX_ENQUEUE = 200;
+
+    /**
+     * When the server does not respond, this is how long we wait until we retry
+     */
+    private static final int RETRY_MILLIS = 10 * 1000;
+
+    /**
      * Avoid re-entrance caused by calls to log4j during the initialization
      */
     private static AtomicBoolean _isEntered = new AtomicBoolean(false);
@@ -41,7 +51,6 @@ public class Bug4jAgent {
     private final ReportLRU _reportLRU = new ReportLRU();
 
     private HttpConnector _connector;
-    private boolean _report = true;
     private final Settings _settings;
 
     private Bug4jAgent(Settings settings) {
@@ -65,7 +74,10 @@ public class Bug4jAgent {
                                     tellMeWhenYouAreReady.notify();
                                 }
 
-                                client.run();
+                                try {
+                                    client.run();
+                                } catch (InterruptedException ignored) {
+                                }
                             }
                         };
                         thread.setName("bug4j");
@@ -118,7 +130,7 @@ public class Bug4jAgent {
 
         enqueue(STOP);
         try {
-            _clientThread.join();
+            _clientThread.join(RETRY_MILLIS * 2);
             _clientThread = null;
         } catch (InterruptedException e) {
             //
@@ -126,25 +138,28 @@ public class Bug4jAgent {
         _queue.clear();
     }
 
-    private void run() {
+    private void run() throws InterruptedException {
         while (true) {
             final ReportableEvent reportableEvent = getNextReportableEvent();
             if (reportableEvent == null) {
                 break;
             }
-            processSafely(reportableEvent);
+            while (!processSafely(reportableEvent)) {
+                Thread.sleep(RETRY_MILLIS); // Try again in 10 seconds
+            }
         }
     }
 
-    private void processSafely(ReportableEvent reportableEvent) {
-        if (_report) {
-            try {
-                init();
-                process(reportableEvent);
-            } catch (Throwable e) {
-                _report = false;
-            }
+    private boolean processSafely(ReportableEvent reportableEvent) {
+        boolean ret = false;
+        try {
+            init();
+            process(reportableEvent);
+            ret = true;
+        } catch (Exception e) {
+            // ret stays false
         }
+        return ret;
     }
 
     private ReportableEvent getNextReportableEvent() {
@@ -201,10 +216,12 @@ public class Bug4jAgent {
     }
 
     static void enqueue(ReportableEvent reportableEvent) {
-        if (!isStarted()) {
-            new Bug4jStarter().start();
+        if (_queue.size() < MAX_ENQUEUE) {
+            if (!isStarted()) {
+                new Bug4jStarter().start();
+            }
+            _queue.add(reportableEvent);
         }
-        _queue.add(reportableEvent);
     }
 
     public static int getReported() {
