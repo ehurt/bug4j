@@ -17,6 +17,8 @@
 package org.bug4j.client;
 
 import org.bug4j.common.TextToLines;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -26,41 +28,48 @@ class ReportableEvent {
     private final String[] _throwableStrRep;
     private final String _user;
 
-    public ReportableEvent(String message, String[] throwableStrRep, String user) {
+    public ReportableEvent(@Nullable String message, @Nullable String[] throwableStrRep, @Nullable String user) {
         _message = message;
         _throwableStrRep = throwableStrRep;
         _user = user;
     }
 
+    @Nullable
     public String getMessage() {
         return _message;
     }
 
+    @Nullable
     public String[] getThrowableStrRep() {
         return _throwableStrRep;
     }
 
+    @Nullable
     public String getUser() {
         return _user;
     }
 
-    public static ReportableEvent createReportableEvent(String message, Throwable throwable) {
+    @NotNull
+    public static ReportableEvent createReportableEvent(@Nullable String message, @Nullable Throwable throwable) {
         final String[] throwableStrRep = createStringRepresentation(throwable);
         final String user = System.getProperty("user.name", null);
         return new ReportableEvent(message, throwableStrRep, user);
     }
 
+    @Nullable
     private static String[] createStringRepresentation(Throwable throwable) {
-        String[] ret;
-        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        final PrintStream printStream = new PrintStream(byteArrayOutputStream);
-        try {
-            throwable.printStackTrace(printStream);
-        } finally {
-            printStream.close();
+        String[] ret = null;
+        if (throwable != null) {
+            final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            final PrintStream printStream = new PrintStream(byteArrayOutputStream);
+            try {
+                throwable.printStackTrace(printStream);
+            } finally {
+                printStream.close();
+            }
+            final String stackText = byteArrayOutputStream.toString();
+            ret = TextToLines.toLineArray(stackText);
         }
-        final String stackText = byteArrayOutputStream.toString();
-        ret = TextToLines.toLineArray(stackText);
         return ret;
     }
 }

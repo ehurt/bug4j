@@ -214,9 +214,11 @@ public class Exporter {
                         if (message != null) {
                             xmlStreamWriter.writeAttribute("message", message);
                         }
-                        xmlStreamWriter.writeCharacters("\n");
-                        xmlStreamWriter.writeCData(_unicodeEscaper.translate(stack));
-                        xmlStreamWriter.writeCharacters("\n");
+                        if (stack != null) {
+                            xmlStreamWriter.writeCharacters("\n");
+                            xmlStreamWriter.writeCData(_unicodeEscaper.translate(stack));
+                            xmlStreamWriter.writeCharacters("\n");
+                        }
                         xmlStreamWriter.writeEndElement();
                     }
                 });
