@@ -42,7 +42,7 @@ public class Bug4jAppender extends AppenderSkeleton {
     @Override
     protected void append(LoggingEvent event) {
         final Level level = event.getLevel();
-        if (level == Level.ERROR) {
+        if (level.isGreaterOrEqual(Level.WARN)) {
             final String message = event.getRenderedMessage();
             final ThrowableInformation throwableInformation = event.getThrowableInformation();
             if (throwableInformation != null) {
