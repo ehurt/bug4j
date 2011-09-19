@@ -17,32 +17,15 @@
 package org.bug4j.server.migration;
 
 import org.apache.commons.io.FileUtils;
-import org.bug4j.server.Configuration;
 import org.bug4j.server.store.jdbc.JdbcStore;
 
 import java.io.File;
 import java.io.IOException;
 
 public class Migrator {
-    private static final int TIC = 2;
-
-    /**
-     * 2011-08-14 Database used to be stored in the default location wich would usually end-up in .../server/bin/bug4j.
-     * The database has now been moved to .../server/bug4jdb
-     */
-    private static final int TIC_DB_IN_BIN = 0;
-
-    /**
-     * 2011-09-10 Added the SESSION_ID to the HIT table
-     */
-    private static final int TIC_SESSION_ID = 1;
-
     private static Migrator INSTANCE;
-    private static final String KEY_MIGRATION_TIC = "migration.tic";
-    private int _migrateFrom;
 
     private Migrator() {
-        _migrateFrom = Configuration.getInstance().getIntProperty(KEY_MIGRATION_TIC, 0);
     }
 
     public static synchronized Migrator getInstance() {
@@ -52,28 +35,16 @@ public class Migrator {
         return INSTANCE;
     }
 
-    public void completeMigration() {
-        final Configuration configuration = Configuration.getInstance();
-        configuration.setIntProperty(KEY_MIGRATION_TIC, TIC);
-        configuration.writeProperties();
-    }
-
     public void preOpenDB() {
-        switch (_migrateFrom) {
-            case TIC_DB_IN_BIN:
-                migrateDatabaseLocation();
-        }
+        migrateDatabaseLocation();
     }
 
     public void postOpenDB() {
-        switch (_migrateFrom) {
-            case TIC_SESSION_ID:
-                addHitSession();
-        }
+        addHitSession();
     }
 
     /**
-     * Database used to be stored in the default location wich would usually end-up in .../server/bin/bug4j.
+     * 2011-08-14 Database used to be stored in the default location wich would usually end-up in .../server/bin/bug4j.
      * The database has now been moved to .../server/bug4jdb
      */
     private void migrateDatabaseLocation() {
@@ -89,6 +60,9 @@ public class Migrator {
         }
     }
 
+    /**
+     * 2011-09-10 Added the SESSION_ID to the HIT table
+     */
     private void addHitSession() {
         final JdbcStore jdbcStore = JdbcStore.getInstance();
         jdbcStore.migrate_addHitSession();

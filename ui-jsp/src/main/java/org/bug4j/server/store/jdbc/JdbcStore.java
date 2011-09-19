@@ -1655,7 +1655,10 @@ public class JdbcStore extends Store {
                 connection.close();
             }
         } catch (SQLException e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            final String sqlState = e.getSQLState();
+            if (!"X0Y32".equals(sqlState)) { // X0Y32: Column 'SESSION_ID' already exists in Table/View '"APP"."HIT"'.
+                throw new IllegalStateException(e.getMessage(), e);
+            }
         }
     }
 }
