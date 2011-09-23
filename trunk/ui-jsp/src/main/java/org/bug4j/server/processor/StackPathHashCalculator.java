@@ -95,6 +95,9 @@ public class StackPathHashCalculator {
                 return true;
             }
         }
+        if (methodCall.contains("_$$_javassist_")) {
+            return true;
+        }
         return false;
     }
 
