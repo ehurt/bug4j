@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 import org.apache.tomcat.util.http.fileupload.FileItemIterator;
 import org.apache.tomcat.util.http.fileupload.FileItemStream;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
+import org.bug4j.server.processor.BugProcessor;
 import org.bug4j.server.store.Store;
 import org.bug4j.server.store.StoreFactory;
 
@@ -69,6 +70,7 @@ public class ImportServlet extends HttpServlet {
                             zipInputStream.close();
                         }
                     }
+                    BugProcessor.printStatistics();
                 } finally {
                     inputStream.close();
                 }
