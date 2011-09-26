@@ -67,7 +67,8 @@ public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jServi
     public Filter getDefaultFilter() throws Exception {
         try {
             final Store store = StoreFactory.getStore();
-            return store.getDefaultFilter(getUserName());
+            final String userName = getUserName();
+            return store.getDefaultFilter(userName);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             throw new Exception(e.getMessage(), e);

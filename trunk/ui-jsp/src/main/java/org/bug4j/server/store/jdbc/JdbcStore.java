@@ -714,8 +714,13 @@ public class JdbcStore extends Store {
     @Nullable
     public Integer getUserPref_Integer(String remoteUser, String key, @Nullable Integer defaultValue) {
         Integer ret = defaultValue;
-        final String userPref = getUserPref(remoteUser, key, null);
-        if (userPref != null) {
+
+        final String defaultStringValue = defaultValue == null ? null : defaultValue.toString();
+        final String userPref = getUserPref(remoteUser, key, defaultStringValue);
+        // Note that null is a valid value which should not be replaced by the default value.
+        if (userPref == null) {
+            ret = null;
+        } else {
             try {
                 ret = Integer.valueOf(userPref);
             } catch (NumberFormatException e) {
