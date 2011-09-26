@@ -26,8 +26,8 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import org.bug4j.gwt.common.client.AdvancedAsyncCallback;
 import org.bug4j.gwt.common.client.BaseDialog;
 import org.bug4j.gwt.common.client.CommonService;
 import org.bug4j.gwt.common.client.Resources;
@@ -70,12 +70,7 @@ public class Admin implements EntryPoint {
         final Element loadingElement = DOM.getElementById("loading");
         DOM.removeChild(DOM.getParent(loadingElement), loadingElement);
 
-        CommonService.App.getInstance().getUserAuthorities(new AsyncCallback<UserAuthorities>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert("Failed to getUserName()");
-            }
-
+        CommonService.App.getInstance().getUserAuthorities(new AdvancedAsyncCallback<UserAuthorities>() {
             @Override
             public void onSuccess(UserAuthorities userAuthorities) {
                 if (userAuthorities.isAdmin()) {
@@ -90,12 +85,7 @@ public class Admin implements EntryPoint {
     private Widget buildNavigation(final AdminView defaultView) {
         final FlowPanel flowPanel = new FlowPanel();
 
-        CommonService.App.getInstance().getApplications(new AsyncCallback<List<String>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert("Failed to get the list of applications");
-            }
-
+        CommonService.App.getInstance().getApplications(new AdvancedAsyncCallback<List<String>>() {
             @Override
             public void onSuccess(List<String> applicationNames) {
                 addNavigationLabel(flowPanel, _userView);

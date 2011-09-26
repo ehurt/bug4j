@@ -28,8 +28,8 @@ import com.google.gwt.text.shared.AbstractSafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.IdentityColumn;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import org.bug4j.gwt.common.client.AdvancedAsyncCallback;
 import org.bug4j.gwt.common.client.BaseDialog;
 import org.bug4j.gwt.common.client.CommonService;
 
@@ -144,12 +144,7 @@ public class ApplicationsView extends AdminView {
     }
 
     void refreshData() {
-        CommonService.App.getInstance().getApplications(new AsyncCallback<List<String>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert("Server failure.");
-            }
-
+        CommonService.App.getInstance().getApplications(new AdvancedAsyncCallback<List<String>>() {
             @Override
             public void onSuccess(List<String> applicationNames) {
                 _cellTable.setRowData(applicationNames);
@@ -166,12 +161,7 @@ public class ApplicationsView extends AdminView {
             protected void whenOk() {
                 final String applicationName = _textBox.getText();
                 if (!applicationName.isEmpty()) {
-                    AdminService.App.getInstance().createApplication(applicationName, new AsyncCallback<Void>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            Window.alert("Server failure");
-                        }
-
+                    AdminService.App.getInstance().createApplication(applicationName, new AdvancedAsyncCallback<Void>() {
                         @Override
                         public void onSuccess(Void result) {
                             _admin.whenApplicationsChanged();
@@ -219,12 +209,7 @@ public class ApplicationsView extends AdminView {
                 "This operation is not reversible\n" +
                 "Are you sure you want  to delete '" + applicationName + "'?");
         if (confirm) {
-            AdminService.App.getInstance().deleteApplication(applicationName, new AsyncCallback<Void>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    Window.alert("Server failure");
-                }
-
+            AdminService.App.getInstance().deleteApplication(applicationName, new AdvancedAsyncCallback<Void>() {
                 @Override
                 public void onSuccess(Void result) {
                     _admin.whenApplicationsChanged();

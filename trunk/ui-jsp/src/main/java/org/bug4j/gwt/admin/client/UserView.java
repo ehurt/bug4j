@@ -30,14 +30,13 @@ import com.google.gwt.text.shared.AbstractSafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import org.bug4j.gwt.admin.client.data.User;
+import org.bug4j.gwt.common.client.AdvancedAsyncCallback;
 import org.bug4j.gwt.common.client.BaseDialog;
 
 import java.util.*;
@@ -243,12 +242,7 @@ public class UserView extends AdminView {
     }
 
     private void refreshData() {
-        AdminService.App.getInstance().getUsers(new AsyncCallback<List<User>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert(caught.getMessage());
-            }
-
+        AdminService.App.getInstance().getUsers(new AdvancedAsyncCallback<List<User>>() {
             @Override
             public void onSuccess(List<User> result) {
                 _cellTable.setRowData(result);
@@ -257,12 +251,7 @@ public class UserView extends AdminView {
     }
 
     private void whenUserChanges(User user) {
-        AdminService.App.getInstance().updateUser(user, new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert(caught.getMessage());
-            }
-
+        AdminService.App.getInstance().updateUser(user, new AdvancedAsyncCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
             }
@@ -312,12 +301,7 @@ public class UserView extends AdminView {
                             null
                     );
                     final String password = userDialog.getPassword();
-                    AdminService.App.getInstance().createUser(user, password, new AsyncCallback<Void>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            Window.alert(caught.getMessage());
-                        }
-
+                    AdminService.App.getInstance().createUser(user, password, new AdvancedAsyncCallback<Void>() {
                         @Override
                         public void onSuccess(Void result) {
                             refreshData();
@@ -334,12 +318,7 @@ public class UserView extends AdminView {
         for (User user : selectedSet) {
             userNames.add(user.getUserName());
         }
-        AdminService.App.getInstance().deleteUsers(userNames, new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert(caught.getMessage());
-            }
-
+        AdminService.App.getInstance().deleteUsers(userNames, new AdvancedAsyncCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
                 refreshData();
@@ -348,12 +327,7 @@ public class UserView extends AdminView {
     }
 
     private void whenResetPassword(User user) {
-        AdminService.App.getInstance().resetPassword(user, new AsyncCallback<String>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert("Server failure.");
-            }
-
+        AdminService.App.getInstance().resetPassword(user, new AdvancedAsyncCallback<String>() {
             @Override
             public void onSuccess(final String newPassword) {
                 final BaseDialog baseDialog = new BaseDialog("Password Reset") {

@@ -24,13 +24,12 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
+import org.bug4j.gwt.common.client.AdvancedAsyncCallback;
 import org.bug4j.gwt.user.client.Bug4jService;
 import org.bug4j.gwt.user.client.BugModel;
 import org.bug4j.gwt.user.client.data.Bug;
@@ -64,12 +63,7 @@ public class BugView implements DisplaysBugs {
             }
         });
 
-        Bug4jService.App.getInstance().getDefaultFilter(new AsyncCallback<Filter>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert(caught.getMessage());
-            }
-
+        Bug4jService.App.getInstance().getDefaultFilter(new AdvancedAsyncCallback<Filter>() {
             @Override
             public void onSuccess(Filter result) {
                 result.copyTo(_filter);
@@ -113,12 +107,7 @@ public class BugView implements DisplaysBugs {
                     newFilter.copyTo(_filter);
                     refreshBugs();
                     updateFilterMenuItem();
-                    Bug4jService.App.getInstance().setDefaultFilter(newFilter, new AsyncCallback<Void>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            Window.alert(caught.getMessage());
-                        }
-
+                    Bug4jService.App.getInstance().setDefaultFilter(newFilter, new AdvancedAsyncCallback<Void>() {
                         @Override
                         public void onSuccess(Void result) {
                             // ignore
@@ -193,12 +182,7 @@ public class BugView implements DisplaysBugs {
             final String sortBy = BugViewColumn.sortBy(sortList);
             final String application = _bugModel.getApplication();
             if (application != null) {
-                Bug4jService.App.getInstance().getBugs(application, _filter, sortBy, new AsyncCallback<List<Bug>>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        Window.alert(caught.getMessage());
-                    }
-
+                Bug4jService.App.getInstance().getBugs(application, _filter, sortBy, new AdvancedAsyncCallback<List<Bug>>() {
                     @Override
                     public void onSuccess(List<Bug> bugs) {
                         _cellTable.setRowData(bugs);
@@ -221,12 +205,7 @@ public class BugView implements DisplaysBugs {
         if (_lastSelectedBug != null) {
             if (!_lastSelectedBug.isRead()) {
                 _lastSelectedBug.setRead(true);
-                Bug4jService.App.getInstance().markRead(_lastSelectedBug.getId(), new AsyncCallback<Void>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        Window.alert(caught.getMessage());
-                    }
-
+                Bug4jService.App.getInstance().markRead(_lastSelectedBug.getId(), new AdvancedAsyncCallback<Void>() {
                     @Override
                     public void onSuccess(Void result) {
                     }

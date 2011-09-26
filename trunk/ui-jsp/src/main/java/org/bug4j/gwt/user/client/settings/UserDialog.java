@@ -17,8 +17,8 @@
 package org.bug4j.gwt.user.client.settings;
 
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import org.bug4j.gwt.common.client.AdvancedAsyncCallback;
 import org.bug4j.gwt.common.client.BaseDialog;
 import org.bug4j.gwt.common.client.data.UserException;
 import org.bug4j.gwt.user.client.Bug4jService;
@@ -46,10 +46,9 @@ public class UserDialog extends BaseDialog {
             _confirm.setText("");
         } else {
             final String oldPassword = _oldPassword.getText();
-            Bug4jService.App.getInstance().updatePassword(oldPassword, newPassword, new AsyncCallback<Void>() {
+            Bug4jService.App.getInstance().updatePassword(oldPassword, newPassword, new AdvancedAsyncCallback<Void>() {
                 @Override
-                public void onFailure(Throwable caught) {
-                    final String message = caught.getMessage();
+                protected void displayErrorMessage(Throwable caught, String message) {
                     setError(message);
                     if (caught instanceof UserException) {
                         final UserException userException = (UserException) caught;

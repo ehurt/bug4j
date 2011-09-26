@@ -21,10 +21,9 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import org.bug4j.gwt.admin.client.data.User;
+import org.bug4j.gwt.common.client.AdvancedAsyncCallback;
 
 /**
  */
@@ -122,12 +121,7 @@ public class UserDialog extends DialogBox {
             }
         });
 
-        AdminService.App.getInstance().getRandomPassword(new AsyncCallback<String>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert(caught.getMessage());
-            }
-
+        AdminService.App.getInstance().getRandomPassword(new AdvancedAsyncCallback<String>() {
             @Override
             public void onSuccess(String result) {
                 _password.setText(result);

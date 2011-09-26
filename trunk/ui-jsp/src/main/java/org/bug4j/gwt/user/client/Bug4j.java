@@ -30,6 +30,7 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import org.bug4j.gwt.common.client.AdvancedAsyncCallback;
 import org.bug4j.gwt.common.client.CommonService;
 import org.bug4j.gwt.common.client.Resources;
 import org.bug4j.gwt.common.client.data.AppPkg;
@@ -66,30 +67,15 @@ public class Bug4j implements EntryPoint {
      * This is the entry point method.
      */
     public void onModuleLoad() {
-        CommonService.App.getInstance().getUserAuthorities(new AsyncCallback<UserAuthorities>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                whenLogout();
-            }
-
+        CommonService.App.getInstance().getUserAuthorities(new AdvancedAsyncCallback<UserAuthorities>() {
             @Override
             public void onSuccess(UserAuthorities userAuthorities) {
                 try {
                     setUserAuthorities(userAuthorities);
-                    Bug4jService.App.getInstance().getDefaultApplication(new AsyncCallback<String>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            fail();
-                        }
-
+                    Bug4jService.App.getInstance().getDefaultApplication(new AdvancedAsyncCallback<String>() {
                         @Override
                         public void onSuccess(final String appName) {
-                            setApplication(appName, new AsyncCallback<Void>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    fail();
-                                }
-
+                            setApplication(appName, new AdvancedAsyncCallback<Void>() {
                                 @Override
                                 public void onSuccess(Void result) {
                                     initialize();
@@ -102,10 +88,6 @@ public class Bug4j implements EntryPoint {
                 }
             }
         });
-    }
-
-    private void fail() {
-        Window.alert("Server failure");
     }
 
     private void initialize() {
@@ -153,12 +135,7 @@ public class Bug4j implements EntryPoint {
 
         final Filter filter = new Filter();
         filter.setBugId(bugId);
-        Bug4jService.App.getInstance().getBugs(null, filter, "", new AsyncCallback<List<Bug>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                fail();
-            }
-
+        Bug4jService.App.getInstance().getBugs(null, filter, "", new AdvancedAsyncCallback<List<Bug>>() {
             @Override
             public void onSuccess(List<Bug> result) {
                 if (!result.isEmpty()) {
@@ -308,12 +285,7 @@ public class Bug4j implements EntryPoint {
 
     private void whenAppClicked(final Label app) {
 
-        CommonService.App.getInstance().getApplications(new AsyncCallback<List<String>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert("Failed to get the list of applications");
-            }
-
+        CommonService.App.getInstance().getApplications(new AdvancedAsyncCallback<List<String>>() {
             @Override
             public void onSuccess(List<String> appNames) {
                 showApplicationPopupPanel(app, appNames);
@@ -353,12 +325,7 @@ public class Bug4j implements EntryPoint {
     }
 
     private void whenAppSelectionChanges(final String appName) {
-        Bug4jService.App.getInstance().setDefaultApplication(appName, new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert(caught.getMessage());
-            }
-
+        Bug4jService.App.getInstance().setDefaultApplication(appName, new AdvancedAsyncCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
                 setApplication(appName, null);
@@ -379,11 +346,11 @@ public class Bug4j implements EntryPoint {
     }
 
     private void setApplication(final String appName, @Nullable final AsyncCallback<Void> asyncCallback) {
-        CommonService.App.getInstance().getPackages(appName, new AsyncCallback<List<AppPkg>>() {
+        CommonService.App.getInstance().getPackages(appName, new AdvancedAsyncCallback<List<AppPkg>>() {
             @Override
             public void onFailure(Throwable caught) {
                 if (asyncCallback == null) {
-                    fail();
+                    super.onFailure(caught);
                 } else {
                     asyncCallback.onFailure(caught);
                 }
