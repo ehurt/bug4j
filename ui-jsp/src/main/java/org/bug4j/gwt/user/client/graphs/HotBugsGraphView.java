@@ -18,12 +18,10 @@ package org.bug4j.gwt.user.client.graphs;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsArray;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.LegendPosition;
@@ -77,29 +75,39 @@ public class HotBugsGraphView extends GraphView implements DisplaysBugs {
     }
 
     private Widget createGraph(int daysBack, Map<Bug, int[]> topHits) {
-        final Options options = LineChart.createOptions();
-        options.setWidth(800);
-        options.setHeight(400);
-        options.setLegend(LegendPosition.NONE);
-        final AbstractDataTable data = createData(daysBack, topHits);
-        _lineChart = new LineChart(data, options);
-        _lineChart.setSize("100%", "100%");
-        _lineChart.addSelectHandler(new SelectHandler() {
-            @Override
-            public void onSelect(SelectEvent event) {
-                final JsArray<Selection> selections = _lineChart.getSelections();
-                if (selections.length() > 0) {
-                    final Selection selection = selections.get(0);
-                    final int column = selection.getColumn();
-                    final Bug bug = _bugs.get(column - 1);
-                    whenBugSelected(bug);
+        final Widget ret;
+        if (!topHits.isEmpty()) {
+            final Options options = LineChart.createOptions();
+            options.setWidth(800);
+            options.setHeight(400);
+            options.setLegend(LegendPosition.NONE);
+            final AbstractDataTable data = createData(daysBack, topHits);
+            _lineChart = new LineChart(data, options);
+            _lineChart.setSize("100%", "100%");
+            _lineChart.addSelectHandler(new SelectHandler() {
+                @Override
+                public void onSelect(SelectEvent event) {
+                    final JsArray<Selection> selections = _lineChart.getSelections();
+                    if (selections.length() > 0) {
+                        final Selection selection = selections.get(0);
+                        final int column = selection.getColumn();
+                        final Bug bug = _bugs.get(column - 1);
+                        whenBugSelected(bug);
+                    }
                 }
-            }
-        });
-        final FlowPanel flowPanel = new FlowPanel();
-        flowPanel.add(new HTML("<H1>Top " + MAX_BUGS + " bugs in the last " + DAYS_BACK + " days.</H1>"));
-        flowPanel.add(_lineChart);
-        return flowPanel;
+            });
+            final FlowPanel flowPanel = new FlowPanel();
+            flowPanel.add(new HTML("<H1>Top " + MAX_BUGS + " bugs in the last " + DAYS_BACK + " days.</H1>"));
+            flowPanel.add(_lineChart);
+            ret = flowPanel;
+        } else {
+            final Label label = new Label("No hits within the last " + DAYS_BACK + " days");
+            final Style style = label.getElement().getStyle();
+            style.setFontSize(1.5, Style.Unit.EM);
+            style.setPadding(1, Style.Unit.EM);
+            ret = label;
+        }
+        return ret;
     }
 
     private void whenBugSelected(Bug bug) {
