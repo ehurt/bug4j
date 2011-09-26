@@ -21,11 +21,10 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.*;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.*;
 import org.bug4j.common.TextToLines;
+import org.bug4j.gwt.common.client.AdvancedAsyncCallback;
 import org.bug4j.gwt.common.client.data.AppPkg;
 import org.bug4j.gwt.user.client.Bug4j;
 import org.bug4j.gwt.user.client.Bug4jService;
@@ -153,12 +152,7 @@ public class BugDetailView {
 
         if (bugHit != null) {
             final long hitId = bugHit.getHitId();
-            Bug4jService.App.getInstance().getBugHitAndStack(hitId, new AsyncCallback<BugHitAndStack>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    Window.alert(caught.getMessage());
-                }
-
+            Bug4jService.App.getInstance().getBugHitAndStack(hitId, new AdvancedAsyncCallback<BugHitAndStack>() {
                 @Override
                 public void onSuccess(BugHitAndStack bugHitAndStack) {
                     final String stack = bugHitAndStack.getStack();
@@ -235,12 +229,7 @@ public class BugDetailView {
                 sortBy.append(ascending ? c : Character.toUpperCase(c));
             }
 
-            Bug4jService.App.getInstance().getHits(bugId, 0, PAGE_SIZE, sortBy.toString(), new AsyncCallback<List<BugHit>>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    Window.alert(caught.getMessage());
-                }
-
+            Bug4jService.App.getInstance().getHits(bugId, 0, PAGE_SIZE, sortBy.toString(), new AdvancedAsyncCallback<List<BugHit>>() {
                 @Override
                 public void onSuccess(List<BugHit> bugHits) {
                     setData(bugHits);

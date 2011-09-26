@@ -25,13 +25,12 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.text.shared.AbstractSafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.bug4j.gwt.admin.client.AdminService;
 import org.bug4j.gwt.admin.client.ApplicationView;
+import org.bug4j.gwt.common.client.AdvancedAsyncCallback;
 import org.bug4j.gwt.common.client.CommonService;
 import org.bug4j.gwt.common.client.data.AppPkg;
 
@@ -65,12 +64,7 @@ public class ApplicationPackagesView {
 
     private void refreshData() {
         final String applicationName = _applicationView.getApplicationName();
-        CommonService.App.getInstance().getPackages(applicationName, new AsyncCallback<List<AppPkg>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert("Failed to get the list of packages.");
-            }
-
+        CommonService.App.getInstance().getPackages(applicationName, new AdvancedAsyncCallback<List<AppPkg>>() {
             @Override
             public void onSuccess(List<AppPkg> pkgs) {
                 _pkgs = pkgs;
@@ -153,12 +147,7 @@ public class ApplicationPackagesView {
 
     private void whenDataChanges() {
         final String applicationName = _applicationView.getApplicationName();
-        AdminService.App.getInstance().setPackages(applicationName, _pkgs, new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert("Server failure");
-            }
-
+        AdminService.App.getInstance().setPackages(applicationName, _pkgs, new AdvancedAsyncCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
             }

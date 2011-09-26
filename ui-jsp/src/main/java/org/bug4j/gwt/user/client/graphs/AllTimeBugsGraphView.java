@@ -18,8 +18,6 @@ package org.bug4j.gwt.user.client.graphs;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
@@ -28,6 +26,7 @@ import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.LegendPosition;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
+import org.bug4j.gwt.common.client.AdvancedAsyncCallback;
 import org.bug4j.gwt.user.client.Bug4jService;
 import org.bug4j.gwt.user.client.BugModel;
 import org.bug4j.gwt.user.client.bugs.DisplaysBugs;
@@ -48,12 +47,7 @@ public class AllTimeBugsGraphView extends GraphView implements DisplaysBugs {
         try {
             final String application = _bugModel.getApplication();
             if (application != null) {
-                Bug4jService.App.getInstance().getBugCountByDate(application, new AsyncCallback<List<BugCountByDate>>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        Window.alert("Failed to get the data");
-                    }
-
+                Bug4jService.App.getInstance().getBugCountByDate(application, new AdvancedAsyncCallback<List<BugCountByDate>>() {
                     @Override
                     public void onSuccess(List<BugCountByDate> bugCountByDates) {
                         final Widget widget = createGraph(bugCountByDates);
