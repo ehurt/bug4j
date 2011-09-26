@@ -92,7 +92,7 @@ public abstract class Store {
     public Filter getDefaultFilter(String remoteUser) {
         final Filter ret = new Filter();
         final String title = getUserPref(remoteUser, "FILTER_TITLE", null);
-        final Integer hitWithinDays = getUserPref_Integer(remoteUser, "FILTER_DAYS", 7);
+        final Integer hitWithinDays = getUserPref_Integer(remoteUser, "FILTER_DAYS", null);
         final String multiUsers = getUserPref(remoteUser, "FILTER_MULTI_USERS", Boolean.FALSE.toString());
         ret.setTitle(title);
         ret.setHitWithinDays(hitWithinDays);

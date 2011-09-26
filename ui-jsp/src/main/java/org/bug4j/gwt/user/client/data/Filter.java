@@ -23,7 +23,7 @@ import java.io.Serializable;
 public class Filter implements Serializable {
     private String _title;
     private Long _bugId;
-    private Integer _hitWithinDays = 7;
+    private Integer _hitWithinDays = null;
     private boolean _reportedByMultiple = false;
 
     public Filter() {
