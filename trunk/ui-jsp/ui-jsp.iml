@@ -20,7 +20,7 @@
         <setting name="compilerParameters" value="-localWorkers 4" />
         <setting name="compilerMaxHeapSize" value="128" />
         <setting name="gwtScriptOutputStyle" value="PRETTY" />
-        <setting name="gwtSdkUrl" value="file://$dep-home$/gwt-2.3.0" />
+        <setting name="gwtSdkUrl" value="file://$dep-home$/gwt-2.4.0" />
         <setting name="webFacet" value="Web" />
       </configuration>
     </facet>
