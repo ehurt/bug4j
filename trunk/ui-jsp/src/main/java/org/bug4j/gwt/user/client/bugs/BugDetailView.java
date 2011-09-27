@@ -47,6 +47,7 @@ public class BugDetailView {
     private final Set<Long> _unreadHits = new HashSet<Long>();
     @Nullable
     private BugHit _lastSelectedHit;
+    private Object _clip;
     private static final TextColumn<BugHit> _dateColumn = new TextColumn<BugHit>() {
         @Override
         public String getValue(BugHit bugHit) {
@@ -173,7 +174,18 @@ public class BugDetailView {
     }
 
     private Widget buildStackPanel() {
-        final DockLayoutPanel ret = new DockLayoutPanel(Style.Unit.EM);
+        final DockLayoutPanel ret = new DockLayoutPanel(Style.Unit.EM) {
+            @Override
+            public void onResize() {
+                super.onResize();
+                zeroClipReposition(_clip);
+            }
+
+            @Override
+            protected void onDetach() {
+                zeroClipDetach(_clip);
+            }
+        };
 
         _stack = new HTML();
         _stack.addStyleName("BugDetailView-hit-stack");
@@ -189,12 +201,6 @@ public class BugDetailView {
         ret.add(scrollPanel);
         return ret;
     }
-
-    public static native void glueCopy(String text) /*-{
-        var clip = new $wnd.ZeroClipboard.Client();
-        clip.setText(text);
-        clip.glue('copyId');
-    }-*/;
 
     public void clear() {
         _anchor.setText("");
@@ -268,7 +274,12 @@ public class BugDetailView {
             safeHtml = new SafeHtmlBuilder().toSafeHtml();
         }
         _stack.setHTML(safeHtml);
-        glueCopy(stackText);
+        if (_clip == null) {
+            // It would be cleaner to attach in a onAttach(){} but the element
+            // does not have a size at that time so it wouldn't work.
+            _clip = zeroClipAttach("copyId");
+        }
+        zeroClipSetText(_clip, stackText);
     }
 
     private static SafeHtml buildStack(List<AppPkg> appPkgs, String stackText) {
@@ -338,4 +349,21 @@ public class BugDetailView {
         return ret.toArray(new String[ret.size()]);
     }
 
+    private static native Object zeroClipAttach(String widgetId) /*-{
+        var clip = new $wnd.ZeroClipboard.Client();
+        clip.glue(widgetId);
+        return clip;
+    }-*/;
+
+    private static native void zeroClipDetach(Object clip) /*-{
+        clip.destroy()
+    }-*/;
+
+    private static native void zeroClipSetText(Object clip, String text) /*-{
+        clip.setText(text)
+    }-*/;
+
+    private static native void zeroClipReposition(Object clip) /*-{
+        clip.reposition();
+    }-*/;
 }
