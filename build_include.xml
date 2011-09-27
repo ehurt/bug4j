@@ -54,7 +54,7 @@
     </path>
 
     <path id="gwt-dev.lib">
-        <filelist dir="${dep-home}/gwt-2.3.0">
+        <filelist dir="${dep-home}/gwt-2.4.0">
             <file name="gwt-user.jar"/>
             <file name="gwt-dev.jar"/>
             <file name="validation-api-1.0.0.GA.jar"/>
@@ -63,7 +63,7 @@
     </path>
 
     <path id="gwt-server.lib">
-        <filelist dir="${dep-home}/gwt-2.3.0">
+        <filelist dir="${dep-home}/gwt-2.4.0">
             <file name="gwt-servlet.jar"/>
         </filelist>
     </path>
