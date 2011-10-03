@@ -32,7 +32,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import org.bug4j.gwt.common.client.AdvancedAsyncCallback;
 import org.bug4j.gwt.common.client.CommonService;
-import org.bug4j.gwt.common.client.Resources;
+import org.bug4j.gwt.common.client.Header;
 import org.bug4j.gwt.common.client.data.AppPkg;
 import org.bug4j.gwt.common.client.data.UserAuthorities;
 import org.bug4j.gwt.user.client.bugs.BugDetailView;
@@ -50,11 +50,9 @@ import java.util.List;
  * Entry point classes define <code>onModuleLoad()</code>
  */
 public class Bug4j implements EntryPoint {
-    public static final Resources IMAGES = GWT.create(Resources.class);
     private final BugModel _bugModel = new BugModel();
     private UserAuthorities _userAuthorities;
-    private Label _applicationLabel;
-    private Label _userLabel = new Label("");
+    private Header _header;
 
     public static String createBugLink(long bugId) {
         return Window.Location
@@ -69,16 +67,15 @@ public class Bug4j implements EntryPoint {
     public void onModuleLoad() {
         CommonService.App.getInstance().getUserAuthorities(new AdvancedAsyncCallback<UserAuthorities>() {
             @Override
-            public void onSuccess(UserAuthorities userAuthorities) {
+            public void onSuccess(final UserAuthorities userAuthorities) {
                 try {
-                    setUserAuthorities(userAuthorities);
                     Bug4jService.App.getInstance().getDefaultApplication(new AdvancedAsyncCallback<String>() {
                         @Override
                         public void onSuccess(final String appName) {
                             setApplication(appName, new AdvancedAsyncCallback<Void>() {
                                 @Override
                                 public void onSuccess(Void result) {
-                                    initialize();
+                                    initialize(userAuthorities);
                                 }
                             });
                         }
@@ -90,10 +87,24 @@ public class Bug4j implements EntryPoint {
         });
     }
 
-    private void initialize() {
+    private void initialize(UserAuthorities userAuthorities) {
         final DockLayoutPanel dockLayoutPanel = new DockLayoutPanel(Style.Unit.PX);
-        final Widget northWidget = buildNorthWidget();
-        dockLayoutPanel.addNorth(northWidget, 35);
+        _header = new Header(true) {
+            @Override
+            protected void whenAppClicked(Label applicationLabel) {
+                Bug4j.this.whenAppClicked(applicationLabel);
+            }
+
+            @Override
+            protected void whenUserClicked(Label userLabel) {
+                Bug4j.this.whenUserClicked(userLabel);
+            }
+        };
+
+        setUserAuthorities(userAuthorities);
+        updateAppButtonText();
+
+        dockLayoutPanel.addNorth(_header, 35);
 
         Long bugId = getBugIdParam();
         if (bugId == null) {
@@ -185,49 +196,6 @@ public class Bug4j implements EntryPoint {
     public static native String getUserAgent() /*-{
         return navigator.userAgent.toLowerCase();
     }-*/;
-
-    private Widget buildNorthWidget() {
-        final Image image = new Image(IMAGES.littleSwatter());
-        image.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                final String url = Window.Location
-                        .createUrlBuilder()
-                        .removeParameter("bug")
-                        .buildString();
-                Window.open(url, "_self", "");
-            }
-        });
-        image.getElement().getStyle().setCursor(Style.Cursor.POINTER);
-
-        _applicationLabel = new Label("");
-        _applicationLabel.setStylePrimaryName("headerDropDown");
-        _applicationLabel.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                whenAppClicked(_applicationLabel);
-            }
-        });
-        updateAppButtonText();
-
-        _userLabel.setStylePrimaryName("headerDropDown");
-        _userLabel.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                whenUserClicked(_userLabel);
-            }
-        });
-
-        final DockLayoutPanel ret = new DockLayoutPanel(Style.Unit.EM);
-        final FlowPanel flowPanel = new FlowPanel();
-        flowPanel.setStyleName("headerMenuPanel");
-        flowPanel.add(_applicationLabel);
-        flowPanel.add(_userLabel);
-
-        ret.addEast(flowPanel, 30);
-        ret.add(image);
-        return ret;
-    }
 
     private void whenUserClicked(Label userLabel) {
         final PopupPanel popupPanel = new PopupPanel(true, true);
@@ -367,13 +335,12 @@ public class Bug4j implements EntryPoint {
     }
 
     private void setUserName(String userName) {
-        final String userName1 = userName;
-        _userLabel.setText(userName1);
+        _header.setUserText(userName);
     }
 
     private void updateAppButtonText() {
         final String application = _bugModel.getApplication();
-        _applicationLabel.setText(application == null ? "< No Application >" : application);
+        _header.setApplicationText(application == null ? "< No Application >" : application);
     }
 
     public UserAuthorities getUserAuthorities() {
