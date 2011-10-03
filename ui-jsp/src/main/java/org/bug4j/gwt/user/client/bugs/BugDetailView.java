@@ -32,7 +32,6 @@ import org.bug4j.gwt.user.client.BugModel;
 import org.bug4j.gwt.user.client.data.Bug;
 import org.bug4j.gwt.user.client.data.BugHit;
 import org.bug4j.gwt.user.client.data.BugHitAndStack;
-import org.bug4j.gwt.user.client.util.PropertyListener;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -146,7 +145,6 @@ public class BugDetailView {
                 _unreadHits.remove(previousHitId);
                 if (_unreadHits.isEmpty()) {
                     _bug.setRead(true);
-                    _bugModel.firePropertyChange(PropertyListener.BUG_PROPERTIES, _bug.getId(), null);
                 }
             }
         }
@@ -266,14 +264,22 @@ public class BugDetailView {
     }
 
     private void render(final String stackText) {
-        final SafeHtml safeHtml;
+        setClipText(stackText);
+
         if (stackText != null) {
-            List<AppPkg> appPkgs = _bugModel.getAppPkgs();
-            safeHtml = buildStack(appPkgs, stackText);
+            _bugModel.getPackages(new AdvancedAsyncCallback<List<AppPkg>>() {
+                @Override
+                public void onSuccess(List<AppPkg> appPkgs) {
+                    final SafeHtml safeHtml = buildStack(appPkgs, stackText);
+                    _stack.setHTML(safeHtml);
+                }
+            });
         } else {
-            safeHtml = new SafeHtmlBuilder().toSafeHtml();
+            _stack.setHTML("");
         }
-        _stack.setHTML(safeHtml);
+    }
+
+    private void setClipText(String stackText) {
         if (_clip == null) {
             // It would be cleaner to attach in a onAttach(){} but the element
             // does not have a size at that time so it wouldn't work.

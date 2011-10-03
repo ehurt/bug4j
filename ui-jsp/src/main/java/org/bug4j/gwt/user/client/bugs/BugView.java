@@ -19,6 +19,7 @@ package org.bug4j.gwt.user.client.bugs;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortList;
@@ -34,8 +35,10 @@ import org.bug4j.gwt.user.client.Bug4jService;
 import org.bug4j.gwt.user.client.BugModel;
 import org.bug4j.gwt.user.client.data.Bug;
 import org.bug4j.gwt.user.client.data.Filter;
-import org.bug4j.gwt.user.client.util.PropertyListener;
-import org.jetbrains.annotations.Nullable;
+import org.bug4j.gwt.user.client.event.ApplicationChangedEvent;
+import org.bug4j.gwt.user.client.event.ApplicationChangedEventHandler;
+import org.bug4j.gwt.user.client.event.BugListChanged;
+import org.bug4j.gwt.user.client.event.BugListChangedHandler;
 
 import java.util.List;
 
@@ -52,14 +55,18 @@ public class BugView implements DisplaysBugs {
 
     public BugView(BugModel bugModel) {
         _bugModel = bugModel;
-        bugModel.addPropertyListener(new PropertyListener() {
+
+        final EventBus eventBus = _bugModel.getEventBus();
+        eventBus.addHandler(ApplicationChangedEvent.TYPE, new ApplicationChangedEventHandler() {
             @Override
-            public void propertyChanged(String key, @Nullable Object oldValue, @Nullable Object newValue) {
-                if (PropertyListener.APPLICATION.equals(key)) {
-                    refreshBugs();
-                } else if (PropertyListener.BUG_LIST.equals(key)) {
-                    refreshBugs();
-                }
+            public void onApplicationChanged(ApplicationChangedEvent event) {
+                refreshBugs();
+            }
+        });
+        eventBus.addHandler(BugListChanged.TYPE, new BugListChangedHandler() {
+            @Override
+            public void onBugListChanged(BugListChanged event) {
+                refreshBugs();
             }
         });
 

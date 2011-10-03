@@ -14,14 +14,20 @@
  *    limitations under the License.
  */
 
-package org.bug4j.gwt.user.client.util;
+package org.bug4j.gwt.user.client.event;
 
-import org.jetbrains.annotations.Nullable;
+import com.google.gwt.event.shared.GwtEvent;
 
-public interface PropertyListener {
-    String APPLICATION = "application";
-    String BUG_LIST = "bug-list";
-    String BUG_PROPERTIES = "bug-properties";
+/**
+ */
+public class BugListChanged extends GwtEvent<BugListChangedHandler> {
+    public static Type<BugListChangedHandler> TYPE = new Type<BugListChangedHandler>();
 
-    void propertyChanged(String key, @Nullable Object oldValue, @Nullable Object newValue);
+    public Type<BugListChangedHandler> getAssociatedType() {
+        return TYPE;
+    }
+
+    protected void dispatch(BugListChangedHandler handler) {
+        handler.onBugListChanged(this);
+    }
 }

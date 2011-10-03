@@ -28,21 +28,20 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import org.bug4j.gwt.common.client.AdvancedAsyncCallback;
 import org.bug4j.gwt.common.client.CommonService;
 import org.bug4j.gwt.common.client.Header;
-import org.bug4j.gwt.common.client.data.AppPkg;
 import org.bug4j.gwt.common.client.data.UserAuthorities;
 import org.bug4j.gwt.user.client.bugs.BugDetailView;
 import org.bug4j.gwt.user.client.bugs.BugView;
 import org.bug4j.gwt.user.client.data.Bug;
 import org.bug4j.gwt.user.client.data.Filter;
+import org.bug4j.gwt.user.client.event.ApplicationChangedEvent;
+import org.bug4j.gwt.user.client.event.ApplicationChangedEventHandler;
+import org.bug4j.gwt.user.client.event.BugListChanged;
 import org.bug4j.gwt.user.client.graphs.TopGraphView;
 import org.bug4j.gwt.user.client.settings.UserDialog;
-import org.bug4j.gwt.user.client.util.PropertyListener;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -68,26 +67,22 @@ public class Bug4j implements EntryPoint {
         CommonService.App.getInstance().getUserAuthorities(new AdvancedAsyncCallback<UserAuthorities>() {
             @Override
             public void onSuccess(final UserAuthorities userAuthorities) {
-                try {
-                    Bug4jService.App.getInstance().getDefaultApplication(new AdvancedAsyncCallback<String>() {
-                        @Override
-                        public void onSuccess(final String appName) {
-                            setApplication(appName, new AdvancedAsyncCallback<Void>() {
-                                @Override
-                                public void onSuccess(Void result) {
-                                    initialize(userAuthorities);
-                                }
-                            });
+                Bug4jService.App.getInstance().getDefaultApplication(new AdvancedAsyncCallback<String>() {
+                    @Override
+                    public void onSuccess(final String appName) {
+                        try {
+                            initialize(userAuthorities, appName);
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-                    });
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                    }
+                });
             }
         });
     }
 
-    private void initialize(UserAuthorities userAuthorities) {
+    private void initialize(UserAuthorities userAuthorities, String appName) {
+
         final DockLayoutPanel dockLayoutPanel = new DockLayoutPanel(Style.Unit.PX);
         _header = new Header(true) {
             @Override
@@ -100,9 +95,6 @@ public class Bug4j implements EntryPoint {
                 Bug4j.this.whenUserClicked(userLabel);
             }
         };
-
-        setUserAuthorities(userAuthorities);
-        updateAppButtonText();
 
         dockLayoutPanel.addNorth(_header, 35);
 
@@ -117,14 +109,16 @@ public class Bug4j implements EntryPoint {
         final Element loadingElement = DOM.getElementById("loading");
         DOM.removeChild(DOM.getParent(loadingElement), loadingElement);
 
-        _bugModel.addPropertyListener(new PropertyListener() {
+        _bugModel.getEventBus().addHandler(ApplicationChangedEvent.TYPE, new ApplicationChangedEventHandler() {
             @Override
-            public void propertyChanged(String key, @Nullable Object oldValue, @Nullable Object newValue) {
-                if (APPLICATION.equals(key)) {
-                    updateAppButtonText();
-                }
+            public void onApplicationChanged(ApplicationChangedEvent event) {
+                final String applicationName = event.getApplicationName();
+                _header.setApplicationText(applicationName);
             }
         });
+
+        setUserAuthorities(userAuthorities);
+        _bugModel.setApplication(appName);
     }
 
     private static Long getBugIdParam() {
@@ -152,7 +146,7 @@ public class Bug4j implements EntryPoint {
                 if (!result.isEmpty()) {
                     final Bug bug = result.get(0);
                     final String app = bug.getApp();
-                    setApplication(app, null);
+                    _bugModel.setApplication(app);
                     bugDetailView.displayBug(bug);
                 }
             }
@@ -173,7 +167,7 @@ public class Bug4j implements EntryPoint {
         tabLayoutPanel.addSelectionHandler(new SelectionHandler<Integer>() {
             @Override
             public void onSelection(SelectionEvent<Integer> integerSelectionEvent) {
-                _bugModel.firePropertyChange(PropertyListener.BUG_LIST, null, null);
+                _bugModel.getEventBus().fireEvent(new BugListChanged());
             }
         });
 
@@ -252,7 +246,6 @@ public class Bug4j implements EntryPoint {
     }
 
     private void whenAppClicked(final Label app) {
-
         CommonService.App.getInstance().getApplications(new AdvancedAsyncCallback<List<String>>() {
             @Override
             public void onSuccess(List<String> appNames) {
@@ -280,7 +273,7 @@ public class Bug4j implements EntryPoint {
                 appLabel.addClickHandler(new ClickHandler() {
                     @Override
                     public void onClick(ClickEvent event) {
-                        whenAppSelectionChanges(appName);
+                        setApplicationName(appName);
                         popupPanel.hide();
                     }
                 });
@@ -292,13 +285,13 @@ public class Bug4j implements EntryPoint {
         popupPanel.show();
     }
 
-    private void whenAppSelectionChanges(final String appName) {
+    private void setApplicationName(final String appName) {
         Bug4jService.App.getInstance().setDefaultApplication(appName, new AdvancedAsyncCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
-                setApplication(appName, null);
             }
         });
+        _bugModel.setApplication(appName);
     }
 
     private void whenExport() {
@@ -313,34 +306,8 @@ public class Bug4j implements EntryPoint {
         Window.open("j_spring_security_logout", "_self", "");
     }
 
-    private void setApplication(final String appName, @Nullable final AsyncCallback<Void> asyncCallback) {
-        CommonService.App.getInstance().getPackages(appName, new AdvancedAsyncCallback<List<AppPkg>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                if (asyncCallback == null) {
-                    super.onFailure(caught);
-                } else {
-                    asyncCallback.onFailure(caught);
-                }
-            }
-
-            @Override
-            public void onSuccess(List<AppPkg> appPkgs) {
-                _bugModel.setApplication(appName, appPkgs);
-                if (asyncCallback != null) {
-                    asyncCallback.onSuccess(null);
-                }
-            }
-        });
-    }
-
     private void setUserName(String userName) {
         _header.setUserText(userName);
-    }
-
-    private void updateAppButtonText() {
-        final String application = _bugModel.getApplication();
-        _header.setApplicationText(application == null ? "< No Application >" : application);
     }
 
     public UserAuthorities getUserAuthorities() {
@@ -349,6 +316,7 @@ public class Bug4j implements EntryPoint {
 
     private void setUserAuthorities(UserAuthorities userAuthorities) {
         _userAuthorities = userAuthorities;
-        setUserName(_userAuthorities.getUserName());
+        final String userName = _userAuthorities.getUserName();
+        setUserName(userName);
     }
 }
