@@ -28,6 +28,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import org.bug4j.gwt.common.client.*;
 import org.bug4j.gwt.common.client.data.UserAuthorities;
+import org.bug4j.gwt.common.client.util.PopupMenu;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -140,38 +141,28 @@ public class Admin implements EntryPoint {
     }
 
     private void whenUserClicked(Label userLabel) {
-        final PopupPanel popupPanel = new PopupPanel(true, true);
-        final MenuBar popup = new MenuBar(true);
-        popup.addItem("Export", new Command() {
+        final PopupMenu popupMenu = new PopupMenu();
+        popupMenu.addItem("Export", new Command() {
             @Override
             public void execute() {
                 whenExport();
-                popupPanel.hide();
             }
         });
-        popup.addItem("Import", new Command() {
+        popupMenu.addItem("Import", new Command() {
             @Override
             public void execute() {
                 whenImport();
-                popupPanel.hide();
             }
         });
-        popup.addSeparator();
-        popup.addItem("Logout", new Command() {
+        popupMenu.addSeparator();
+        popupMenu.addItem("Logout", new Command() {
             @Override
             public void execute() {
                 whenLogout();
-                popupPanel.hide();
             }
         });
-        popupPanel.setWidget(popup);
 
-        popupPanel.show();
-
-        final int offsetWidth = popupPanel.getOffsetWidth();
-        popupPanel.setPopupPosition(
-                userLabel.getAbsoluteLeft() + userLabel.getOffsetWidth() - offsetWidth,
-                userLabel.getAbsoluteTop() + userLabel.getOffsetHeight());
+        popupMenu.show(userLabel);
     }
 
     private void whenImport() {

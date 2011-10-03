@@ -33,6 +33,7 @@ import org.bug4j.gwt.common.client.AdvancedAsyncCallback;
 import org.bug4j.gwt.common.client.CommonService;
 import org.bug4j.gwt.common.client.Header;
 import org.bug4j.gwt.common.client.data.UserAuthorities;
+import org.bug4j.gwt.common.client.util.PopupMenu;
 import org.bug4j.gwt.user.client.bugs.BugDetailView;
 import org.bug4j.gwt.user.client.bugs.BugView;
 import org.bug4j.gwt.user.client.data.Bug;
@@ -192,47 +193,36 @@ public class Bug4j implements EntryPoint {
     }-*/;
 
     private void whenUserClicked(Label userLabel) {
-        final PopupPanel popupPanel = new PopupPanel(true, true);
-        final MenuBar popup = new MenuBar(true);
-        popup.addItem("User Settings...", new Command() {
+        final PopupMenu popupMenu = new PopupMenu();
+        popupMenu.addItem("User Settings...", new Command() {
             @Override
             public void execute() {
                 whenUserSettings();
-                popupPanel.hide();
             }
         });
         if (_userAuthorities.isAdmin()) {
-            popup.addItem("Administration...", new Command() {
+            popupMenu.addItem("Administration...", new Command() {
                 @Override
                 public void execute() {
                     whenAdministration();
                 }
             });
         }
-        popup.addSeparator();
-        popup.addItem("Download", new Command() {
+        popupMenu.addSeparator();
+        popupMenu.addItem("Download", new Command() {
             @Override
             public void execute() {
                 whenExport();
-                popupPanel.hide();
             }
         });
-        popup.addSeparator();
-        popup.addItem("Logout", new Command() {
+        popupMenu.addSeparator();
+        popupMenu.addItem("Logout", new Command() {
             @Override
             public void execute() {
                 whenLogout();
-                popupPanel.hide();
             }
         });
-        popupPanel.setWidget(popup);
-
-        popupPanel.show();
-
-        final int offsetWidth = popupPanel.getOffsetWidth();
-        popupPanel.setPopupPosition(
-                userLabel.getAbsoluteLeft() + userLabel.getOffsetWidth() - offsetWidth,
-                userLabel.getAbsoluteTop() + userLabel.getOffsetHeight());
+        popupMenu.show(userLabel);
     }
 
     private void whenUserSettings() {
