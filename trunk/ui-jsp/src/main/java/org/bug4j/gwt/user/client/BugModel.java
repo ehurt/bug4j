@@ -16,55 +16,49 @@
 
 package org.bug4j.gwt.user.client;
 
+import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.event.shared.SimpleEventBus;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.bug4j.gwt.common.client.AdvancedAsyncCallback;
+import org.bug4j.gwt.common.client.CommonService;
 import org.bug4j.gwt.common.client.data.AppPkg;
-import org.bug4j.gwt.user.client.util.PropertyListener;
-import org.jetbrains.annotations.Nullable;
+import org.bug4j.gwt.user.client.event.ApplicationChangedEvent;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class BugModel {
+    private EventBus _eventBus = new SimpleEventBus();
     private String _application;
     private List<AppPkg> _appPkgs;
-    private final List<PropertyListener> _propertyListeners = new ArrayList<PropertyListener>();
 
     public BugModel() {
     }
 
-    public void firePropertyChange(String property, @Nullable Object oldValue, @Nullable Object newValue) {
-        if (!equals(oldValue, newValue)) {
-            for (PropertyListener applicationListener : _propertyListeners) {
-                applicationListener.propertyChanged(property, oldValue, newValue);
-            }
-        }
-    }
-
-    private static boolean equals(Object object1, Object object2) {
-        if (object1 == object2) {
-            return true;
-        }
-        if (object1 == null || object2 == null) {
-            return false;
-        }
-        return object1.equals(object2);
-    }
-
-    public void addPropertyListener(PropertyListener listener) {
-        _propertyListeners.add(listener);
+    public EventBus getEventBus() {
+        return _eventBus;
     }
 
     public String getApplication() {
         return _application;
     }
 
-    public void setApplication(final String application, List<AppPkg> appPkgs) {
-        final String oldApplication = _application;
+    public void setApplication(final String application) {
         _application = application;
-        _appPkgs = appPkgs;
-        firePropertyChange(PropertyListener.APPLICATION, oldApplication, application);
+        _appPkgs = null;
+        _eventBus.fireEvent(new ApplicationChangedEvent(_application));
     }
 
-    public List<AppPkg> getAppPkgs() {
-        return _appPkgs;
+    public void getPackages(final AsyncCallback<List<AppPkg>> callback) {
+        if (_appPkgs != null) {
+            callback.onSuccess(_appPkgs);
+        } else {
+            CommonService.App.getInstance().getPackages(_application, new AdvancedAsyncCallback<List<AppPkg>>() {
+                @Override
+                public void onSuccess(List<AppPkg> result) {
+                    _appPkgs = result;
+                    callback.onSuccess(_appPkgs);
+                }
+            });
+        }
     }
 }

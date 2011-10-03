@@ -16,6 +16,7 @@
 
 package org.bug4j.gwt.user.client.graphs;
 
+import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -23,8 +24,10 @@ import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import org.bug4j.gwt.user.client.BugModel;
 import org.bug4j.gwt.user.client.bugs.DisplaysBugs;
-import org.bug4j.gwt.user.client.util.PropertyListener;
-import org.jetbrains.annotations.Nullable;
+import org.bug4j.gwt.user.client.event.ApplicationChangedEvent;
+import org.bug4j.gwt.user.client.event.ApplicationChangedEventHandler;
+import org.bug4j.gwt.user.client.event.BugListChanged;
+import org.bug4j.gwt.user.client.event.BugListChangedHandler;
 
 public abstract class GraphView implements DisplaysBugs {
     private SimpleLayoutPanel _simpleLayoutPanel;
@@ -34,14 +37,18 @@ public abstract class GraphView implements DisplaysBugs {
     public GraphView(BugModel bugModel, String label) {
         _bugModel = bugModel;
         _anchor = createAnchor(label);
-        bugModel.addPropertyListener(new PropertyListener() {
+
+        final EventBus eventBus = _bugModel.getEventBus();
+        eventBus.addHandler(ApplicationChangedEvent.TYPE, new ApplicationChangedEventHandler() {
             @Override
-            public void propertyChanged(String key, @Nullable Object oldValue, @Nullable Object newValue) {
-                if (APPLICATION.equals(key)) {
-                    addOrReplaceGraph();
-                } else if (BUG_LIST.equals(key)) {
-                    addOrReplaceGraph();
-                }
+            public void onApplicationChanged(ApplicationChangedEvent event) {
+                addOrReplaceGraph();
+            }
+        });
+        eventBus.addHandler(BugListChanged.TYPE, new BugListChangedHandler() {
+            @Override
+            public void onBugListChanged(BugListChanged event) {
+                addOrReplaceGraph();
             }
         });
     }
