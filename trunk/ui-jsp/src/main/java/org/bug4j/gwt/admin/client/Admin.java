@@ -21,16 +21,12 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.layout.client.Layout;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
-import org.bug4j.gwt.common.client.AdvancedAsyncCallback;
-import org.bug4j.gwt.common.client.BaseDialog;
-import org.bug4j.gwt.common.client.CommonService;
-import org.bug4j.gwt.common.client.Resources;
+import org.bug4j.gwt.common.client.*;
 import org.bug4j.gwt.common.client.data.UserAuthorities;
 
 import java.util.ArrayList;
@@ -41,7 +37,6 @@ import java.util.List;
  */
 public class Admin implements EntryPoint {
     public static final Resources IMAGES = GWT.create(Resources.class);
-    private Label _userLabel;
     private SimpleLayoutPanel _centerLayoutPanel;
     private AdminView _currentAdminView;
     private UserAuthorities _userAuthorities;
@@ -49,11 +44,19 @@ public class Admin implements EntryPoint {
     private SimpleLayoutPanel _navigationHost;
     private final UserView _userView = new UserView();
     private final ApplicationsView _applicationsView = new ApplicationsView(this);
+    private Header _header;
 
     public void onModuleLoad() {
         final DockLayoutPanel dockLayoutPanel = new DockLayoutPanel(Style.Unit.PX);
-        final Widget northWidget = buildNorthWidget();
-        dockLayoutPanel.addNorth(northWidget, 35);
+        _header = new Header(false) {
+            @Override
+            protected void whenUserClicked(Label userLabel) {
+                Admin.this.whenUserClicked(userLabel);
+            }
+        };
+        _header.setStyleName("admin-header");
+
+        dockLayoutPanel.addNorth(_header, 40);
 
         final SplitLayoutPanel splitLayoutPanel = new SplitLayoutPanel(4);
 
@@ -133,33 +136,7 @@ public class Admin implements EntryPoint {
     }
 
     private void whenUserNameChanged(String userName) {
-        _userLabel.setText(userName);
-    }
-
-    private Widget buildNorthWidget() {
-        final Image image = new Image(IMAGES.littleSwatter());
-
-        _userLabel = new Label("");
-        _userLabel.setStylePrimaryName("headerDropDown");
-        _userLabel.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                whenUserClicked(_userLabel);
-            }
-        });
-
-        final FlowPanel flowPanel = new FlowPanel();
-        flowPanel.add(_userLabel);
-
-        final LayoutPanel layoutPanel = new LayoutPanel();
-        layoutPanel.add(image);
-        layoutPanel.add(flowPanel);
-
-        layoutPanel.setWidgetLeftWidth(image, 0, Style.Unit.PX, 110, Style.Unit.PX);
-        layoutPanel.setWidgetHorizontalPosition(flowPanel, Layout.Alignment.END);
-        layoutPanel.setStylePrimaryName("admin-header");
-
-        return layoutPanel;
+        _header.setUserText(userName);
     }
 
     private void whenUserClicked(Label userLabel) {
