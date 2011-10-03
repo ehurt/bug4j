@@ -42,7 +42,7 @@ import org.bug4j.gwt.user.client.event.BugListChangedHandler;
 
 import java.util.List;
 
-public class BugView implements DisplaysBugs {
+public class BugView {
 
     private static final int PAGE_SIZE = 100;
     private final BugModel _bugModel;
@@ -128,11 +128,6 @@ public class BugView implements DisplaysBugs {
 
     private void updateFilterMenuItem() {
         _filterMenuItem.setText("Filter" + (_filter.isFiltering() ? "*" : ""));
-    }
-
-    @Override
-    public void redisplay() {
-        _cellTable.redraw();
     }
 
     private CellTable<Bug> createTable() {

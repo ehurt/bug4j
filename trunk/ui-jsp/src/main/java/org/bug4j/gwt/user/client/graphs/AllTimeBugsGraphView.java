@@ -29,7 +29,6 @@ import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import org.bug4j.gwt.common.client.AdvancedAsyncCallback;
 import org.bug4j.gwt.user.client.Bug4jService;
 import org.bug4j.gwt.user.client.BugModel;
-import org.bug4j.gwt.user.client.bugs.DisplaysBugs;
 import org.bug4j.gwt.user.client.data.BugCountByDate;
 
 import java.util.Date;
@@ -37,7 +36,7 @@ import java.util.List;
 
 import static com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
 
-public class AllTimeBugsGraphView extends GraphView implements DisplaysBugs {
+public class AllTimeBugsGraphView extends GraphView {
 
     public AllTimeBugsGraphView(BugModel bugModel) {
         super(bugModel, "Number of hits per day");

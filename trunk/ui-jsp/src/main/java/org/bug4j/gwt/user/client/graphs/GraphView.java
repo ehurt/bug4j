@@ -23,13 +23,12 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import org.bug4j.gwt.user.client.BugModel;
-import org.bug4j.gwt.user.client.bugs.DisplaysBugs;
 import org.bug4j.gwt.user.client.event.ApplicationChangedEvent;
 import org.bug4j.gwt.user.client.event.ApplicationChangedEventHandler;
 import org.bug4j.gwt.user.client.event.BugListChanged;
 import org.bug4j.gwt.user.client.event.BugListChangedHandler;
 
-public abstract class GraphView implements DisplaysBugs {
+public abstract class GraphView {
     private SimpleLayoutPanel _simpleLayoutPanel;
     private final Label _anchor;
     protected final BugModel _bugModel;
@@ -88,9 +87,5 @@ public abstract class GraphView implements DisplaysBugs {
             _simpleLayoutPanel.remove(oldWidget);
         }
         _simpleLayoutPanel.setWidget(widget);
-    }
-
-    @Override
-    public final void redisplay() {
     }
 }
