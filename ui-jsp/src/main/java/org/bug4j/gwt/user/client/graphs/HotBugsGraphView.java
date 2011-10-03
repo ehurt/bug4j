@@ -33,7 +33,6 @@ import org.bug4j.gwt.common.client.AdvancedAsyncCallback;
 import org.bug4j.gwt.user.client.Bug4jService;
 import org.bug4j.gwt.user.client.BugModel;
 import org.bug4j.gwt.user.client.bugs.BugDetailView;
-import org.bug4j.gwt.user.client.bugs.DisplaysBugs;
 import org.bug4j.gwt.user.client.data.Bug;
 
 import java.util.ArrayList;
@@ -43,7 +42,7 @@ import java.util.Map;
 
 import static com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
 
-public class HotBugsGraphView extends GraphView implements DisplaysBugs {
+public class HotBugsGraphView extends GraphView {
 
     private static final int DAYS_BACK = 7;
     private static final int MAX_BUGS = 5;

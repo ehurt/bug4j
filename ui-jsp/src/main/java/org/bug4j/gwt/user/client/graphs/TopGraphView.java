@@ -20,9 +20,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
 import org.bug4j.gwt.user.client.BugModel;
-import org.bug4j.gwt.user.client.bugs.DisplaysBugs;
 
-public class TopGraphView implements DisplaysBugs {
+public class TopGraphView {
     private SimpleLayoutPanel _simpleLayoutPanel;
     private GraphView _graphView;
     private final BugModel _bugModel;
@@ -76,13 +75,6 @@ public class TopGraphView implements DisplaysBugs {
             _simpleLayoutPanel.setWidget(widget);
             final Label anchor = _graphView.getAnchor();
             anchor.setStyleDependentName("selected", true);
-        }
-    }
-
-    @Override
-    public void redisplay() {
-        if (_graphView != null) {
-            _graphView.redisplay();
         }
     }
 }
