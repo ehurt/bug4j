@@ -23,9 +23,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SelectionModel;
-import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.gwt.view.client.*;
 import org.bug4j.common.TextToLines;
 import org.bug4j.gwt.common.client.AdvancedAsyncCallback;
 import org.bug4j.gwt.common.client.data.AppPkg;
@@ -132,8 +130,8 @@ public class BugDetailView extends DockLayoutPanel {
             }
         });
         ret.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(_dateColumn, false));
-
         ret.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(ret));
+
         _selectionModel = new SingleSelectionModel<BugHit>();
         ret.setSelectionModel(_selectionModel);
         _selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -142,6 +140,52 @@ public class BugDetailView extends DockLayoutPanel {
                 whenHitSelectionChanges();
             }
         });
+
+        final AsyncDataProvider<BugHit> dataProvider = new AsyncDataProvider<BugHit>() {
+            @Override
+            protected void onRangeChanged(HasData<BugHit> display) {
+                if (_bug != null) {
+                    final long bugId = _bug.getId();
+
+                    final StringBuilder sortBy = new StringBuilder();
+                    final ColumnSortList sortList = _dataGrid.getColumnSortList();
+                    for (int i = 0; i < sortList.size(); i++) {
+                        final ColumnSortList.ColumnSortInfo columnSortInfo = sortList.get(i);
+                        final Column<?, ?> column = columnSortInfo.getColumn();
+                        final char c = column == _dateColumn ? 'd' :
+                                       column == _versionColumn ? 'v' :
+                                       column == _userColumn ? 'b' : 'X';
+                        final boolean ascending = columnSortInfo.isAscending();
+                        sortBy.append(ascending ? c : Character.toUpperCase(c));
+                    }
+
+                    Bug4jService.App.getInstance().getHits(bugId, 0, PAGE_SIZE, sortBy.toString(), new AdvancedAsyncCallback<List<BugHit>>() {
+                        @Override
+                        public void onSuccess(List<BugHit> bugHits) {
+                            _lastSelectedHit = null;
+                            _unreadHits.clear();
+                            for (BugHit bugHit : bugHits) {
+                                final long hitId = bugHit.getHitId();
+                                if (hitId > _bug.getLastReadHit()) {
+                                    _unreadHits.add(hitId);
+                                }
+                            }
+
+                            _dataGrid.setRowData(0, bugHits);
+
+                            final SelectionModel<? super BugHit> selectionModel = _dataGrid.getSelectionModel();
+                            if (!bugHits.isEmpty()) {
+                                final BugHit firstBugHit = bugHits.get(0);
+                                selectionModel.setSelected(firstBugHit, true);
+                            } else {
+                                selectionModel.setSelected(null, true);
+                            }
+                        }
+                    });
+                }
+            }
+        };
+        dataProvider.addDataDisplay(ret);
         return ret;
     }
 
@@ -216,40 +260,22 @@ public class BugDetailView extends DockLayoutPanel {
 
     public void displayBug(final Bug bug) {
         _bug = bug;
-        _lastSelectedHit = null;
-        refreshData();
+        refreshTitle();
+        refreshGrid();
     }
 
-    private void refreshData() {
-        if (_bug != null) {
-            final long bugId = _bug.getId();
+    private void refreshTitle() {
+        final long bugId = _bug.getId();
 
-            final String bugTitle = bugId + "-" + _bug.getTitle();
-            _anchor.setText(bugTitle);
-            final String url = createBugLink(bugId);
-            _anchor.setHref(url);
+        final String bugTitle = bugId + "-" + _bug.getTitle();
+        _anchor.setText(bugTitle);
+        final String url = createBugLink(bugId);
+        _anchor.setHref(url);
+    }
 
-            final StringBuilder sortBy = new StringBuilder();
-            final ColumnSortList sortList = _dataGrid.getColumnSortList();
-            for (int i = 0; i < sortList.size(); i++) {
-                final ColumnSortList.ColumnSortInfo columnSortInfo = sortList.get(i);
-                final Column<?, ?> column = columnSortInfo.getColumn();
-                final char c = column == _dateColumn ? 'd' :
-                               column == _versionColumn ? 'v' :
-                               column == _userColumn ? 'b' : 'X';
-                final boolean ascending = columnSortInfo.isAscending();
-                sortBy.append(ascending ? c : Character.toUpperCase(c));
-            }
-
-            Bug4jService.App.getInstance().getHits(bugId, 0, PAGE_SIZE, sortBy.toString(), new AdvancedAsyncCallback<List<BugHit>>() {
-                @Override
-                public void onSuccess(List<BugHit> bugHits) {
-                    setData(bugHits);
-                }
-            });
-        } else {
-            _dataGrid.setRowCount(0);
-        }
+    private void refreshGrid() {
+        final Range visibleRange = _dataGrid.getVisibleRange();
+        _dataGrid.setVisibleRangeAndClearData(visibleRange, true);
     }
 
     private static String createBugLink(long bugId) {
@@ -257,25 +283,6 @@ public class BugDetailView extends DockLayoutPanel {
                 .createUrlBuilder()
                 .setParameter("bug", Long.toString(bugId))
                 .buildString();
-    }
-
-    private void setData(List<BugHit> bugHits) {
-        _unreadHits.clear();
-        for (BugHit bugHit : bugHits) {
-            final long hitId = bugHit.getHitId();
-            if (hitId > _bug.getLastReadHit()) {
-                _unreadHits.add(hitId);
-            }
-        }
-
-        _dataGrid.setRowData(bugHits);
-        final SelectionModel<? super BugHit> selectionModel = _dataGrid.getSelectionModel();
-        if (!bugHits.isEmpty()) {
-            final BugHit firstBugHit = bugHits.get(0);
-            selectionModel.setSelected(firstBugHit, true);
-        } else {
-            selectionModel.setSelected(null, true);
-        }
     }
 
     private void renderStack(final String stackText) {
