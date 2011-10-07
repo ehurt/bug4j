@@ -16,26 +16,25 @@
 
 package org.bug4j.gwt.user.client;
 
-import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.bug4j.gwt.common.client.AdvancedAsyncCallback;
+import org.bug4j.gwt.common.client.CommonModel;
 import org.bug4j.gwt.common.client.CommonService;
 import org.bug4j.gwt.common.client.data.AppPkg;
+import org.bug4j.gwt.common.client.data.UserAuthorities;
 import org.bug4j.gwt.user.client.event.ApplicationChangedEvent;
 
 import java.util.List;
 
-public class BugModel {
-    private EventBus _eventBus = new SimpleEventBus();
+/**
+ * In addition to the common model, the BugModel holds the current application and its list of packages.
+ */
+public class BugModel extends CommonModel {
     private String _application;
     private List<AppPkg> _appPkgs;
 
-    public BugModel() {
-    }
-
-    public EventBus getEventBus() {
-        return _eventBus;
+    public BugModel(UserAuthorities userAuthorities) {
+        super(userAuthorities);
     }
 
     public String getApplication() {

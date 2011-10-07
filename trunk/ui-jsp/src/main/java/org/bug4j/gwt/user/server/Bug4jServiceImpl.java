@@ -32,7 +32,7 @@ import java.util.Map;
 public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jService {
     private static final Logger LOGGER = Logger.getLogger(Bug4jServiceImpl.class);
 
-    private String getUserName() throws Exception {
+    private String getUserName() {
         final HttpServletRequest threadLocalRequest = getThreadLocalRequest();
         final String remoteUser = threadLocalRequest.getRemoteUser();
         return remoteUser;
@@ -40,78 +40,80 @@ public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jServi
 
     @Override
     @Nullable
-    public String getDefaultApplication() throws Exception {
-        String ret = null;
+    public String getDefaultApplication() {
+        final String ret;
         final String remoteUser = getUserName();
         final Store store = StoreFactory.getStore();
         try {
             ret = store.getDefaultApplication(remoteUser);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
+            throw new IllegalStateException(e.getMessage(), e);
         }
         return ret;
     }
 
     @Override
-    public void setDefaultApplication(String app) throws Exception {
+    public void setDefaultApplication(String app) {
         final String remoteUser = getUserName();
         final Store store = StoreFactory.getStore();
         try {
             store.setDefaultApplication(remoteUser, app);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
+            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 
     @Override
-    public Filter getDefaultFilter() throws Exception {
+    public Filter getDefaultFilter() {
         try {
             final Store store = StoreFactory.getStore();
             final String userName = getUserName();
             return store.getDefaultFilter(userName);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            throw new Exception(e.getMessage(), e);
+            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 
     @Override
-    public void setDefaultFilter(Filter filter) throws Exception {
+    public void setDefaultFilter(Filter filter) {
         try {
             final Store store = StoreFactory.getStore();
             final String userName = getUserName();
             store.setDefaultFilter(userName, filter);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            throw new Exception(e.getMessage(), e);
+            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 
     @Override
-    public List<Bug> getBugs(String app, Filter filter, final String sortBy) throws Exception {
+    public List<Bug> getBugs(String app, Filter filter, final String sortBy) {
         try {
             final Store store = StoreFactory.getStore();
             final String userName = getUserName();
             return store.getBugs(userName, app, filter, 0, Integer.MAX_VALUE, sortBy);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            throw new Exception(e.getMessage(), e);
+            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 
     @Override
-    public void deleteBug(long bugId) throws Exception {
+    public void deleteBug(long bugId) {
         try {
             final Store store = StoreFactory.getStore();
             store.deleteBug(bugId);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            throw e;
+            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 
     @Override
-    public List<BugHit> getHits(long bugId, int offset, int max, String orderBy) throws Exception {
+    public List<BugHit> getHits(long bugId, int offset, int max, String orderBy) {
         try {
             final Store store = StoreFactory.getStore();
             return store.getHits(bugId, offset, max, orderBy);
@@ -122,7 +124,7 @@ public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jServi
     }
 
     @Override
-    public Map<Bug, int[]> getTopHits(String app, int daysBack, int max) throws Exception {
+    public Map<Bug, int[]> getTopHits(String app, int daysBack, int max) {
         try {
             final Store store = StoreFactory.getStore();
             return store.getTopHits(app, daysBack, max);
@@ -133,13 +135,13 @@ public class Bug4jServiceImpl extends RemoteServiceServlet implements Bug4jServi
     }
 
     @Override
-    public BugHitAndStack getBugHitAndStack(long hitId) throws Exception {
+    public BugHitAndStack getBugHitAndStack(long hitId) {
         final Store store = StoreFactory.getStore();
         return store.getBugHitAndStack(hitId);
     }
 
     @Override
-    public void markRead(long bugId) throws Exception {
+    public void markRead(long bugId) {
         final Store store = StoreFactory.getStore();
         try {
             store.markRead(getUserName(), bugId);

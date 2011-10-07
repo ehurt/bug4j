@@ -20,16 +20,10 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.ColumnSortEvent;
-import com.google.gwt.user.cellview.client.ColumnSortList;
-import com.google.gwt.user.cellview.client.RowStyles;
+import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.view.client.AsyncDataProvider;
-import com.google.gwt.view.client.HasData;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.gwt.view.client.*;
 import org.bug4j.gwt.common.client.AdvancedAsyncCallback;
 import org.bug4j.gwt.user.client.Bug4jService;
 import org.bug4j.gwt.user.client.BugModel;
@@ -42,19 +36,44 @@ import org.bug4j.gwt.user.client.event.BugListChangedHandler;
 
 import java.util.List;
 
-public class BugView {
+/**
+ * The view that shows bugs on the left and hits on the right.
+ */
+public class BugView extends SplitLayoutPanel {
 
     private static final int PAGE_SIZE = 100;
     private final BugModel _bugModel;
     private SingleSelectionModel<Bug> _selectionModel;
     private BugDetailView _bugDetailView;
-    private CellTable<Bug> _cellTable;
-    private final Filter _filter = new Filter();
+    private DataGrid<Bug> _dataGrid;
+    private final Filter _filter;
     private MenuItem _filterMenuItem;
     private Bug _lastSelectedBug;
 
-    public BugView(BugModel bugModel) {
+    public BugView(BugModel bugModel, Filter filter) {
+        super(5);
+
         _bugModel = bugModel;
+        _filter = filter;
+        _bugDetailView = new BugDetailView(_bugModel);
+
+        createTable();
+        final DockLayoutPanel dockLayoutPanel = new DockLayoutPanel(Style.Unit.EM);
+        final MenuBar menuBar = new MenuBar();
+        _filterMenuItem = menuBar.addItem("<<<filter>>>", new Command() {
+            @Override
+            public void execute() {
+                whenFilter();
+            }
+        });
+        updateFilterMenuItem();
+
+        dockLayoutPanel.addNorth(menuBar, 2);
+
+        dockLayoutPanel.add(_dataGrid);
+
+        addWest(dockLayoutPanel, 600);
+        add(_bugDetailView);
 
         final EventBus eventBus = _bugModel.getEventBus();
         eventBus.addHandler(ApplicationChangedEvent.TYPE, new ApplicationChangedEventHandler() {
@@ -69,39 +88,6 @@ public class BugView {
                 refreshBugs();
             }
         });
-
-        Bug4jService.App.getInstance().getDefaultFilter(new AdvancedAsyncCallback<Filter>() {
-            @Override
-            public void onSuccess(Filter result) {
-                result.copyTo(_filter);
-                refreshBugs();
-            }
-        });
-    }
-
-    public Widget createWidget() {
-        final CellTable<Bug> bugCellTable = createTable();
-        final ScrollPanel scrollPanel = new ScrollPanel(bugCellTable);
-        final DockLayoutPanel dockLayoutPanel = new DockLayoutPanel(Style.Unit.EM);
-        final MenuBar menuBar = new MenuBar();
-        _filterMenuItem = menuBar.addItem("<<<filter>>>", new Command() {
-            @Override
-            public void execute() {
-                whenFilter();
-            }
-        });
-        updateFilterMenuItem();
-
-        dockLayoutPanel.addNorth(menuBar, 2);
-
-        dockLayoutPanel.add(scrollPanel);
-
-        _bugDetailView = new BugDetailView(_bugModel);
-
-        final SplitLayoutPanel splitLayoutPanel = new SplitLayoutPanel(5);
-        splitLayoutPanel.addWest(dockLayoutPanel, 600);
-        splitLayoutPanel.add(_bugDetailView.createWidget());
-        return splitLayoutPanel;
     }
 
     private void whenFilter() {
@@ -130,32 +116,26 @@ public class BugView {
         _filterMenuItem.setText("Filter" + (_filter.isFiltering() ? "*" : ""));
     }
 
-    private CellTable<Bug> createTable() {
-        _cellTable = new CellTable<Bug>(PAGE_SIZE);
+    private DataGrid<Bug> createTable() {
+        _dataGrid = new DataGrid<Bug>(PAGE_SIZE);
+        _dataGrid.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.BOUND_TO_SELECTION);
         final Label noDataLabel = new Label("No bugs");
         noDataLabel.getElement().getStyle().setFontSize(20, Style.Unit.PT);
-        _cellTable.setEmptyTableWidget(noDataLabel);
-        _cellTable.setWidth("100%", true);
-        _cellTable.addStyleName("BugView-table");
-        _cellTable.addColumn(BugViewColumn.ID, "ID");
-        _cellTable.addColumn(BugViewColumn.TITLE, "Title");
-        _cellTable.addColumn(BugViewColumn.HIT, "#");
+        _dataGrid.setEmptyTableWidget(noDataLabel);
+        _dataGrid.setWidth("100%");
+        _dataGrid.addStyleName("BugView-table");
+        _dataGrid.addColumn(BugViewColumn.ID, "ID");
+        _dataGrid.addColumn(BugViewColumn.TITLE, "Title");
+        _dataGrid.addColumn(BugViewColumn.HIT, "#");
 
-        _cellTable.setColumnWidth(BugViewColumn.ID, "5em");
-        _cellTable.setColumnWidth(BugViewColumn.HIT, "5em");
+        _dataGrid.setColumnWidth(BugViewColumn.ID, "5em");
+        _dataGrid.setColumnWidth(BugViewColumn.HIT, "5em");
 
-        _cellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(BugViewColumn.HIT, false));
+        _dataGrid.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(BugViewColumn.HIT, false));
 
-        AsyncDataProvider<Bug> dataProvider = new AsyncDataProvider<Bug>() {
-            @Override
-            protected void onRangeChanged(HasData<Bug> display) {
-                refreshBugs();
-            }
-        };
-        dataProvider.addDataDisplay(_cellTable);
-        _cellTable.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(_cellTable));
+        _dataGrid.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(_dataGrid));
         _selectionModel = new SingleSelectionModel<Bug>();
-        _cellTable.setSelectionModel(_selectionModel);
+        _dataGrid.setSelectionModel(_selectionModel);
 
         _selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
@@ -164,7 +144,7 @@ public class BugView {
             }
         });
 
-        _cellTable.setRowStyles(new RowStyles<Bug>() {
+        _dataGrid.setRowStyles(new RowStyles<Bug>() {
             @Override
             public String getStyleNames(Bug row, int rowIndex) {
                 if (row.isRead()) {
@@ -175,19 +155,18 @@ public class BugView {
             }
         });
 
-        return _cellTable;
-    }
+        AsyncDataProvider<Bug> dataProvider = new AsyncDataProvider<Bug>() {
+            @Override
+            protected void onRangeChanged(HasData<Bug> display) {
+                final Range range = display.getVisibleRange();
+                final ColumnSortList sortList = _dataGrid.getColumnSortList();
+                final String sortBy = BugViewColumn.sortBy(sortList);
 
-    private void refreshBugs() {
-        if (_cellTable != null && _selectionModel != null) {
-            final ColumnSortList sortList = _cellTable.getColumnSortList();
-            final String sortBy = BugViewColumn.sortBy(sortList);
-            final String application = _bugModel.getApplication();
-            if (application != null) {
+                final String application = _bugModel.getApplication();
                 Bug4jService.App.getInstance().getBugs(application, _filter, sortBy, new AdvancedAsyncCallback<List<Bug>>() {
                     @Override
                     public void onSuccess(List<Bug> bugs) {
-                        _cellTable.setRowData(bugs);
+                        _dataGrid.setRowData(range.getStart(), bugs);
                         if (!bugs.isEmpty()) {
                             final Bug firstBug = bugs.get(0);
                             _selectionModel.setSelected(firstBug, true);
@@ -196,11 +175,16 @@ public class BugView {
                         }
                     }
                 });
-            } else {
-                _cellTable.setRowCount(0);
-                _selectionModel.setSelected(null, true);
             }
-        }
+        };
+        dataProvider.addDataDisplay(_dataGrid);
+
+        return _dataGrid;
+    }
+
+    private void refreshBugs() {
+        final Range visibleRange = _dataGrid.getVisibleRange();
+        _dataGrid.setVisibleRangeAndClearData(visibleRange, true);
     }
 
     private void whenTableSelectionChanges() {

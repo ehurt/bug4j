@@ -17,238 +17,174 @@
 package org.bug4j.gwt.admin.client;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
-import org.bug4j.gwt.common.client.*;
+import org.bug4j.gwt.admin.client.event.ApplicationsChangedEvent;
+import org.bug4j.gwt.admin.client.event.ApplicationsChangedEventHandler;
+import org.bug4j.gwt.common.client.AdvancedAsyncCallback;
+import org.bug4j.gwt.common.client.CommonService;
+import org.bug4j.gwt.common.client.CommonServiceAsync;
 import org.bug4j.gwt.common.client.data.UserAuthorities;
-import org.bug4j.gwt.common.client.util.PopupMenu;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
+ * The main entry point of the Admin application.
  */
 public class Admin implements EntryPoint {
-    public static final Resources IMAGES = GWT.create(Resources.class);
     private SimpleLayoutPanel _centerLayoutPanel;
-    private AdminView _currentAdminView;
-    private UserAuthorities _userAuthorities;
-    private final Collection<ApplicationView> _applicationViews = new ArrayList<ApplicationView>();
     private SimpleLayoutPanel _navigationHost;
-    private final UserView _userView = new UserView();
-    private final ApplicationsView _applicationsView = new ApplicationsView(this);
-    private Header _header;
+
+    private UserView _userView;
+    private ApplicationsView _applicationsView;
+    private ApplicationView _applicationView;
+    private Label _usersLabel = new Label("Users");
+    private Label _applicationsLabel = new Label("Applications");
+    private Label _selectedLabel;
+    private final Map<String, Label> _applicationLabels = new HashMap<String, Label>();
 
     public void onModuleLoad() {
-        final DockLayoutPanel dockLayoutPanel = new DockLayoutPanel(Style.Unit.PX);
-        _header = new Header(false) {
+        final CommonServiceAsync app = CommonService.App.getInstance();
+        app.getUserAuthorities(new AdvancedAsyncCallback<UserAuthorities>() {
             @Override
-            protected void whenUserClicked(Label userLabel) {
-                Admin.this.whenUserClicked(userLabel);
+            public void onSuccess(final UserAuthorities userAuthorities) {
+                app.getApplications(new AdvancedAsyncCallback<List<String>>() {
+                    @Override
+                    public void onSuccess(List<String> applications) {
+                        try {
+                            init(userAuthorities, applications);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
             }
-        };
-        _header.setStyleName("admin-header");
+        });
+    }
 
-        dockLayoutPanel.addNorth(_header, 40);
+    private void init(UserAuthorities userAuthorities, List<String> applications) {
+        if (!userAuthorities.isAdmin()) {
+            // Not an admin, get out of there
+            Window.open("/", "_self", "");
+            return;
+        }
+
+        final AdminModel adminModel = new AdminModel(userAuthorities, applications);
+
+        _userView = new UserView();
+        _applicationsView = new ApplicationsView(this, adminModel);
+        _applicationView = new ApplicationView();
+
+        final DockLayoutPanel dockLayoutPanel = new DockLayoutPanel(Style.Unit.PX);
+        final AdminHeader header = new AdminHeader(adminModel);
+        header.setStyleName("admin-header");
+
+        dockLayoutPanel.addNorth(header, 40);
 
         final SplitLayoutPanel splitLayoutPanel = new SplitLayoutPanel(4);
 
         _navigationHost = new SimpleLayoutPanel();
         splitLayoutPanel.addWest(_navigationHost, 200);
-        refreshNavigation(_userView);
 
         _centerLayoutPanel = new SimpleLayoutPanel();
         splitLayoutPanel.add(_centerLayoutPanel);
         dockLayoutPanel.add(splitLayoutPanel);
 
+        _usersLabel.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                editUsers();
+            }
+        });
+        _usersLabel.setStylePrimaryName("admin-label");
+
+        _applicationsLabel.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                editApplications();
+            }
+        });
+        _applicationsLabel.setStylePrimaryName("admin-label");
+
+        adminModel.getEventBus().addHandler(ApplicationsChangedEvent.TYPE, new ApplicationsChangedEventHandler() {
+            @Override
+            public void onApplicationsChanged(ApplicationsChangedEvent event) {
+                final List<String> applications = event.getApplications();
+                refreshNavigation(applications);
+            }
+        });
+
+        adminModel.fireInitializationEvents();
+        editUsers();
+
         final RootLayoutPanel rootLayoutPanel = RootLayoutPanel.get();
         rootLayoutPanel.add(dockLayoutPanel);
         final Element loadingElement = DOM.getElementById("loading");
         DOM.removeChild(DOM.getParent(loadingElement), loadingElement);
-
-        CommonService.App.getInstance().getUserAuthorities(new AdvancedAsyncCallback<UserAuthorities>() {
-            @Override
-            public void onSuccess(UserAuthorities userAuthorities) {
-                if (userAuthorities.isAdmin()) {
-                    setUserAuthorities(userAuthorities);
-                } else {
-                    whenLogout();
-                }
-            }
-        });
     }
 
-    private Widget buildNavigation(final AdminView defaultView) {
+    private void editUsers() {
+        setLabelSelected(_usersLabel);
+        _centerLayoutPanel.setWidget(_userView);
+    }
+
+    private void editApplications() {
+        setLabelSelected(_applicationsLabel);
+        _centerLayoutPanel.setWidget(_applicationsView);
+    }
+
+    public void editApplication(String applicationName) {
+        final Label applicationLabel = _applicationLabels.get(applicationName);
+        editApplication(applicationLabel);
+    }
+
+    private void editApplication(Label label) {
+        setLabelSelected(label);
+        _centerLayoutPanel.setWidget(_applicationView);
+        final String applicationName = label.getText();
+        _applicationView.show(applicationName);
+    }
+
+    private void refreshNavigation(List<String> applicationNames) {
         final FlowPanel flowPanel = new FlowPanel();
 
-        CommonService.App.getInstance().getApplications(new AdvancedAsyncCallback<List<String>>() {
-            @Override
-            public void onSuccess(List<String> applicationNames) {
-                addNavigationLabel(flowPanel, _userView);
-                addNavigationLabel(flowPanel, _applicationsView);
+        flowPanel.add(_usersLabel);
+        flowPanel.add(_applicationsLabel);
 
-                _applicationViews.clear();
-                for (String applicationName : applicationNames) {
-                    final ApplicationView applicationView = new ApplicationView(applicationName);
-                    addNavigationLabel(flowPanel, applicationView);
-                    _applicationViews.add(applicationView);
+        _applicationLabels.clear();
+        for (final String applicationName : applicationNames) {
+            final Label label = new Label(applicationName);
+            label.setStylePrimaryName("admin-label");
+            label.addStyleName("admin-label-app");
+            label.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    editApplication(label);
                 }
-                setView(defaultView);
-            }
-        });
-
-        return flowPanel;
-    }
-
-    private void addNavigationLabel(final FlowPanel flowPanel, final AdminView adminView) {
-        final Label label = adminView.getLabel();
-        label.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                setView(adminView);
-            }
-        });
-        flowPanel.add(adminView.getLabel());
-    }
-
-    private void setView(AdminView newView) {
-        if (_currentAdminView != null) {
-            final Widget widget = _currentAdminView.getWidget();
-            widget.removeFromParent();
-
-            _currentAdminView.setSelected(false);
+            });
+            _applicationLabels.put(applicationName, label);
+            flowPanel.add(label);
         }
 
-        _currentAdminView = newView;
+        _navigationHost.setWidget(flowPanel);
+    }
 
-        if (_currentAdminView != null) {
-            final Widget widget = _currentAdminView.getWidget();
-            _centerLayoutPanel.setWidget(widget);
-            _currentAdminView.setSelected(true);
+    private void setLabelSelected(Label label) {
+        if (_selectedLabel != null) {
+            _selectedLabel.setStyleDependentName("selected", false);
         }
-    }
 
-    private void whenUserNameChanged(String userName) {
-        _header.setUserText(userName);
-    }
+        _selectedLabel = label;
 
-    private void whenUserClicked(Label userLabel) {
-        final PopupMenu popupMenu = new PopupMenu();
-        popupMenu.addItem("Export", new Command() {
-            @Override
-            public void execute() {
-                whenExport();
-            }
-        });
-        popupMenu.addItem("Import", new Command() {
-            @Override
-            public void execute() {
-                whenImport();
-            }
-        });
-        popupMenu.addSeparator();
-        popupMenu.addItem("Logout", new Command() {
-            @Override
-            public void execute() {
-                whenLogout();
-            }
-        });
-
-        popupMenu.show(userLabel);
-    }
-
-    private void whenImport() {
-
-        final DialogBox dialogBox = new BaseDialog("Import") {
-
-            private FormPanel _formPanel;
-            private PopupPanel _loadingPanel;
-
-            @Override
-            protected Widget createContent() {
-                final String moduleBaseURL = GWT.getModuleBaseURL();
-                final FileUpload fileUpload = new FileUpload();
-                fileUpload.setName("upload");
-                _formPanel = new FormPanel();
-                final String action = moduleBaseURL + "../admin/import";
-                _formPanel.setAction(action);
-                _formPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
-                _formPanel.setMethod(FormPanel.METHOD_POST);
-
-                _formPanel.add(fileUpload);
-
-                _formPanel.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
-                    @Override
-                    public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-                        whenApplicationsChanged();
-                        _loadingPanel.hide();
-                        hide();
-                    }
-                });
-
-                return _formPanel;
-            }
-
-            @Override
-            protected void whenOk() {
-                // Cannot hide the panel or the submit will fail.
-                setPopupPosition(-1000, -1000);
-                _formPanel.submit();
-
-                _loadingPanel = new PopupPanel();
-                final FlowPanel flowPanel = new FlowPanel();
-                flowPanel.add(new Image(IMAGES.loading32x32()));
-                flowPanel.add(new Label("Importing..."));
-                _loadingPanel.setWidget(flowPanel);
-                _loadingPanel.center();
-            }
-        };
-        dialogBox.center();
-    }
-
-    private void whenExport() {
-        final String moduleBaseURL = GWT.getModuleBaseURL();
-        Window.open(moduleBaseURL + "../user/export", "_self", "");
-    }
-
-    private void whenLogout() {
-        Window.open("j_spring_security_logout", "_self", "");
-    }
-
-    public UserAuthorities getUserAuthorities() {
-        return _userAuthorities;
-    }
-
-    private void setUserAuthorities(UserAuthorities userAuthorities) {
-        _userAuthorities = userAuthorities;
-        final String userName = _userAuthorities.getUserName();
-        whenUserNameChanged(userName);
-    }
-
-    public void edit(String applicationName) {
-        for (ApplicationView applicationView : _applicationViews) {
-            if (applicationView.getApplicationName().equals(applicationName)) {
-                setView(applicationView);
-                break;
-            }
+        if (_selectedLabel != null) {
+            _selectedLabel.setStyleDependentName("selected", true);
         }
-    }
-
-    private void refreshNavigation(AdminView defaultView) {
-        final Widget navigationWidget = buildNavigation(defaultView);
-        _navigationHost.setWidget(navigationWidget);
-    }
-
-    public void whenApplicationsChanged() {
-        refreshNavigation(_applicationsView);
-        _applicationsView.refreshData();
     }
 }

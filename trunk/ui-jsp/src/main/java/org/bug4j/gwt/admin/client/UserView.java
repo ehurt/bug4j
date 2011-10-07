@@ -43,23 +43,16 @@ import java.util.*;
 
 /**
  */
-public class UserView extends AdminView {
+public class UserView extends DockLayoutPanel {
 
     private Button _deleteButton;
     private MultiSelectionModel<User> _selectionModel;
     private CellTable<User> _cellTable;
 
     protected UserView() {
-        super("Users");
-    }
-
-    @Override
-    protected Widget createWidget() {
-        final DockLayoutPanel dockLayoutPanel = new DockLayoutPanel(Style.Unit.EM);
-
+        super(Style.Unit.EM);
         final Widget buttonPanel = createButtonPanel();
-        dockLayoutPanel.addNorth(buttonPanel, 2.5);
-
+        addNorth(buttonPanel, 2.5);
 
         _cellTable = createCellTable();
 
@@ -69,11 +62,9 @@ public class UserView extends AdminView {
             style.setPadding(10, Style.Unit.PX);
         }
 
-        dockLayoutPanel.add(scrollPanel);
+        add(scrollPanel);
 
         whenSelectionChanges();
-
-        return dockLayoutPanel;
     }
 
     private CellTable<User> createCellTable() {
