@@ -28,25 +28,25 @@ import java.util.Map;
 @RemoteServiceRelativePath("Bug4jService")
 public interface Bug4jService extends RemoteService {
 
-    String getDefaultApplication() throws Exception;
+    String getDefaultApplication();
 
-    void setDefaultApplication(String app) throws Exception;
+    void setDefaultApplication(String app);
 
-    Filter getDefaultFilter() throws Exception;
+    Filter getDefaultFilter();
 
-    void setDefaultFilter(Filter filter) throws Exception;
+    void setDefaultFilter(Filter filter);
 
-    List<Bug> getBugs(String app, Filter filter, String sortBy) throws Exception;
+    List<Bug> getBugs(String app, Filter filter, String sortBy);
 
-    void deleteBug(long bugId) throws Exception;
+    void deleteBug(long bugId);
 
-    List<BugHit> getHits(long bugId, int offset, int max, String orderBy) throws Exception;
+    List<BugHit> getHits(long bugId, int offset, int max, String orderBy);
 
-    Map<Bug, int[]> getTopHits(String app, int daysBack, int max) throws Exception;
+    Map<Bug, int[]> getTopHits(String app, int daysBack, int max);
 
-    BugHitAndStack getBugHitAndStack(long hitId) throws Exception;
+    BugHitAndStack getBugHitAndStack(long hitId);
 
-    void markRead(long bugId) throws Exception;
+    void markRead(long bugId);
 
     List<BugCountByDate> getBugCountByDate(String app);
 

@@ -115,8 +115,7 @@ public class HotBugsGraphView extends GraphView {
         final int clientHeight = (int) (Window.getClientHeight() * .8);
         popupPanel.setSize(clientWidth + "px", clientHeight + "px");
         final BugDetailView bugDetailView = new BugDetailView(_bugModel);
-        final Widget widget = bugDetailView.createWidget();
-        popupPanel.setWidget(widget);
+        popupPanel.setWidget(bugDetailView);
         popupPanel.center();
         bugDetailView.displayBug(bug);
     }

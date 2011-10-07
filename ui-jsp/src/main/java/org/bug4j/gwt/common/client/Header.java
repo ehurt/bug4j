@@ -25,6 +25,9 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
+import org.bug4j.gwt.common.client.data.UserAuthorities;
+import org.bug4j.gwt.common.client.event.UserChangedEvent;
+import org.bug4j.gwt.common.client.event.UserChangedEventHandler;
 
 /**
  * The component at the top of the screen with the icon on the left and the [application] and user name on the right
@@ -35,10 +38,17 @@ public abstract class Header extends DockLayoutPanel {
     private final Label _userLabel = new Label("");
 
     @SuppressWarnings({"GWTStyleCheck"})
-    public Header(boolean showApplicationMenu) {
+    public Header(CommonModel commonModel, boolean showApplicationMenu) {
         super(Style.Unit.EM);
-        getElement().setId("org.bug4j.gwt.common.client.Header");
 
+        commonModel.getEventBus().addHandler(UserChangedEvent.TYPE, new UserChangedEventHandler() {
+            @Override
+            public void onUserChanged(UserChangedEvent event) {
+                final UserAuthorities userAuthorities = event.getUserAuthorities();
+                final String userName = userAuthorities.getUserName();
+                setUserText(userName);
+            }
+        });
         final FlowPanel flowPanel = new FlowPanel();
         flowPanel.setStyleName("headerMenuPanel");
 
@@ -63,6 +73,10 @@ public abstract class Header extends DockLayoutPanel {
             flowPanel.add(_applicationLabel);
         }
 
+        final String userName = commonModel.getUserName();
+        if (userName != null) {
+            _userLabel.setText(userName);
+        }
         _userLabel.setStylePrimaryName("headerDropDown");
         _userLabel.addClickHandler(new ClickHandler() {
             @Override
@@ -82,7 +96,7 @@ public abstract class Header extends DockLayoutPanel {
 
     protected abstract void whenUserClicked(Label userLabel);
 
-    public void setUserText(String userName) {
+    private void setUserText(String userName) {
         _userLabel.setText(userName);
     }
 

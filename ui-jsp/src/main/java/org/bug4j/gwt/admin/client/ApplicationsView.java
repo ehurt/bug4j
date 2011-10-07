@@ -29,31 +29,29 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.IdentityColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
+import org.bug4j.gwt.admin.client.event.ApplicationsChangedEvent;
+import org.bug4j.gwt.admin.client.event.ApplicationsChangedEventHandler;
 import org.bug4j.gwt.common.client.AdvancedAsyncCallback;
 import org.bug4j.gwt.common.client.BaseDialog;
-import org.bug4j.gwt.common.client.CommonService;
 
 import java.util.List;
 
 /**
+ * The admin view with the list of applications which allows to create and delete applications.
  */
-public class ApplicationsView extends AdminView {
+public class ApplicationsView extends DockLayoutPanel implements ApplicationsChangedEventHandler {
 
     private CellTable<String> _cellTable;
     private final Admin _admin;
+    private final AdminModel _adminModel;
 
-    protected ApplicationsView(Admin admin) {
-        super("Applications");
+    protected ApplicationsView(Admin admin, AdminModel adminModel) {
+        super(Style.Unit.EM);
         _admin = admin;
-    }
-
-    @Override
-    protected Widget createWidget() {
-        final DockLayoutPanel dockLayoutPanel = new DockLayoutPanel(Style.Unit.EM);
+        _adminModel = adminModel;
 
         final Widget buttonPanel = createButtonPanel();
-        dockLayoutPanel.addNorth(buttonPanel, 2.5);
-
+        addNorth(buttonPanel, 2.5);
 
         _cellTable = createCellTable();
 
@@ -63,11 +61,8 @@ public class ApplicationsView extends AdminView {
             style.setPadding(10, Style.Unit.PX);
         }
 
-        dockLayoutPanel.add(scrollPanel);
-
-        refreshData();
-
-        return dockLayoutPanel;
+        add(scrollPanel);
+        _adminModel.getEventBus().addHandler(ApplicationsChangedEvent.TYPE, this);
     }
 
     private Widget createButtonPanel() {
@@ -143,15 +138,6 @@ public class ApplicationsView extends AdminView {
         return cellTable;
     }
 
-    void refreshData() {
-        CommonService.App.getInstance().getApplications(new AdvancedAsyncCallback<List<String>>() {
-            @Override
-            public void onSuccess(List<String> applicationNames) {
-                _cellTable.setRowData(applicationNames);
-            }
-        });
-    }
-
     private void whenNewApplication() {
         final BaseDialog baseDialog = new BaseDialog("New Application") {
 
@@ -164,8 +150,7 @@ public class ApplicationsView extends AdminView {
                     AdminService.App.getInstance().createApplication(applicationName, new AdvancedAsyncCallback<Void>() {
                         @Override
                         public void onSuccess(Void result) {
-                            _admin.whenApplicationsChanged();
-                            refreshData();
+                            _adminModel.add(applicationName);
                             hide();
                         }
                     });
@@ -200,10 +185,10 @@ public class ApplicationsView extends AdminView {
     }
 
     private void whenEdit(String applicationName) {
-        _admin.edit(applicationName);
+        _admin.editApplication(applicationName);
     }
 
-    private void whenDelete(String applicationName) {
+    private void whenDelete(final String applicationName) {
         final boolean confirm = Window.confirm("" +
                 "This operation will delete the application including the associated bugs.\n" +
                 "This operation is not reversible\n" +
@@ -212,10 +197,15 @@ public class ApplicationsView extends AdminView {
             AdminService.App.getInstance().deleteApplication(applicationName, new AdvancedAsyncCallback<Void>() {
                 @Override
                 public void onSuccess(Void result) {
-                    _admin.whenApplicationsChanged();
-                    refreshData();
+                    _adminModel.delete(applicationName);
                 }
             });
         }
+    }
+
+    @Override
+    public void onApplicationsChanged(ApplicationsChangedEvent event) {
+        final List<String> applications = event.getApplications();
+        _cellTable.setRowData(applications);
     }
 }

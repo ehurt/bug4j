@@ -21,12 +21,14 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.*;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.view.client.*;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionModel;
+import com.google.gwt.view.client.SingleSelectionModel;
 import org.bug4j.common.TextToLines;
 import org.bug4j.gwt.common.client.AdvancedAsyncCallback;
 import org.bug4j.gwt.common.client.data.AppPkg;
-import org.bug4j.gwt.user.client.Bug4j;
 import org.bug4j.gwt.user.client.Bug4jService;
 import org.bug4j.gwt.user.client.BugModel;
 import org.bug4j.gwt.user.client.data.Bug;
@@ -36,12 +38,15 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class BugDetailView {
+/**
+ * The view that shows hits at the top and a stack at the bottom.
+ */
+public class BugDetailView extends DockLayoutPanel {
 
     private static final int PAGE_SIZE = 200;
     private Anchor _anchor;
     private HTML _stack;
-    private CellTable<BugHit> _cellTable;
+    private DataGrid<BugHit> _dataGrid;
     private Bug _bug;
     private final Set<Long> _unreadHits = new HashSet<Long>();
     @Nullable
@@ -71,39 +76,50 @@ public class BugDetailView {
     };
     private SingleSelectionModel<BugHit> _selectionModel;
     private final BugModel _bugModel;
+    private ScrollPanel _stackScrollPanel;
 
     public BugDetailView(BugModel bugModel) {
-        _bugModel = bugModel;
-    }
+        super(Style.Unit.EM);
+        getElement().setId("org.bug4j.gwt.user.client.bugs.BugDetailView");
 
-    public Widget createWidget() {
-        final DockLayoutPanel ret = new DockLayoutPanel(Style.Unit.EM);
-        ret.addNorth(createBugHeader(), 3);
+        _bugModel = bugModel;
+
+        final Widget bugHeader = createBugHeader();
+        addNorth(bugHeader, 3);
 
         final SplitLayoutPanel splitLayoutPanel = new SplitLayoutPanel();
-        _cellTable = buildCellTable();
-        splitLayoutPanel.addNorth(new ScrollPanel(_cellTable), 250);
+        _dataGrid = buildDataGrid();
+        splitLayoutPanel.addNorth(_dataGrid, 250);
         splitLayoutPanel.add(buildStackPanel());
-        ret.add(splitLayoutPanel);
-        return ret;
+        add(splitLayoutPanel);
     }
 
-    private CellTable<BugHit> buildCellTable() {
-        _cellTable = new CellTable<BugHit>(PAGE_SIZE);
-        _cellTable.setWidth("100%", true);
+    private DataGrid<BugHit> buildDataGrid() {
+        final DataGrid<BugHit> ret = new DataGrid<BugHit>(PAGE_SIZE) {
+            @Override
+            public void setRowData(int start, List<? extends BugHit> values) {
+                final HeaderPanel headerPanel = (HeaderPanel) getWidget();
+                final ScrollPanel scrollPanel = (ScrollPanel) headerPanel.getContentWidget();
+                scrollPanel.scrollToTop();
+                super.setRowData(start, values);
+            }
+        };
+
+        ret.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.BOUND_TO_SELECTION);
+        ret.setWidth("100%");
         final Label emptyTableWidget = new Label("No hits");
         emptyTableWidget.getElement().getStyle().setFontSize(20, Style.Unit.PT);
-        _cellTable.setEmptyTableWidget(emptyTableWidget);
+        ret.setEmptyTableWidget(emptyTableWidget);
 
         _dateColumn.setSortable(true);
         _versionColumn.setSortable(true);
         _userColumn.setSortable(true);
 
-        _cellTable.addColumn(_dateColumn, "Date");
-        _cellTable.addColumn(_versionColumn, "Version");
-        _cellTable.addColumn(_userColumn, "User");
+        ret.addColumn(_dateColumn, "Date");
+        ret.addColumn(_versionColumn, "Version");
+        ret.addColumn(_userColumn, "User");
 
-        _cellTable.setRowStyles(new RowStyles<BugHit>() {
+        ret.setRowStyles(new RowStyles<BugHit>() {
             @Override
             public String getStyleNames(BugHit bugHit, int rowIndex) {
                 StringBuilder ret = new StringBuilder("BugDetailView-hit-cell ");
@@ -115,26 +131,18 @@ public class BugDetailView {
                 return ret.toString();
             }
         });
-        _cellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(_dateColumn, false));
+        ret.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(_dateColumn, false));
 
-        AsyncDataProvider<BugHit> dataProvider = new AsyncDataProvider<BugHit>() {
-            @Override
-            protected void onRangeChanged(HasData<BugHit> display) {
-                refreshData();
-            }
-        };
-        dataProvider.addDataDisplay(_cellTable);
-
-        _cellTable.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(_cellTable));
+        ret.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(ret));
         _selectionModel = new SingleSelectionModel<BugHit>();
-        _cellTable.setSelectionModel(_selectionModel);
+        ret.setSelectionModel(_selectionModel);
         _selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 whenHitSelectionChanges();
             }
         });
-        return _cellTable;
+        return ret;
     }
 
     private void whenHitSelectionChanges() {
@@ -155,7 +163,7 @@ public class BugDetailView {
                 @Override
                 public void onSuccess(BugHitAndStack bugHitAndStack) {
                     final String stack = bugHitAndStack.getStack();
-                    render(stack);
+                    renderStack(stack);
                 }
             });
         }
@@ -187,8 +195,8 @@ public class BugDetailView {
 
         _stack = new HTML();
         _stack.addStyleName("BugDetailView-hit-stack");
-        final ScrollPanel scrollPanel = new ScrollPanel(_stack);
-        scrollPanel.addStyleName("BugDetailView-hit-stack-sp");
+        _stackScrollPanel = new ScrollPanel(_stack);
+        _stackScrollPanel.addStyleName("BugDetailView-hit-stack-sp");
 
         final Anchor copy = new Anchor("Copy");
         copy.getElement().setId("copyId");
@@ -196,13 +204,13 @@ public class BugDetailView {
         bottomButtons.add(copy);
 
         ret.addSouth(bottomButtons, 1.5);
-        ret.add(scrollPanel);
+        ret.add(_stackScrollPanel);
         return ret;
     }
 
     public void clear() {
         _anchor.setText("");
-        _cellTable.setRowCount(0);
+        _dataGrid.setRowCount(0);
         _stack.setHTML("");
     }
 
@@ -218,11 +226,11 @@ public class BugDetailView {
 
             final String bugTitle = bugId + "-" + _bug.getTitle();
             _anchor.setText(bugTitle);
-            final String url = Bug4j.createBugLink(bugId);
+            final String url = createBugLink(bugId);
             _anchor.setHref(url);
 
             final StringBuilder sortBy = new StringBuilder();
-            final ColumnSortList sortList = _cellTable.getColumnSortList();
+            final ColumnSortList sortList = _dataGrid.getColumnSortList();
             for (int i = 0; i < sortList.size(); i++) {
                 final ColumnSortList.ColumnSortInfo columnSortInfo = sortList.get(i);
                 final Column<?, ?> column = columnSortInfo.getColumn();
@@ -240,8 +248,15 @@ public class BugDetailView {
                 }
             });
         } else {
-            _cellTable.setRowCount(0);
+            _dataGrid.setRowCount(0);
         }
+    }
+
+    private static String createBugLink(long bugId) {
+        return Window.Location
+                .createUrlBuilder()
+                .setParameter("bug", Long.toString(bugId))
+                .buildString();
     }
 
     private void setData(List<BugHit> bugHits) {
@@ -253,8 +268,8 @@ public class BugDetailView {
             }
         }
 
-        _cellTable.setRowData(bugHits);
-        final SelectionModel<? super BugHit> selectionModel = _cellTable.getSelectionModel();
+        _dataGrid.setRowData(bugHits);
+        final SelectionModel<? super BugHit> selectionModel = _dataGrid.getSelectionModel();
         if (!bugHits.isEmpty()) {
             final BugHit firstBugHit = bugHits.get(0);
             selectionModel.setSelected(firstBugHit, true);
@@ -263,10 +278,11 @@ public class BugDetailView {
         }
     }
 
-    private void render(final String stackText) {
+    private void renderStack(final String stackText) {
         setClipText(stackText);
 
         if (stackText != null) {
+            _stackScrollPanel.setVerticalScrollPosition(0);
             _bugModel.getPackages(new AdvancedAsyncCallback<List<AppPkg>>() {
                 @Override
                 public void onSuccess(List<AppPkg> appPkgs) {
