@@ -49,6 +49,15 @@
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
 
+    <filter>
+        <filter-name>noCacheFilter</filter-name>
+        <filter-class>org.bug4j.server.jsp.NoCacheFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>noCacheFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
     <servlet>
         <servlet-name>derbynet</servlet-name>
         <servlet-class>org.apache.derby.drda.NetServlet</servlet-class>
@@ -122,7 +131,6 @@
         <servlet-class>org.bug4j.server.jsp.StartupServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
-
     <servlet-mapping>
         <servlet-name>StartupServlet</servlet-name>
         <url-pattern>/whyShouldIHaveAMappingQmQmQm</url-pattern>
@@ -145,7 +153,6 @@
         <servlet-name>org.bug4j.gwt.admin.Admin AdminService</servlet-name>
         <url-pattern>/admin/AdminService</url-pattern>
     </servlet-mapping>
-
 
     <servlet>
         <servlet-name>ExportServlet</servlet-name>
