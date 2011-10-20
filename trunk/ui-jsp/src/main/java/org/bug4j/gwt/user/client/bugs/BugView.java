@@ -167,6 +167,7 @@ public class BugView extends SplitLayoutPanel {
                     @Override
                     public void onSuccess(List<Bug> bugs) {
                         _dataGrid.setRowData(range.getStart(), bugs);
+                        _dataGrid.setRowCount(range.getStart() + bugs.size(), true);
                         if (!bugs.isEmpty()) {
                             final Bug firstBug = bugs.get(0);
                             _selectionModel.setSelected(firstBug, true);
