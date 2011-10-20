@@ -108,6 +108,7 @@ public class BugDetailView extends DockLayoutPanel {
         final Label emptyTableWidget = new Label("No hits");
         emptyTableWidget.getElement().getStyle().setFontSize(20, Style.Unit.PT);
         ret.setEmptyTableWidget(emptyTableWidget);
+        ret.setRowCount(0);
 
         _dateColumn.setSortable(true);
         _versionColumn.setSortable(true);
@@ -172,6 +173,7 @@ public class BugDetailView extends DockLayoutPanel {
                             }
 
                             _dataGrid.setRowData(0, bugHits);
+                            _dataGrid.setRowCount(bugHits.size(), true);
 
                             final SelectionModel<? super BugHit> selectionModel = _dataGrid.getSelectionModel();
                             if (!bugHits.isEmpty()) {
