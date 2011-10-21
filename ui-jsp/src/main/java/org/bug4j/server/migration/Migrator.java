@@ -40,7 +40,10 @@ public class Migrator {
     }
 
     public void postOpenDB() {
-        addHitSession();
+        final JdbcStore jdbcStore = JdbcStore.getInstance();
+        jdbcStore.migrate_addHitSession();                      // 2011-09-10 Added the SESSION_ID to the HIT table
+        jdbcStore.migrate_addBugExtinct();                      // 2011-10-20 Added the EXTINCT and UNEXTINCT to the BUG table
+        jdbcStore.migrateFilterMultiUser2FilterSingleUser();    // 2011-10-21 Inverted the multi-user filter (multi=true => single=false)
     }
 
     /**
@@ -58,13 +61,5 @@ public class Migrator {
                 throw new IllegalStateException(e.getMessage(), e);
             }
         }
-    }
-
-    /**
-     * 2011-09-10 Added the SESSION_ID to the HIT table
-     */
-    private void addHitSession() {
-        final JdbcStore jdbcStore = JdbcStore.getInstance();
-        jdbcStore.migrate_addHitSession();
     }
 }

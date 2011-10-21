@@ -127,6 +127,10 @@
             <classpath refid="test.class.path"/>
             <classpath location="${module.production.output}"/>
         </javac>
+        <copy todir="${module.test.output}">
+            <fileset dir="src/test/resources"/>
+        </copy>
+        <unzip src="src/test/resources/bug4jdb.zip" dest="${module.test.output}"/>
     </target>
 
     <target name="unit-test">

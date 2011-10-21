@@ -28,4 +28,7 @@ public interface Resources extends ClientBundle {
 
     @Source("icons/loading_32_32.gif")
     ImageResource loading32x32();
+
+    @Source("icons/extinct.png")
+    ImageResource extinct32x32();
 }

@@ -108,11 +108,14 @@ div#main {
     color: #a9a9a9;
 }
 
+.BugDetailView-title-container {
+    border-bottom: 1px solid #a9a9a9;
+}
+
 .BugDetailView-title {
     font-size: large;
     padding: 5px;
     margin: 3px;
-    border-bottom: 1px solid #a9a9a9;
     white-space: nowrap;
 }
 

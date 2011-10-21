@@ -28,7 +28,8 @@ public class FilterDialog extends DialogBox {
     private TextBox _hitDays;
     private final Filter _filter;
     private TextBox _title;
-    private CheckBox _multipleReports;
+    private CheckBox _includeSingleUserReports;
+    private CheckBox _includeExtinct;
 
     public FilterDialog(Filter filter) {
         _filter = new Filter(filter);
@@ -73,11 +74,19 @@ public class FilterDialog extends DialogBox {
 
         ret.add(grid);
 
+        final FlowPanel checkboxPanel = new FlowPanel();
         {
-            _multipleReports = new CheckBox("Reported by multiple users");
-            _multipleReports.setValue(_filter.isReportedByMultiple());
-            ret.add(_multipleReports);
+            _includeSingleUserReports = new CheckBox("Include single user reports");
+            _includeSingleUserReports.setValue(_filter.isIncludeSingleUserReports());
+            checkboxPanel.add(new SimplePanel(_includeSingleUserReports));
         }
+
+        {
+            _includeExtinct = new CheckBox("Include extinct bugs");
+            _includeExtinct.setValue(_filter.isShowExtinct());
+            checkboxPanel.add(new SimplePanel(_includeExtinct));
+        }
+        ret.add(checkboxPanel);
 
         return ret;
     }
@@ -152,8 +161,11 @@ public class FilterDialog extends DialogBox {
         final String titleText = _title.getText();
         _filter.setTitle(titleText.isEmpty() ? null : titleText);
 
-        final boolean multipleReportsValue = _multipleReports.getValue();
-        _filter.setReportedByMultiple(multipleReportsValue);
+        final boolean includeSingleUserReportsValue = _includeSingleUserReports.getValue();
+        _filter.setIncludeSingleUserReports(includeSingleUserReportsValue);
+
+        final boolean showExtinct = _includeExtinct.getValue();
+        _filter.setShowExtinct(showExtinct);
     }
 
     @Override
