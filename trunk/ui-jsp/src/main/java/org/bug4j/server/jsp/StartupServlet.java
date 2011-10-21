@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 import org.bug4j.server.migration.Migrator;
 import org.bug4j.server.store.Store;
 import org.bug4j.server.store.StoreFactory;
+import org.bug4j.server.store.jdbc.JdbcStore;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -34,18 +35,20 @@ public class StartupServlet extends HttpServlet {
 
     @Override
     public void init(ServletConfig config) throws ServletException {
-        final Migrator migrator = Migrator.getInstance();
+        migrate();
 
-        migrator.preOpenDB();
+        printUrlWhenReady();
 
-        try {
-            StoreFactory.createJdbcStore();
+        scheduleTasks();
+    }
 
-            migrator.postOpenDB();
-        } catch (Throwable e) {
-            LOGGER.error(e.getMessage(), e);
-        }
+    @Override
+    public void destroy() {
+        final Store store = StoreFactory.getStore();
+        store.close();
+    }
 
+    private void printUrlWhenReady() {
         new Thread() {
             @Override
             public void run() {
@@ -57,12 +60,6 @@ public class StartupServlet extends HttpServlet {
             }
 
         }.start();
-    }
-
-    @Override
-    public void destroy() {
-        final Store store = StoreFactory.getStore();
-        store.close();
     }
 
     /**
@@ -93,5 +90,48 @@ public class StartupServlet extends HttpServlet {
             ret = true;
         }
         return ret;
+    }
+
+    private static void migrate() {
+        final Migrator migrator = Migrator.getInstance();
+
+        migrator.preOpenDB();
+
+        try {
+            StoreFactory.createJdbcStore();
+
+            migrator.postOpenDB();
+        } catch (Throwable e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Run tasks periodically.
+     * I don't want to introduce a dependency on Quartz just yet
+     */
+    private void scheduleTasks() {
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(1000 * 60); // Let the system fully startup before to run the scheduled tasks
+                    //noinspection InfiniteLoopStatement
+                    while (true) {
+                        runSheduledTasks();
+                        Thread.sleep(1000 * 60 * 60);
+                    }
+                } catch (InterruptedException ignored) {
+                }
+                LOGGER.info("Task scheduler exits");
+            }
+        }.start();
+    }
+
+    private void runSheduledTasks() {
+        LOGGER.info("Running scheduled tasks");
+        final JdbcStore jdbcStore = JdbcStore.getInstance();
+        jdbcStore.updateExtinctStatus();
+        LOGGER.info("Done with scheduled tasks");
     }
 }

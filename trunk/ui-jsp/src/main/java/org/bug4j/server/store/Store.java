@@ -93,17 +93,20 @@ public abstract class Store {
         final Filter ret = new Filter();
         final String title = getUserPref(remoteUser, "FILTER_TITLE", null);
         final Integer hitWithinDays = getUserPref_Integer(remoteUser, "FILTER_DAYS", null);
-        final String multiUsers = getUserPref(remoteUser, "FILTER_MULTI_USERS", Boolean.FALSE.toString());
+        final String includeSingleUserReports = getUserPref(remoteUser, "FILTER_INCLUDE_SINGLE_USER", Boolean.TRUE.toString());
+        final String showExtinct = getUserPref(remoteUser, "FILTER_INCLUDE_EXTINCT", Boolean.TRUE.toString());
         ret.setTitle(title);
         ret.setHitWithinDays(hitWithinDays);
-        ret.setReportedByMultiple(Boolean.parseBoolean(multiUsers));
+        ret.setIncludeSingleUserReports(Boolean.parseBoolean(includeSingleUserReports));
+        ret.setShowExtinct(Boolean.parseBoolean(showExtinct));
         return ret;
     }
 
     public void setDefaultFilter(String remoteUser, Filter filter) {
         setUserPref(remoteUser, "FILTER_TITLE", filter.getTitle());
         setUserPref(remoteUser, "FILTER_DAYS", filter.getHitWithinDays());
-        setUserPref(remoteUser, "FILTER_MULTI_USERS", Boolean.toString(filter.isReportedByMultiple()));
+        setUserPref(remoteUser, "FILTER_INCLUDE_SINGLE_USER", Boolean.toString(filter.isIncludeSingleUserReports()));
+        setUserPref(remoteUser, "FILTER_INCLUDE_EXTINCT", Boolean.toString(filter.isShowExtinct()));
     }
 
     public abstract void markRead(String userName, long bugId);
@@ -147,4 +150,6 @@ public abstract class Store {
     public abstract boolean doesUserExist(String userName);
 
     public abstract long createSession(String app, String version, long now, String remoteAddr);
+
+    public abstract void updateExtinctStatus();
 }

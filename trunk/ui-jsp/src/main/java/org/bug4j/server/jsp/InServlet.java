@@ -40,32 +40,37 @@ public class InServlet extends HttpServlet {
     }
 
     private void doit(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("text/plain");
-        final PrintWriter out = response.getWriter();
+        try {
+            response.setContentType("text/plain");
+            final PrintWriter out = response.getWriter();
 
-        final String app = request.getParameter("a");
-        final String version = request.getParameter("v");
-        final String message = request.getParameter("m");
-        final String user = request.getParameter("u");
-        final String hash = request.getParameter("h");
-        final Long sessionId = getLongParameter(request, "e");
+            final String app = request.getParameter("a");
+            final String version = request.getParameter("v");
+            final String message = request.getParameter("m");
+            final String user = request.getParameter("u");
+            final String hash = request.getParameter("h");
+            final Long sessionId = getLongParameter(request, "e");
 
-        if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace(String.format("in :%s-%s-%s", app, version, hash));
-        }
-
-        final Store store = StoreFactory.getStore();
-        if (store.doesAppExist(app)) {
-            final Stack stack = store.getStackByHash(app, hash);
-            if (stack != null) {
-                final long dateReported = System.currentTimeMillis();
-                store.reportHitOnStack(sessionId, version, message, dateReported, user, stack);
-                out.print("Old");
-            } else {
-                out.print("New");
+            if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace(String.format("in :%s-%s-%s", app, version, hash));
             }
-        } else {
-            response.sendError(403, "Unknown application");
+
+            final Store store = StoreFactory.getStore();
+            if (store.doesAppExist(app)) {
+                final Stack stack = store.getStackByHash(app, hash);
+                if (stack != null) {
+                    final long dateReported = System.currentTimeMillis();
+                    store.reportHitOnStack(sessionId, version, message, dateReported, user, stack);
+                    out.print("Old");
+                } else {
+                    out.print("New");
+                }
+            } else {
+                response.sendError(403, "Unknown application");
+            }
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            response.sendError(500);
         }
     }
 

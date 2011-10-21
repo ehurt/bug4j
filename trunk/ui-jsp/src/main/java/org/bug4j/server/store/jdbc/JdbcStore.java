@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.sql.*;
 import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class JdbcStore extends Store {
@@ -100,7 +101,6 @@ public class JdbcStore extends Store {
                         " USER_LAST_SIGNED_IN TIMESTAMP" +
                         ")"
                 );
-
             }
 
             if (!doesTableExist(statement, "BUG4J_AUTHORITIES")) {
@@ -136,7 +136,9 @@ public class JdbcStore extends Store {
                         "CREATE TABLE BUG (" +
                         " BUG_ID INT GENERATED ALWAYS AS IDENTITY," +
                         " APP VARCHAR(32) NOT NULL," +
-                        " TITLE VARCHAR(256) NOT NULL" +
+                        " TITLE VARCHAR(256) NOT NULL," +
+                        " EXTINCT TIMESTAMP," +
+                        " UNEXTINCT TIMESTAMP" +
                         ")"
                 );
                 statement.execute("CREATE INDEX BUG_ID_IDX ON BUG(BUG_ID)");
@@ -281,7 +283,9 @@ public class JdbcStore extends Store {
                     "        COUNT(H.HIT_ID) AS HIT_COUNT," +
                     "        MAX(H.HIT_ID) AS HIT_MAX," +
                     "        UR.LAST_HIT_ID," +
-                    "        B.APP" +
+                    "        B.APP," +
+                    "        B.EXTINCT," +
+                    "        B.UNEXTINCT" +
                     "  FROM BUG B" +
                     "    LEFT OUTER JOIN HIT H ON B.BUG_ID = H.BUG_ID" +
                     "    LEFT OUTER JOIN USER_READ UR ON B.BUG_ID = UR.BUG_ID AND UR.USER_NAME=:userName"
@@ -300,15 +304,18 @@ public class JdbcStore extends Store {
             if (filter.getBugId() != null) {
                 conditions.add("B.BUG_ID=:bugId");
             }
+            if (!filter.isShowExtinct()) {
+                conditions.add("B.EXTINCT IS NULL");
+            }
             if (!conditions.isEmpty()) {
                 final String whereClause = StringUtils.join(conditions, " AND ");
                 sql.append(" WHERE ").append(whereClause);
             }
 
-            sql.append("  GROUP BY B.APP,B.BUG_ID, B.TITLE,UR.LAST_HIT_ID");
+            sql.append("  GROUP BY B.APP,B.BUG_ID, B.TITLE,UR.LAST_HIT_ID, B.EXTINCT, B.UNEXTINCT");
 
             sql.append("  HAVING COUNT(H.HIT_ID) > 0");
-            if (filter.isReportedByMultiple()) {
+            if (!filter.isIncludeSingleUserReports()) {
                 sql.append(" AND");
                 sql.append(" COUNT(DISTINCT H.REPORTED_BY) > 1");
             }
@@ -366,7 +373,11 @@ public class JdbcStore extends Store {
                             lastReadHit = null;
                         }
                         final String bugApp = resultSet.getString(6);
-                        final Bug bug = new Bug(bugApp, bugId, title, hitCount, maxHit, lastReadHit);
+                        final Timestamp extinctValue = resultSet.getTimestamp(7);
+                        final Timestamp unextinctValue = resultSet.getTimestamp(8);
+                        final Long extinct = extinctValue == null ? null : extinctValue.getTime();
+                        final Long unextinct = unextinctValue == null ? null : unextinctValue.getTime();
+                        final Bug bug = new Bug(bugApp, bugId, title, hitCount, maxHit, lastReadHit, extinct, unextinct);
                         ret.add(bug);
                     }
                 } finally {
@@ -1406,7 +1417,7 @@ public class JdbcStore extends Store {
         long ret;
         final Connection connection = getConnection();
         try {
-            final PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO BUG (APP, TITLE) VALUES(?,?)", Statement.RETURN_GENERATED_KEYS);
+            final PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO BUG (APP, TITLE, EXTINCT) VALUES(?,?,NULL)", Statement.RETURN_GENERATED_KEYS);
             try {
                 preparedStatement.setString(1, app);
                 preparedStatement.setString(2, title);
@@ -1510,39 +1521,55 @@ public class JdbcStore extends Store {
 
     @Override
     public void reportHitOnStack(Long sessionId, String appVersion, String message, long dateReported, String user, Stack stack) {
-        final Connection connection = getConnection();
-
         try {
-            final PreparedStatement preparedStatement = connection.prepareStatement(
-                    "INSERT INTO HIT (SESSION_ID, BUG_ID,STACK_ID,APP_VER,DATE_REPORTED,MESSAGE,REPORTED_BY) VALUES(?,?,?,?,?,?,?)");
-            try {
-                final long bugId = stack.getBugId();
-                final Long stackId = stack.getStackId();
-                final Timestamp now = new Timestamp(dateReported);
+            final Connection connection = getConnection();
 
-                if (sessionId != null) {
-                    preparedStatement.setLong(1, sessionId);
-                } else {
-                    preparedStatement.setNull(1, Types.INTEGER);
+            try {
+                final PreparedStatement insertHitStatement = connection.prepareStatement(
+                        "INSERT INTO HIT (SESSION_ID, BUG_ID,STACK_ID,APP_VER,DATE_REPORTED,MESSAGE,REPORTED_BY) VALUES(?,?,?,?,?,?,?)");
+                try {
+                    final long bugId = stack.getBugId();
+                    final Long stackId = stack.getStackId();
+                    final Timestamp now = new Timestamp(dateReported);
+
+                    if (sessionId != null) {
+                        insertHitStatement.setLong(1, sessionId);
+                    } else {
+                        insertHitStatement.setNull(1, Types.INTEGER);
+                    }
+                    insertHitStatement.setLong(2, bugId);
+                    if (stackId != null) {
+                        insertHitStatement.setLong(3, stackId);
+                    } else {
+                        insertHitStatement.setNull(3, Types.INTEGER);
+                    }
+                    insertHitStatement.setString(4, appVersion);
+                    insertHitStatement.setTimestamp(5, now);
+                    insertHitStatement.setString(6, truncate(message, 1024));
+                    insertHitStatement.setString(7, truncate(user, 1024));
+                    insertHitStatement.executeUpdate();
+                } finally {
+                    insertHitStatement.close();
                 }
-                preparedStatement.setLong(2, bugId);
-                if (stackId != null) {
-                    preparedStatement.setLong(3, stackId);
-                } else {
-                    preparedStatement.setNull(3, Types.INTEGER);
+
+                final PreparedStatement updateExtinctStatement = connection.prepareStatement("UPDATE BUG SET EXTINCT=NULL, UNEXTINCT=? WHERE BUG_ID=? AND EXTINCT IS NOT NULL");
+                try {
+                    final Timestamp now = new Timestamp(System.currentTimeMillis());
+                    final long bugId = stack.getBugId();
+                    updateExtinctStatement.setTimestamp(1, now);
+                    updateExtinctStatement.setLong(2, bugId);
+                    final int updatedCount = updateExtinctStatement.executeUpdate();
+                    if (updatedCount == 1) {
+                        LOGGER.info("Bug " + bugId + " was resurected");
+                    }
+                } finally {
+                    updateExtinctStatement.close();
                 }
-                preparedStatement.setString(4, appVersion);
-                preparedStatement.setTimestamp(5, now);
-                preparedStatement.setString(6, truncate(message, 1024));
-                preparedStatement.setString(7, truncate(user, 1024));
-                preparedStatement.executeUpdate();
             } finally {
-                DbUtils.closeQuietly(preparedStatement);
+                connection.close();
             }
         } catch (SQLException e) {
             throw new IllegalStateException(e.getMessage(), e);
-        } finally {
-            DbUtils.closeQuietly(connection);
         }
     }
 
@@ -1650,12 +1677,92 @@ public class JdbcStore extends Store {
         return ret;
     }
 
+    public void updateExtinctStatus() {
+        try {
+            final Connection connection = getConnection();
+            try {
+                final Collection<Long> extinctBugIds = collectExtinctBugs(connection);
+
+                final PreparedStatement preparedStatement = connection.prepareStatement("UPDATE BUG SET EXTINCT=?, UNEXTINCT=NULL WHERE BUG_ID=?");
+                try {
+                    final Timestamp now = new Timestamp(System.currentTimeMillis());
+                    for (Long bugId : extinctBugIds) {
+                        preparedStatement.setTimestamp(1, now);
+                        preparedStatement.setLong(2, bugId);
+                        preparedStatement.executeUpdate();
+                    }
+                } finally {
+                    preparedStatement.close();
+                }
+            } finally {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Find bugs that are extinct.
+     */
+    private Collection<Long> collectExtinctBugs(Connection connection) throws SQLException {
+        final Collection<Long> extinctBugIds = new ArrayList<Long>();
+        final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        final PreparedStatement preparedStatement = connection.prepareStatement("" +
+                "SELECT\n" +
+                "        BUG.BUG_ID," +
+                "        MIN(HIT.DATE_REPORTED)," +
+                "        MAX(HIT.DATE_REPORTED)," +
+                "        COUNT(HIT.BUG_ID)" +
+                "  FROM BUG LEFT JOIN HIT ON BUG.BUG_ID=HIT.BUG_ID" +
+                "  WHERE BUG.EXTINCT IS NULL" +
+                "  GROUP BY BUG.BUG_ID" +
+                "  ORDER BY COUNT(HIT.BUG_ID) DESC");
+        try {
+            final ResultSet resultSet = preparedStatement.executeQuery();
+            final long now = System.currentTimeMillis();
+            while (resultSet.next()) {
+                final long bugId = resultSet.getLong(1);
+                final Timestamp minTimestamp = resultSet.getTimestamp(2);
+                final Timestamp maxTimestamp = resultSet.getTimestamp(3);
+                final int count = resultSet.getInt(4);
+
+                final long DAY = 1000 * 60 * 60 * 24;
+                final long min = minTimestamp.getTime();
+                final long max = maxTimestamp.getTime();
+
+                if (max + 3 * DAY < now) { // If it has been more than 3 days since the last hit
+                    // Calculate the average elapsed time between two hits. Consider that anything below 3 days is irrelevant
+                    final long avgFreq = Math.max((max - min) / count, 3 * DAY);
+                    if (max + avgFreq * 3 < now) { // If it has been more than 3 times the average hit frequency
+                        LOGGER.info(
+                                String.format("Extinct bug:%d (%s <-> %s/%d)",
+                                        bugId,
+                                        simpleDateFormat.format(minTimestamp),
+                                        simpleDateFormat.format(maxTimestamp),
+                                        count
+                                )
+                        );
+                        extinctBugIds.add(bugId);
+                    }
+                }
+            }
+        } finally {
+            preparedStatement.close();
+        }
+        return extinctBugIds;
+    }
+
     public void migrate_addHitSession() {
         try {
             final Connection connection = getConnection();
             try {
                 final Statement statement = connection.createStatement();
-                statement.execute("ALTER TABLE HIT ADD COLUMN SESSION_ID INT");
+                try {
+                    statement.execute("ALTER TABLE HIT ADD COLUMN SESSION_ID INT");
+                } finally {
+                    statement.close();
+                }
             } finally {
                 connection.close();
             }
@@ -1664,6 +1771,50 @@ public class JdbcStore extends Store {
             if (!"X0Y32".equals(sqlState)) { // X0Y32: Column 'SESSION_ID' already exists in Table/View '"APP"."HIT"'.
                 throw new IllegalStateException(e.getMessage(), e);
             }
+        }
+    }
+
+    /**
+     * Added the EXTINCT and UNEXTINCT columns
+     */
+    public void migrate_addBugExtinct() {
+        try {
+            final Connection connection = getConnection();
+            try {
+                final Statement statement = connection.createStatement();
+                try {
+                    statement.execute("ALTER TABLE BUG ADD COLUMN EXTINCT TIMESTAMP");
+                    statement.execute("ALTER TABLE BUG ADD COLUMN UNEXTINCT TIMESTAMP");
+                } finally {
+                    statement.close();
+                }
+            } finally {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            final String sqlState = e.getSQLState();
+            if (!"X0Y32".equals(sqlState)) { // X0Y32: Column 'XXX' already exists in Table/View '"YYY"."ZZZ"'.
+                throw new IllegalStateException(e.getMessage(), e);
+            }
+        }
+    }
+
+    public void migrateFilterMultiUser2FilterSingleUser() {
+        try {
+            final Connection connection = getConnection();
+            try {
+                final Statement statement = connection.createStatement();
+                try {
+                    statement.executeUpdate("UPDATE USER_PREFS SET PREF_KEY='FILTER_INCLUDE_SINGLE_USER',PREF_VALUE='true' WHERE PREF_KEY='FILTER_MULTI_USERS' AND PREF_VALUE='false'");
+                    statement.executeUpdate("UPDATE USER_PREFS SET PREF_KEY='FILTER_INCLUDE_SINGLE_USER',PREF_VALUE='false' WHERE PREF_KEY='FILTER_MULTI_USERS' AND PREF_VALUE='true'");
+                } finally {
+                    statement.close();
+                }
+            } finally {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 }

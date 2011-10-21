@@ -17,13 +17,14 @@
 package org.bug4j.server.store;
 
 import org.bug4j.server.store.jdbc.JdbcStore;
+import org.junit.Assert;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class TestingStore extends JdbcStore {
-    public static final String EMBEDDED_URL = "jdbc:derby:C:/java/apache-tomcat-7.0.20/bug4jdb";
     public static final String MEM_URL = "jdbc:derby:memory:tst;create=true";
     private String _url;
 
@@ -37,7 +38,22 @@ public class TestingStore extends JdbcStore {
     }
 
     public static TestingStore createEmbeddedStore() {
-        return new TestingStore(EMBEDDED_URL);
+        final File databasePath = getDatabasePath();
+        Assert.assertNotNull("Could not find the database, started from " + new File(".").getAbsolutePath(), databasePath);
+        //noinspection ConstantConditions
+        return new TestingStore("jdbc:derby:" + databasePath.getAbsolutePath());
+    }
+
+    private static File getDatabasePath() {
+        File base = new File(".").getAbsoluteFile();
+        while (base != null) {
+            final File file = new File(base, "out/test/ui-jsp/bug4jdb");
+            if (file.exists()) {
+                return file;
+            }
+            base = base.getParentFile();
+        }
+        return null;
     }
 
     @Override

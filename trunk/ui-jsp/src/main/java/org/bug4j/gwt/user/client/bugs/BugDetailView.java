@@ -26,6 +26,7 @@ import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.*;
 import org.bug4j.common.TextToLines;
 import org.bug4j.gwt.common.client.AdvancedAsyncCallback;
+import org.bug4j.gwt.common.client.Header;
 import org.bug4j.gwt.common.client.data.AppPkg;
 import org.bug4j.gwt.user.client.Bug4jService;
 import org.bug4j.gwt.user.client.BugModel;
@@ -75,6 +76,7 @@ public class BugDetailView extends DockLayoutPanel {
     private SingleSelectionModel<BugHit> _selectionModel;
     private final BugModel _bugModel;
     private ScrollPanel _stackScrollPanel;
+    private Image _extinctImage;
 
     public BugDetailView(BugModel bugModel) {
         super(Style.Unit.EM);
@@ -220,9 +222,16 @@ public class BugDetailView extends DockLayoutPanel {
         _anchor = new Anchor();
         _anchor.addStyleName("BugDetailView-title");
 
-        final SimpleLayoutPanel simpleLayoutPanel = new SimpleLayoutPanel();
-        simpleLayoutPanel.setWidget(_anchor);
-        return simpleLayoutPanel;
+        _extinctImage = new Image(Header.IMAGES.extinct32x32());
+        _extinctImage.setTitle("Extinct");
+        _extinctImage.setVisible(false);
+
+        final DockLayoutPanel dockLayoutPanel = new DockLayoutPanel(Style.Unit.PX);
+        dockLayoutPanel.addEast(_extinctImage, 32);
+        dockLayoutPanel.add(_anchor);
+        dockLayoutPanel.addStyleName("BugDetailView-title-container");
+
+        return dockLayoutPanel;
     }
 
     private Widget buildStackPanel() {
@@ -273,6 +282,7 @@ public class BugDetailView extends DockLayoutPanel {
         _anchor.setText(bugTitle);
         final String url = createBugLink(bugId);
         _anchor.setHref(url);
+        _extinctImage.setVisible(_bug.isExtinct());
     }
 
     private void refreshGrid() {

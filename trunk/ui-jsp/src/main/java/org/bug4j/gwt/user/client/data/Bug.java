@@ -29,7 +29,10 @@ public class Bug implements Serializable {
     private Long _maxHit;
     @Nullable
     private Long _lastReadHit;
+    private Long _extinct;
+    private Long _unextinct;
 
+    @SuppressWarnings({"UnusedDeclaration"})
     public Bug() {
     }
 
@@ -40,13 +43,15 @@ public class Bug implements Serializable {
         _hitCount = hitCount;
     }
 
-    public Bug(String app, long id, String title, int hitCount, long maxHit, Long lastReadHit) {
+    public Bug(String app, long id, String title, int hitCount, long maxHit, Long lastReadHit, Long extinct, Long unextinct) {
         _app = app;
         _id = id;
         _title = title;
         _hitCount = hitCount;
         _maxHit = maxHit;
         _lastReadHit = lastReadHit;
+        _extinct = extinct;
+        _unextinct = unextinct;
     }
 
     @Override
@@ -90,5 +95,14 @@ public class Bug implements Serializable {
 
     public void setRead(boolean read) {
         _lastReadHit = read ? Long.MAX_VALUE : null;
+    }
+
+    public boolean isExtinct() {
+        return _extinct != null;
+    }
+
+    @SuppressWarnings({"UnusedDeclaration"})
+    public Long getUnextinct() {
+        return _unextinct;
     }
 }

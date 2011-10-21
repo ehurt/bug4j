@@ -24,7 +24,8 @@ public class Filter implements Serializable {
     private String _title;
     private Long _bugId;
     private Integer _hitWithinDays = null;
-    private boolean _reportedByMultiple = false;
+    private boolean _includeSingleUserReports = true;
+    private boolean _showExtinct = true;
 
     public Filter() {
     }
@@ -36,11 +37,12 @@ public class Filter implements Serializable {
     public void copyTo(Filter that) {
         that.setHitWithinDays(this.getHitWithinDays());
         that.setTitle(this.getTitle());
-        that.setReportedByMultiple(this.isReportedByMultiple());
+        that.setIncludeSingleUserReports(this.isIncludeSingleUserReports());
+        that.setShowExtinct(this.isShowExtinct());
     }
 
     public boolean isFiltering() {
-        return hasHitWithinDays() || hasTitle() || isReportedByMultiple();
+        return hasHitWithinDays() || hasTitle() || !isIncludeSingleUserReports() || !isShowExtinct();
     }
 
     public boolean hasHitWithinDays() {
@@ -58,7 +60,8 @@ public class Filter implements Serializable {
     public void clear() {
         setHitWithinDays(null);
         setTitle(null);
-        setReportedByMultiple(false);
+        setIncludeSingleUserReports(true);
+        setShowExtinct(true);
     }
 
     public boolean hasTitle() {
@@ -81,11 +84,19 @@ public class Filter implements Serializable {
         _bugId = bugId;
     }
 
-    public boolean isReportedByMultiple() {
-        return _reportedByMultiple;
+    public boolean isIncludeSingleUserReports() {
+        return _includeSingleUserReports;
     }
 
-    public void setReportedByMultiple(boolean reportedByMultiple) {
-        _reportedByMultiple = reportedByMultiple;
+    public void setIncludeSingleUserReports(boolean includeSingleUserReports) {
+        _includeSingleUserReports = includeSingleUserReports;
+    }
+
+    public boolean isShowExtinct() {
+        return _showExtinct;
+    }
+
+    public void setShowExtinct(boolean showExtinct) {
+        _showExtinct = showExtinct;
     }
 }
