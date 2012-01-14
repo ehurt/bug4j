@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Cedric Dandoy
+ * Copyright 2012 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import static org.bug4j.common.ParamConstants.*;
+
 public class InServlet extends HttpServlet {
     private static final Logger LOGGER = Logger.getLogger(InServlet.class);
 
@@ -44,12 +46,15 @@ public class InServlet extends HttpServlet {
             response.setContentType("text/plain");
             final PrintWriter out = response.getWriter();
 
-            final String app = request.getParameter("a");
-            final String version = request.getParameter("v");
-            final String message = request.getParameter("m");
-            final String user = request.getParameter("u");
-            final String hash = request.getParameter("h");
-            final Long sessionId = getLongParameter(request, "e");
+            final String app = request.getParameter(PARAM_APPLICATION_NAME);
+            final String version = request.getParameter(PARAM_APPLICATION_VERSION);
+            final String message = request.getParameter(PARAM_MESSAGE);
+            final String user = request.getParameter(PARAM_USER);
+            final String hash = request.getParameter(PARAM_HASH);
+            final Long sessionId = getLongParameter(request, PARAM_SESSION_ID);
+            final Long buildDate = getLongParameter(request, PARAM_BUILD_DATE);
+            final boolean devBuild = getBooleanParameter(request, PARAM_DEV_BUILD);
+            final Integer buildNumber = getIntParameter(request, PARAM_BUILD_NUMBER);
 
             if (LOGGER.isTraceEnabled()) {
                 LOGGER.trace(String.format("in :%s-%s-%s", app, version, hash));
@@ -60,7 +65,7 @@ public class InServlet extends HttpServlet {
                 final Stack stack = store.getStackByHash(app, hash);
                 if (stack != null) {
                     final long dateReported = System.currentTimeMillis();
-                    store.reportHitOnStack(sessionId, version, message, dateReported, user, stack);
+                    store.reportHitOnStack(sessionId, version, message, dateReported, user, stack, buildDate, devBuild, buildNumber);
                     out.print("Old");
                 } else {
                     out.print("New");
@@ -82,6 +87,27 @@ public class InServlet extends HttpServlet {
                 ret = Long.parseLong(sessionValue);
             } catch (NumberFormatException ignored) {
             }
+        }
+        return ret;
+    }
+
+    static Integer getIntParameter(HttpServletRequest request, String name) {
+        Integer ret = null;
+        final String sessionValue = request.getParameter(name);
+        if (sessionValue != null) {
+            try {
+                ret = Integer.parseInt(sessionValue);
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        return ret;
+    }
+
+    static boolean getBooleanParameter(HttpServletRequest request, String name) {
+        boolean ret = false;
+        final String sessionValue = request.getParameter(name);
+        if ("Y".equals(sessionValue)) {
+            ret = true;
         }
         return ret;
     }

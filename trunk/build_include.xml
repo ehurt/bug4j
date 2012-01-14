@@ -3,7 +3,7 @@
     <property name="home" location="."/>
 
     <property environment="env"/>
-    <property name="env.dep-home" value="/java"/>
+    <property name="env.dep-home" value="c:/java"/>
     <property name="dep-home" value="${env.dep-home}"/>
     <property file="${home}/build.properties"/>
 

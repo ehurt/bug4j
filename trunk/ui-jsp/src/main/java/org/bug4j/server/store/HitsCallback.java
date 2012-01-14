@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Cedric Dandoy
+ * Copyright 2012 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,5 +17,5 @@
 package org.bug4j.server.store;
 
 public interface HitsCallback {
-    void hit(long hitId, String appVer, long dateReported, String user, String message, String stack) throws Exception;
+    void hit(long hitId, String appVer, long dateReported, Long dateBuilt, boolean devBuild, Integer buildNumber, String user, String message, String stack) throws Exception;
 }

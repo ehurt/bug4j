@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Cedric Dandoy
+ * Copyright 2012 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -53,12 +53,15 @@ public abstract class Importer {
     protected String _title;
     protected StringBuilder _stack;
     protected long _hitId;
-    protected Date _date;
+    protected Long _dateReported;
     protected String _appVer;
     protected String _user;
     protected String _message;
     protected ArrayList<String> _packages;
     private Long _sessionId;
+    private Long _buildDate;
+    private boolean _devBuild;
+    private Integer _buildNumber;
 
     public Importer() {
     }
@@ -197,24 +200,56 @@ public abstract class Importer {
     }
 
     protected void startHit(Attributes attributes) {
-        final String hitIdValue = attributes.getValue("id");
+        final String hitIdValue = attributes.getValue(ImportExportConstants.NAME_HIT_ID);
         try {
             _hitId = Long.parseLong(hitIdValue);
-            final String sessionIdValue = attributes.getValue("sessionId");
+            final String sessionIdValue = attributes.getValue(ImportExportConstants.NAME_SESSION_ID);
             try {
                 if (sessionIdValue != null) {
                     _sessionId = Long.parseLong(sessionIdValue);
                 }
-                final String dateValue = attributes.getValue("date");
-                try {
-                    _date = _dateFormat.parse(dateValue);
-                    _appVer = attributes.getValue("appVer");
-                    _user = attributes.getValue("user");
-                    _message = attributes.getValue("message");
-                    _stack = new StringBuilder();
-                } catch (ParseException e) {
-                    LOGGER.error("Failed to parse the date '" + dateValue + "'");
+
+                {
+                    final String dateReportedValue = attributes.getValue(ImportExportConstants.NAME_DATE_REPORTED);
+                    if (dateReportedValue != null) {
+                        try {
+                            final Date dateReported = _dateFormat.parse(dateReportedValue);
+                            _dateReported = dateReported.getTime();
+                        } catch (ParseException e) {
+                            LOGGER.error("Failed to parse the reported date '" + dateReportedValue + "'");
+                        }
+                    }
                 }
+
+                _appVer = attributes.getValue(ImportExportConstants.NAME_APP_VER);
+                _user = attributes.getValue(ImportExportConstants.NAME_USER);
+                _message = attributes.getValue(ImportExportConstants.NAME_MESSAGE);
+                _stack = new StringBuilder();
+
+                {
+                    final String buildDateValue = attributes.getValue(ImportExportConstants.NAME_BUILD_DATE);
+                    if (buildDateValue != null) {
+                        try {
+                            final Date buildDate = _dateFormat.parse(buildDateValue);
+                            _buildDate = buildDate.getTime();
+                        } catch (ParseException e) {
+                            LOGGER.error("Failed to parse the build date '" + buildDateValue + "'");
+                        }
+                    }
+                }
+                _devBuild = Boolean.parseBoolean(attributes.getValue(ImportExportConstants.NAME_DEV_BUILD));
+
+                {
+                    final String buildNumberValue = attributes.getValue(ImportExportConstants.NAME_BUILD_NUMBER);
+                    if (buildNumberValue != null) {
+                        try {
+                            _buildNumber = Integer.parseInt(buildNumberValue);
+                        } catch (NumberFormatException e) {
+                            LOGGER.error("Failed to parse the build number '" + buildNumberValue + "'");
+                        }
+                    }
+                }
+
             } catch (NumberFormatException e) {
                 LOGGER.error("Failed to parse session of hit id='" + hitIdValue + "'");
             }
@@ -224,18 +259,23 @@ public abstract class Importer {
     }
 
     protected void endHit() {
-        final long dateReported = _date.getTime();
         final String stack = _stack.toString();
-        _sessionId = 0L;
-        whenHit(_appName, _sessionId, _bugId, _title, _hitId, dateReported, _appVer, _user, _message, stack);
+        if (_dateReported != null) {
+            whenHit(_appName, _sessionId, _bugId, _title, _hitId, _dateReported, _appVer, _user, _message, stack, _buildDate, _devBuild, _buildNumber);
+        } else {
+            LOGGER.error("Bug " + _bugId + " is missing a reported date");
+        }
 
         _hitId = 0;
         _sessionId = null;
-        _date = null;
+        _dateReported = null;
         _appVer = null;
         _user = null;
         _message = null;
         _stack = null;
+        _buildDate = null;
+        _devBuild = false;
+        _buildNumber = null;
     }
 
     protected void endHits() {
@@ -251,5 +291,5 @@ public abstract class Importer {
     protected void endApps() {
     }
 
-    protected abstract void whenHit(String app, Long sessionId, long bugId, String title, long hitId, long dateReported, String appVer, String user, String message, String stack);
+    protected abstract void whenHit(String app, Long sessionId, long bugId, String title, long hitId, long dateReported, String appVer, String user, String message, String stack, Long buildDate, boolean devBuild, Integer buildNumber);
 }

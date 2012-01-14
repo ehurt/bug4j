@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Cedric Dandoy
+ * Copyright 2012 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -187,7 +187,10 @@ public class JdbcStore extends Store {
                         " BUG_ID INT," +
                         " STACK_ID INT," +
                         " APP_VER VARCHAR(32)," +
-                        " DATE_REPORTED TIMESTAMP," +
+                        " DATE_BUILT TIMESTAMP," +
+                        " DEV_BUILD CHAR(1)," +
+                        " BUILD_NUMBER INT," +
+                        " DATE_REPORTED TIMESTAMP NOT NULL," +
                         " REPORTED_BY VARCHAR(1024)," +
                         " MESSAGE VARCHAR(1024)" +
                         ")"
@@ -498,17 +501,18 @@ public class JdbcStore extends Store {
     public void close() {
     }
 
+
     @Override
     public List<BugHit> getHits(long bugId, int offset, int max, String orderBy) {
         final List<BugHit> ret = new ArrayList<BugHit>();
         final Connection connection = getConnection();
         try {
-            StringBuilder sql = new StringBuilder("SELECT H.HIT_ID,H.APP_VER,H.DATE_REPORTED,H.REPORTED_BY FROM HIT H WHERE H.BUG_ID=:bugId\n");
+            StringBuilder sql = new StringBuilder("SELECT H.HIT_ID,H.APP_VER,H.DATE_REPORTED,H.REPORTED_BY,H.DATE_BUILT,H.DEV_BUILD,H.BUILD_NUMBER FROM HIT H WHERE H.BUG_ID=:bugId\n");
             String sep = " ORDER BY ";
             for (int i = 0; i < orderBy.length(); i++) {
                 final char c = orderBy.charAt(i);
                 final char lc = Character.toLowerCase(c);
-                final int columnPos = "ivdb".indexOf(lc) + 1;
+                final int columnPos = "abcdefg".indexOf(lc) + 1;
                 final boolean asc = Character.isLowerCase(c);
                 sql
                         .append(sep)
@@ -533,11 +537,17 @@ public class JdbcStore extends Store {
                         final String appVer = resultSet.getString(2);
                         final long dateReported = resultSet.getTimestamp(3).getTime();
                         final String user = resultSet.getString(4);
+                        final Timestamp dateBuilt = resultSet.getTimestamp(5);
+                        final String devBuildValue = resultSet.getString(6);
+                        final Integer buildNumber = getInteger(resultSet, 7);
                         final BugHit bugHit = new BugHit(
                                 hitId,
                                 appVer,
                                 dateReported,
-                                user
+                                user,
+                                dateBuilt == null ? null : dateBuilt.getTime(),
+                                "Y".equals(devBuildValue),
+                                buildNumber
                         );
                         ret.add(bugHit);
                     }
@@ -555,13 +565,40 @@ public class JdbcStore extends Store {
         return ret;
     }
 
+    private Integer getInteger(ResultSet resultSet, int columnIndex) throws SQLException {
+        Integer ret = null;
+        final int i = resultSet.getInt(columnIndex);
+        if (!resultSet.wasNull()) {
+            ret = i;
+        }
+        return ret;
+    }
+
+    private Long getDate(ResultSet resultSet, int columnIndex) throws SQLException {
+        Long ret = null;
+        final Timestamp dateReportedValue = resultSet.getTimestamp(columnIndex);
+        if (!resultSet.wasNull()) {
+            ret = dateReportedValue.getTime();
+        }
+        return ret;
+    }
+
     @Override
     public void fetchHits(long bugId, HitsCallback hitsCallback) {
         try {
             final Connection connection = getConnection();
             try {
                 final PreparedStatement preparedStatement = connection.prepareStatement("" +
-                        "SELECT H.HIT_ID,H.APP_VER,H.DATE_REPORTED,H.REPORTED_BY,H.MESSAGE,S.STACK_TEXT" +
+                        "SELECT " +
+                        "       H.HIT_ID," +                // 1
+                        "       H.APP_VER," +               // 2
+                        "       H.DATE_REPORTED," +         // 3
+                        "       H.REPORTED_BY," +           // 4
+                        "       H.MESSAGE," +               // 5
+                        "       H.DATE_BUILT," +            // 6
+                        "       H.DEV_BUILD," +             // 7
+                        "       H.BUILD_NUMBER," +          // 8
+                        "       S.STACK_TEXT" +             // 9
                         "   FROM HIT H LEFT OUTER JOIN STACK_TEXT S ON H.STACK_ID=S.STACK_ID" +
                         "   WHERE H.BUG_ID=?" +
                         "   ORDER BY H.HIT_ID");
@@ -572,11 +609,13 @@ public class JdbcStore extends Store {
                         while (resultSet.next()) {
                             final long hitId = resultSet.getLong(1);
                             final String appVer = resultSet.getString(2);
-                            final Timestamp dateReportedValue = resultSet.getTimestamp(3);
-                            final long dateReported = dateReportedValue.getTime();
+                            final long dateReported = getDate(resultSet, 3);
                             final String user = resultSet.getString(4);
                             final String message = resultSet.getString(5);
-                            final Clob clob = resultSet.getClob(6);
+                            final Long dateBuilt = getDate(resultSet, 6);
+                            final boolean devBuild = "Y".equals(resultSet.getString(7));
+                            final Integer buildNumber = getInteger(resultSet, 8);
+                            final Clob clob = resultSet.getClob(9);
                             String stack = null;
                             if (clob != null) {
                                 final Reader characterStream = clob.getCharacterStream();
@@ -586,7 +625,7 @@ public class JdbcStore extends Store {
                                     LOGGER.error("Failed to read the stack trace for bug " + bugId + " hit " + hitId);
                                 }
                             }
-                            hitsCallback.hit(hitId, appVer, dateReported, user, message, stack);
+                            hitsCallback.hit(hitId, appVer, dateReported, dateBuilt, devBuild, buildNumber, user, message, stack);
                         }
                     } finally {
                         resultSet.close();
@@ -1520,13 +1559,13 @@ public class JdbcStore extends Store {
     }
 
     @Override
-    public void reportHitOnStack(Long sessionId, String appVersion, String message, long dateReported, String user, Stack stack) {
+    public void reportHitOnStack(Long sessionId, String appVersion, String message, long dateReported, String user, Stack stack, Long buildDate, boolean devBuild, Integer buildNumber) {
         try {
             final Connection connection = getConnection();
 
             try {
                 final PreparedStatement insertHitStatement = connection.prepareStatement(
-                        "INSERT INTO HIT (SESSION_ID, BUG_ID,STACK_ID,APP_VER,DATE_REPORTED,MESSAGE,REPORTED_BY) VALUES(?,?,?,?,?,?,?)");
+                        "INSERT INTO HIT (SESSION_ID,BUG_ID,STACK_ID,APP_VER,DATE_REPORTED,MESSAGE,REPORTED_BY,DATE_BUILT,DEV_BUILD,BUILD_NUMBER) VALUES(?,?,?,?,?,?,?,?,?,?)");
                 try {
                     final long bugId = stack.getBugId();
                     final Long stackId = stack.getStackId();
@@ -1547,6 +1586,26 @@ public class JdbcStore extends Store {
                     insertHitStatement.setTimestamp(5, now);
                     insertHitStatement.setString(6, truncate(message, 1024));
                     insertHitStatement.setString(7, truncate(user, 1024));
+
+                    if (buildDate != null) {
+                        final Timestamp buildDateTimestamp = new Timestamp(buildDate);
+                        insertHitStatement.setTimestamp(8, buildDateTimestamp);
+                    } else {
+                        insertHitStatement.setNull(8, Types.TIMESTAMP);
+                    }
+
+                    if (devBuild) {
+                        insertHitStatement.setString(9, "Y");
+                    } else {
+                        insertHitStatement.setNull(9, Types.CHAR);
+                    }
+
+                    if (buildNumber != null) {
+                        insertHitStatement.setInt(10, buildNumber);
+                    } else {
+                        insertHitStatement.setNull(10, Types.INTEGER);
+                    }
+
                     insertHitStatement.executeUpdate();
                 } finally {
                     insertHitStatement.close();
@@ -1753,38 +1812,23 @@ public class JdbcStore extends Store {
         return extinctBugIds;
     }
 
-    public void migrate_addHitSession() {
-        try {
-            final Connection connection = getConnection();
-            try {
-                final Statement statement = connection.createStatement();
-                try {
-                    statement.execute("ALTER TABLE HIT ADD COLUMN SESSION_ID INT");
-                } finally {
-                    statement.close();
-                }
-            } finally {
-                connection.close();
-            }
-        } catch (SQLException e) {
-            final String sqlState = e.getSQLState();
-            if (!"X0Y32".equals(sqlState)) { // X0Y32: Column 'SESSION_ID' already exists in Table/View '"APP"."HIT"'.
-                throw new IllegalStateException(e.getMessage(), e);
-            }
-        }
-    }
-
     /**
-     * Added the EXTINCT and UNEXTINCT columns
+     * Add the following columns to the HIT table:
+     * DATE_BUILT TIMESTAMP
+     * DEV_BUILD CHAR(1)
+     * BUILD_NUMBER INT
      */
-    public void migrate_addBugExtinct() {
+    public void migrate_addBuildDetailColumns() {
+
         try {
             final Connection connection = getConnection();
             try {
                 final Statement statement = connection.createStatement();
                 try {
-                    statement.execute("ALTER TABLE BUG ADD COLUMN EXTINCT TIMESTAMP");
-                    statement.execute("ALTER TABLE BUG ADD COLUMN UNEXTINCT TIMESTAMP");
+                    statement.execute("ALTER TABLE HIT ADD COLUMN DATE_BUILT TIMESTAMP");
+                    statement.execute("ALTER TABLE HIT ADD COLUMN DEV_BUILD CHAR(1)");
+                    statement.execute("ALTER TABLE HIT ADD COLUMN BUILD_NUMBER INT");
+                    statement.execute("UPDATE HIT SET BUILD_NUMBER=0");
                 } finally {
                     statement.close();
                 }
@@ -1796,25 +1840,6 @@ public class JdbcStore extends Store {
             if (!"X0Y32".equals(sqlState)) { // X0Y32: Column 'XXX' already exists in Table/View '"YYY"."ZZZ"'.
                 throw new IllegalStateException(e.getMessage(), e);
             }
-        }
-    }
-
-    public void migrateFilterMultiUser2FilterSingleUser() {
-        try {
-            final Connection connection = getConnection();
-            try {
-                final Statement statement = connection.createStatement();
-                try {
-                    statement.executeUpdate("UPDATE USER_PREFS SET PREF_KEY='FILTER_INCLUDE_SINGLE_USER',PREF_VALUE='true' WHERE PREF_KEY='FILTER_MULTI_USERS' AND PREF_VALUE='false'");
-                    statement.executeUpdate("UPDATE USER_PREFS SET PREF_KEY='FILTER_INCLUDE_SINGLE_USER',PREF_VALUE='false' WHERE PREF_KEY='FILTER_MULTI_USERS' AND PREF_VALUE='true'");
-                } finally {
-                    statement.close();
-                }
-            } finally {
-                connection.close();
-            }
-        } catch (SQLException e) {
-            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 }

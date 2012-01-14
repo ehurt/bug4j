@@ -28,9 +28,12 @@
         <param name="serverUrl" value="http://127.0.0.1:8063/"/>
         <param name="applicationName" value="bug4jDemo"/>
         <param name="applicationVersion" value="1.0"/>
-        <param name="buildDate" value="@@@buildDate@@@"/>
-        <param name="devBuild" value="false"/>
-        <param name="buildNumber" value="@@@buildNumber@@@"/>
+        <param name="buildDate" value="2012/01/09 10:06:03"/>
+        <param name="devBuild" value="true"/>
+        <param name="buildNumber" value="114"/>
+        <!--
+                <param name="proxy" value="proxy.example.com:8080"/>
+        -->
     </appender>
 
     <root>
@@ -40,3 +43,4 @@
     </root>
 
 </log4j:configuration>
+        

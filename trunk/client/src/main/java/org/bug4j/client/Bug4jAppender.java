@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Cedric Dandoy
+ * Copyright 2012 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -81,6 +81,21 @@ public class Bug4jAppender extends AppenderSkeleton {
         _bug4jStarter.setApplicationVersion(applicationVersion);
     }
 
+    @SuppressWarnings({"UnusedDeclaration"})
+    public void setBuildDate(String buildDate) {
+        _bug4jStarter.setBuildDate(buildDate);
+    }
+
+    @SuppressWarnings({"UnusedDeclaration"})
+    public void setDevBuild(String devBuild) {
+        _bug4jStarter.setDevBuild(Boolean.valueOf(devBuild));
+    }
+
+    @SuppressWarnings({"UnusedDeclaration"})
+    public void setBuildNumber(int buildNumber) {
+        _bug4jStarter.setBuildNumber(buildNumber);
+    }
+
     /**
      * Set the proxy.
      *
@@ -89,5 +104,9 @@ public class Bug4jAppender extends AppenderSkeleton {
     @SuppressWarnings({"UnusedDeclaration"})
     public void setProxy(String proxy) {
         _bug4jStarter.setProxy(proxy);
+    }
+
+    protected Bug4jStarter test_getBug4jStarter() {
+        return _bug4jStarter;
     }
 }

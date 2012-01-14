@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Cedric Dandoy
+ * Copyright 2012 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -42,7 +42,15 @@ public abstract class Store {
     public abstract void close();
 
     /**
-     * @param orderBy i[d], a[pplication version] or d[ate reported], lowercase=ascending
+     * @param orderBy <ul>
+     *                <li>a: HIT_ID
+     *                <li>b: APP_VER
+     *                <li>c: DATE_REPORTED
+     *                <li>d: REPORTED_BY
+     *                <li>e: DATE_BUILT
+     *                <li>f: DEV_BUILD
+     *                <li>g: BUILD_NUMBER
+     *                </ul>
      */
     public abstract List<BugHit> getHits(long bugId, int offset, int max, String orderBy);
 
@@ -62,7 +70,7 @@ public abstract class Store {
 
     public abstract Stack createStack(long bugId, long strainId, String fullHash, String stackText);
 
-    public abstract void reportHitOnStack(@Nullable final Long sessionId, String version, @Nullable String message, long dateReported, @Nullable String user, Stack stack);
+    public abstract void reportHitOnStack(@Nullable final Long sessionId, String version, @Nullable String message, long dateReported, @Nullable String user, Stack stack, Long buildDate, boolean devBuild, Integer buildNumber);
 
     public abstract String getStack(long hitId);
 

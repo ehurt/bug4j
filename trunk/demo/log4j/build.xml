@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!--
-  ~ Copyright 2011 Cedric Dandoy
+  ~ Copyright 2012 Cedric Dandoy
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -16,8 +16,19 @@
   -->
 
 <project name="demo-log4j" default="all" basedir=".">
+    <property name="home" location="../.."/>
+    <import file="${home}/build_include.xml"/>
+
+    <tstamp>
+        <format property="BUILD_TIMESTAMP" pattern="yyyy/MM/dd HH:mm:ss:SS"/>
+    </tstamp>
 
     <target name="all" depends="clean,compile,run"/>
+
+    <path id="project.class.path">
+        <path refid="log4j.lib"/>
+        <pathelement location="${artifacts.output}/bug4j.jar"/>
+    </path>
 
     <target name="clean">
         <delete dir="out" failonerror="false"/>
@@ -32,12 +43,19 @@
                debug="true" debuglevel="lines,vars,source"
                includeantruntime="false">
             <src path="src"/>
-            <classpath>
-                <pathelement location="../../client/bug4j.jar"/>
-                <pathelement location="../../client/lib/log4j-1.2.16.jar"/>
-            </classpath>
+            <classpath refid="project.class.path"/>
         </javac>
-        <copy todir="out" file="src/log4j.properties"/>
+        <copy todir="out" file="src/log4j.xml" overwrite="true"/>
+
+        <!--
+            The build number should be provided by your build system.
+            For Jenkins this would be the BUILD_NUMBER variable.
+        -->
+        <property name="env.BUILD_NUMBER" value="0"/>
+        <replace file="out/log4j.xml">
+            <replacefilter token="@@@buildDate@@@" value="${BUILD_TIMESTAMP}"/>
+            <replacefilter token="@@@buildNumber@@@" value="${env.BUILD_NUMBER}"/>
+        </replace>
         <jar destfile="demo-log4j.jar" basedir="out">
             <manifest>
                 <attribute name="Main-Class" value="org.bug4j.demo.Log4jDemo"/>

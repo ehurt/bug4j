@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Cedric Dandoy
+ * Copyright 2012 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -48,6 +48,19 @@ public final class Bug4jStarter {
                 setApplicationName(value);
             } else if ("application.version".equals(name)) {
                 setApplicationVersion(value);
+            } else if ("build.date".equals(name)) {
+                setBuildDate(value);
+            } else if ("devbuild".equals(name)) {
+                setDevBuild(Boolean.parseBoolean(value));
+            } else if ("build.number".equals(name)) {
+                if (name.length() > 0) {
+                    try {
+                        final int buildNumber = Integer.parseInt(value);
+                        setBuildNumber(buildNumber);
+                    } catch (NumberFormatException e) {
+                        // ignore
+                    }
+                }
             } else if ("proxy".equals(name)) {
                 setProxy(value);
             } else {
@@ -94,10 +107,35 @@ public final class Bug4jStarter {
 
     /**
      * Sets the application version.
-     * Example: "2011-06-15 08:32:17"
+     * Example: "1.0"
      */
     public Bug4jStarter setApplicationVersion(String applicationVersion) {
         _settings.setApplicationVersion(applicationVersion);
+        return this;
+    }
+
+    /**
+     * Sets the build date.
+     * Example: 2011-06-15 08:32:17
+     */
+    public Bug4jStarter setBuildDate(String buildDate) {
+        _settings.setBuildDate(buildDate);
+        return this;
+    }
+
+    /**
+     * Sets the dev. build flag.
+     */
+    public Bug4jStarter setDevBuild(boolean devBuild) {
+        _settings.setDevBuild(devBuild);
+        return this;
+    }
+
+    /**
+     * Sets the build number.
+     */
+    public Bug4jStarter setBuildNumber(int buildNumber) {
+        _settings.setBuildNumber(buildNumber);
         return this;
     }
 
@@ -135,5 +173,9 @@ public final class Bug4jStarter {
      */
     public void start() {
         Bug4jAgent.start(_settings);
+    }
+
+    protected Settings test_getSettings() {
+        return _settings;
     }
 }

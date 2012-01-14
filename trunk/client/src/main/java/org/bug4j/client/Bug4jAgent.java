@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Cedric Dandoy
+ * Copyright 2012 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -112,9 +112,15 @@ public class Bug4jAgent {
             final String serverUrl = _settings.getServerUrl();
             final String applicationName = _settings.getApplicationName();
             final String applicationVersion = _settings.getApplicationVersion();
+            final long buildDate = _settings.getBuildDate();
+            final boolean devBuild = _settings.isDevBuild();
+            final Integer buildNumber = _settings.getBuildNumber();
             final String proxyHost = _settings.getProxyHost();
             final int proxyPort = _settings.getProxyPort();
-            _connector = HttpConnector.createHttpConnector(serverUrl, applicationName, applicationVersion, proxyHost, proxyPort);
+            _connector = HttpConnector.createHttpConnector(
+                    serverUrl, proxyHost, proxyPort,
+                    applicationName, applicationVersion,
+                    buildDate, devBuild, buildNumber);
         }
     }
 

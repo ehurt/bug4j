@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Cedric Dandoy
+ * Copyright 2012 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.bug4j.gwt.user.client.data;
 
+import org.jetbrains.annotations.Nullable;
+
 public class BugHitAndStack extends BugHit {
     private String _message;
     private String _stack;
@@ -25,7 +27,11 @@ public class BugHitAndStack extends BugHit {
     }
 
     public BugHitAndStack(long hitId, String appVer, long dateReported, String user, String message, String stack) {
-        super(hitId, appVer, dateReported, user);
+        this(hitId, appVer, dateReported, user, message, stack, null, false, null);
+    }
+
+    public BugHitAndStack(long hitId, String appVer, long dateReported, String user, String message, String stack, @Nullable Long dateBuilt, boolean devBuild, @Nullable Integer buildNumber) {
+        super(hitId, appVer, dateReported, user, dateBuilt, devBuild, buildNumber);
         _message = message;
         _stack = stack;
     }

@@ -14,28 +14,19 @@
  *    limitations under the License.
  */
 
-package org.bug4j.server.migration;
+package org.bug4j.common;
 
-import org.bug4j.server.store.jdbc.JdbcStore;
-
-public class Migrator {
-    private static Migrator INSTANCE;
-
-    private Migrator() {
-    }
-
-    public static synchronized Migrator getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new Migrator();
-        }
-        return INSTANCE;
-    }
-
-    public void preOpenDB() {
-    }
-
-    public void postOpenDB() {
-        final JdbcStore jdbcStore = JdbcStore.getInstance();
-        jdbcStore.migrate_addBuildDetailColumns();              // 2012-01-09 Added some columns to the hit about the build information.
-    }
+/**
+ */
+public class ParamConstants {
+    public static final String PARAM_APPLICATION_NAME = "a";
+    public static final String PARAM_BUILD_DATE = "d";
+    public static final String PARAM_DEV_BUILD = "dev";
+    public static final String PARAM_SESSION_ID = "e";
+    public static final String PARAM_HASH = "h";
+    public static final String PARAM_MESSAGE = "m";
+    public static final String PARAM_BUILD_NUMBER = "n";
+    public static final String PARAM_STACK = "s";
+    public static final String PARAM_USER = "u";
+    public static final String PARAM_APPLICATION_VERSION = "v";
 }

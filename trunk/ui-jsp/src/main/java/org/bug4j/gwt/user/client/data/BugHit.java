@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Cedric Dandoy
+ * Copyright 2012 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -23,15 +23,21 @@ public class BugHit implements Serializable {
     private String _appVer;
     private long _dateReported;
     private String _user;
+    private Long _dateBuilt;
+    private boolean _devBuild;
+    private Integer _buildNumber;
 
     public BugHit() {
     }
 
-    public BugHit(long hitId, String appVer, long dateReported, String user) {
+    public BugHit(long hitId, String appVer, long dateReported, String user, Long dateBuilt, boolean devBuild, Integer buildNumber) {
         _hitId = hitId;
         _appVer = appVer;
         _dateReported = dateReported;
         _user = user;
+        _dateBuilt = dateBuilt;
+        _devBuild = devBuild;
+        _buildNumber = buildNumber;
     }
 
     public long getHitId() {
@@ -48,5 +54,17 @@ public class BugHit implements Serializable {
 
     public String getUser() {
         return _user;
+    }
+
+    public Long getDateBuilt() {
+        return _dateBuilt;
+    }
+
+    public boolean isDevBuild() {
+        return _devBuild;
+    }
+
+    public Integer getBuildNumber() {
+        return _buildNumber;
     }
 }

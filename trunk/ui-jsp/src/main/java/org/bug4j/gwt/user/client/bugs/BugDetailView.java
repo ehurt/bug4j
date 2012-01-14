@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Cedric Dandoy
+ * Copyright 2012 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -67,6 +67,47 @@ public class BugDetailView extends DockLayoutPanel {
             return bugHit.getAppVer();
         }
     };
+
+    private static final TextColumn<BugHit> _buildDateColumn = new TextColumn<BugHit>() {
+        @SuppressWarnings({"deprecation"})
+        @Override
+        public String getValue(BugHit bugHit) {
+            final Long dateBuilt = bugHit.getDateBuilt();
+            final String ret;
+            if (dateBuilt != null) {
+                final DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_SHORT);
+                final Date date = new Date(dateBuilt);
+                ret = dateTimeFormat.format(date);
+            } else {
+                ret = "";
+            }
+            return ret;
+        }
+    };
+
+    private static final TextColumn<BugHit> _buildNumberColumn = new TextColumn<BugHit>() {
+        @Override
+        public String getValue(BugHit bugHit) {
+            String ret;
+            final Integer buildNumber = bugHit.getBuildNumber();
+            final boolean devBuild = bugHit.isDevBuild();
+            if (buildNumber == null) {
+                if (devBuild) {
+                    ret = "Dev";
+                } else {
+                    ret = "";
+                }
+            } else {
+                ret = buildNumber.toString();
+                if (devBuild) {
+                    ret += " (Dev)";
+                }
+            }
+
+            return ret;
+        }
+    };
+
     private static final TextColumn<BugHit> _userColumn = new TextColumn<BugHit>() {
         @Override
         public String getValue(BugHit bugHit) {
@@ -114,10 +155,14 @@ public class BugDetailView extends DockLayoutPanel {
 
         _dateColumn.setSortable(true);
         _versionColumn.setSortable(true);
+        _buildDateColumn.setSortable(true);
+        _buildNumberColumn.setSortable(true);
         _userColumn.setSortable(true);
 
         ret.addColumn(_dateColumn, "Date");
         ret.addColumn(_versionColumn, "Version");
+        ret.addColumn(_buildDateColumn, "Built");
+        ret.addColumn(_buildNumberColumn, "Build Number");
         ret.addColumn(_userColumn, "User");
 
         ret.setRowStyles(new RowStyles<BugHit>() {
@@ -155,9 +200,12 @@ public class BugDetailView extends DockLayoutPanel {
                     for (int i = 0; i < sortList.size(); i++) {
                         final ColumnSortList.ColumnSortInfo columnSortInfo = sortList.get(i);
                         final Column<?, ?> column = columnSortInfo.getColumn();
-                        final char c = column == _dateColumn ? 'd' :
-                                       column == _versionColumn ? 'v' :
-                                       column == _userColumn ? 'b' : 'X';
+                        final char c = column == _dateColumn ? 'c' :
+                                       column == _versionColumn ? 'b' :
+                                       column == _userColumn ? 'd' :
+                                       column == _buildDateColumn ? 'e' :
+                                       column == _buildNumberColumn ? 'g' :
+                                       'X';
                         final boolean ascending = columnSortInfo.isAscending();
                         sortBy.append(ascending ? c : Character.toUpperCase(c));
                     }

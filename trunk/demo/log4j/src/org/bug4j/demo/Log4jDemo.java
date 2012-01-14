@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Cedric Dandoy
+ * Copyright 2012 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import java.io.InputStream;
 public class Log4jDemo {
     private static final Logger LOGGER = Logger.getLogger(Log4jDemo.class);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         try {
             System.out.println("\n\nCausing an exception...\n\n");
             calling();
