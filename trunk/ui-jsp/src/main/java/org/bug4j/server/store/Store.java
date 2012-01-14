@@ -160,4 +160,7 @@ public abstract class Store {
     public abstract long createSession(String app, String version, long now, String remoteAddr);
 
     public abstract void updateExtinctStatus();
+
+    public abstract List<Session> getSessions(String application);
+
 }
