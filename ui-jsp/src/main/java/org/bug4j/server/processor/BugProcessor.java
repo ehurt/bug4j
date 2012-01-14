@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Cedric Dandoy
+ * Copyright 2012 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public final class BugProcessor {
     /**
      * @return the bugid that was matched.
      */
-    public static long process(final Store store, @Nullable Long sessionId, String app, String version, @Nullable String message, long dateReported, @Nullable String user, String stackText) {
+    public static long process(final Store store, @Nullable Long sessionId, String app, String version, Long buildDate, boolean devBuild, Integer buildNumber, @Nullable String message, long dateReported, @Nullable String user, String stackText) {
         stackText = stackText.trim();
         final List<String> stackLines = stackText.isEmpty() ? null : TextToLines.toLineList(stackText);
 
@@ -107,7 +107,7 @@ public final class BugProcessor {
             }
             stack = new Stack(bugId, null);
         }
-        store.reportHitOnStack(sessionId, version, message, dateReported, user, stack);
+        store.reportHitOnStack(sessionId, version, message, dateReported, user, stack, buildDate, devBuild, buildNumber);
 
         return stack.getBugId();
     }
@@ -134,7 +134,7 @@ public final class BugProcessor {
         final List<String> thisCauses = stackAnalyzer.getCauses(thisStackLines);
         final List<Long> bugIds = store.getBugIdByTitle(app, title);
         for (long bugId : bugIds) {
-            final List<BugHit> hits = store.getHits(bugId, 0, MATCH_BY_TITLE_LOOK_BACK_MAX, "D"); // only look back at the last hits
+            final List<BugHit> hits = store.getHits(bugId, 0, MATCH_BY_TITLE_LOOK_BACK_MAX, "C"); // only look back at the last hits
             for (BugHit hit : hits) {
                 final long hitId = hit.getHitId();
                 final String thatStackText = store.getStack(hitId);

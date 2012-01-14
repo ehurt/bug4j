@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!--
-  ~ Copyright 2011 Cedric Dandoy
+  ~ Copyright 2012 Cedric Dandoy
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -16,6 +16,16 @@
   -->
 
 <project name="demo-manual" default="all" basedir=".">
+    <property name="home" location="../.."/>
+    <import file="${home}/build_include.xml"/>
+
+    <tstamp>
+        <format property="BUILD_TIMESTAMP" pattern="yyyy/MM/dd HH:mm:ss:SS"/>
+    </tstamp>
+
+    <path id="project.class.path">
+        <pathelement location="${artifacts.output}/bug4j.jar"/>
+    </path>
 
     <target name="all" depends="clean,compile,run"/>
 
@@ -32,11 +42,14 @@
                debug="true" debuglevel="lines,vars,source"
                includeantruntime="false">
             <src path="src"/>
-            <classpath>
-                <pathelement location="../../client/bug4j.jar"/>
-            </classpath>
+            <classpath refid="project.class.path"/>
         </javac>
         <copy todir="out" file="src/bug4j.properties"/>
+        <replace file="out/bug4j.properties">
+            <replacefilter token="#build.date=" value="build.date=${BUILD_TIMESTAMP}"/>
+            <replacefilter token="#build.number=" value="build.number=1"/>
+            <replacefilter token="#devbuild=" value="devbuild=true"/>
+        </replace>
         <jar destfile="demo-manual.jar" basedir="out">
             <manifest>
                 <attribute name="Main-Class" value="org.bug4j.demo.DemoManual"/>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Cedric Dandoy
+ * Copyright 2012 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+import static org.bug4j.common.ParamConstants.*;
+
 public class BugServlet extends HttpServlet {
     private static final Logger LOGGER = Logger.getLogger(BugServlet.class);
 
@@ -42,16 +44,20 @@ public class BugServlet extends HttpServlet {
 
         response.setContentType("text/plain");
         try {
-            final String app = request.getParameter("a");
-            final String version = request.getParameter("v");
-            final String message = request.getParameter("m");
+            final String app = request.getParameter(PARAM_APPLICATION_NAME);
+            final String version = request.getParameter(PARAM_APPLICATION_VERSION);
+            final String message = request.getParameter(PARAM_MESSAGE);
             final long dateReported = System.currentTimeMillis();
-            final String user = request.getParameter("u");
-            final String stackText = request.getParameter("s");
-            final Long sessionId = InServlet.getLongParameter(request, "e");
+            final String user = request.getParameter(PARAM_USER);
+            final String stackText = request.getParameter(PARAM_STACK);
+            final Long sessionId = InServlet.getLongParameter(request, PARAM_SESSION_ID);
+
+            final Long buildDate = InServlet.getLongParameter(request, PARAM_BUILD_DATE);
+            final boolean devBuild = InServlet.getBooleanParameter(request, PARAM_DEV_BUILD);
+            final Integer buildNumber = InServlet.getIntParameter(request, PARAM_BUILD_NUMBER);
 
             final Store store = StoreFactory.getStore();
-            BugProcessor.process(store, sessionId, app, version, message, dateReported, user, stackText);
+            BugProcessor.process(store, sessionId, app, version, buildDate, devBuild, buildNumber, message, dateReported, user, stackText);
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Cedric Dandoy
+ * Copyright 2012 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.util.Map;
 
 @RemoteServiceRelativePath("Bug4jService")
 public interface Bug4jService extends RemoteService {
-
     String getDefaultApplication();
 
     void setDefaultApplication(String app);

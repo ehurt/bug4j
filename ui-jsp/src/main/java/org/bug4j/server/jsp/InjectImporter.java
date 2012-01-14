@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Cedric Dandoy
+ * Copyright 2012 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -51,8 +51,8 @@ public class InjectImporter extends Importer {
     }
 
     @Override
-    protected void whenHit(String app, Long sessionId, long bugId, String title, long hitId, long dateReported, String appVer, String user, String message, String stack) {
-        final long newBugId = BugProcessor.process(_store, sessionId, app, appVer, message, dateReported, user, stack);
+    protected void whenHit(String app, Long sessionId, long bugId, String title, long hitId, long dateReported, String appVer, String user, String message, String stack, Long buildDate, boolean devBuild, Integer buildNumber) {
+        final long newBugId = BugProcessor.process(_store, sessionId, app, appVer, buildDate, devBuild, buildNumber, message, dateReported, user, stack);
         System.out.println(bugId + "/" + hitId + "->" + newBugId);
     }
 }

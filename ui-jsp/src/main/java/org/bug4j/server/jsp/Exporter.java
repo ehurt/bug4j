@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Cedric Dandoy
+ * Copyright 2012 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
+import static org.bug4j.server.jsp.ImportExportConstants.*;
 
 public class Exporter {
 
@@ -203,16 +205,25 @@ public class Exporter {
                 xmlStreamWriter.writeStartElement("hits");
                 _store.fetchHits(bugId, new HitsCallback() {
                     @Override
-                    public void hit(long hitId, String appVer, long dateReported, String user, String message, String stack) throws Exception {
+                    public void hit(long hitId, String appVer, long dateReported, Long dateBuilt, boolean devBuild, Integer buildNumber, String user, String message, String stack) throws Exception {
                         xmlStreamWriter.writeStartElement("hit");
-                        xmlStreamWriter.writeAttribute("id", Long.toString(hitId));
-                        xmlStreamWriter.writeAttribute("date", _dateFormat.format(new Date(dateReported)));
-                        xmlStreamWriter.writeAttribute("appVer", appVer);
+                        xmlStreamWriter.writeAttribute(NAME_HIT_ID, Long.toString(hitId));
+                        xmlStreamWriter.writeAttribute(NAME_DATE_REPORTED, _dateFormat.format(new Date(dateReported)));
+                        xmlStreamWriter.writeAttribute(NAME_APP_VER, appVer);
+                        if (dateBuilt != null) {
+                            xmlStreamWriter.writeAttribute(NAME_BUILD_DATE, _dateFormat.format(new Date(dateBuilt)));
+                        }
+                        if (devBuild) {
+                            xmlStreamWriter.writeAttribute(NAME_DEV_BUILD, "true");
+                        }
+                        if (buildNumber != null) {
+                            xmlStreamWriter.writeAttribute(NAME_BUILD_NUMBER, Integer.toString(buildNumber));
+                        }
                         if (user != null) {
-                            xmlStreamWriter.writeAttribute("user", user);
+                            xmlStreamWriter.writeAttribute(NAME_USER, user);
                         }
                         if (message != null) {
-                            xmlStreamWriter.writeAttribute("message", message);
+                            xmlStreamWriter.writeAttribute(NAME_MESSAGE, message);
                         }
                         if (stack != null) {
                             xmlStreamWriter.writeCharacters("\n");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Cedric Dandoy
+ * Copyright 2012 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -99,7 +99,7 @@ public class JdbcStoreTest {
             stack = _store.createStack(bugid, strain.getStrainId(), fullHash, STACK_TEXT);
         }
         final long dateReported = System.currentTimeMillis();
-        _store.reportHitOnStack(null, APP_VERSION, null, dateReported, null, stack);
+        _store.reportHitOnStack(null, APP_VERSION, null, dateReported, null, stack, System.currentTimeMillis(), false, 117);
         bugid = stack.getBugId();
         System.out.println("bugid = " + bugid);
     }

@@ -87,6 +87,8 @@
         <ant dir="common" target="clean"/>
         <ant dir="client" target="clean"/>
         <ant dir="ui-jsp" target="clean"/>
+        <ant dir="demo/log4j" target="clean"/>
+        <ant dir="demo/manual" target="clean"/>
         <delete dir="${out}"/>
     </target>
 </project>

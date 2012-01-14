@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2011 Cedric Dandoy
+  ~ Copyright 2012 Cedric Dandoy
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -26,8 +26,6 @@
 
         <intercept-url pattern="/static/**" filters="none"/>
         <intercept-url pattern="/br/**" access="permitAll"/>
-        <!-- TODO: Remove this /bug4j entries, which is there for backward compatibility -->
-        <intercept-url pattern="/bug4j/*" access="permitAll"/>
 
         <intercept-url pattern="/index.html" access="isAuthenticated()"/>
         <intercept-url pattern="/admin.html" access="hasRole('admin')"/>

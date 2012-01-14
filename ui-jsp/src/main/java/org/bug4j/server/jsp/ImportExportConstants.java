@@ -14,28 +14,18 @@
  *    limitations under the License.
  */
 
-package org.bug4j.server.migration;
+package org.bug4j.server.jsp;
 
-import org.bug4j.server.store.jdbc.JdbcStore;
-
-public class Migrator {
-    private static Migrator INSTANCE;
-
-    private Migrator() {
-    }
-
-    public static synchronized Migrator getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new Migrator();
-        }
-        return INSTANCE;
-    }
-
-    public void preOpenDB() {
-    }
-
-    public void postOpenDB() {
-        final JdbcStore jdbcStore = JdbcStore.getInstance();
-        jdbcStore.migrate_addBuildDetailColumns();              // 2012-01-09 Added some columns to the hit about the build information.
-    }
+/**
+ */
+public class ImportExportConstants {
+    static final String NAME_HIT_ID = "id";
+    static final String NAME_SESSION_ID = "sessionId";
+    static final String NAME_DATE_REPORTED = "date";
+    static final String NAME_APP_VER = "appVer";
+    static final String NAME_USER = "user";
+    static final String NAME_MESSAGE = "message";
+    static final String NAME_BUILD_DATE = "buildDate";
+    static final String NAME_DEV_BUILD = "devBuild";
+    static final String NAME_BUILD_NUMBER = "buildNumber";
 }
