@@ -1,5 +1,5 @@
 <%--
-  ~ Copyright 2011 Cedric Dandoy
+  ~ Copyright 2012 Cedric Dandoy
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -118,7 +118,7 @@
             width: 100%;
             height: 642px;
             z-index: -2;
-            background: url("icons/login_back.png") top left no-repeat;
+            /*background: url("icons/login_back.png") top left no-repeat;*/
         }
     </style>
 </head>
