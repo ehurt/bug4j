@@ -20,7 +20,6 @@ package org.bug4j.server.jsp;
  */
 public class ImportExportConstants {
     static final String NAME_HIT_ID = "id";
-    static final String NAME_SESSION_ID = "sessionId";
     static final String NAME_DATE_REPORTED = "date";
     static final String NAME_APP_VER = "appVer";
     static final String NAME_USER = "user";
@@ -28,4 +27,11 @@ public class ImportExportConstants {
     static final String NAME_BUILD_DATE = "buildDate";
     static final String NAME_DEV_BUILD = "devBuild";
     static final String NAME_BUILD_NUMBER = "buildNumber";
+
+    static final String NAME_SESSION_ID = "sessionId";
+    static final String NAME_SESSION_APP_NAME = "appName";
+    static final String NAME_SESSION_APP_VER = "appVer";
+    static final String NAME_SESSION_FIRST_HIT = "firstHit";
+    static final String NAME_SESSION_HOST_NAME = "hostName";
+
 }

@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.text.translate.AggregateTranslator;
 import org.apache.commons.lang3.text.translate.LookupTranslator;
 import org.apache.commons.lang3.text.translate.UnicodeEscaper;
+import org.bug4j.gwt.user.client.data.Session;
 import org.bug4j.server.store.HitsCallback;
 import org.bug4j.server.store.Store;
 import org.bug4j.server.store.UserEx;
@@ -125,8 +126,26 @@ public class Exporter {
         xmlStreamWriter.writeStartElement("app");
         xmlStreamWriter.writeAttribute("name", application);
         exportPackages(xmlStreamWriter, application);
+        exportSessions(xmlStreamWriter, application);
         exportBugs(xmlStreamWriter, application);
         xmlStreamWriter.writeEndElement();
+    }
+
+    private void exportSessions(XMLStreamWriter xmlStreamWriter, String application) throws XMLStreamException {
+        final List<Session> sessions = _store.getSessions(application);
+        if (!sessions.isEmpty()) {
+            xmlStreamWriter.writeStartElement("sessions");
+            for (Session session : sessions) {
+                xmlStreamWriter.writeStartElement("session");
+                xmlStreamWriter.writeAttribute(ImportExportConstants.NAME_SESSION_ID, Long.toString(session.getSessionId()));
+                xmlStreamWriter.writeAttribute(ImportExportConstants.NAME_SESSION_APP_NAME, session.getApplication());
+                xmlStreamWriter.writeAttribute(ImportExportConstants.NAME_SESSION_APP_VER, session.getVersion());
+                xmlStreamWriter.writeAttribute(ImportExportConstants.NAME_SESSION_FIRST_HIT, _dateFormat.format(new Date(session.getFirstHit())));
+                xmlStreamWriter.writeAttribute(ImportExportConstants.NAME_SESSION_HOST_NAME, session.getHostName());
+                xmlStreamWriter.writeEndElement();
+            }
+            xmlStreamWriter.writeEndElement();
+        }
     }
 
     private void exportPackages(XMLStreamWriter xmlStreamWriter, String application) throws XMLStreamException {
@@ -205,9 +224,10 @@ public class Exporter {
                 xmlStreamWriter.writeStartElement("hits");
                 _store.fetchHits(bugId, new HitsCallback() {
                     @Override
-                    public void hit(long hitId, String appVer, long dateReported, Long dateBuilt, boolean devBuild, Integer buildNumber, String user, String message, String stack) throws Exception {
+                    public void hit(long hitId, long sessionId, String appVer, long dateReported, Long dateBuilt, boolean devBuild, Integer buildNumber, String user, String message, String stack) throws Exception {
                         xmlStreamWriter.writeStartElement("hit");
                         xmlStreamWriter.writeAttribute(NAME_HIT_ID, Long.toString(hitId));
+                        xmlStreamWriter.writeAttribute(NAME_SESSION_ID, Long.toString(sessionId));
                         xmlStreamWriter.writeAttribute(NAME_DATE_REPORTED, _dateFormat.format(new Date(dateReported)));
                         xmlStreamWriter.writeAttribute(NAME_APP_VER, appVer);
                         if (dateBuilt != null) {

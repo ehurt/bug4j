@@ -501,13 +501,22 @@ public class JdbcStore extends Store {
     public void close() {
     }
 
-
     @Override
     public List<BugHit> getHits(long bugId, int offset, int max, String orderBy) {
         final List<BugHit> ret = new ArrayList<BugHit>();
         final Connection connection = getConnection();
         try {
-            StringBuilder sql = new StringBuilder("SELECT H.HIT_ID,H.APP_VER,H.DATE_REPORTED,H.REPORTED_BY,H.DATE_BUILT,H.DEV_BUILD,H.BUILD_NUMBER FROM HIT H WHERE H.BUG_ID=:bugId\n");
+            StringBuilder sql = new StringBuilder("" +
+                    "SELECT " +
+                    "   H.HIT_ID," +
+                    "   C.APP_VER," +
+                    "   H.DATE_REPORTED," +
+                    "   H.REPORTED_BY," +
+                    "   H.DATE_BUILT," +
+                    "   H.DEV_BUILD," +
+                    "   H.BUILD_NUMBER" +
+                    " FROM HIT H LEFT JOIN CLIENT_SESSION C ON H.SESSION_ID = C.SESSION_ID" +
+                    " WHERE H.BUG_ID=:bugId");
             String sep = " ORDER BY ";
             for (int i = 0; i < orderBy.length(); i++) {
                 final char c = orderBy.charAt(i);
@@ -591,15 +600,17 @@ public class JdbcStore extends Store {
                 final PreparedStatement preparedStatement = connection.prepareStatement("" +
                         "SELECT " +
                         "       H.HIT_ID," +                // 1
-                        "       H.APP_VER," +               // 2
-                        "       H.DATE_REPORTED," +         // 3
-                        "       H.REPORTED_BY," +           // 4
-                        "       H.MESSAGE," +               // 5
-                        "       H.DATE_BUILT," +            // 6
-                        "       H.DEV_BUILD," +             // 7
-                        "       H.BUILD_NUMBER," +          // 8
-                        "       S.STACK_TEXT" +             // 9
+                        "       C.SESSION_ID," +            // 2
+                        "       C.APP_VER," +               // 3
+                        "       H.DATE_REPORTED," +         // 4
+                        "       H.REPORTED_BY," +           // 5
+                        "       H.MESSAGE," +               // 6
+                        "       H.DATE_BUILT," +            // 7
+                        "       H.DEV_BUILD," +             // 8
+                        "       H.BUILD_NUMBER," +          // 9
+                        "       S.STACK_TEXT" +             // 10
                         "   FROM HIT H LEFT OUTER JOIN STACK_TEXT S ON H.STACK_ID=S.STACK_ID" +
+                        "   LEFT JOIN CLIENT_SESSION C ON H.SESSION_ID = C.SESSION_ID" +
                         "   WHERE H.BUG_ID=?" +
                         "   ORDER BY H.HIT_ID");
                 try {
@@ -608,14 +619,15 @@ public class JdbcStore extends Store {
                     try {
                         while (resultSet.next()) {
                             final long hitId = resultSet.getLong(1);
-                            final String appVer = resultSet.getString(2);
-                            final long dateReported = getDate(resultSet, 3);
-                            final String user = resultSet.getString(4);
-                            final String message = resultSet.getString(5);
-                            final Long dateBuilt = getDate(resultSet, 6);
-                            final boolean devBuild = "Y".equals(resultSet.getString(7));
-                            final Integer buildNumber = getInteger(resultSet, 8);
-                            final Clob clob = resultSet.getClob(9);
+                            final long sessionId = resultSet.getLong(2);
+                            final String appVer = resultSet.getString(3);
+                            final long dateReported = getDate(resultSet, 4);
+                            final String user = resultSet.getString(5);
+                            final String message = resultSet.getString(6);
+                            final Long dateBuilt = getDate(resultSet, 7);
+                            final boolean devBuild = "Y".equals(resultSet.getString(8));
+                            final Integer buildNumber = getInteger(resultSet, 9);
+                            final Clob clob = resultSet.getClob(10);
                             String stack = null;
                             if (clob != null) {
                                 final Reader characterStream = clob.getCharacterStream();
@@ -625,7 +637,7 @@ public class JdbcStore extends Store {
                                     LOGGER.error("Failed to read the stack trace for bug " + bugId + " hit " + hitId);
                                 }
                             }
-                            hitsCallback.hit(hitId, appVer, dateReported, dateBuilt, devBuild, buildNumber, user, message, stack);
+                            hitsCallback.hit(hitId, sessionId, appVer, dateReported, dateBuilt, devBuild, buildNumber, user, message, stack);
                         }
                     } finally {
                         resultSet.close();
@@ -1672,10 +1684,16 @@ public class JdbcStore extends Store {
         final Connection connection = getConnection();
         try {
             final PreparedStatement preparedStatement = connection.prepareStatement("" +
-                    "SELECT H.APP_VER,H.DATE_REPORTED,H.REPORTED_BY,H.MESSAGE,S.STACK_TEXT\n" +
-                    "  FROM HIT H " +
-                    "   LEFT OUTER JOIN STACK_TEXT S ON H.STACK_ID=S.STACK_ID \n" +
-                    "  WHERE H.HIT_ID=?");
+                    "SELECT" +
+                    "       C.APP_VER," +
+                    "       H.DATE_REPORTED," +
+                    "       H.REPORTED_BY," +
+                    "       H.MESSAGE," +
+                    "       S.STACK_TEXT" +
+                    "   FROM HIT H " +
+                    "   LEFT OUTER JOIN STACK_TEXT S ON H.STACK_ID=S.STACK_ID" +
+                    "   LEFT JOIN CLIENT_SESSION C ON H.SESSION_ID=C.SESSION_ID" +
+                    "   WHERE H.HIT_ID=?");
             try {
                 preparedStatement.setLong(1, hitId);
                 final ResultSet resultSet = preparedStatement.executeQuery();
@@ -1761,6 +1779,55 @@ public class JdbcStore extends Store {
         }
     }
 
+    @Override
+    public List<Session> getSessions(String application) {
+        final List<Session> ret = new ArrayList<Session>();
+
+        final Connection connection = getConnection();
+        try {
+            try {
+                final PreparedStatement preparedStatement = connection.prepareStatement("" +
+                        "SELECT" +
+                        "   S.SESSION_ID," +
+                        "   S.APP_VER," +
+                        "   S.FIRST_HIT," +
+                        "   S.HOST_NAME" +
+                        "  FROM CLIENT_SESSION S" +
+                        "  WHERE S.APP=?");
+                try {
+                    preparedStatement.setString(1, application);
+                    final ResultSet resultSet = preparedStatement.executeQuery();
+                    try {
+                        if (resultSet.next()) {
+                            final long sessionId = resultSet.getLong(1);
+                            final String version = resultSet.getString(2);
+                            final Timestamp firstHitTimestamp = resultSet.getTimestamp(3);
+                            final long firstHit = firstHitTimestamp.getTime();
+                            final String hostName = resultSet.getString(4);
+                            final Session session = new Session(
+                                    sessionId,
+                                    application,
+                                    version,
+                                    firstHit,
+                                    hostName
+                            );
+                            ret.add(session);
+                        }
+                    } finally {
+                        resultSet.close();
+                    }
+                } finally {
+                    preparedStatement.close();
+                }
+            } finally {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+        return ret;
+    }
+
     /**
      * Find bugs that are extinct.
      */
@@ -1768,7 +1835,7 @@ public class JdbcStore extends Store {
         final Collection<Long> extinctBugIds = new ArrayList<Long>();
         final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         final PreparedStatement preparedStatement = connection.prepareStatement("" +
-                "SELECT\n" +
+                "SELECT" +
                 "        BUG.BUG_ID," +
                 "        MIN(HIT.DATE_REPORTED)," +
                 "        MAX(HIT.DATE_REPORTED)," +

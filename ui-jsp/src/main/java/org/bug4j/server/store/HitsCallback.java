@@ -17,5 +17,5 @@
 package org.bug4j.server.store;
 
 public interface HitsCallback {
-    void hit(long hitId, String appVer, long dateReported, Long dateBuilt, boolean devBuild, Integer buildNumber, String user, String message, String stack) throws Exception;
+    void hit(long hitId, long sessionId, String appVer, long dateReported, Long dateBuilt, boolean devBuild, Integer buildNumber, String user, String message, String stack) throws Exception;
 }
