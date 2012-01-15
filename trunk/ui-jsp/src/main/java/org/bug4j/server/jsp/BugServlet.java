@@ -49,7 +49,7 @@ public class BugServlet extends HttpServlet {
             final long dateReported = System.currentTimeMillis();
             final String user = request.getParameter(PARAM_USER);
             final String stackText = request.getParameter(PARAM_STACK);
-            final Long sessionId = InServlet.getLongParameter(request, PARAM_SESSION_ID);
+            final long sessionId = InServlet.getLongParameter(request, PARAM_SESSION_ID);
 
             final Store store = StoreFactory.getStore();
             BugProcessor.process(store, sessionId, app, message, dateReported, user, stackText);
