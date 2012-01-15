@@ -62,8 +62,6 @@ public class JdbcStoreTest {
             "	... 22 more";
     private static final String APP = "My Application";
 
-    private static final String APP_VERSION = "1.3";
-
     private Store _store;
 
     @Before
@@ -99,7 +97,7 @@ public class JdbcStoreTest {
             stack = _store.createStack(bugid, strain.getStrainId(), fullHash, STACK_TEXT);
         }
         final long dateReported = System.currentTimeMillis();
-        _store.reportHitOnStack(null, APP_VERSION, null, dateReported, null, stack, System.currentTimeMillis(), false, 117);
+        _store.reportHitOnStack(null, null, dateReported, null, stack);
         bugid = stack.getBugId();
         System.out.println("bugid = " + bugid);
     }

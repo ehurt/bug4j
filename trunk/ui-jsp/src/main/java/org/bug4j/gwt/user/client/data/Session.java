@@ -24,55 +24,53 @@ public class Session implements Serializable {
     private String _version;
     private long _firstHit;
     private String _hostName;
+    private Long _dateBuilt;
+    private boolean _devBuild;
+    private Integer _buildNumber;
 
     public Session() {
     }
 
-    public Session(long sessionId, String application, String version, long firstHit, String hostName) {
+    public Session(long sessionId, String application, String version, long firstHit, String hostName, Long dateBuilt, boolean devBuild, Integer buildNumber) {
         _sessionId = sessionId;
         _application = application;
         _version = version;
         _firstHit = firstHit;
         _hostName = hostName;
+        _dateBuilt = dateBuilt;
+        _devBuild = devBuild;
+        _buildNumber = buildNumber;
     }
 
     public long getSessionId() {
         return _sessionId;
     }
 
-    public void setSessionId(long sessionId) {
-        _sessionId = sessionId;
-    }
-
     public String getApplication() {
         return _application;
-    }
-
-    public void setApplication(String application) {
-        _application = application;
     }
 
     public String getVersion() {
         return _version;
     }
 
-    public void setVersion(String version) {
-        _version = version;
-    }
-
     public long getFirstHit() {
         return _firstHit;
-    }
-
-    public void setFirstHit(long firstHit) {
-        _firstHit = firstHit;
     }
 
     public String getHostName() {
         return _hostName;
     }
 
-    public void setHostName(String hostName) {
-        _hostName = hostName;
+    public Long getDateBuilt() {
+        return _dateBuilt;
+    }
+
+    public boolean isDevBuild() {
+        return _devBuild;
+    }
+
+    public Integer getBuildNumber() {
+        return _buildNumber;
     }
 }

@@ -51,13 +51,13 @@ public class InjectImporter extends Importer {
     }
 
     @Override
-    protected long whenSession(long sessionId, String application, String version, Long firstHit, String hostName) {
-        return _store.createSession(application, version, firstHit, hostName);
+    protected long whenSession(long sessionId, String application, String version, Long firstHit, String hostName, Long buildDate, boolean devBuild, Integer buildNumber) {
+        return _store.createSession(application, version, firstHit, hostName, buildDate, devBuild, buildNumber);
     }
 
     @Override
-    protected void whenHit(String app, Long sessionId, long bugId, String title, long hitId, long dateReported, String appVer, String user, String message, String stack, Long buildDate, boolean devBuild, Integer buildNumber) {
-        final long newBugId = BugProcessor.process(_store, sessionId, app, appVer, buildDate, devBuild, buildNumber, message, dateReported, user, stack);
+    protected void whenHit(String app, Long sessionId, long bugId, String title, long hitId, long dateReported, String user, String message, String stack) {
+        final long newBugId = BugProcessor.process(_store, sessionId, app, message, dateReported, user, stack);
         System.out.println(bugId + "/" + hitId + "->" + newBugId);
     }
 }

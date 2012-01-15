@@ -105,10 +105,6 @@ class HttpConnector {
         final String response = send("/br/in",
                 ParamConstants.PARAM_SESSION_ID, Long.toString(_sessionId),
                 ParamConstants.PARAM_APPLICATION_NAME, _applicationName,
-                ParamConstants.PARAM_APPLICATION_VERSION, _applicationVersion,
-                ParamConstants.PARAM_BUILD_DATE, Long.toString(_buildDate),
-                ParamConstants.PARAM_DEV_BUILD, _devBuild ? "Y" : null,
-                ParamConstants.PARAM_BUILD_NUMBER, _buildNumber == null ? null : Integer.toString(_buildNumber),
                 ParamConstants.PARAM_MESSAGE, message,
                 ParamConstants.PARAM_USER, user,
                 ParamConstants.PARAM_HASH, hash
@@ -121,10 +117,6 @@ class HttpConnector {
         send("/br/bug",
                 ParamConstants.PARAM_SESSION_ID, Long.toString(_sessionId),
                 ParamConstants.PARAM_APPLICATION_NAME, _applicationName,
-                ParamConstants.PARAM_APPLICATION_VERSION, _applicationVersion,
-                ParamConstants.PARAM_BUILD_DATE, Long.toString(_buildDate),
-                ParamConstants.PARAM_DEV_BUILD, _devBuild ? "Y" : null,
-                ParamConstants.PARAM_BUILD_NUMBER, _buildNumber == null ? null : Integer.toString(_buildNumber),
                 ParamConstants.PARAM_MESSAGE, message,
                 ParamConstants.PARAM_USER, user,
                 ParamConstants.PARAM_STACK, stackText
@@ -145,9 +137,12 @@ class HttpConnector {
     }
 
     private void createSession() {
-        final String response = send("/br/ses",
-                ParamConstants.PARAM_APPLICATION_NAME, _applicationName,
-                ParamConstants.PARAM_APPLICATION_VERSION, _applicationVersion
+        final String response = send("/br/ses"
+                , ParamConstants.PARAM_APPLICATION_NAME, _applicationName
+                , ParamConstants.PARAM_APPLICATION_VERSION, _applicationVersion
+                , ParamConstants.PARAM_BUILD_DATE, Long.toString(_buildDate)
+                , ParamConstants.PARAM_DEV_BUILD, _devBuild ? "Y" : null
+                , ParamConstants.PARAM_BUILD_NUMBER, _buildNumber == null ? null : Integer.toString(_buildNumber)
         );
         if (response != null) {
             try {

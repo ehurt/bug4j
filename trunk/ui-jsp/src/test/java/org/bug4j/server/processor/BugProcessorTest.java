@@ -26,7 +26,6 @@ import org.junit.Test;
 
 public class BugProcessorTest {
     private static final String APP = "My Application";
-    private static final String APP_VERSION = "1.3";
 
     private Store _store;
 
@@ -45,7 +44,7 @@ public class BugProcessorTest {
     public void testDedupeByTitle_1() throws Exception {
         // Initial exception
         final long dateReported = System.currentTimeMillis();
-        final long bug_0 = BugProcessor.process(_store, null, APP, APP_VERSION, 0L, false, 0, null, dateReported, null, "" +
+        final long bug_0 = BugProcessor.process(_store, null, APP, null, dateReported, null, "" +
                 "java.lang.IllegalStateException: oh oh!\n" +
                 "\tat org.bug4j.SomeClass.someMethod(SomeClass.java:100)\n" +
                 "\tat org.bug4j.SomeClass.someMethod(SomeClass.java:200)\n" +
@@ -55,7 +54,7 @@ public class BugProcessorTest {
                 "\t... 22 more");
 
         // Same IllegalStateException but with a different code path. Should match the first one
-        final long bug_1 = BugProcessor.process(_store, null, APP, APP_VERSION, 0L, false, 0, null, dateReported, null, "" +
+        final long bug_1 = BugProcessor.process(_store, null, APP, null, dateReported, null, "" +
                 "java.lang.IllegalStateException: oh oh!\n" +
                 "\tat org.bug4j.SomeClass.someMethod(SomeClass.java:100)\n" +
                 "\tat org.bug4j.SomeClass.someOtherMethod(SomeClass.java:500)\n" +
@@ -66,7 +65,7 @@ public class BugProcessorTest {
         Assert.assertEquals(bug_0, bug_1);
 
         // Same IllegalStateException bug with a different cause. Should be a different bug
-        final long bug_2 = BugProcessor.process(_store, null, APP, APP_VERSION, 0L, false, 0, null, dateReported, null, "" +
+        final long bug_2 = BugProcessor.process(_store, null, APP, null, dateReported, null, "" +
                 "java.lang.IllegalStateException: oh oh!\n" +
                 "\tat org.bug4j.SomeClass.someMethod(SomeClass.java:100)\n" +
                 "\tat org.bug4j.SomeClass.someOtherMethod(SomeClass.java:500)\n" +

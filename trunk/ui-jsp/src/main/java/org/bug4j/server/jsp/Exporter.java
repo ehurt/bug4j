@@ -62,6 +62,37 @@ public class Exporter {
         _store = store;
     }
 
+    private void writeString(XMLStreamWriter xmlStreamWriter, String qName, String value) throws XMLStreamException {
+        if (value != null) {
+            final String escapedValue = StringEscapeUtils.escapeXml(value);
+            xmlStreamWriter.writeAttribute(qName, escapedValue);
+        }
+    }
+
+    private static void writeLong(XMLStreamWriter xmlStreamWriter, String qName, Long value) throws XMLStreamException {
+        if (value != null) {
+            xmlStreamWriter.writeAttribute(qName, value.toString());
+        }
+    }
+
+    private static void writeInteger(XMLStreamWriter xmlStreamWriter, String qName, Integer value) throws XMLStreamException {
+        if (value != null) {
+            xmlStreamWriter.writeAttribute(qName, value.toString());
+        }
+    }
+
+    private static void writeBoolean(XMLStreamWriter xmlStreamWriter, String qName, Boolean value) throws XMLStreamException {
+        if (Boolean.TRUE.equals(value)) {
+            xmlStreamWriter.writeAttribute(qName, "true");
+        }
+    }
+
+    private void writeDate(XMLStreamWriter xmlStreamWriter, String qName, Long value) throws XMLStreamException {
+        if (value != null) {
+            xmlStreamWriter.writeAttribute(qName, _dateFormat.format(new Date(value)));
+        }
+    }
+
     public void exportAll(OutputStream outputStream) throws XMLStreamException, IOException {
         withXMLStreamWriter(outputStream, new Streamer() {
             @Override
@@ -137,11 +168,23 @@ public class Exporter {
             xmlStreamWriter.writeStartElement("sessions");
             for (Session session : sessions) {
                 xmlStreamWriter.writeStartElement("session");
-                xmlStreamWriter.writeAttribute(ImportExportConstants.NAME_SESSION_ID, Long.toString(session.getSessionId()));
-                xmlStreamWriter.writeAttribute(ImportExportConstants.NAME_SESSION_APP_NAME, session.getApplication());
-                xmlStreamWriter.writeAttribute(ImportExportConstants.NAME_SESSION_APP_VER, session.getVersion());
-                xmlStreamWriter.writeAttribute(ImportExportConstants.NAME_SESSION_FIRST_HIT, _dateFormat.format(new Date(session.getFirstHit())));
-                xmlStreamWriter.writeAttribute(ImportExportConstants.NAME_SESSION_HOST_NAME, session.getHostName());
+
+                final long sessionId = session.getSessionId();
+                final String version = session.getVersion();
+                final long firstHit = session.getFirstHit();
+                final String hostName = session.getHostName();
+                final Long dateBuilt = session.getDateBuilt();
+                final boolean devBuild = session.isDevBuild();
+                final Integer buildNumber = session.getBuildNumber();
+
+                writeLong(xmlStreamWriter, NAME_SESSION_ID, sessionId);
+                writeString(xmlStreamWriter, NAME_SESSION_APP_VER, version);
+                writeDate(xmlStreamWriter, NAME_SESSION_FIRST_HIT, firstHit);
+                writeString(xmlStreamWriter, NAME_SESSION_HOST_NAME, hostName);
+                writeDate(xmlStreamWriter, NAME_BUILD_DATE, dateBuilt);
+                writeBoolean(xmlStreamWriter, NAME_DEV_BUILD, devBuild);
+                writeInteger(xmlStreamWriter, NAME_BUILD_NUMBER, buildNumber);
+
                 xmlStreamWriter.writeEndElement();
             }
             xmlStreamWriter.writeEndElement();
@@ -229,16 +272,6 @@ public class Exporter {
                         xmlStreamWriter.writeAttribute(NAME_HIT_ID, Long.toString(hitId));
                         xmlStreamWriter.writeAttribute(NAME_SESSION_ID, Long.toString(sessionId));
                         xmlStreamWriter.writeAttribute(NAME_DATE_REPORTED, _dateFormat.format(new Date(dateReported)));
-                        xmlStreamWriter.writeAttribute(NAME_APP_VER, appVer);
-                        if (dateBuilt != null) {
-                            xmlStreamWriter.writeAttribute(NAME_BUILD_DATE, _dateFormat.format(new Date(dateBuilt)));
-                        }
-                        if (devBuild) {
-                            xmlStreamWriter.writeAttribute(NAME_DEV_BUILD, "true");
-                        }
-                        if (buildNumber != null) {
-                            xmlStreamWriter.writeAttribute(NAME_BUILD_NUMBER, Integer.toString(buildNumber));
-                        }
                         if (user != null) {
                             xmlStreamWriter.writeAttribute(NAME_USER, user);
                         }

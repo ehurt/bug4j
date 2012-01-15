@@ -34,6 +34,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.bug4j.server.jsp.ImportExportConstants.*;
+
 /*
     <bugs app="appname">
         <bug id="1" title="FileNotFoundException at Bug4jTest.java:38">
@@ -56,14 +58,10 @@ public abstract class Importer {
     protected StringBuilder _stack;
     protected long _hitId;
     protected Long _dateReported;
-    protected String _appVer;
     protected String _user;
     protected String _message;
     protected ArrayList<String> _packages;
     private Long _sessionId;
-    private Long _buildDate;
-    private boolean _devBuild;
-    private Integer _buildNumber;
     private Map<Long, Long> _sessionMap = new HashMap<Long, Long>();
 
     public Importer() {
@@ -205,31 +203,17 @@ public abstract class Importer {
     }
 
     protected void startHit(Attributes attributes) {
-        final String hitIdValue = attributes.getValue(ImportExportConstants.NAME_HIT_ID);
+        final String hitIdValue = attributes.getValue(NAME_HIT_ID);
         try {
             _hitId = Long.parseLong(hitIdValue);
-            final String sessionIdValue = attributes.getValue(ImportExportConstants.NAME_SESSION_ID);
+            final String sessionIdValue = attributes.getValue(NAME_SESSION_ID);
             try {
                 if (sessionIdValue != null) {
                     _sessionId = Long.parseLong(sessionIdValue);
-                    _dateReported = getDateAsLong(attributes, ImportExportConstants.NAME_DATE_REPORTED);
-                    _appVer = attributes.getValue(ImportExportConstants.NAME_APP_VER);
-                    _user = attributes.getValue(ImportExportConstants.NAME_USER);
-                    _message = attributes.getValue(ImportExportConstants.NAME_MESSAGE);
+                    _dateReported = getDateAsLong(attributes, NAME_DATE_REPORTED);
+                    _user = attributes.getValue(NAME_USER);
+                    _message = attributes.getValue(NAME_MESSAGE);
                     _stack = new StringBuilder();
-                    _buildDate = getDateAsLong(attributes, ImportExportConstants.NAME_BUILD_DATE);
-                    _devBuild = Boolean.parseBoolean(attributes.getValue(ImportExportConstants.NAME_DEV_BUILD));
-
-                    {
-                        final String buildNumberValue = attributes.getValue(ImportExportConstants.NAME_BUILD_NUMBER);
-                        if (buildNumberValue != null) {
-                            try {
-                                _buildNumber = Integer.parseInt(buildNumberValue);
-                            } catch (NumberFormatException e) {
-                                LOGGER.error("Failed to parse the build number '" + buildNumberValue + "'");
-                            }
-                        }
-                    }
                 } else {
                     LOGGER.error("Missing session id for hit id='" + hitIdValue + "'");
                 }
@@ -246,7 +230,7 @@ public abstract class Importer {
         final String stack = _stack.toString();
         if (_dateReported != null) {
             final Long newSessionId = _sessionMap.get(_sessionId);
-            whenHit(_appName, newSessionId, _bugId, _title, _hitId, _dateReported, _appVer, _user, _message, stack, _buildDate, _devBuild, _buildNumber);
+            whenHit(_appName, newSessionId, _bugId, _title, _hitId, _dateReported, _user, _message, stack);
         } else {
             LOGGER.error("Bug " + _bugId + " is missing a reported date");
         }
@@ -254,13 +238,9 @@ public abstract class Importer {
         _hitId = 0;
         _sessionId = null;
         _dateReported = null;
-        _appVer = null;
         _user = null;
         _message = null;
         _stack = null;
-        _buildDate = null;
-        _devBuild = false;
-        _buildNumber = null;
     }
 
     protected void endHits() {
@@ -277,13 +257,18 @@ public abstract class Importer {
     }
 
     private void startSession(Attributes attributes) {
-        final long sessionId = getLong(attributes, ImportExportConstants.NAME_SESSION_ID);
-        final String application = attributes.getValue(ImportExportConstants.NAME_SESSION_APP_NAME);
-        final String version = attributes.getValue(ImportExportConstants.NAME_SESSION_APP_VER);
-        final Long firstHit = getDateAsLong(attributes, ImportExportConstants.NAME_SESSION_FIRST_HIT);
-        final String hostName = attributes.getValue(ImportExportConstants.NAME_SESSION_HOST_NAME);
-        final long newSessionId = whenSession(sessionId, application, version, firstHit, hostName);
-        _sessionMap.put(sessionId, newSessionId);
+        final long sessionId = getLong(attributes, NAME_SESSION_ID);
+        final String version = attributes.getValue(NAME_SESSION_APP_VER);
+        final Long firstHit = getDateAsLong(attributes, NAME_SESSION_FIRST_HIT);
+        final String hostName = attributes.getValue(NAME_SESSION_HOST_NAME);
+        final Long buildDate = getDateAsLong(attributes, NAME_BUILD_DATE);
+        final boolean devBuild = Boolean.parseBoolean(attributes.getValue(NAME_DEV_BUILD));
+        final Integer buildNumber = getInteger(attributes, NAME_BUILD_NUMBER);
+
+        if (buildNumber != null) {
+            final long newSessionId = whenSession(sessionId, _appName, version, firstHit, hostName, buildDate, devBuild, buildNumber);
+            _sessionMap.put(sessionId, newSessionId);
+        }
     }
 
     private static long getLong(Attributes attributes, String qName) {
@@ -293,10 +278,24 @@ public abstract class Importer {
                 final long sessionId = Long.parseLong(value);
                 return sessionId;
             } catch (NumberFormatException e) {
-                throw new IllegalStateException("Invalid value " + value + " for attribute " + ImportExportConstants.NAME_SESSION_ID);
+                throw new IllegalStateException("Invalid value " + value + " for attribute " + qName);
             }
         } else {
-            throw new IllegalStateException("Missing value for attribute " + ImportExportConstants.NAME_SESSION_ID);
+            throw new IllegalStateException("Missing value for attribute " + qName);
+        }
+    }
+
+    private static Integer getInteger(Attributes attributes, String qName) {
+        final String value = attributes.getValue(qName);
+        if (value != null) {
+            try {
+                final Integer ret = Integer.parseInt(value);
+                return ret;
+            } catch (NumberFormatException e) {
+                throw new IllegalStateException("Invalid value " + value + " for attribute " + qName);
+            }
+        } else {
+            throw new IllegalStateException("Missing value for attribute " + qName);
         }
     }
 
@@ -315,7 +314,7 @@ public abstract class Importer {
         return ret;
     }
 
-    protected abstract long whenSession(long sessionId, String application, String version, Long firstHit, String hostName);
+    protected abstract long whenSession(long sessionId, String application, String version, Long firstHit, String hostName, Long buildDate, boolean devBuild, Integer buildNumber);
 
-    protected abstract void whenHit(String app, Long sessionId, long bugId, String title, long hitId, long dateReported, String appVer, String user, String message, String stack, Long buildDate, boolean devBuild, Integer buildNumber);
+    protected abstract void whenHit(String app, Long sessionId, long bugId, String title, long hitId, long dateReported, String user, String message, String stack);
 }

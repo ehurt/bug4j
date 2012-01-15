@@ -70,7 +70,7 @@ public abstract class Store {
 
     public abstract Stack createStack(long bugId, long strainId, String fullHash, String stackText);
 
-    public abstract void reportHitOnStack(@Nullable final Long sessionId, String version, @Nullable String message, long dateReported, @Nullable String user, Stack stack, Long buildDate, boolean devBuild, Integer buildNumber);
+    public abstract void reportHitOnStack(@Nullable final Long sessionId, @Nullable String message, long dateReported, @Nullable String user, Stack stack);
 
     public abstract String getStack(long hitId);
 
@@ -157,7 +157,7 @@ public abstract class Store {
 
     public abstract boolean doesUserExist(String userName);
 
-    public abstract long createSession(String app, String version, long now, String remoteAddr);
+    public abstract long createSession(String app, String version, long now, String remoteAddr, Long buildDate, boolean devBuild, Integer buildNumber);
 
     public abstract void updateExtinctStatus();
 

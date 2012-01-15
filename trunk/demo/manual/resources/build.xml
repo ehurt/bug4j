@@ -15,37 +15,28 @@
   ~    limitations under the License.
   -->
 
-<project name="demo-manual" default="all" basedir=".">
-    <property name="home" location="../.."/>
-    <import file="${home}/build_include.xml"/>
-
-    <property name="module" value="demo-manual"/>
-    <property name="module.production.output" value="${production.output}/${module}"/>
-    <property name="module.test.output" value="${test.output}/${module}"/>
-    <property name="module.artifact.output" value="${artifacts.output}/${module}.jar"/>
-
+<project name="demo-manual" default="all">
     <tstamp>
         <format property="BUILD_TIMESTAMP" pattern="yyyy/MM/dd HH:mm:ss:SS"/>
     </tstamp>
 
-    <path id="project.class.path">
-        <pathelement location="${artifacts.output}/bug4j.jar"/>
-    </path>
-
     <target name="all" depends="clean,compile,run"/>
 
+    <path id="project.class.path">
+        <pathelement location="../../client/bug4j.jar"/>
+    </path>
+
     <target name="clean">
-        <delete dir="${module.production.output}" failonerror="false"/>
-        <delete file="${module.artifact.output}" failonerror="false">
-        </delete>
+        <delete dir="out" failonerror="false"/>
+        <delete file="demo-manual.jar" failonerror="false"/>
     </target>
 
     <target name="compile" depends="javac,create-config,jar"/>
 
     <target name="javac">
-        <mkdir dir="${module.production.output}"/>
+        <mkdir dir="out"/>
         <javac includes="**" encoding="utf-8"
-               destdir="${module.production.output}"
+               destdir="out"
                debug="true" debuglevel="lines,vars,source"
                includeantruntime="false">
             <src path="src"/>
@@ -54,8 +45,8 @@
     </target>
 
     <target name="create-config">
-        <copy todir="${module.production.output}" file="src/bug4j.properties"/>
-        <replace file="${module.production.output}/bug4j.properties">
+        <copy todir="out" file="src/bug4j.properties"/>
+        <replace file="out/bug4j.properties">
             <replacefilter token="#build.date=" value="build.date=${BUILD_TIMESTAMP}"/>
             <replacefilter token="#build.number=" value="build.number=1"/>
             <replacefilter token="#devbuild=" value="devbuild=true"/>
@@ -63,7 +54,7 @@
     </target>
 
     <target name="jar">
-        <jar destfile="${module.artifact.output}" basedir="${module.production.output}">
+        <jar destfile="demo-manual.jar" basedir="out">
             <manifest>
                 <attribute name="Main-Class" value="org.bug4j.demo.DemoManual"/>
                 <attribute name="Class-Path" value="../../client/bug4j.jar ../../client/lib/commons-logging-1.1.1.jar ../../client/lib/httpclient-4.1.1.jar ../../client/lib/httpcore-4.1.jar"/>
