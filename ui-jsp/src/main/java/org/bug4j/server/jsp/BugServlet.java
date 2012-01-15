@@ -45,19 +45,14 @@ public class BugServlet extends HttpServlet {
         response.setContentType("text/plain");
         try {
             final String app = request.getParameter(PARAM_APPLICATION_NAME);
-            final String version = request.getParameter(PARAM_APPLICATION_VERSION);
             final String message = request.getParameter(PARAM_MESSAGE);
             final long dateReported = System.currentTimeMillis();
             final String user = request.getParameter(PARAM_USER);
             final String stackText = request.getParameter(PARAM_STACK);
             final Long sessionId = InServlet.getLongParameter(request, PARAM_SESSION_ID);
 
-            final Long buildDate = InServlet.getLongParameter(request, PARAM_BUILD_DATE);
-            final boolean devBuild = InServlet.getBooleanParameter(request, PARAM_DEV_BUILD);
-            final Integer buildNumber = InServlet.getIntParameter(request, PARAM_BUILD_NUMBER);
-
             final Store store = StoreFactory.getStore();
-            BugProcessor.process(store, sessionId, app, version, buildDate, devBuild, buildNumber, message, dateReported, user, stackText);
+            BugProcessor.process(store, sessionId, app, message, dateReported, user, stackText);
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
         }

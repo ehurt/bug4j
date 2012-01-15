@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<project name="bug4j" default="dist" basedir=".">
+<project name="bug4j" default="all" basedir=".">
 
     <property name="home" location="."/>
     <import file="build_include.xml"/>
 
     <property name="dist" value="${out}/dist"/>
 
-    <target name="dist" depends="clean,compile,test,package-dist"/>
+    <target name="all" depends="clean,compile,test,package-dist"/>
 
-    <target name="package-dist" depends="package-dist-client,package-dist-demo,package-dist-server">
+    <target name="package-dist" depends="package-dist-client,package-dist-demo-log4j,package-dist-demo-manual,package-dist-server">
         <zip destfile="${out}/${bug4j-release-name}.zip">
             <zipfileset dir="${dist}" prefix="${bug4j-release-name}" excludes="server/bin/*.sh" filemode="644"/>
             <zipfileset dir="${dist}" prefix="${bug4j-release-name}" includes="server/bin/*.sh" filemode="755"/>
@@ -58,16 +58,23 @@
         </copy>
     </target>
 
-    <target name="package-dist-demo">
-        <copy todir="${dist}/demo/" overwrite="true">
-            <fileset dir="demo/">
-                <exclude name="/project/"/>
+    <target name="package-dist-demo-log4j">
+        <copy todir="${dist}/demo/log4j" file="${artifacts.output}/demo-log4j.jar" overwrite="true"/>
+        <copy todir="${dist}/demo/log4j" file="demo/log4j/resources/build.xml" overwrite="true"/>
+        <copy todir="${dist}/demo/log4j/src" overwrite="true">
+            <fileset dir="demo/log4j/src"/>
+            <fileset dir="demo/log4j/resources/">
+                <filename name="log4j.xml"/>
             </fileset>
         </copy>
-        <ant dir="${dist}/demo/log4j/" target="compile"/>
-        <delete dir="${dist}/demo/log4j/out/" failonerror="false"/>
-        <ant dir="${dist}/demo/manual/" target="compile"/>
-        <delete dir="${dist}/demo/manual/out/" failonerror="false"/>
+    </target>
+
+    <target name="package-dist-demo-manual">
+        <copy todir="${dist}/demo/manual" file="${artifacts.output}/demo-manual.jar" overwrite="true"/>
+        <copy todir="${dist}/demo/manual" file="demo/manual/resources/build.xml" overwrite="true"/>
+        <copy todir="${dist}/demo/manual/src" overwrite="true">
+            <fileset dir="demo/manual/src"/>
+        </copy>
     </target>
 
     <target name="compile">
@@ -75,7 +82,10 @@
         <ant dir="common" target="compile"/>
         <ant dir="client" target="compile"/>
         <ant dir="ui-jsp" target="compile"/>
+        <ant dir="demo/log4j" target="compile"/>
+        <ant dir="demo/manual" target="compile"/>
     </target>
+
     <target name="test">
         <mkdir dir="${production.output}"/>
         <ant dir="common" target="test"/>

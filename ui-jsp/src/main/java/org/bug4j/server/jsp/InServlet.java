@@ -47,17 +47,13 @@ public class InServlet extends HttpServlet {
             final PrintWriter out = response.getWriter();
 
             final String app = request.getParameter(PARAM_APPLICATION_NAME);
-            final String version = request.getParameter(PARAM_APPLICATION_VERSION);
             final String message = request.getParameter(PARAM_MESSAGE);
             final String user = request.getParameter(PARAM_USER);
             final String hash = request.getParameter(PARAM_HASH);
             final Long sessionId = getLongParameter(request, PARAM_SESSION_ID);
-            final Long buildDate = getLongParameter(request, PARAM_BUILD_DATE);
-            final boolean devBuild = getBooleanParameter(request, PARAM_DEV_BUILD);
-            final Integer buildNumber = getIntParameter(request, PARAM_BUILD_NUMBER);
 
             if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace(String.format("in :%s-%s-%s", app, version, hash));
+                LOGGER.trace(String.format("in :%s-%s", app, hash));
             }
 
             final Store store = StoreFactory.getStore();
@@ -65,7 +61,7 @@ public class InServlet extends HttpServlet {
                 final Stack stack = store.getStackByHash(app, hash);
                 if (stack != null) {
                     final long dateReported = System.currentTimeMillis();
-                    store.reportHitOnStack(sessionId, version, message, dateReported, user, stack, buildDate, devBuild, buildNumber);
+                    store.reportHitOnStack(sessionId, message, dateReported, user, stack);
                     out.print("Old");
                 } else {
                     out.print("New");

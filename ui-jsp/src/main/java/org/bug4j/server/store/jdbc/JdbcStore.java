@@ -186,10 +186,6 @@ public class JdbcStore extends Store {
                         " SESSION_ID INT," +
                         " BUG_ID INT," +
                         " STACK_ID INT," +
-                        " APP_VER VARCHAR(32)," +
-                        " DATE_BUILT TIMESTAMP," +
-                        " DEV_BUILD CHAR(1)," +
-                        " BUILD_NUMBER INT," +
                         " DATE_REPORTED TIMESTAMP NOT NULL," +
                         " REPORTED_BY VARCHAR(1024)," +
                         " MESSAGE VARCHAR(1024)" +
@@ -227,6 +223,9 @@ public class JdbcStore extends Store {
                         " SESSION_ID INT GENERATED ALWAYS AS IDENTITY," +
                         " APP VARCHAR(32) NOT NULL," +
                         " APP_VER VARCHAR(32)," +
+                        " DATE_BUILT TIMESTAMP," +
+                        " DEV_BUILD CHAR(1)," +
+                        " BUILD_NUMBER INT," +
                         " HOST_NAME VARCHAR(255)," +
                         " FIRST_HIT TIMESTAMP" +
                         ")"
@@ -512,9 +511,9 @@ public class JdbcStore extends Store {
                     "   C.APP_VER," +
                     "   H.DATE_REPORTED," +
                     "   H.REPORTED_BY," +
-                    "   H.DATE_BUILT," +
-                    "   H.DEV_BUILD," +
-                    "   H.BUILD_NUMBER" +
+                    "   C.DATE_BUILT," +
+                    "   C.DEV_BUILD," +
+                    "   C.BUILD_NUMBER" +
                     " FROM HIT H LEFT JOIN CLIENT_SESSION C ON H.SESSION_ID = C.SESSION_ID" +
                     " WHERE H.BUG_ID=:bugId");
             String sep = " ORDER BY ";
@@ -605,9 +604,9 @@ public class JdbcStore extends Store {
                         "       H.DATE_REPORTED," +         // 4
                         "       H.REPORTED_BY," +           // 5
                         "       H.MESSAGE," +               // 6
-                        "       H.DATE_BUILT," +            // 7
-                        "       H.DEV_BUILD," +             // 8
-                        "       H.BUILD_NUMBER," +          // 9
+                        "       C.DATE_BUILT," +            // 7
+                        "       C.DEV_BUILD," +             // 8
+                        "       C.BUILD_NUMBER," +          // 9
                         "       S.STACK_TEXT" +             // 10
                         "   FROM HIT H LEFT OUTER JOIN STACK_TEXT S ON H.STACK_ID=S.STACK_ID" +
                         "   LEFT JOIN CLIENT_SESSION C ON H.SESSION_ID = C.SESSION_ID" +
@@ -1571,13 +1570,20 @@ public class JdbcStore extends Store {
     }
 
     @Override
-    public void reportHitOnStack(Long sessionId, String appVersion, String message, long dateReported, String user, Stack stack, Long buildDate, boolean devBuild, Integer buildNumber) {
+    public void reportHitOnStack(Long sessionId, String message, long dateReported, String user, Stack stack) {
         try {
             final Connection connection = getConnection();
 
             try {
                 final PreparedStatement insertHitStatement = connection.prepareStatement(
-                        "INSERT INTO HIT (SESSION_ID,BUG_ID,STACK_ID,APP_VER,DATE_REPORTED,MESSAGE,REPORTED_BY,DATE_BUILT,DEV_BUILD,BUILD_NUMBER) VALUES(?,?,?,?,?,?,?,?,?,?)");
+                        "INSERT INTO HIT (" +
+                                "    SESSION_ID" +                 // 1
+                                "   ,BUG_ID" +                     // 2
+                                "   ,STACK_ID" +                   // 3
+                                "   ,DATE_REPORTED" +              // 4
+                                "   ,MESSAGE" +                    // 5
+                                "   ,REPORTED_BY" +                // 6
+                                ") VALUES(?,?,?,?,?,?)");
                 try {
                     final long bugId = stack.getBugId();
                     final Long stackId = stack.getStackId();
@@ -1594,29 +1600,9 @@ public class JdbcStore extends Store {
                     } else {
                         insertHitStatement.setNull(3, Types.INTEGER);
                     }
-                    insertHitStatement.setString(4, appVersion);
-                    insertHitStatement.setTimestamp(5, now);
-                    insertHitStatement.setString(6, truncate(message, 1024));
-                    insertHitStatement.setString(7, truncate(user, 1024));
-
-                    if (buildDate != null) {
-                        final Timestamp buildDateTimestamp = new Timestamp(buildDate);
-                        insertHitStatement.setTimestamp(8, buildDateTimestamp);
-                    } else {
-                        insertHitStatement.setNull(8, Types.TIMESTAMP);
-                    }
-
-                    if (devBuild) {
-                        insertHitStatement.setString(9, "Y");
-                    } else {
-                        insertHitStatement.setNull(9, Types.CHAR);
-                    }
-
-                    if (buildNumber != null) {
-                        insertHitStatement.setInt(10, buildNumber);
-                    } else {
-                        insertHitStatement.setNull(10, Types.INTEGER);
-                    }
+                    insertHitStatement.setTimestamp(4, now);
+                    insertHitStatement.setString(5, truncate(message, 1024));
+                    insertHitStatement.setString(6, truncate(user, 1024));
 
                     insertHitStatement.executeUpdate();
                 } finally {
@@ -1723,19 +1709,37 @@ public class JdbcStore extends Store {
 
 
     @Override
-    public long createSession(String app, String version, long now, String remoteAddr) {
+    public long createSession(String app, String version, long now, String remoteAddr, Long buildDate, boolean devBuild, Integer buildNumber) {
         long ret;
         try {
             final Connection connection = getConnection();
             try {
                 final PreparedStatement preparedStatement = connection.prepareStatement(
-                        "INSERT INTO CLIENT_SESSION(APP,APP_VER,HOST_NAME,FIRST_HIT) VALUES(?,?,?,?)",
+                        "INSERT INTO CLIENT_SESSION(" +
+                                "APP" +             //1
+                                ",APP_VER" +        //2
+                                ",HOST_NAME" +      //3
+                                ",FIRST_HIT" +      //4
+                                ",DATE_BUILT" +     //5
+                                ",DEV_BUILD" +      //6
+                                ",BUILD_NUMBER" +   //7
+                                ") VALUES (?,?,?,?,?,?,?)",
                         Statement.RETURN_GENERATED_KEYS);
                 try {
                     preparedStatement.setString(1, app);
                     preparedStatement.setString(2, version);
                     preparedStatement.setString(3, remoteAddr);
                     preparedStatement.setTimestamp(4, new Timestamp(now));
+                    setDate(preparedStatement, 5, buildDate);
+
+                    if (devBuild) {
+                        preparedStatement.setString(6, "Y");
+                    } else {
+                        preparedStatement.setNull(6, Types.CHAR);
+                    }
+
+                    setInteger(preparedStatement, 7, buildNumber);
+
                     preparedStatement.executeUpdate();
                     final ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
                     if (!generatedKeys.next()) {
@@ -1752,6 +1756,23 @@ public class JdbcStore extends Store {
             throw new IllegalStateException(e.getMessage(), e);
         }
         return ret;
+    }
+
+    private void setDate(PreparedStatement preparedStatement, int parameterIndex, Long value) throws SQLException {
+        if (value != null) {
+            final Timestamp buildDateTimestamp = new Timestamp(value);
+            preparedStatement.setTimestamp(parameterIndex, buildDateTimestamp);
+        } else {
+            preparedStatement.setNull(parameterIndex, Types.TIMESTAMP);
+        }
+    }
+
+    private void setInteger(PreparedStatement preparedStatement, int parameterIndex, Integer value) throws SQLException {
+        if (value != null) {
+            preparedStatement.setInt(parameterIndex, value);
+        } else {
+            preparedStatement.setNull(parameterIndex, Types.INTEGER);
+        }
     }
 
     public void updateExtinctStatus() {
@@ -1788,28 +1809,38 @@ public class JdbcStore extends Store {
             try {
                 final PreparedStatement preparedStatement = connection.prepareStatement("" +
                         "SELECT" +
-                        "   S.SESSION_ID," +
-                        "   S.APP_VER," +
-                        "   S.FIRST_HIT," +
-                        "   S.HOST_NAME" +
-                        "  FROM CLIENT_SESSION S" +
-                        "  WHERE S.APP=?");
+                        "     C.SESSION_ID" +           // 1
+                        "   , C.APP_VER" +              // 2
+                        "   , C.FIRST_HIT" +            // 3
+                        "   , C.HOST_NAME" +            // 4
+                        "   , C.DATE_BUILT" +           // 5
+                        "   , C.DEV_BUILD" +            // 6
+                        "   , C.BUILD_NUMBER" +         // 7
+                        "  FROM CLIENT_SESSION C" +
+                        "  WHERE C.APP=?");
                 try {
                     preparedStatement.setString(1, application);
                     final ResultSet resultSet = preparedStatement.executeQuery();
                     try {
-                        if (resultSet.next()) {
+                        while (resultSet.next()) {
                             final long sessionId = resultSet.getLong(1);
                             final String version = resultSet.getString(2);
                             final Timestamp firstHitTimestamp = resultSet.getTimestamp(3);
                             final long firstHit = firstHitTimestamp.getTime();
                             final String hostName = resultSet.getString(4);
+                            final Timestamp dateBuiltTimestamp = resultSet.getTimestamp(5);
+                            final long dateBuilt = dateBuiltTimestamp.getTime();
+                            final boolean devBuild = "Y".equals(resultSet.getString(6));
+                            final Integer buildNumber = resultSet.getInt(7);
                             final Session session = new Session(
                                     sessionId,
                                     application,
                                     version,
                                     firstHit,
-                                    hostName
+                                    hostName,
+                                    dateBuilt,
+                                    devBuild,
+                                    buildNumber
                             );
                             ret.add(session);
                         }
@@ -1892,10 +1923,10 @@ public class JdbcStore extends Store {
             try {
                 final Statement statement = connection.createStatement();
                 try {
-                    statement.execute("ALTER TABLE HIT ADD COLUMN DATE_BUILT TIMESTAMP");
-                    statement.execute("ALTER TABLE HIT ADD COLUMN DEV_BUILD CHAR(1)");
-                    statement.execute("ALTER TABLE HIT ADD COLUMN BUILD_NUMBER INT");
-                    statement.execute("UPDATE HIT SET BUILD_NUMBER=0");
+                    statement.execute("ALTER TABLE CLIENT_SESSION ADD COLUMN DATE_BUILT TIMESTAMP");
+                    statement.execute("ALTER TABLE CLIENT_SESSION ADD COLUMN DEV_BUILD CHAR(1)");
+                    statement.execute("ALTER TABLE CLIENT_SESSION ADD COLUMN BUILD_NUMBER INT");
+                    statement.execute("UPDATE CLIENT_SESSION SET BUILD_NUMBER=0");
                 } finally {
                     statement.close();
                 }

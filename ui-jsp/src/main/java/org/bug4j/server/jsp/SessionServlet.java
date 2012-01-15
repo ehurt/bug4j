@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Cedric Dandoy
+ * Copyright 2012 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import static org.bug4j.common.ParamConstants.*;
+
 public class SessionServlet extends HttpServlet {
     private static final Logger LOGGER = Logger.getLogger(SessionServlet.class);
 
@@ -42,15 +44,18 @@ public class SessionServlet extends HttpServlet {
 
         response.setContentType("text/plain");
         try {
-            final String app = request.getParameter("a");
-            final String version = request.getParameter("v");
-//            final String user = request.getParameter("u");
+            final String app = request.getParameter(PARAM_APPLICATION_NAME);
+            final String version = request.getParameter(PARAM_APPLICATION_VERSION);
+            final Long buildDate = InServlet.getLongParameter(request, PARAM_BUILD_DATE);
+            final boolean devBuild = InServlet.getBooleanParameter(request, PARAM_DEV_BUILD);
+            final Integer buildNumber = InServlet.getIntParameter(request, PARAM_BUILD_NUMBER);
+
             final long now = System.currentTimeMillis();
             final String remoteAddr = request.getRemoteAddr();
 
             final Store store = StoreFactory.getStore();
             if (store.doesAppExist(app)) {
-                final long sessionId = store.createSession(app, version, now, remoteAddr);
+                final long sessionId = store.createSession(app, version, now, remoteAddr, buildDate, devBuild, buildNumber);
                 final PrintWriter writer = response.getWriter();
                 writer.println(sessionId);
             } else {
