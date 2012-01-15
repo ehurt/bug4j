@@ -127,9 +127,6 @@
             <classpath refid="test.class.path"/>
             <classpath location="${module.production.output}"/>
         </javac>
-        <copy todir="${module.test.output}">
-            <fileset dir="src/test/resources"/>
-        </copy>
     </target>
 
     <target name="unit-test">
