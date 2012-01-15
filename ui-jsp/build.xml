@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!--
-  ~ Copyright 2011 Cedric Dandoy
+  ~ Copyright 2012 Cedric Dandoy
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -130,7 +130,6 @@
         <copy todir="${module.test.output}">
             <fileset dir="src/test/resources"/>
         </copy>
-        <unzip src="src/test/resources/bug4jdb.zip" dest="${module.test.output}"/>
     </target>
 
     <target name="unit-test">

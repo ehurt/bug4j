@@ -56,7 +56,7 @@ public class InjectImporter extends Importer {
     }
 
     @Override
-    protected void whenHit(String app, Long sessionId, long bugId, String title, long hitId, long dateReported, String user, String message, String stack) {
+    protected void whenHit(String app, long sessionId, long bugId, String title, long hitId, long dateReported, String user, String message, String stack) {
         final long newBugId = BugProcessor.process(_store, sessionId, app, message, dateReported, user, stack);
         System.out.println(bugId + "/" + hitId + "->" + newBugId);
     }

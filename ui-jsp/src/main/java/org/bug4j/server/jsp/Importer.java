@@ -230,7 +230,9 @@ public abstract class Importer {
         final String stack = _stack.toString();
         if (_dateReported != null) {
             final Long newSessionId = _sessionMap.get(_sessionId);
-            whenHit(_appName, newSessionId, _bugId, _title, _hitId, _dateReported, _user, _message, stack);
+            if (newSessionId != null) {
+                whenHit(_appName, newSessionId, _bugId, _title, _hitId, _dateReported, _user, _message, stack);
+            }
         } else {
             LOGGER.error("Bug " + _bugId + " is missing a reported date");
         }
@@ -316,5 +318,5 @@ public abstract class Importer {
 
     protected abstract long whenSession(long sessionId, String application, String version, Long firstHit, String hostName, Long buildDate, boolean devBuild, Integer buildNumber);
 
-    protected abstract void whenHit(String app, Long sessionId, long bugId, String title, long hitId, long dateReported, String user, String message, String stack);
+    protected abstract void whenHit(String app, long sessionId, long bugId, String title, long hitId, long dateReported, String user, String message, String stack);
 }
