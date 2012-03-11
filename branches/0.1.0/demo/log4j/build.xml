@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  ~ Copyright 2012 Cedric Dandoy
+  ~
+  ~    Licensed under the Apache License, Version 2.0 (the "License");
+  ~    you may not use this file except in compliance with the License.
+  ~    You may obtain a copy of the License at
+  ~
+  ~        http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~    Unless required by applicable law or agreed to in writing, software
+  ~    distributed under the License is distributed on an "AS IS" BASIS,
+  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~    See the License for the specific language governing permissions and
+  ~    limitations under the License.
+  -->
+
+<project name="demo-log4j" default="all" basedir=".">
+    <property name="home" location="../.."/>
+    <import file="${home}/build_include.xml"/>
+
+    <property name="module" value="demo-log4j"/>
+    <property name="module.production.output" value="${production.output}/${module}"/>
+    <property name="module.test.output" value="${test.output}/${module}"/>
+    <property name="module.artifact.output" value="${artifacts.output}/${module}.jar"/>
+
+    <tstamp>
+        <format property="BUILD_TIMESTAMP" pattern="yyyy/MM/dd HH:mm:ss:SSS"/>
+    </tstamp>
+
+    <target name="all" depends="clean,compile,run"/>
+
+    <path id="project.class.path">
+        <path refid="log4j.lib"/>
+        <pathelement location="${artifacts.output}/bug4j.jar"/>
+    </path>
+
+    <target name="clean">
+        <delete dir="${module.production.output}" failonerror="false"/>
+        <delete dir="${module.test.output}" failonerror="false"/>
+        <delete file="${module.artifact.output}" failonerror="false">
+        </delete>
+    </target>
+
+    <target name="compile" depends="javac,create-log4j-config,jar"/>
+
+    <target name="javac">
+        <mkdir dir="${module.production.output}"/>
+        <javac includes="**" encoding="utf-8"
+               destdir="${module.production.output}"
+               debug="true" debuglevel="lines,vars,source"
+               includeantruntime="false">
+            <src path="src"/>
+            <classpath refid="project.class.path"/>
+        </javac>
+    </target>
+
+    <target name="create-log4j-config">
+        <!--
+            The build number should be provided by your build system.
+            For Jenkins this would be the BUILD_NUMBER variable.
+        -->
+        <property name="env.BUILD_NUMBER" value="0"/>
+        <copy todir="${module.production.output}" file="resources/log4j.xml" overwrite="true"/>
+        <replace file="${module.production.output}/log4j.xml">
+            <replacefilter token="@@@buildDate@@@" value="${BUILD_TIMESTAMP}"/>
+            <replacefilter token="@@@buildNumber@@@" value="${env.BUILD_NUMBER}"/>
+        </replace>
+    </target>
+
+    <target name="jar">
+        <jar destfile="${module.artifact.output}" basedir="${module.production.output}">
+            <manifest>
+                <attribute name="Main-Class" value="org.bug4j.demo.Log4jDemo"/>
+                <attribute name="Class-Path" value="../../client/bug4j.jar ../../client/lib/commons-logging-1.1.1.jar ../../client/lib/httpclient-4.1.1.jar ../../client/lib/httpcore-4.1.jar ../../client/lib/log4j-1.2.16.jar"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="run">
+        <java jar="demo-log4j.jar" fork="true"/>
+    </target>
+
+</project>

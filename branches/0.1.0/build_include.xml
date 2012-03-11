@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="build_include">
+    <property name="home" location="."/>
+
+    <property environment="env"/>
+    <property name="env.dep-home" value="c:/java"/>
+    <property name="dep-home" value="${env.dep-home}"/>
+    <property file="${home}/build.properties"/>
+
+    <tstamp>
+        <format property="snapshot-timestamp" pattern="yyyyMMdd"/>
+    </tstamp>
+    <!--<property name="bug4j-release-name" value="bug4j-0.0.2-SNAPSHOT-${snapshot-timestamp}"/>-->
+    <property name="bug4j-release-name" value="bug4j-0.1.0"/>
+
+    <path id="commons-io.lib">
+        <filelist dir="${dep-home}/commons-io-2.0.1">
+            <file name="commons-io-2.0.1.jar"/>
+        </filelist>
+    </path>
+
+    <path id="commons-dbutils.lib">
+        <filelist dir="${dep-home}/commons-dbutils-1.3">
+            <file name="commons-dbutils-1.3.jar"/>
+        </filelist>
+    </path>
+
+    <path id="commons-logging.lib">
+        <filelist dir="${dep-home}/commons-logging-1.1.1">
+            <file name="commons-logging-1.1.1.jar"/>
+        </filelist>
+    </path>
+
+    <path id="commons-lang.lib">
+        <filelist dir="${dep-home}/commons-lang3-3.0.1">
+            <file name="commons-lang3-3.0.1.jar"/>
+        </filelist>
+    </path>
+
+    <path id="tomcat-coyote.lib">
+        <filelist dir="${tomcat-home}/lib">
+            <file name="tomcat-coyote.jar"/>
+        </filelist>
+    </path>
+
+    <path id="derby.lib">
+        <filelist dir="${dep-home}/db-derby-10.7.1.1-bin/lib">
+            <file name="derby.jar"/>
+            <file name="derbyclient.jar"/>
+            <file name="derbynet.jar"/>
+        </filelist>
+    </path>
+
+    <path id="gwt-dev.lib">
+        <filelist dir="${dep-home}/gwt-2.4.0">
+            <file name="gwt-user.jar"/>
+            <file name="gwt-dev.jar"/>
+            <file name="validation-api-1.0.0.GA.jar"/>
+            <file name="validation-api-1.0.0.GA-sources.jar"/>
+        </filelist>
+    </path>
+
+    <path id="gwt-server.lib">
+        <filelist dir="${dep-home}/gwt-2.4.0">
+            <file name="gwt-servlet.jar"/>
+        </filelist>
+    </path>
+
+    <path id="gwt-visualization.lib">
+        <filelist dir="${dep-home}/gwt-visualization-1.1.1">
+            <file name="gwt-visualization.jar"/>
+        </filelist>
+    </path>
+
+    <path id="httpcomponents-client.lib">
+        <filelist dir="${dep-home}/httpcomponents-client-4.1.1/lib">
+            <file name="commons-logging-1.1.1.jar"/>
+            <file name="httpclient-4.1.1.jar"/>
+            <file name="httpcore-4.1.jar"/>
+        </filelist>
+    </path>
+
+    <path id="javaee">
+        <filelist dir="${tomcat-home}/lib">
+            <file name="servlet-api.jar"/>
+        </filelist>
+    </path>
+
+    <path id="junit.lib">
+        <filelist dir="${dep-home}/junit-4.8.2">
+            <file name="junit-4.8.2.jar"/>
+        </filelist>
+    </path>
+
+    <path id="jetbrains.annotations.lib">
+        <filelist dir="${dep-home}/jetbrains/jetbrains-10.5/">
+            <file name="annotations.jar"/>
+        </filelist>
+    </path>
+
+    <path id="log4j.lib">
+        <filelist dir="${dep-home}/apache-log4j-1.2.16/">
+            <file name="log4j-1.2.16.jar"/>
+        </filelist>
+    </path>
+
+    <path id="spring-framework.lib">
+        <fileset dir="${dep-home}/spring-framework-3.0.5.RELEASE/dist/">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+    <path id="spring-security.lib">
+        <fileset dir="${dep-home}/spring-security-3.0.5.RELEASE/dist/">
+            <include name="*RELEASE.jar"/>
+        </fileset>
+    </path>
+
+</project>

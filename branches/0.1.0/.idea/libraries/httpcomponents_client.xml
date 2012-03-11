@@ -1,0 +1,16 @@
+<component name="libraryTable">
+  <library name="httpcomponents-client">
+    <CLASSES>
+      <root url="jar://$dep-home$/httpcomponents-client-4.1.1/lib/commons-logging-1.1.1.jar!/" />
+      <root url="jar://$dep-home$/httpcomponents-client-4.1.1/lib/commons-codec-1.4.jar!/" />
+      <root url="jar://$dep-home$/httpcomponents-client-4.1.1/lib/httpclient-cache-4.1.1.jar!/" />
+      <root url="jar://$dep-home$/httpcomponents-client-4.1.1/lib/httpmime-4.1.1.jar!/" />
+      <root url="jar://$dep-home$/httpcomponents-client-4.1.1/lib/httpclient-4.1.1.jar!/" />
+      <root url="jar://$dep-home$/httpcomponents-client-4.1.1/lib/httpcore-4.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$dep-home$/httpcomponents-client-4.1.1/httpcomponents-client-4.1.1-src.zip!/httpcomponents-client-4.1.1/httpclient/src/main/java" />
+    </SOURCES>
+  </library>
+</component>

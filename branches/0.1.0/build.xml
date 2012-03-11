@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="bug4j" default="all" basedir=".">
+
+    <property name="home" location="."/>
+    <import file="build_include.xml"/>
+
+    <property name="dist" value="${out}/dist"/>
+
+    <target name="all" depends="clean,compile,test,package-dist"/>
+
+    <target name="package-dist" depends="package-dist-client,package-dist-demo-log4j,package-dist-demo-manual,package-dist-server">
+        <zip destfile="${out}/${bug4j-release-name}.zip">
+            <zipfileset dir="${dist}" prefix="${bug4j-release-name}" excludes="server/bin/*.sh" filemode="644"/>
+            <zipfileset dir="${dist}" prefix="${bug4j-release-name}" includes="server/bin/*.sh" filemode="755"/>
+        </zip>
+    </target>
+
+    <target name="package-dist-client">
+        <mkdir dir="${dist}/client/lib"/>
+        <copy todir="${dist}/client" file="${artifacts.output}/bug4j.jar"/>
+        <zip destfile="${dist}/client/bug4j-src.zip">
+            <fileset dir="common/src/main/java/"/>
+            <fileset dir="client/src/main/java/"/>
+        </zip>
+        <copy todir="${dist}/client/lib">
+            <path refid="httpcomponents-client.lib"/>
+            <path refid="log4j.lib"/>
+        </copy>
+    </target>
+
+    <target name="package-dist-server">
+        <mkdir dir="${dist}/server"/>
+        <copy todir="${dist}/server">
+            <fileset dir="${tomcat-home}">
+                <exclude name="/logs/**"/>
+                <exclude name="/temp/"/>
+                <exclude name="/webapps/ROOT/"/>
+                <exclude name="/webapps/bug4j/"/>
+                <exclude name="/webapps/bug4j.war"/>
+                <exclude name="/work/**"/>
+            </fileset>
+            <fileset dir="ui-jsp/src/main/resources/server/"/>
+        </copy>
+        <mkdir dir="${dist}/server/logs"/>
+        <mkdir dir="${dist}/server/temp"/>
+        <copy todir="${dist}" overwrite="true">
+            <fileset dir="ui-jsp/src/main/resources/"/>
+        </copy>
+        <replace file="${dist}/server/conf/server.xml" token="8080" value="8063"/>
+        <copy todir="${dist}/server/webapps/ROOT">
+            <fileset dir="${artifacts.output}/ui_jsp_war_exploded"/>
+        </copy>
+        <copy todir="${dist}/server/webapps/ROOT/static">
+            <fileset dir="${dep-home}/zeroclipboard-1.0.7/zeroclipboard">
+                <include name="ZeroClipboard.js"/>
+                <include name="ZeroClipboard.swf"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="package-dist-demo-log4j">
+        <copy todir="${dist}/demo/log4j" file="${artifacts.output}/demo-log4j.jar" overwrite="true"/>
+        <copy todir="${dist}/demo/log4j" file="demo/log4j/resources/build.xml" overwrite="true"/>
+        <copy todir="${dist}/demo/log4j/src" overwrite="true">
+            <fileset dir="demo/log4j/src"/>
+            <fileset dir="demo/log4j/resources/">
+                <filename name="log4j.xml"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="package-dist-demo-manual">
+        <copy todir="${dist}/demo/manual" file="${artifacts.output}/demo-manual.jar" overwrite="true"/>
+        <copy todir="${dist}/demo/manual" file="demo/manual/resources/build.xml" overwrite="true"/>
+        <copy todir="${dist}/demo/manual/src" overwrite="true">
+            <fileset dir="demo/manual/src"/>
+        </copy>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="${production.output}"/>
+        <ant dir="common" target="compile"/>
+        <ant dir="client" target="compile"/>
+        <ant dir="ui-jsp" target="compile"/>
+        <ant dir="demo/log4j" target="compile"/>
+        <ant dir="demo/manual" target="compile"/>
+    </target>
+
+    <target name="test">
+        <mkdir dir="${production.output}"/>
+        <ant dir="common" target="test"/>
+        <ant dir="client" target="test"/>
+        <ant dir="ui-jsp" target="test"/>
+    </target>
+
+    <target name="clean">
+        <ant dir="common" target="clean"/>
+        <ant dir="client" target="clean"/>
+        <ant dir="ui-jsp" target="clean"/>
+        <ant dir="demo/log4j" target="clean"/>
+        <ant dir="demo/manual" target="clean"/>
+        <delete dir="${out}"/>
+    </target>
+</project>

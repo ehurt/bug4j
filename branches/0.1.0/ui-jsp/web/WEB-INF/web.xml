@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2011 Cedric Dandoy
+  ~
+  ~    Licensed under the Apache License, Version 2.0 (the "License");
+  ~    you may not use this file except in compliance with the License.
+  ~    You may obtain a copy of the License at
+  ~
+  ~        http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~    Unless required by applicable law or agreed to in writing, software
+  ~    distributed under the License is distributed on an "AS IS" BASIS,
+  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~    See the License for the specific language governing permissions and
+  ~    limitations under the License.
+  -->
+
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         version="2.5">
+
+    <description>Bug4j</description>
+    <resource-ref>
+        <description>DB Connection</description>
+        <res-ref-name>jdbc/bugDB</res-ref-name>
+        <res-type>javax.sql.DataSource</res-type>
+        <res-auth>Container</res-auth>
+    </resource-ref>
+
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>
+            /WEB-INF/security-app-context.xml
+        </param-value>
+    </context-param>
+    <filter>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
+    <filter>
+        <filter-name>noCacheFilter</filter-name>
+        <filter-class>org.bug4j.server.jsp.NoCacheFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>noCacheFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <servlet>
+        <servlet-name>derbynet</servlet-name>
+        <servlet-class>org.apache.derby.drda.NetServlet</servlet-class>
+        <init-param>
+            <param-name>startNetworkServerOnInit</param-name>
+            <param-value>true</param-value>
+        </init-param>
+        <init-param>
+            <param-name>portNumber</param-name>
+            <param-value>1528</param-value>
+        </init-param>
+        <!--
+        The "host" parameter allows configuration of the host name that will
+        be used for the listening socket for network connections. By default,
+        the Network Server will listen to requests only on the loopback
+        address, which means that it will only accept connections from the
+        local host. Changing this value could expose the server to
+        external connections, which raises security concerns, so before using
+        the "host" parameter, you should run under the Java security
+        manager and enable user authentication.
+        -->
+        <init-param>
+            <param-name>host</param-name>
+            <param-value>localhost</param-value>
+        </init-param>
+        <load-on-startup>0</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>derbynet</servlet-name>
+        <url-pattern>/derbynet</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>InServlet</servlet-name>
+        <servlet-class>org.bug4j.server.jsp.InServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>InServlet</servlet-name>
+        <url-pattern>/br/in</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>InServlet</servlet-name>
+        <url-pattern>/bug4j/in</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>BugServlet</servlet-name>
+        <servlet-class>org.bug4j.server.jsp.BugServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BugServlet</servlet-name>
+        <url-pattern>/br/bug</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>BugServlet</servlet-name>
+        <url-pattern>/bug4j/bug</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>SessionServlet</servlet-name>
+        <servlet-class>org.bug4j.server.jsp.SessionServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SessionServlet</servlet-name>
+        <url-pattern>/br/ses</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>StartupServlet</servlet-name>
+        <servlet-class>org.bug4j.server.jsp.StartupServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>StartupServlet</servlet-name>
+        <url-pattern>/whyShouldIHaveAMappingQmQmQm</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>Bug4jService</servlet-name>
+        <servlet-class>org.bug4j.gwt.user.server.Bug4jServiceImpl</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Bug4jService</servlet-name>
+        <url-pattern>/user/Bug4jService</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>org.bug4j.gwt.admin.Admin AdminService</servlet-name>
+        <servlet-class>org.bug4j.gwt.admin.server.AdminServiceImpl</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>org.bug4j.gwt.admin.Admin AdminService</servlet-name>
+        <url-pattern>/admin/AdminService</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ExportServlet</servlet-name>
+        <servlet-class>org.bug4j.server.jsp.ExportServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ExportServlet</servlet-name>
+        <url-pattern>/user/export</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ImportServlet</servlet-name>
+        <servlet-class>org.bug4j.server.jsp.ImportServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ImportServlet</servlet-name>
+        <url-pattern>/admin/import</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>DownloadServlet</servlet-name>
+        <servlet-class>org.bug4j.server.jsp.DownloadServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DownloadServlet</servlet-name>
+        <url-pattern>/user/download</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>TestServlet</servlet-name>
+        <servlet-class>org.bug4j.server.jsp.TestServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>TestServlet</servlet-name>
+        <url-pattern>/user/test</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>org.bug4j.gwt.common.Common CommonService</servlet-name>
+        <servlet-class>org.bug4j.gwt.common.server.CommonServiceImpl</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>org.bug4j.gwt.common.Common CommonService</servlet-name>
+        <url-pattern>/common/CommonService</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>org.bug4j.gwt.common.Common CommonService</servlet-name>
+        <url-pattern>/user/CommonService</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>org.bug4j.gwt.common.Common CommonService</servlet-name>
+        <url-pattern>/admin/CommonService</url-pattern>
+    </servlet-mapping>
+
+
+</web-app>
