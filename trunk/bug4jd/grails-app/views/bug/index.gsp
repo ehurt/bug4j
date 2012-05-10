@@ -21,24 +21,89 @@
 <head>
     <meta name='layout' content='main'/>
     <title>Bugs - ${application.code} - ${application.label}</title>
+    <script type="text/javascript">
+        function whenBugClicked(elm, bugId) {
+            $(".bug-row-selected").removeClass("bug-row-selected");
+            $(elm).addClass('bug-row-selected');
+            $('#hit').text('');
+        ${remoteFunction(action:'hits', update:'hits', params: '\'bugid=\' + bugId')}
+        }
+
+        function whenHitClicked(elm, hitId) {
+            $(".hit-row-selected").removeClass('hit-row-selected');
+            $(elm).addClass('hit-row-selected');
+        ${remoteFunction(action:'hit', update:'hit', params: '\'hitid=\' + hitId')}
+        }
+    </script>
+    <style type="text/css">
+    body {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    tr:hover {
+        background: inherit;
+    }
+
+    .bug-row:hover {
+        background: #E1F2B6;
+        cursor: pointer;
+    }
+
+    .bug-row-selected {
+        background: #E1F2B6;
+        font-weight: bold;
+    }
+
+    .hit-row:hover {
+        background: #E1F2B6;
+        cursor: pointer;
+    }
+
+    .hit-row-selected {
+        background: #E1F2B6;
+        font-weight: bold;
+    }
+
+    .hit {
+        border: 1px solid #E1F2B6;
+        padding: 3px;
+    }
+    </style>
 </head>
 
 <body>
 <table>
     <tr>
-        <g:sortableColumn property="id" title="${message(code: 'bug.id.label', default: 'ID')}"/>
-        <g:sortableColumn property="title" title="${message(code: 'bug.title.label', default: 'Title')}"/>
+        <td style="width: 50%;">
+            <div>
+                <g:if test="${bugs.size() < total}">
+                    <div class="pagination">
+                        <g:paginate total="${total}"/>
+                    </div>
+                </g:if>
+                <table>
+                    <tr>
+                        <g:sortableColumn property="id" title="${message(code: 'bug.id.label', default: 'ID')}"/>
+                        <g:sortableColumn property="title" title="${message(code: 'bug.title.label', default: 'Title')}"/>
+                    </tr>
+                    <g:each in="${bugs}" var="bug" status="lineno">
+                        <tr class="bug-row ${lineno == 0 ? ' bug-row-selected' : ''}" onclick="whenBugClicked(this, '${bug.id}');">
+                            <td>${bug.id}</td>
+                            <td>${bug.title}</td>
+                        </tr>
+                    </g:each>
+                </table>
+            </div>
+        </td>
+        <td>
+            <div id="hits">
+                <g:render template="hits" model="[hits: bugs ? bugs[0].hits : []]"/>
+            </div>
+        </td>
     </tr>
-    <g:each in="${bugs}" var="bug">
-        <tr>
-            <td>${bug.id}</td>
-            <td>${bug.title}</td>
-        </tr>
-    </g:each>
 </table>
-
-<div class="pagination">
-    <g:paginate total="${total}"/>
-</div>
 </body>
 </html>

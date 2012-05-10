@@ -17,7 +17,8 @@
 /* FONT STACK */
 body,
 input, select, textarea {
-    font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    font-family: arial, FreeSans, Helvetica, sans-serif;
+    font-size: 12px;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -62,7 +63,7 @@ body {
     box-shadow: 0 0 0.3em #255b17;
 }
 
-#bug4jLogo {
+#banner {
     background-color: white;
     border-bottom: 1px solid #ececec;
 }

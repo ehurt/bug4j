@@ -16,19 +16,16 @@
 
 
 
-
-
 import org.bug4j.Application
 import org.bug4j.Bug
+import org.bug4j.Hit
 
 class BugController {
 
     def index() {
-        if (!params.sort) {
-            params.sort = 'id'
-            params.order = 'desc'
-        }
-        params.max = Math.min(params.max ? params.int('max') : 10, 100)
+        if (!params.sort) params.sort = 'id'
+        if (!params.order) params.order = 'desc'
+        if (!params.max) params.max = 100
         Application application = getApplication()
         final bugs = Bug.findAllByApplication(application, params)
         return [
@@ -38,12 +35,38 @@ class BugController {
         ]
     }
 
+    def hits() {
+        final bugid = params.bugid
+
+        if (!params.max) params.max = 100
+        if (!params.sort) params.sort = 'dateReported'
+        if (!params.order) params.order = 'desc'
+
+        final bug = Bug.get(bugid)
+        final hits = Hit.findAllByBug(bug, [max: 100, sort: "dateReported", order: "desc", offset: 0])
+        render(template: 'hits', model: [hits: hits])
+    }
+
+    def hit() {
+        final hitid = params.hitid
+        final Hit hit = Hit.get(hitid)
+
+        render(template: 'hit', model: [hit: hit])
+    }
+
     private Application getApplication() {
         Application application = null
-        final appCode = session.appCode
 
+        String appCode = params.app
         if (appCode) {
             application = Application.findByCode(appCode)
+        }
+
+        if (!application) {
+            appCode = session.appCode
+            if (appCode) {
+                application = Application.findByCode(appCode)
+            }
         }
 
         if (!application) {
