@@ -15,8 +15,7 @@
   --}%
 
 
-
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="org.bug4j.Bug" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta name='layout' content='main'/>
@@ -86,13 +85,15 @@
                 </g:if>
                 <table>
                     <tr>
-                        <g:sortableColumn property="id" title="${message(code: 'bug.id.label', default: 'ID')}"/>
-                        <g:sortableColumn property="title" title="${message(code: 'bug.title.label', default: 'Title')}"/>
+                        <g:sortableColumn property="bug_id" title="${message(code: 'bug.id.label', default: 'ID')}"/>
+                        <g:sortableColumn property="bug_title" title="${message(code: 'bug.title.label', default: 'Title')}"/>
+                        <g:sortableColumn property="hitCount" title="${message(code: 'bug.hitCount.label', default: 'Hits')}"/>
                     </tr>
                     <g:each in="${bugs}" var="bug" status="lineno">
-                        <tr class="bug-row ${lineno == 0 ? ' bug-row-selected' : ''}" onclick="whenBugClicked(this, '${bug.id}');">
-                            <td>${bug.id}</td>
-                            <td>${bug.title}</td>
+                        <tr class="bug-row ${lineno == 0 ? ' bug-row-selected' : ''}" onclick="whenBugClicked(this, '${bug.bug_id}');">
+                            <td>${bug.bug_id}</td>
+                            <td>${bug.bug_title}</td>
+                            <td>${bug.hitCount}</td>
                         </tr>
                     </g:each>
                 </table>
@@ -100,7 +101,14 @@
         </td>
         <td>
             <div id="hits">
-                <g:render template="hits" model="[hits: bugs ? bugs[0].hits : []]"/>
+                <%
+                    def hits = []
+                    if (bugs) {
+                        long bugId = bugs[0].bug_id as long
+                        hits = Bug.get(bugId).hits
+                    }
+                %>
+                <g:render template="hits" model="[hits: hits]"/>
             </div>
         </td>
     </tr>
