@@ -16,6 +16,8 @@
 
 
 
+
+
 import org.bug4j.Application
 import org.bug4j.Bug
 import org.bug4j.Hit
@@ -23,11 +25,39 @@ import org.bug4j.Hit
 class BugController {
 
     def index() {
-        if (!params.sort) params.sort = 'id'
+        if (!params.sort) params.sort = 'bug_id'
         if (!params.order) params.order = 'desc'
-        if (!params.max) params.max = 100
-        Application application = getApplication()
-        final bugs = Bug.findAllByApplication(application, params)
+        if (!params.max) params.max = 10
+        if (!params.offset) params.offset = 0
+
+        final Application selectedApplication = getApplication()
+        final list = Application.withCriteria() {
+            eq("id", selectedApplication.id)
+            projections {
+                bugs {
+                    groupProperty("id", "bug_id")
+                    groupProperty("title", "bug_title")
+                    hits {
+                        count("id", "hitCount")
+                    }
+                }
+            }
+            maxResults(params.max as int)
+            firstResult(params.offset as int)
+            order(params.sort, params.order)
+        }
+
+        final bugs = list.collect {
+            [
+                    'bug_id': it[0],
+                    'bug_title': it[1],
+                    'hitCount': it[2],
+            ]
+        }
+        bugs.each {
+            println "${it.bug_id} - ${it.bug_title} - ${it.hitCount} - "
+        }
+        println '-------------------------------'
         return [
                 application: application,
                 bugs: bugs,
