@@ -235,7 +235,7 @@ class BugService {
                 bug: bug,
                 clientSession: clientSession,
                 stack: stack,
-                dateReported: new Date(),
+                dateReported: new Date(dateReported),
                 reportedBy: user,
                 message: message
         )

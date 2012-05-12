@@ -16,20 +16,24 @@
 
 
 
+<%@ page import="java.text.DateFormat; java.text.SimpleDateFormat" %>
 <div>
     <div id="hit-table">
         <table>
             <thead>
-            <g:sortableColumn property="id" title="${message(code: 'hit.id.label', default: 'ID')}"/>
-            <g:sortableColumn property="dateReported" title="${message(code: 'hit.dateReported.label', default: 'Date Reported')}"/>
-            <g:sortableColumn property="reportedBy" title="${message(code: 'hit.reportedBy.label', default: 'Reported By')}"/>
-            <g:sortableColumn property="message" title="${message(code: 'hit.message.label', default: 'Message')}"/>
+            <g:sortableColumn property="id" title="${message(code: 'hit.id.label', default: 'ID')}" style="width: 5em;"/>
+            <g:sortableColumn property="dateReported" title="${message(code: 'hit.dateReported.label', default: 'Date Reported')}" style="width: 20em;"/>
+            <g:sortableColumn property="reportedBy" title="${message(code: 'hit.reportedBy.label', default: 'Reported By')}" style="width: 15em;"/>
+            <g:sortableColumn property="message" title="${message(code: 'hit.message.label', default: 'Message')}" style="width: 100%;"/>
             </thead>
             <tbody id="hit-tbody">
+            <%
+                DateFormat dateFormat = SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.SHORT, SimpleDateFormat.SHORT)
+            %>
             <g:each in="${hits}" var="hit" status="lineno">
                 <tr class="hit-row ${lineno ? "" : "hit-row-selected"}" onclick="whenHitClicked(this, '${hit.id}')">
                     <td>${hit.id}</td>
-                    <td>${hit.dateReported}</td>
+                    <td>${dateFormat.format(hit.dateReported)}</td>
                     <td>${hit.reportedBy}</td>
                     <td class="hit-message">${hit.message}</td>
                 </tr>

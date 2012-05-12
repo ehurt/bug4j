@@ -14,10 +14,7 @@
   -    limitations under the License.
   --}%
 
-
-
-
-<%@ page import="org.bug4j.Bug" contentType="text/html;charset=UTF-8" %>
+<%@ page import="java.text.DateFormat; java.text.SimpleDateFormat; org.bug4j.Bug" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta name='layout' content='main'/>
@@ -121,12 +118,19 @@
                 <g:sortableColumn property="bug_id" title="${message(code: 'bug.id.label', default: 'ID')}"/>
                 <g:sortableColumn property="bug_title" title="${message(code: 'bug.title.label', default: 'Title')}"/>
                 <g:sortableColumn property="hitCount" title="${message(code: 'bug.hitCount.label', default: 'Hits')}"/>
+                <g:sortableColumn property="firstHitDate" title="${message(code: 'bug.firstHitDate.label', default: 'First Hit')}"/>
+                <g:sortableColumn property="lastHitDate" title="${message(code: 'bug.lastHitDate.label', default: 'Last Hit')}"/>
             </tr>
+            <%
+                DateFormat dateFormat = SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT)
+            %>
             <g:each in="${bugs}" var="bug" status="lineno">
                 <tr class="bug-row ${lineno == 0 ? ' bug-row-selected' : ''}" onclick="whenBugClicked(this, '${bug.bug_id}');">
                     <td>${bug.bug_id}</td>
                     <td>${bug.bug_title}</td>
                     <td>${bug.hitCount}</td>
+                    <td>${dateFormat.format(bug.firstHitDate)}</td>
+                    <td>${dateFormat.format(bug.lastHitDate)}</td>
                 </tr>
             </g:each>
         </table>
