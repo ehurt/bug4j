@@ -14,6 +14,8 @@
  *    limitations under the License.
  */
 
+
+
 import org.bug4j.Application
 
 class MainController {
@@ -37,6 +39,21 @@ class MainController {
             final zipFile = new File('D:/bug4j/bugs.zip')
             bugService.importFile(zipFile)
             render(text: 'Imported', contentType: 'text/plain')
+        } catch (Exception e) {
+            e.printStackTrace()
+        }
+    }
+
+    def testImport2() {
+        try {
+            try {
+                final zipFile = new File('C:/Users/dandoy/Downloads/bug4j/Discovery Manager.xml')
+                bugService.importFile(zipFile)
+                render(text: 'Imported', contentType: 'text/plain')
+            } catch (Exception e) {
+                log.error("Failed to import file", e)
+                render(text: 'Failed', contentType: 'text/plain')
+            }
         } catch (Exception e) {
             e.printStackTrace()
         }

@@ -15,30 +15,30 @@
   --}%
 
 
-<table>
-    <tr style="height: 50%;"><td>
+
+<div>
+    <div id="hit-table">
         <table>
-            <tr>
-                <g:sortableColumn property="id" title="${message(code: 'hit.id.label', default: 'ID')}"/>
-                <g:sortableColumn property="dateReported" title="${message(code: 'hit.dateReported.label', default: 'Date Reported')}"/>
-                <g:sortableColumn property="reportedBy" title="${message(code: 'hit.reportedBy.label', default: 'Reported By')}"/>
-                <g:sortableColumn property="message" title="${message(code: 'hit.message.label', default: 'Message')}"/>
-            </tr>
+            <thead>
+            <g:sortableColumn property="id" title="${message(code: 'hit.id.label', default: 'ID')}"/>
+            <g:sortableColumn property="dateReported" title="${message(code: 'hit.dateReported.label', default: 'Date Reported')}"/>
+            <g:sortableColumn property="reportedBy" title="${message(code: 'hit.reportedBy.label', default: 'Reported By')}"/>
+            <g:sortableColumn property="message" title="${message(code: 'hit.message.label', default: 'Message')}"/>
+            </thead>
+            <tbody id="hit-tbody">
             <g:each in="${hits}" var="hit" status="lineno">
                 <tr class="hit-row ${lineno ? "" : "hit-row-selected"}" onclick="whenHitClicked(this, '${hit.id}')">
                     <td>${hit.id}</td>
                     <td>${hit.dateReported}</td>
                     <td>${hit.reportedBy}</td>
-                    <td>${hit.message}</td>
+                    <td class="hit-message">${hit.message}</td>
                 </tr>
             </g:each>
+            </tbody>
         </table>
-    </td></tr>
-    <tr>
-        <td>
-            <div id="hit" class="hit">
-                <g:render template="hit" model="[hit: hits ? hits.iterator().next() : []]"/>
-            </div>
-        </td>
-    </tr>
-</table>
+    </div>
+
+    <div id="hit">
+        <g:render template="hit" model="[hit: hits ? hits.iterator().next() : []]"/>
+    </div>
+</div>

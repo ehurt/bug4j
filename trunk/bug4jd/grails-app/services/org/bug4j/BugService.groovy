@@ -16,6 +16,8 @@
 
 
 
+
+
 package org.bug4j
 
 import org.apache.commons.lang.StringUtils
@@ -153,6 +155,11 @@ class BugService {
     def reportBug(ClientSession clientSession, Application application, String message, long dateReported, String user, String stackString) {
 
         final List<String> stackLines = stackString ? TextToLines.toLineList(stackString.trim()) : [];
+        if (message) {
+            if (message.size() >= 1024) {
+                message = message.substring(0, 1024)
+            }
+        }
 
         Bug bug = null
         Stack stack = null
@@ -170,9 +177,10 @@ class BugService {
             if (stackLines) {
                 // Try to find a matching strain.
                 final String strainHash = StackPathHashCalculator.analyze(stackLines);
-                Strain strain = Strain.find("from Strain s, Bug b where s.hash=:hash and s.bug=b and b.application=:application",
+                def strainAnBug = Strain.find("from Strain s, Bug b where s.hash=:hash and s.bug=b and b.application=:application",
                         [hash: strainHash, application: application])
-                if (strain == null) {
+                Strain strain
+                if (strainAnBug == null) {
                     // Determine the title that the bug would get.
                     final applicationPackages = ApplicationPackages.findAllByApplication(application)
                     final List<String> appPackages = applicationPackages*.packageName;
@@ -203,7 +211,8 @@ class BugService {
                     strain.save(failOnError: true)
                 } else {
                     // _matchByStrain++;
-                    bug = strain.bug
+                    strain = (Strain) strainAnBug[0]
+                    bug = (Bug) strainAnBug[1]
                 }
                 stack = new Stack(strain: strain, hash: fullHash)
                 strain.addToStacks(stack)

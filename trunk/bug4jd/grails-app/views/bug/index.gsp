@@ -15,6 +15,8 @@
   --}%
 
 
+
+
 <%@ page import="org.bug4j.Bug" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
@@ -24,7 +26,6 @@
         function whenBugClicked(elm, bugId) {
             $(".bug-row-selected").removeClass("bug-row-selected");
             $(elm).addClass('bug-row-selected');
-            $('#hit').text('');
         ${remoteFunction(action:'hits', update:'hits', params: '\'bugid=\' + bugId')}
         }
 
@@ -35,11 +36,33 @@
         }
     </script>
     <style type="text/css">
-    body {
-        height: 100%;
-        width: 100%;
-        margin: 0;
-        padding: 0;
+
+    #bugs {
+        width: 50%;
+        float: left;
+    }
+
+    #hits {
+        width: 49%;
+        float: right;
+    }
+
+    #hit-table {
+        height: 300px;
+        overflow-x: hidden;
+        overflow-y: scroll;
+    }
+
+    #stack {
+        border-top: 1px solid #E1F2B6;
+        max-height: 500px;
+        overflow-x: scroll;
+        overflow-y: scroll;
+        white-space: nowrap;
+    }
+
+    .clear {
+        clear: both;
     }
 
     tr:hover {
@@ -52,7 +75,7 @@
     }
 
     .bug-row-selected {
-        background: #E1F2B6;
+        background: #eeffc3;
         font-weight: bold;
     }
 
@@ -62,7 +85,7 @@
     }
 
     .hit-row-selected {
-        background: #E1F2B6;
+        background: #eeffc3;
         font-weight: bold;
     }
 
@@ -70,48 +93,57 @@
         border: 1px solid #E1F2B6;
         padding: 3px;
     }
+
+    th {
+        white-space: nowrap;
+    }
+
+    .hit-message {
+        overflow-x: hidden;
+    }
+
+    #hit-row, td {
+        white-space: nowrap;
+    }
     </style>
 </head>
 
 <body>
-<table>
-    <tr>
-        <td style="width: 50%;">
-            <div>
-                <g:if test="${bugs.size() < total}">
-                    <div class="pagination">
-                        <g:paginate total="${total}"/>
-                    </div>
-                </g:if>
-                <table>
-                    <tr>
-                        <g:sortableColumn property="bug_id" title="${message(code: 'bug.id.label', default: 'ID')}"/>
-                        <g:sortableColumn property="bug_title" title="${message(code: 'bug.title.label', default: 'Title')}"/>
-                        <g:sortableColumn property="hitCount" title="${message(code: 'bug.hitCount.label', default: 'Hits')}"/>
-                    </tr>
-                    <g:each in="${bugs}" var="bug" status="lineno">
-                        <tr class="bug-row ${lineno == 0 ? ' bug-row-selected' : ''}" onclick="whenBugClicked(this, '${bug.bug_id}');">
-                            <td>${bug.bug_id}</td>
-                            <td>${bug.bug_title}</td>
-                            <td>${bug.hitCount}</td>
-                        </tr>
-                    </g:each>
-                </table>
+<div>
+    <div id="bugs">
+        <g:if test="${bugs.size() < total}">
+            <div class="pagination">
+                <g:paginate total="${total}"/>
             </div>
-        </td>
-        <td>
-            <div id="hits">
-                <%
-                    def hits = []
-                    if (bugs) {
-                        long bugId = bugs[0].bug_id as long
-                        hits = Bug.get(bugId).hits
-                    }
-                %>
-                <g:render template="hits" model="[hits: hits]"/>
-            </div>
-        </td>
-    </tr>
-</table>
+        </g:if>
+        <table>
+            <tr>
+                <g:sortableColumn property="bug_id" title="${message(code: 'bug.id.label', default: 'ID')}"/>
+                <g:sortableColumn property="bug_title" title="${message(code: 'bug.title.label', default: 'Title')}"/>
+                <g:sortableColumn property="hitCount" title="${message(code: 'bug.hitCount.label', default: 'Hits')}"/>
+            </tr>
+            <g:each in="${bugs}" var="bug" status="lineno">
+                <tr class="bug-row ${lineno == 0 ? ' bug-row-selected' : ''}" onclick="whenBugClicked(this, '${bug.bug_id}');">
+                    <td>${bug.bug_id}</td>
+                    <td>${bug.bug_title}</td>
+                    <td>${bug.hitCount}</td>
+                </tr>
+            </g:each>
+        </table>
+    </div>
+
+    <div id="hits">
+        <%
+            def hits = []
+            if (bugs) {
+                long bugId = bugs[0].bug_id as long
+                hits = Bug.get(bugId).hits
+            }
+        %>
+        <g:render template="hits" model="[hits: hits]"/>
+    </div>
+
+    <div class="clear"></div>
+</div>
 </body>
 </html>

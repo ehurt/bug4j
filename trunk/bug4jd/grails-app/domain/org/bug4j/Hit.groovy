@@ -14,6 +14,8 @@
  *    limitations under the License.
  */
 
+
+
 package org.bug4j
 
 class Hit {
@@ -22,8 +24,8 @@ class Hit {
     String message
 
     static constraints = {
-        reportedBy(blank: false)
-        message(nullable: true)
+        reportedBy(nullable: true)
+        message(nullable: true, maxSize: 1024)
         stack(nullable: true)
         clientSession(nullable: true)
     }

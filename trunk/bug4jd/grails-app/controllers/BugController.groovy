@@ -18,6 +18,8 @@
 
 
 
+
+
 import org.bug4j.Application
 import org.bug4j.Bug
 import org.bug4j.Hit
@@ -54,14 +56,10 @@ class BugController {
                     'hitCount': it[2],
             ]
         }
-        bugs.each {
-            println "${it.bug_id} - ${it.bug_title} - ${it.hitCount} - "
-        }
-        println '-------------------------------'
         return [
                 application: application,
                 bugs: bugs,
-                total: Bug.count
+                total: Bug.countByApplication(selectedApplication)
         ]
     }
 
