@@ -14,12 +14,6 @@
  *    limitations under the License.
  */
 
-
-
-
-
-
-
 import org.bug4j.Application
 import org.bug4j.Bug
 import org.bug4j.Hit
@@ -41,6 +35,8 @@ class BugController {
                     groupProperty("title", "bug_title")
                     hits {
                         count("id", "hitCount")
+                        min("dateReported", "firstHitDate")
+                        max("dateReported", "lastHitDate")
                     }
                 }
             }
@@ -54,6 +50,8 @@ class BugController {
                     'bug_id': it[0],
                     'bug_title': it[1],
                     'hitCount': it[2],
+                    'firstHitDate': it[3],
+                    'lastHitDate': it[4],
             ]
         }
         return [
