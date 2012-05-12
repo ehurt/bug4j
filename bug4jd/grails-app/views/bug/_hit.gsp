@@ -15,6 +15,10 @@
   --}%
 
 
+
+
 <g:if test="${hit?.stack?.stackText}">
-    <pre>${hit.stack.stackText.readStackString()}</pre>
+    <div id="stack">
+        <pre>${hit.stack.stackText.readStackString()}</pre>
+    </div>
 </g:if>

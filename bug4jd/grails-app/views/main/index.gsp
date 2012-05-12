@@ -16,28 +16,29 @@
 
 
 
+
+
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta name='layout' content='main'/>
     <title>Main</title>
+    <script type="text/javascript">
+        function preImport(ref) {
+            $("#" + ref).text('Importing')
+        }
+    </script>
 </head>
 
 <body>
-<g:each in="${applications}" var="application">
-    <h1>${application.code} - ${application.label}</h1>
-    <table>
-        <tr>
-            <g:sortableColumn property="id" title="${message(code: 'bug.id.label', default: 'ID')}"/>
-            <g:sortableColumn property="title" title="${message(code: 'bug.title.label', default: 'Title')}"/>
-        </tr>
-        <g:each in="${application.bugs}" var="bug">
-            <tr>
-                <td>${bug.id}</td>
-                <td>${bug.title}</td>
-            </tr>
-        </g:each>
-    </table>
-</g:each>
+<div style="margin: 30px 0 0 30px">
+    <g:remoteLink action="testImport" before="preImport('testImport');" update="testImport">Import D:/bug4j/bugs.zip</g:remoteLink>
+    <span id="testImport" style="margin-left: 10px;"></span>
+</div>
+
+<div style="margin: 30px 0 0 30px">
+    <g:remoteLink action="testImport2" before="preImport('testImport2');" update="testImport2">Import C:/Users/dandoy/Downloads/bug4j/Discovery Manager.xml</g:remoteLink>
+    <span id="testImport2" style="margin-left: 10px;"></span>
+</div>
 </body>
 </html>

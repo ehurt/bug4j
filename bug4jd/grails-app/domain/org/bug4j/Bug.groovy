@@ -16,6 +16,8 @@
 
 
 
+
+
 package org.bug4j
 
 class Bug {
@@ -41,5 +43,6 @@ class Bug {
 
     static mapping = {
         table 'BUG'
+        title index: 'BUG_TITLE_IDX'
     }
 }

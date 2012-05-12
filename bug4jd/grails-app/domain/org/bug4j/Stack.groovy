@@ -14,6 +14,8 @@
  *    limitations under the License.
  */
 
+
+
 package org.bug4j
 
 class Stack {
@@ -37,4 +39,8 @@ class Stack {
     static hasOne = [
             stackText: StackText,
     ]
+
+    static mapping = {
+        hash index: 'STACK_HASH_IDX'
+    }
 }
