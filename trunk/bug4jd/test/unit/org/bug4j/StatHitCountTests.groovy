@@ -13,34 +13,17 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-
-
-
 package org.bug4j
 
-class Hit {
-    Date dateReported
-    String reportedBy
-    String message
+import grails.test.mixin.TestFor
 
-    static constraints = {
-        reportedBy(nullable: true)
-        message(nullable: true, maxSize: 1024)
-        stack(nullable: true)
-        clientSession(nullable: true)
-    }
+/**
+ * See the API for {@link grails.test.mixin.domain.DomainClassUnitTestMixin} for usage instructions
+ */
+@TestFor(StatHitCount)
+class StatHitCountTests {
 
-    static belongsTo = [
-            bug: Bug,
-            clientSession: ClientSession,
-            stack: Stack,
-    ]
-
-    static hasOne = [
-    ]
-
-    static mapping = {
-        bug index: 'HIT_BUG_IDX'
-        stack index: 'HIT_STACK_IDX'
+    void testSomething() {
+        fail "Implement me"
     }
 }

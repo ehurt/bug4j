@@ -20,6 +20,7 @@ import org.bug4j.Application
 
 class MainController {
     def bugService
+    def statsService
 
     def index() {
         params.max = Math.min(params.max ? params.int('max') : 10, 100)
@@ -40,22 +41,29 @@ class MainController {
             bugService.importFile(zipFile)
             render(text: 'Imported', contentType: 'text/plain')
         } catch (Exception e) {
-            e.printStackTrace()
+            log.error("Failed to import file", e)
+            render(text: 'Failed', contentType: 'text/plain')
         }
     }
 
     def testImport2() {
         try {
-            try {
-                final zipFile = new File('C:/Users/dandoy/Downloads/bug4j/Discovery Manager.xml')
-                bugService.importFile(zipFile)
-                render(text: 'Imported', contentType: 'text/plain')
-            } catch (Exception e) {
-                log.error("Failed to import file", e)
-                render(text: 'Failed', contentType: 'text/plain')
-            }
+            final zipFile = new File('C:/Users/dandoy/Downloads/bug4j/Discovery Manager.xml')
+            bugService.importFile(zipFile)
+            render(text: 'Imported', contentType: 'text/plain')
         } catch (Exception e) {
-            e.printStackTrace()
+            log.error("Failed to import file", e)
+            render(text: 'Failed', contentType: 'text/plain')
+        }
+    }
+
+    def generateStats() {
+        try {
+            statsService.generateStats(true)
+            render(text: 'Statistics generated', contentType: 'text/plain')
+        } catch (Exception e) {
+            log.error("Failed to generate the statistics", e)
+            render(text: 'Failed', contentType: 'text/plain')
         }
     }
 }

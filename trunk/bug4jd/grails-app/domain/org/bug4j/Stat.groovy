@@ -13,34 +13,16 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-
-
-
 package org.bug4j
 
-class Hit {
-    Date dateReported
-    String reportedBy
-    String message
+class Stat {
+
+    Date dateLastGenerated
 
     static constraints = {
-        reportedBy(nullable: true)
-        message(nullable: true, maxSize: 1024)
-        stack(nullable: true)
-        clientSession(nullable: true)
     }
 
     static belongsTo = [
-            bug: Bug,
-            clientSession: ClientSession,
-            stack: Stack,
+            application: Application
     ]
-
-    static hasOne = [
-    ]
-
-    static mapping = {
-        bug index: 'HIT_BUG_IDX'
-        stack index: 'HIT_STACK_IDX'
-    }
 }

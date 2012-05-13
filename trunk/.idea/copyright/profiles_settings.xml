@@ -5,5 +5,8 @@
       <option name="fileLocation" value="2" />
       <option name="prefixLines" value="false" />
     </LanguageOptions>
+    <LanguageOptions name="__TEMPLATE__">
+      <option name="addBlankAfter" value="false" />
+    </LanguageOptions>
   </settings>
 </component>
