@@ -3,6 +3,7 @@ dataSource {
     pooled = true
     username = "sa"
     password = ""
+//    loggingSql = true
 }
 hibernate {
     cache.use_second_level_cache = true
