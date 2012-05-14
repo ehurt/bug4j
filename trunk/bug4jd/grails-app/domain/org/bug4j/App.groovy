@@ -14,17 +14,27 @@
  *    limitations under the License.
  */
 
+
+
 package org.bug4j
 
-import grails.test.mixin.TestFor
+class App {
 
-/**
- * See the API for {@link grails.test.mixin.domain.DomainClassUnitTestMixin} for usage instructions
- */
-@TestFor(Application)
-class ApplicationTests {
+    String label
+    String code
 
-    void testSomething() {
-        fail "Implement me"
+    static constraints = {
+        label blank: false, unique: true
+        code blank: false, unique: true
+    }
+
+    static hasMany = [
+            appPackages: AppPackages,
+            bugs: Bug,
+            clientSessions: ClientSession,
+    ]
+
+    static mapping = {
+        table 'APP'
     }
 }

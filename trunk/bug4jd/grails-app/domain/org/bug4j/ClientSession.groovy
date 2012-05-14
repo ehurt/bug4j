@@ -19,7 +19,7 @@ package org.bug4j
 import java.sql.Timestamp
 
 class ClientSession {
-    String applicationVersion
+    String appVersion
     Timestamp dateBuilt
     boolean devBuild
     Integer buildNumber
@@ -27,7 +27,7 @@ class ClientSession {
     Timestamp firstHit
 
     static constraints = {
-        applicationVersion(nullable: true)
+        appVersion(nullable: true)
         dateBuilt(nullable: true)
         devBuild(nullable: true)
         buildNumber(nullable: true)
@@ -36,7 +36,7 @@ class ClientSession {
     }
 
     static belongsTo = [
-            application: Application
+            app: App
     ]
 
     static hasMany = [

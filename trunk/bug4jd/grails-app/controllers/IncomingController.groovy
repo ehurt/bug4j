@@ -23,15 +23,15 @@ class IncomingController {
     def bugService
 
     def createSession() {
-        final String applicationCode = params.a
-        final String applicationVersion = params.v
+        final String appCode = params.a
+        final String appVersion = params.v
         final Long dataMillis = params.d as Long
         final String devBuild = params.dev
         final Integer buildNumber = params.n as Integer
         final String remoteAddr = request.remoteAddr
 
         try {
-            ClientSession clientSession = bugService.createSession(applicationCode, applicationVersion, dataMillis, devBuild, buildNumber, remoteAddr)
+            ClientSession clientSession = bugService.createSession(appCode, appVersion, dataMillis, devBuild, buildNumber, remoteAddr)
             render(text: clientSession.id, contentType: 'text/plain')
         } catch (IllegalArgumentException e) {
             response.sendError(400, e.getMessage())
@@ -42,13 +42,13 @@ class IncomingController {
 
     def check() {
         final String sessionId = params.e
-        final String applicationCode = params.a
+        final String appCode = params.a
         final String message = params.m
         final String user = params.u
         final String hash = params.h
 
         try {
-            if (bugService.isNewBug(sessionId, applicationCode, message, user, hash)) {
+            if (bugService.isNewBug(sessionId, appCode, message, user, hash)) {
                 render(text: 'New', contentType: 'text/plain')
             } else {
                 render(text: 'Old', contentType: 'text/plain')
@@ -62,11 +62,11 @@ class IncomingController {
 
     def bug() {
         final String sessionId = params.e
-        final String applicationCode = params.a
+        final String appCode = params.a
         final String message = params.m
         final long dateReported = System.currentTimeMillis()
         final String user = params.u
         final String stackText = params.s
-        bugService.reportBug(Long.parseLong(sessionId), applicationCode, message, dateReported, user, stackText)
+        bugService.reportBug(Long.parseLong(sessionId), appCode, message, dateReported, user, stackText)
     }
 }

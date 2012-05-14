@@ -16,7 +16,7 @@
 
 
 
-import org.bug4j.Application
+import org.bug4j.App
 
 class MainController {
     def bugService
@@ -24,9 +24,9 @@ class MainController {
 
     def index() {
         params.max = Math.min(params.max ? params.int('max') : 10, 100)
-        final applications = Application.list()
+        final apps = App.list()
         return [
-                applications: applications
+                apps: apps
         ]
     }
 

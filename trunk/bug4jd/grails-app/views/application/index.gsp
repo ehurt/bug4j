@@ -21,7 +21,7 @@
 <head>
     <meta name='layout' content='main'/>
     <title>Applications</title>
-    <g:set var="entityName" value="${message(code: 'application.label', default: 'Application')}"/>
+    <g:set var="entityName" value="${message(code: 'app.label', default: 'Application')}"/>
 
 </head>
 
@@ -34,7 +34,7 @@
     </ul>
 </div>
 
-<div id="list-applications" class="content scaffold-list" role="main">
+<div id="list-apps" class="content scaffold-list" role="main">
     <g:if test="${flash.message}">
         <div class="message" role="status">${flash.message}</div>
     </g:if>
@@ -44,10 +44,10 @@
             <th>Label</th>
             <th>Code</th>
         </tr>
-        <g:each in="${applications}" var="application">
+        <g:each in="${apps}" var="app">
             <tr>
-                <td><g:link action="edit" id="${application.id}">${application.label.encodeAsHTML()}</g:link></td>
-                <td>${application.code.encodeAsHTML()}</td>
+                <td><g:link action="edit" id="${app.id}">${app.label.encodeAsHTML()}</g:link></td>
+                <td>${app.code.encodeAsHTML()}</td>
             </tr>
         </g:each>
         <g:paginate total="${total}"/>

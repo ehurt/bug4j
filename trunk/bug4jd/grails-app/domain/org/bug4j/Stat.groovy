@@ -23,6 +23,6 @@ class Stat {
     }
 
     static belongsTo = [
-            application: Application
+            app: App
     ]
 }

@@ -14,9 +14,7 @@
  *    limitations under the License.
  */
 
-
-
-import org.bug4j.Application
+import org.bug4j.App
 import org.bug4j.Bug
 import org.bug4j.ClientSession
 import org.bug4j.Hit
@@ -24,60 +22,60 @@ import org.bug4j.Hit
 class ApplicationController {
 
     def index() {
-        final applications = Application.list(params)
-        final total = Application.count
+        final apps = App.list(params)
+        final total = App.count
         return [
-                applications: applications,
+                apps: apps,
                 total: total
         ]
     }
 
     def create() {
-        final Application applicationInstance = new Application(params)
-        render(view: 'edit', model: [applicationInstance: applicationInstance])
+        final App appInstance = new App(params)
+        render(view: 'edit', model: [appInstance: appInstance])
     }
 
     def edit() {
         final id = params.id
-        final Application applicationInstance = Application.get(id)
+        final App appInstance = App.get(id)
         return [
-                applicationInstance: applicationInstance
+                appInstance: appInstance
         ]
     }
 
     def save() {
-        final Application applicationInstance
+        final App appInstance
         final id = params.id
         if (id) {
-            applicationInstance = Application.get(id)
-            applicationInstance.properties = params
+            appInstance = App.get(id)
+            appInstance.properties = params
         } else {
-            applicationInstance = new Application(params)
+            appInstance = new App(params)
         }
-        if (!applicationInstance.save(flush: true)) {
-            render(view: "edit", model: [applicationInstance: applicationInstance])
+        if (!appInstance.save(flush: true)) {
+            render(view: "edit", model: [appInstance: appInstance])
             return
         }
 
         flash.message = id ?
-                        message(code: 'default.updated.message', args: [message(code: 'application.label', default: 'Application'), applicationInstance.label]) :
-                        message(code: 'default.created.message', args: [message(code: 'application.label', default: 'Application'), applicationInstance.label])
-        redirect(action: "index", id: applicationInstance.id)
+                        message(code: 'default.updated.message', args: [message(code: 'app.label', default: 'Application'), appInstance.label]) :
+                        message(code: 'default.created.message', args: [message(code: 'app.label', default: 'Application'), appInstance.label])
+        redirect(action: "index", id: appInstance.id)
     }
 
     def delete() {
         final id = params.id
-        final applicationInstance = Application.get(id)
-        ClientSession.findAllByApplication(applicationInstance).each {ClientSession clientSession ->
+        final appInstance = App.get(id)
+        ClientSession.findAllByApp(appInstance).each {ClientSession clientSession ->
             Hit.findAllByClientSession(clientSession)*.delete()
             clientSession.delete()
         }
-        Bug.findAllByApplication(applicationInstance).each {Bug bug ->
+        Bug.findAllByApp(appInstance).each {Bug bug ->
             bug.strains*.delete()
             bug.delete()
         }
-        applicationInstance.delete()
-        flash.message = message(code: 'default.deleted.message', args: [message(code: 'application.label', default: 'Application'), applicationInstance.label])
+        appInstance.delete()
+        flash.message = message(code: 'default.deleted.message', args: [message(code: 'app.label', default: 'Application'), appInstance.label])
         redirect(action: 'index')
     }
 }

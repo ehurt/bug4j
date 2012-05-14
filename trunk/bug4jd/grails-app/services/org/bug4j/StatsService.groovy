@@ -18,32 +18,33 @@ package org.bug4j
 class StatsService {
 
     def generateStats(boolean forceRecalc) {
-        Application.list().each {
+        App.list().each {
             if (forceRecalc) {
-                Stat.findByApplication(it)?.delete()
+                Stat.findByApp(it)?.delete()
             }
             generateStats(it)
         }
     }
 
-    def generateStats(Application app) {
-        Stat stat = Stat.findByApplication(app)
+    def generateStats(App app) {
+        Stat stat = Stat.findByApp(app)
         if (!stat) {
-            stat = new Stat(application: app, dateLastGenerated: new Date(0))
+            stat = new Stat(dateLastGenerated: new Date(0))
+            stat.app = app
         }
         generateStatsHitCount(app, stat.dateLastGenerated)
         stat.dateLastGenerated = new Date()
         stat.save(failOnError: true)
     }
 
-    def generateStatsHitCount(Application app, Date since) {
+    def generateStatsHitCount = {App app, Date since ->
         final daysSince = toDays(since.time)
         Date adjustedSince = backToMidnight(since)
-        StatHitCount.executeUpdate("delete StatHitCount where application=? and day>=?", [app, daysSince])
+        StatHitCount.executeUpdate("delete StatHitCount where app=? and day>=?", [app, daysSince])
 
         final list = Hit.executeQuery("""select year(h.dateReported),month(h.dateReported),day(h.dateReported), count(*)
                         from Hit h, Bug b
-                        where b.application=?
+                        where b.app=?
                         and b=h.bug
                         and h.dateReported >= ?
                         group by year(h.dateReported),month(h.dateReported),day(h.dateReported)""",
@@ -61,8 +62,8 @@ class StatsService {
         }
 
         stats.each {
-            final statHitCount = new StatHitCount(application: app, day: it.key, hitCount: it.value)
-            statHitCount.application = app
+            final statHitCount = new StatHitCount(day: it.key, hitCount: it.value)
+            statHitCount.app = app
             statHitCount.save(failOnError: true)
         }
     }

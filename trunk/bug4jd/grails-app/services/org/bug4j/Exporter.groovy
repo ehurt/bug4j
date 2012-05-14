@@ -91,20 +91,20 @@ public class Exporter {
         }
     }
 
-    public void exportAll(OutputStream outputStream, final Collection<User> users, final Collection<Application> applications) throws XMLStreamException, IOException {
+    public void exportAll(OutputStream outputStream, final Collection<User> users, final Collection<App> apps) throws XMLStreamException, IOException {
         withXMLStreamWriter(outputStream, new Streamer() {
             @Override
             public void stream(XMLStreamWriter xmlStreamWriter) throws XMLStreamException {
-                exportAll(xmlStreamWriter, users, applications);
+                exportAll(xmlStreamWriter, users, apps);
             }
         });
     }
 
-    public void exportApplicationBugs(OutputStream outputStream, final Application application) throws XMLStreamException, IOException {
+    public void exportAppBugs(OutputStream outputStream, final App app) throws XMLStreamException, IOException {
         withXMLStreamWriter(outputStream, new Streamer() {
             @Override
             public void stream(XMLStreamWriter xmlStreamWriter) throws XMLStreamException {
-                exportApplicationBugs(xmlStreamWriter, application);
+                exportAppBugs(xmlStreamWriter, app);
             }
         });
     }
@@ -130,43 +130,43 @@ public class Exporter {
         }
     }
 
-    private void exportAll(final XMLStreamWriter xmlStreamWriter, Collection<User> users, Collection<Application> applications) throws XMLStreamException {
+    private void exportAll(final XMLStreamWriter xmlStreamWriter, Collection<User> users, Collection<App> apps) throws XMLStreamException {
         xmlStreamWriter.writeStartElement("bug4j");
 
         exportUsers(xmlStreamWriter, users);
 
-        exportApplications(xmlStreamWriter, applications);
+        exportApps(xmlStreamWriter, apps);
 
         xmlStreamWriter.writeEndElement();
     }
 
-    private void exportApplications(XMLStreamWriter xmlStreamWriter, Collection<Application> applications) throws XMLStreamException {
+    private void exportApps(XMLStreamWriter xmlStreamWriter, Collection<App> apps) throws XMLStreamException {
         xmlStreamWriter.writeStartElement("apps");
-        for (Application application : applications) {
-            exportApplication(xmlStreamWriter, application);
+        for (App app : apps) {
+            exportApp(xmlStreamWriter, app);
         }
         xmlStreamWriter.writeEndElement();
     }
 
-    private void exportApplication(XMLStreamWriter xmlStreamWriter, Application application) throws XMLStreamException {
+    private void exportApp(XMLStreamWriter xmlStreamWriter, App app) throws XMLStreamException {
         xmlStreamWriter.writeStartElement("app");
-        xmlStreamWriter.writeAttribute("name", application.getLabel());
-        xmlStreamWriter.writeAttribute("code", application.getCode());
-        exportPackages(xmlStreamWriter, application);
-        exportSessions(xmlStreamWriter, application);
-        exportBugs(xmlStreamWriter, application);
+        xmlStreamWriter.writeAttribute("name", app.getLabel());
+        xmlStreamWriter.writeAttribute("code", app.getCode());
+        exportPackages(xmlStreamWriter, app);
+        exportSessions(xmlStreamWriter, app);
+        exportBugs(xmlStreamWriter, app);
         xmlStreamWriter.writeEndElement();
     }
 
-    private void exportSessions(XMLStreamWriter xmlStreamWriter, Application application) throws XMLStreamException {
-        final Set<ClientSession> sessions = application.getClientSessions();
+    private void exportSessions(XMLStreamWriter xmlStreamWriter, App app) throws XMLStreamException {
+        final Set<ClientSession> sessions = app.getClientSessions();
         if (!sessions.isEmpty()) {
             xmlStreamWriter.writeStartElement("sessions");
             for (ClientSession session : sessions) {
                 xmlStreamWriter.writeStartElement("session");
 
                 final long sessionId = session.id
-                final String version = session.applicationVersion
+                final String version = session.appVersion
                 final Timestamp firstHit = session.firstHit
                 final String hostName = session.hostName
                 final Timestamp dateBuilt = session.dateBuilt
@@ -187,13 +187,13 @@ public class Exporter {
         }
     }
 
-    private void exportPackages(XMLStreamWriter xmlStreamWriter, Application application) throws XMLStreamException {
-        final Set<ApplicationPackages> applicationPackages = application.getApplicationPackages();
-        if (!applicationPackages.isEmpty()) {
+    private void exportPackages(XMLStreamWriter xmlStreamWriter, App app) throws XMLStreamException {
+        final Set<AppPackages> appPackages = app.getAppPackages();
+        if (!appPackages.isEmpty()) {
             xmlStreamWriter.writeStartElement("packages");
-            for (ApplicationPackages applicationPackage : applicationPackages) {
+            for (AppPackages appPackage : appPackages) {
                 xmlStreamWriter.writeStartElement("package");
-                final String packageName = applicationPackage.getPackageName();
+                final String packageName = appPackage.getPackageName();
                 xmlStreamWriter.writeAttribute("name", _unicodeEscaper.translate(packageName));
                 xmlStreamWriter.writeEndElement();
             }
@@ -238,15 +238,15 @@ public class Exporter {
         xmlStreamWriter.writeEndElement();
     }
 
-    private void exportApplicationBugs(final XMLStreamWriter xmlStreamWriter, Application application) throws XMLStreamException {
+    private void exportAppBugs(final XMLStreamWriter xmlStreamWriter, App app) throws XMLStreamException {
         xmlStreamWriter.writeStartElement("bugs");
-        xmlStreamWriter.writeAttribute("app", application.getCode());
-        exportBugs(xmlStreamWriter, application);
+        xmlStreamWriter.writeAttribute("app", app.getCode());
+        exportBugs(xmlStreamWriter, app);
         xmlStreamWriter.writeEndElement();
     }
 
-    private void exportBugs(final XMLStreamWriter xmlStreamWriter, Application application) throws XMLStreamException {
-        final Set<Bug> bugs = application.getBugs();
+    private void exportBugs(final XMLStreamWriter xmlStreamWriter, App app) throws XMLStreamException {
+        final Set<Bug> bugs = app.getBugs();
         for (Bug bug : bugs) {
             xmlStreamWriter.writeStartElement("bug");
             xmlStreamWriter.writeAttribute("id", Long.toString(bug.id));

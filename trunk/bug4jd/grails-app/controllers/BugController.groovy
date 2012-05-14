@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-import org.bug4j.Application
+import org.bug4j.App
 import org.bug4j.Bug
 import org.bug4j.Hit
 
@@ -26,9 +26,9 @@ class BugController {
         if (!params.max) params.max = 10
         if (!params.offset) params.offset = 0
 
-        final Application selectedApplication = getApplication()
-        final list = Application.withCriteria() {
-            eq("id", selectedApplication.id)
+        final App selectedApp = getApp()
+        final list = App.withCriteria() {
+            eq("id", selectedApp.id)
             projections {
                 bugs {
                     groupProperty("id", "bug_id")
@@ -55,9 +55,9 @@ class BugController {
             ]
         }
         return [
-                application: application,
+                app: app,
                 bugs: bugs,
-                total: Bug.countByApplication(selectedApplication)
+                total: Bug.countByApp(selectedApp)
         ]
     }
 
@@ -80,27 +80,27 @@ class BugController {
         render(template: 'hit', model: [hit: hit])
     }
 
-    private Application getApplication() {
-        Application application = null
+    private App getApp() {
+        App app = null
 
         String appCode = params.app
         if (appCode) {
-            application = Application.findByCode(appCode)
+            app = App.findByCode(appCode)
         }
 
-        if (!application) {
+        if (!app) {
             appCode = session.appCode
             if (appCode) {
-                application = Application.findByCode(appCode)
+                app = App.findByCode(appCode)
             }
         }
 
-        if (!application) {
-            application = Application.list(max: 1).first()
+        if (!app) {
+            app = App.list(max: 1).first()
         }
 
-        session.appCode = application?.code
+        session.appCode = app?.code
 
-        return application
+        return app
     }
 }
