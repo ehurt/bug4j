@@ -20,10 +20,10 @@ class StatHitCount {
     int hitCount
 
     static constraints = {
-        day(unique: 'application')
+        day(unique: 'app')
     }
 
     static belongsTo = [
-            application: Application
+            app: App
     ]
 }

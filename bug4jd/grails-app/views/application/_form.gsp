@@ -16,19 +16,19 @@
 
 
 
-<%@ page import="org.bug4j.Application" %>
-<g:hiddenField name="id" value="${applicationInstance?.id}"/>
+<%@ page import="org.bug4j.App" %>
+<g:hiddenField name="id" value="${appInstance?.id}"/>
 
-<div class="fieldcontain ${hasErrors(bean: applicationInstance, field: 'label', 'error')} ">
+<div class="fieldcontain ${hasErrors(bean: appInstance, field: 'label', 'error')} ">
     <label for="label">
-        <g:message code="application.label.label" default="Label"/>
+        <g:message code="app.label.label" default="Label"/>
     </label>
-    <g:textField name="label" value="${applicationInstance?.label}"/>
+    <g:textField name="label" value="${appInstance?.label}"/>
 </div>
 
-<div class="fieldcontain ${hasErrors(bean: applicationInstance, field: 'code', 'error')} ">
+<div class="fieldcontain ${hasErrors(bean: appInstance, field: 'code', 'error')} ">
     <label for="code">
-        <g:message code="application.code.label" default="Code"/>
+        <g:message code="app.code.label" default="Code"/>
     </label>
-    <g:textField name="code" value="${applicationInstance?.code}"/>
+    <g:textField name="code" value="${appInstance?.code}"/>
 </div>

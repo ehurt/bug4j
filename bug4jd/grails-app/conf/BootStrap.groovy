@@ -14,17 +14,17 @@
  *    limitations under the License.
  */
 
-import org.bug4j.Application
-import org.bug4j.ApplicationPackages
+import org.bug4j.App
+import org.bug4j.AppPackages
 
 class BootStrap {
 
     def init = { servletContext ->
-        if (!Application.count) {
-            final application = new Application(label: 'bug4jDemo', code: 'bug4jDemo')
-            final applicationPackages = new ApplicationPackages(application: application, packageName: 'org.bug4j.demo')
-            application.addToApplicationPackages(applicationPackages)
-            application.save()
+        if (!App.count) {
+            final app = new App(label: 'bug4jDemo', code: 'bug4jDemo')
+            final appPackages = new AppPackages(app: app, packageName: 'org.bug4j.demo')
+            app.addToAppPackages(appPackages)
+            app.save()
         }
     }
 

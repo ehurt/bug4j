@@ -14,8 +14,7 @@
  *    limitations under the License.
  */
 
-
-import org.bug4j.Application
+import org.bug4j.App
 import org.bug4j.StatHitCount
 
 class HomeController {
@@ -29,9 +28,9 @@ class HomeController {
         final int nowInDays = System.currentTimeMillis() / 1000 / 60 / 60 / 24
         final int startInDays = nowInDays - daysBack
 
-        Application.list().each {Application app ->
+        App.list().each {App app ->
             def stats = (0..daysBack).collect {0}
-            def statHitCounts = StatHitCount.findAllByApplicationAndDayGreaterThanEquals(app, startInDays)
+            def statHitCounts = StatHitCount.findAllByAppAndDayGreaterThanEquals(app, startInDays)
             statHitCounts.each {StatHitCount statHitCount ->
                 final day = statHitCount.day
                 final hitCount = statHitCount.hitCount

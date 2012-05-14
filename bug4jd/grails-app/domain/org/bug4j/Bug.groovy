@@ -32,7 +32,7 @@ class Bug {
     }
 
     static belongsTo = [
-            application: Application,
+            app: App,
     ]
 
     static hasMany = [

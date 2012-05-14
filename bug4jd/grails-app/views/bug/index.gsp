@@ -18,7 +18,7 @@
 <html>
 <head>
     <meta name='layout' content='main'/>
-    <title>Bugs - ${application.code} - ${application.label}</title>
+    <title>Bugs - ${app.code} - ${app.label}</title>
     <script type="text/javascript">
         function whenBugClicked(elm, bugId) {
             $(".bug-row-selected").removeClass("bug-row-selected");

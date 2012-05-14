@@ -21,7 +21,7 @@
 <head>
     <meta name='layout' content='main'/>
     <title>Application</title>
-    <g:set var="entityName" value="${message(code: 'application.label', default: 'Application')}"/>
+    <g:set var="entityName" value="${message(code: 'app.label', default: 'Application')}"/>
 </head>
 
 <body>
@@ -29,8 +29,8 @@
     <ul>
         <li><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label"/></a></li>
         <li><g:link class="list" action="index"><g:message code="default.list.label" args="[entityName]"/></g:link></li>
-        <g:if test="${applicationInstance.id}">
-            <li><g:link class="delete" action="delete" id="${applicationInstance.id}"><g:message code="default.button.delete.label" args="['Application']"/></g:link></li>
+        <g:if test="${appInstance.id}">
+            <li><g:link class="delete" action="delete" id="${appInstance.id}"><g:message code="default.button.delete.label" args="['Application']"/></g:link></li>
         </g:if>
     </ul>
 </div>
@@ -38,9 +38,9 @@
 <g:if test="${flash.message}">
     <div class="message" role="status">${flash.message}</div>
 </g:if>
-<g:hasErrors bean="${applicationInstance}">
+<g:hasErrors bean="${appInstance}">
     <ul class="errors" role="alert">
-        <g:eachError bean="${applicationInstance}" var="error">
+        <g:eachError bean="${appInstance}" var="error">
             <li <g:if test="${error in org.springframework.validation.FieldError}">data-field-id="${error.field}"</g:if>><g:message error="${error}"/></li>
         </g:eachError>
     </ul>
@@ -52,7 +52,7 @@
     </fieldset>
     <fieldset class="buttons">
         <g:submitButton name="create" class="save" value="${
-            applicationInstance.id ?
+            appInstance.id ?
             message(code: 'default.button.update.label', default: 'Update') :
             message(code: 'default.button.create.label', default: 'Create')
         }"/>

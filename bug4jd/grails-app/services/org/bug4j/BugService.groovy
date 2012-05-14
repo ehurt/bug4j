@@ -36,31 +36,31 @@ import java.util.zip.ZipInputStream
 import javax.xml.parsers.SAXParserFactory
 
 class BugService {
-    ClientSession createSession(String applicationCode,
-                                String applicationVersion,
+    ClientSession createSession(String appCode,
+                                String appVersion,
                                 Long dataMillis,
                                 String devBuild,
                                 Integer buildNumber,
                                 String remoteAddr) {
 
-        log.debug("createSession ${applicationCode}")
+        log.debug("createSession ${appCode}")
 
-        final application = Application.findByCode(applicationCode)
-        if (!application) {
-            log.warn("Request to create a session for an invalid application. Application:${applicationCode} - from:${remoteAddr}")
-            throw new IllegalArgumentException("Unknown application: ${applicationCode}")
+        final app = App.findByCode(appCode)
+        if (!app) {
+            log.warn("Request to create a session for an invalid application. Application:${appCode} - from:${remoteAddr}")
+            throw new IllegalArgumentException("Unknown application: ${appCode}")
         }
 
         final clientSession = new ClientSession(
-                application: application,
-                applicationVersion: applicationVersion,
+                app: app,
+                appVersion: appVersion,
                 dateBuilt: new Timestamp(dataMillis),
                 devBuild: 'Y'.equals(devBuild),
                 buildNumber: buildNumber,
                 hostName: remoteAddr,
                 firstHit: new Timestamp(System.currentTimeMillis())
         )
-        application.addToClientSessions(clientSession)
+        app.addToClientSessions(clientSession)
         if (!clientSession.save()) {
             log.error("Failed to create a session: ${clientSession.errors.toString()}")
             throw new IllegalStateException('Failed to create a session: ')
@@ -73,14 +73,14 @@ class BugService {
      * and asks if that one has already been reported.
      */
     boolean isNewBug(String sessionId,
-                     String applicationCode,
+                     String appCode,
                      String message,
                      String user,
                      String hash) {
 
-        log.debug("check ${sessionId}-${applicationCode}-${user}-${hash}-${message}")
+        log.debug("check ${sessionId}-${appCode}-${user}-${hash}-${message}")
 
-        if (sessionId == null || applicationCode == null || hash == null) {
+        if (sessionId == null || appCode == null || hash == null) {
             throw new IllegalArgumentException('Invalid request parameters')
         }
 
@@ -92,15 +92,15 @@ class BugService {
             }
         }
 
-        final Application application = Application.findByCode(applicationCode)
-        if (!application) {
-            final errorMessage = "Unknown application: ${applicationCode}"
+        final App app = App.findByCode(appCode)
+        if (!app) {
+            final errorMessage = "Unknown application: ${appCode}"
             log.error(errorMessage)
             throw new IllegalArgumentException(errorMessage)
         }
 
-        def results = Stack.find("from Stack s, Hit h, Bug b where s.hash=:hash and s=h.stack and h.bug=b and b.application=:application",
-                [application: application, hash: hash])
+        def results = Stack.find("from Stack s, Hit h, Bug b where s.hash=:hash and s=h.stack and h.bug=b and b.app=:app",
+                [app: app, hash: hash])
 
         if (results) {
             Stack stack = (Stack) results[0]
@@ -128,7 +128,7 @@ class BugService {
     /**
      * Reports a bug
      */
-    def reportBug(long sessionId, String applicationCode, String message, long dateReported, String user, String stackString) {
+    def reportBug(long sessionId, String appCode, String message, long dateReported, String user, String stackString) {
 
         if (sessionId == null) {
             throw new IllegalArgumentException('Invalid request parameters')
@@ -142,17 +142,17 @@ class BugService {
             }
         }
 
-        final Application application = Application.findByCode(applicationCode)
-        if (!application) {
-            final errorMessage = "Cannot find application ${applicationCode}"
+        final App app = App.findByCode(appCode)
+        if (!app) {
+            final errorMessage = "Cannot find application ${appCode}"
             log.error(errorMessage)
             throw new IllegalArgumentException(errorMessage)
         }
 
-        reportBug(clientSession, application, message, dateReported, user, stackString)
+        reportBug(clientSession, app, message, dateReported, user, stackString)
     }
 
-    def reportBug(ClientSession clientSession, Application application, String message, long dateReported, String user, String stackString) {
+    def reportBug(ClientSession clientSession, App app, String message, long dateReported, String user, String stackString) {
 
         final List<String> stackLines = stackString ? TextToLines.toLineList(stackString.trim()) : [];
         if (message) {
@@ -166,8 +166,8 @@ class BugService {
 
         // First try based on the full hash of the exception.
         final String fullHash = hash(message, stackLines);
-        def results = Stack.find("from Stack s, Hit h, Bug b where s.hash=:hash and s=h.stack and h.bug=b and b.application=:application",
-                [application: application, hash: fullHash])
+        def results = Stack.find("from Stack s, Hit h, Bug b where s.hash=:hash and s=h.stack and h.bug=b and b.app=:app",
+                [app: app, hash: fullHash])
         if (results) {
             bug = (Bug) results[2]
             stack = (Stack) results[0]
@@ -177,18 +177,18 @@ class BugService {
             if (stackLines) {
                 // Try to find a matching strain.
                 final String strainHash = StackPathHashCalculator.analyze(stackLines);
-                def strainAnBug = Strain.find("from Strain s, Bug b where s.hash=:hash and s.bug=b and b.application=:application",
-                        [hash: strainHash, application: application])
+                def strainAnBug = Strain.find("from Strain s, Bug b where s.hash=:hash and s.bug=b and b.app=:app",
+                        [hash: strainHash, app: app])
                 Strain strain
                 if (strainAnBug == null) {
                     // Determine the title that the bug would get.
-                    final applicationPackages = ApplicationPackages.findAllByApplication(application)
-                    final List<String> appPackages = applicationPackages*.packageName;
+                    final List<String> appPackages = AppPackages.findAllByApp(app)*.packageName;
                     final StackAnalyzer stackAnalyzer = new StackAnalyzer();
                     stackAnalyzer.setApplicationPackages(appPackages);
 
                     String title = stackAnalyzer.getTitle(stackLines);
-                    if (title == null) { // This may happen if the stack does not contain any of the application packages.
+                    if (title == null) {
+                        // This may happen if the stack does not contain any of the application packages.
                         // Try again without application packages
                         stackAnalyzer.setApplicationPackages(Collections.<String> emptyList());
                         title = stackAnalyzer.getTitle(stackLines);
@@ -199,11 +199,11 @@ class BugService {
                     }
 
                     // Try to find a bug with the exact same title
-                    bug = identifyBugByTitle(application, stackLines, title);
+                    bug = identifyBugByTitle(app, stackLines, title);
                     if (!bug) {
                         // if everything failed then it is a new bug.
-                        bug = new Bug(application: application, title: title)
-                        application.addToBugs(bug)
+                        bug = new Bug(app: app, title: title)
+                        app.addToBugs(bug)
                         bug.save(failOnError: true)
                     } // else ==> _matchByCauses++
                     strain = new Strain(bug: bug, hash: strainHash)
@@ -221,10 +221,10 @@ class BugService {
                 stack.setStackText(stackText)
 
             } else {
-                bug = identifyBugByTitle(application, stackLines, message);
+                bug = identifyBugByTitle(app, stackLines, message);
                 if (!bug) {
-                    bug = new Bug(application: application, title: message)
-                    application.addToBugs(bug)
+                    bug = new Bug(app: app, title: message)
+                    app.addToBugs(bug)
                 }
                 bug.save(failOnError: true)
                 stack = new Stack(hash: fullHash)
@@ -266,10 +266,10 @@ class BugService {
      * This addresses the case for example of a NPE at the exact same location but from different code paths.
      * To match, the underlying causes must be identical.
      */
-    private Bug identifyBugByTitle(Application application, List<String> thisStackLines, String title) {
+    private Bug identifyBugByTitle(App app, List<String> thisStackLines, String title) {
         final StackAnalyzer stackAnalyzer = new StackAnalyzer();
         final List<String> thisCauses = stackAnalyzer.getCauses(thisStackLines);
-        final List<Bug> bugs = Bug.findAllByApplicationAndTitle(application, title)
+        final List<Bug> bugs = Bug.findAllByAppAndTitle(app, title)
         for (Bug bug : bugs) {
             List<Hit> hits = bug.hits.sort {it.dateReported}.reverse()
             hits.each {Hit hit ->
@@ -321,7 +321,7 @@ class BugService {
             boolean _admin
             boolean _external
 
-            Application _application
+            App _app
             String _bugTitle
 
             String _hitId
@@ -345,20 +345,20 @@ class BugService {
 
                         break;
                     case 'app':
-                        String applicationName = atts.getValue('name')
-                        _application = Application.findByLabel(applicationName)
-                        if (!_application) {
-                            _application = new Application(label: applicationName, code: applicationName)
-                            _application.save(flush: true)
+                        String appName = atts.getValue('name')
+                        _app = App.findByLabel(appName)
+                        if (!_app) {
+                            _app = new App(label: appName, code: appName)
+                            _app.save(flush: true)
                         }
                         break
 
                     case 'package':
                         final packageName = atts.getValue('name')
-                        if (!ApplicationPackages.findByApplicationAndPackageName(_application, packageName)) {
-                            final applicationPackages = new ApplicationPackages(application: _application, packageName: packageName)
-                            _application.addToApplicationPackages(applicationPackages)
-                            applicationPackages.save(flush: true)
+                        if (!AppPackages.findByAppAndPackageName(_app, packageName)) {
+                            final appPackages = new AppPackages(app: _app, packageName: packageName)
+                            _app.addToAppPackages(appPackages)
+                            appPackages.save(flush: true)
                         }
                         break;
 
@@ -370,14 +370,14 @@ class BugService {
                         final buildDate = dateFormat.parse(atts.getValue('buildDate')).getTime()
                         final buildNumber = atts.getValue('buildNumber')
                         final clientSession = new ClientSession(
-                                application: _application,
+                                app: _app,
                                 dateBuilt: new Timestamp(buildDate),
                                 devBuild: false,
                                 buildNumber: buildNumber as int,
                                 hostName: hostName,
                                 firstHit: new Timestamp(firstHit)
                         )
-                        _application.addToClientSessions(clientSession)
+                        _app.addToClientSessions(clientSession)
                         clientSession.save(flush: true)
                         _sessions.put(sessionId, clientSession)
                         break;
@@ -416,7 +416,7 @@ class BugService {
                     case 'user':
                         break
                     case 'app':
-                        _application = null
+                        _app = null
                         break
                     case 'package':
                         break;
@@ -425,7 +425,7 @@ class BugService {
                         break
                     case 'hit':
                         final clientSession = _sessions.get(_sessionId)
-                        reportBug(clientSession, _application, _message, _dateReported, _user, _stackString)
+                        reportBug(clientSession, _app, _message, _dateReported, _user, _stackString)
                         _hitId = null
                         break;
                 }
@@ -437,7 +437,7 @@ class BugService {
     public void export(OutputStream outputStream) {
         final exporter = new Exporter()
         final users = User.list()
-        final applications = Application.list()
-        exporter.exportAll(outputStream, users, applications)
+        final apps = App.list()
+        exporter.exportAll(outputStream, users, apps)
     }
 }
