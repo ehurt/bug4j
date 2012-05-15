@@ -18,7 +18,7 @@ package org.bug4j.server.util
 /**
  */
 class DateUtil {
-    static enum TimeAdjustType {
+    public static enum TimeAdjustType {
         BEGINNING_OF_DAY, END_OF_DAY
     }
     private static final DATE_PATTERN_MM_DD_YYYY = ~/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/

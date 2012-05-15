@@ -18,7 +18,7 @@ package org.bug4j
 class StatCount {
     int day
     char countType // Bug/Hit
-    int hitCount
+    int count
 
     static constraints = {
         day(unique: ['app', 'countType'])
