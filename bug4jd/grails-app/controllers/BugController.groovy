@@ -17,6 +17,11 @@
 import org.bug4j.App
 import org.bug4j.Bug
 import org.bug4j.Hit
+import org.bug4j.server.util.DateUtil
+
+import java.text.DateFormat
+
+import static org.bug4j.server.util.DateUtil.TimeAdjustType
 
 class BugController {
 
@@ -26,27 +31,75 @@ class BugController {
         if (!params.max) params.max = 10
         if (!params.offset) params.offset = 0
 
-        final App selectedApp = getApp()
-        final list = App.withCriteria() {
-            eq("id", selectedApp.id)
-            projections {
-                bugs {
-                    groupProperty("id", "bug_id")
-                    groupProperty("title", "bug_title")
-                    hits {
-                        count("id", "hitCount")
-                        min("dateReported", "firstHitDate")
-                        max("dateReported", "lastHitDate")
-                    }
-                }
+        def selectedApp = getApp()
+        def queryParams = [app: selectedApp]
+        def queryCond = ''
+        def filter = [display: '']
+        final today = DateUtil.adjustToDayBoundary(new Date(), TimeAdjustType.BEGINNING_OF_DAY)
+
+        Date fromDate = null
+        Date toDate = null
+        if (params.applyFilter) {
+            if (params.applyFilter.from) fromDate = DateUtil.interpretDate(params.applyFilter.from, TimeAdjustType.BEGINNING_OF_DAY)
+            if (params.applyFilter.to) toDate = DateUtil.interpretDate(params.applyFilter.to, TimeAdjustType.END_OF_DAY)
+        } else {
+            if (params.fromDay) {
+                fromDate = today.minus(params.fromDay as int)
+                queryCond += " and h.dateReported>=:fromDate"
+                queryParams += [fromDate: fromDate]
             }
-            maxResults(params.max as int)
-            firstResult(params.offset as int)
-            order(params.sort, params.order)
+
+            if (params.toDay) {
+                toDate = today.minus(params.toDay as int)
+                queryCond += " and h.dateReported<=:toDate"
+                queryParams += [toDate: toDate]
+            }
         }
 
+        DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.SHORT);
+
+        if (fromDate) {
+            if (toDate) {
+                filter.display = "between ${dateFormat.format(fromDate)} and ${dateFormat.format(toDate)}"
+            } else {
+                filter.display = "after ${dateFormat.format(fromDate)}"
+            }
+        } else {
+            if (toDate) {
+                filter.display = "before ${dateFormat.format(toDate)}"
+            }
+        }
+
+        if (fromDate) filter.fromDate = dateFormat.format(fromDate)
+        if (toDate) filter.toDate = dateFormat.format(toDate)
+
+        final sql = """
+                select
+                    b.id as bug_id,
+                    b.title as bug_title,
+                    count(h.id) as hitCount,
+                    min(h.dateReported) as firstHitDate,
+                    max(h.dateReported) as lastHitDate
+                from Bug b, Hit h
+                where b.app=:app
+                and b=h.bug
+                ${queryCond}
+                group by b.id,b.title
+                order by ${params.sort} ${params.order}
+                """
+        final List list = Bug.executeQuery(sql, queryParams, [max: params.max, offset: params.offset])
+
+        final countSql = """
+                select count(distinct b.id) as total
+                from Bug b, Hit h
+                where b.app=:app
+                and b=h.bug
+                ${queryCond}
+                """
+        final total = Bug.executeQuery(countSql, queryParams)
+        println "Total: ${total}"
         final bugs = list.collect {
-            [
+            return [
                     'bug_id': it[0],
                     'bug_title': it[1],
                     'hitCount': it[2],
@@ -54,10 +107,13 @@ class BugController {
                     'lastHitDate': it[4],
             ]
         }
+        def reparam = filterMap(params, ['sort', 'order', 'max', 'offset', 'appCode', 'fromDay', 'toDay'])
         return [
-                app: app,
+                app: selectedApp,
                 bugs: bugs,
-                total: Bug.countByApp(selectedApp)
+                total: total[0],
+                filter: filter,
+                params: reparam
         ]
     }
 
@@ -83,7 +139,7 @@ class BugController {
     private App getApp() {
         App app = null
 
-        String appCode = params.app
+        String appCode = params.appCode
         if (appCode) {
             app = App.findByCode(appCode)
         }
@@ -103,4 +159,16 @@ class BugController {
 
         return app
     }
+
+    private static def filterMap(Map map, List keys) {
+        def ret = [:]
+        for (Object key : keys) {
+            final value = map.get(key)
+            if (value) {
+                ret.put(key, value)
+            }
+        }
+        return ret
+    }
+
 }
