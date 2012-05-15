@@ -440,4 +440,36 @@ class BugService {
         final apps = App.list()
         exporter.exportAll(outputStream, users, apps)
     }
+
+    public static String stackToHtml(String stackString, List<String> packages) {
+        String stackHtml = ''
+        if (stackString) {
+            final hilightPrefixes = packages.collect {'\tat ' + it}
+            stackString = stackString.replace('\r', '')
+            List<String> lines = StringUtils.split(stackString, '\n')
+            String messageLine = lines.remove(0)
+            messageLine = highlightStackLine(messageLine, true)
+            stackHtml = lines.sum {line ->
+                def highlight = false
+                if (line.startsWith('\tat ')) {
+                    highlight = hilightPrefixes.find {hilightPrefix ->
+                        if (line.startsWith(hilightPrefix)) {
+                            return true
+                        }
+                    }
+                } else {
+                    if (!line.startsWith('\t...')) {
+                        highlight = true
+                    }
+                }
+                return highlightStackLine(line, highlight as boolean)
+            }
+            stackHtml = messageLine + stackHtml
+        }
+        return stackHtml
+    }
+
+    private static String highlightStackLine(String line, boolean highlight) {
+        return "<div class=\"${highlight ? 'stack-highlight' : 'stack-dim'}\">${line.encodeAsHTML()}</div>"
+    }
 }

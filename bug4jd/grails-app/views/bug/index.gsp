@@ -64,7 +64,17 @@
         max-height: 500px;
         overflow-x: scroll;
         overflow-y: scroll;
-        white-space: nowrap;
+        display: block;
+        font-family: monospace;
+        white-space: pre;
+    }
+
+    .stack-dim {
+        color: #d3d3d3;
+    }
+
+    .stack-highlight {
+        color: #000000;
     }
 
     .clear {
