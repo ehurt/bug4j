@@ -72,7 +72,7 @@ class StatsService {
         }
 
         stats.each {
-            final statHitCount = new StatCount(day: it.key, hitCount: it.value, countType: 'B')
+            final statHitCount = new StatCount(day: it.key, count: it.value, countType: 'B')
             statHitCount.app = app
             statHitCount.save(failOnError: true)
         }
@@ -99,7 +99,7 @@ class StatsService {
         }
 
         stats.each {
-            final statHitCount = new StatCount(day: it.key, hitCount: it.value, countType: 'H')
+            final statHitCount = new StatCount(day: it.key, count: it.value, countType: 'H')
             statHitCount.app = app
             statHitCount.save(failOnError: true)
         }
@@ -130,7 +130,7 @@ class StatsService {
         def statCounts = StatCount.findAllByAppAndCountTypeAndDayGreaterThanEquals(app, countType, startInDays)
         statCounts.each {StatCount statHitCount ->
             final day = statHitCount.day
-            final hitCount = statHitCount.hitCount
+            final hitCount = statHitCount.count
             final daysAgo = nowInDays - day
             ret[daysBack - daysAgo] = hitCount
         }
@@ -155,10 +155,10 @@ class StatsService {
         final int nowInDays = System.currentTimeMillis() / 1000 / 60 / 60 / 24
 
         def ret = [:]
-        ret.today = StatCount.findByAppAndDayAndCountType(app, nowInDays, countType)?.hitCount
-        ret.yesterday = StatCount.findByAppAndDayAndCountType(app, nowInDays - 1, countType)?.hitCount
+        ret.today = StatCount.findByAppAndDayAndCountType(app, nowInDays, countType)?.count
+        ret.yesterday = StatCount.findByAppAndDayAndCountType(app, nowInDays - 1, countType)?.count
         final statCountOverXDays = StatCount.findAllByAppAndCountTypeAndDayBetween(app, countType, nowInDays - daysBack, nowInDays)
-        ret.total = statCountOverXDays.sum {it.hitCount}
+        ret.total = statCountOverXDays.sum {it.count}
         ret.avg = ret.total ? ret.total / daysBack as int : null
 
         if (ret.avg) {

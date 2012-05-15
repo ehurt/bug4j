@@ -21,8 +21,6 @@ import org.bug4j.server.util.DateUtil
 
 import java.text.DateFormat
 
-import static org.bug4j.server.util.DateUtil.TimeAdjustType
-
 class BugController {
 
     def index() {
@@ -35,13 +33,13 @@ class BugController {
         def queryParams = [app: selectedApp]
         def queryCond = ''
         def filter = [display: '']
-        final today = DateUtil.adjustToDayBoundary(new Date(), TimeAdjustType.BEGINNING_OF_DAY)
+        final today = DateUtil.adjustToDayBoundary(new Date(), DateUtil.TimeAdjustType.BEGINNING_OF_DAY)
 
         Date fromDate = null
         Date toDate = null
         if (params.applyFilter) {
-            if (params.applyFilter.from) fromDate = DateUtil.interpretDate(params.applyFilter.from, TimeAdjustType.BEGINNING_OF_DAY)
-            if (params.applyFilter.to) toDate = DateUtil.interpretDate(params.applyFilter.to, TimeAdjustType.END_OF_DAY)
+            if (params.applyFilter.from) fromDate = DateUtil.interpretDate(params.applyFilter.from, DateUtil.TimeAdjustType.BEGINNING_OF_DAY)
+            if (params.applyFilter.to) toDate = DateUtil.interpretDate(params.applyFilter.to, DateUtil.TimeAdjustType.END_OF_DAY)
         } else {
             if (params.fromDay) {
                 fromDate = today.minus(params.fromDay as int)
