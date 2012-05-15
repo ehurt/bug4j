@@ -31,6 +31,15 @@
             $(elm).addClass('hit-row-selected');
         ${remoteFunction(action:'hit', update:'hit', params: '\'hitid=\' + hitId')}
         }
+
+        function showFilterForm() {
+            $("#filter-form").toggle('fast');
+        }
+
+        function clearWhenFilter() {
+            $("#filter-when-from").val('');
+            $("#filter-when-to").val('');
+        }
     </script>
     <style type="text/css">
 
@@ -102,24 +111,56 @@
     #hit-row, td {
         white-space: nowrap;
     }
+
+    #filter-div {
+        margin: 5px;
+        cursor: pointer;
+    }
+
+    #filter-display {
+        border: 1px solid #ddd;
+        border-radius: 2px;
+        padding: 2px;
+    }
+
+    #filter-form {
+        display: none;
+        margin: 5px 0 5px 10px;
+    }
     </style>
 </head>
 
 <body>
 <div>
-    <div id="bugs">
-        <g:if test="${bugs.size() < total}">
-            <div class="pagination">
-                <g:paginate total="${total}"/>
+    <div id="filter-div" onclick="showFilterForm();">
+        <span style="text-decoration: underline">Filter:</span>
+        <span id="filter-display">${filter.display}</span>
+    </div>
+
+    <div id="filter-form">
+        <g:form params="${params}">
+            <div>
+                <label for="applyFilter.from">From</label>
+                <g:textField id="filter-when-from" name="applyFilter.from" value="${filter.fromDate}"/>
+                <label for="applyFilter.to">to</label>
+                <g:textField id="filter-when-to" name="applyFilter.to" value="${filter.toDate}"/>
+                <span style="border-bottom: 1px dotted;cursor: pointer;" onclick="clearWhenFilter();">clear</span>
             </div>
-        </g:if>
+
+            <div style="margin: 5px 0 0 5px;">
+                <g:submitButton name="Apply"/>
+            </div>
+        </g:form>
+    </div>
+
+    <div id="bugs">
         <table>
             <tr>
-                <g:sortableColumn property="bug_id" title="${message(code: 'bug.id.label', default: 'ID')}"/>
-                <g:sortableColumn property="bug_title" title="${message(code: 'bug.title.label', default: 'Title')}"/>
-                <g:sortableColumn property="hitCount" title="${message(code: 'bug.hitCount.label', default: 'Hits')}"/>
-                <g:sortableColumn property="firstHitDate" title="${message(code: 'bug.firstHitDate.label', default: 'First Hit')}"/>
-                <g:sortableColumn property="lastHitDate" title="${message(code: 'bug.lastHitDate.label', default: 'Last Hit')}"/>
+                <g:sortableColumn property="bug_id" title="${message(code: 'bug.id.label', default: 'ID')}" defaultOrder="desc" params="${params}"/>
+                <g:sortableColumn property="bug_title" title="${message(code: 'bug.title.label', default: 'Title')}" params="${params}"/>
+                <g:sortableColumn property="hitCount" title="${message(code: 'bug.hitCount.label', default: 'Hits')}" defaultOrder="desc" params="${params}"/>
+                <g:sortableColumn property="firstHitDate" title="${message(code: 'bug.firstHitDate.label', default: 'First Hit')}" defaultOrder="desc" params="${params}"/>
+                <g:sortableColumn property="lastHitDate" title="${message(code: 'bug.lastHitDate.label', default: 'Last Hit')}" defaultOrder="desc" params="${params}"/>
             </tr>
             <%
                 DateFormat dateFormat = SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT)
@@ -134,6 +175,12 @@
                 </tr>
             </g:each>
         </table>
+        <g:if test="${bugs.size() < total}">
+            <div class="pagination">
+                <g:link params="${params + [max: (params.max as int) + 10]}">More</g:link>
+            </div>
+        </g:if>
+
     </div>
 
     <div id="hits">

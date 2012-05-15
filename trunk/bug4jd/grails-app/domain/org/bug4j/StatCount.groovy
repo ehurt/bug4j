@@ -15,15 +15,17 @@
  */
 package org.bug4j
 
-import grails.test.mixin.TestFor
+class StatCount {
+    int day
+    char countType // Bug/Hit
+    int hitCount
 
-/**
- * See the API for {@link grails.test.mixin.domain.DomainClassUnitTestMixin} for usage instructions
- */
-@TestFor(StatHitCount)
-class StatHitCountTests {
-
-    void testSomething() {
-        fail "Implement me"
+    static constraints = {
+        day(unique: ['app', 'countType'])
+//        countType inList: ['B' as char, 'H' as char]
     }
+
+    static belongsTo = [
+            app: App
+    ]
 }
