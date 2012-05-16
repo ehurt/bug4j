@@ -160,7 +160,7 @@ public final class BugProcessor {
     private static Long identifyBugByTitle(Store store, String app, String title) {
         Long ret = null;
         final List<Long> bugIds = store.getBugIdByTitle(app, title);
-        if (bugIds.size() == 1) {
+        if (bugIds.size() > 0) {
             ret = bugIds.get(0);
         }
         return ret;

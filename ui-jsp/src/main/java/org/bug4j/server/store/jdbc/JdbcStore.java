@@ -136,7 +136,7 @@ public class JdbcStore extends Store {
                         "CREATE TABLE BUG (" +
                         " BUG_ID INT GENERATED ALWAYS AS IDENTITY," +
                         " APP VARCHAR(32) NOT NULL," +
-                        " TITLE VARCHAR("+TITLE_SIZE+") NOT NULL," +
+                        " TITLE VARCHAR(" + TITLE_SIZE + ") NOT NULL," +
                         " EXTINCT TIMESTAMP," +
                         " UNEXTINCT TIMESTAMP" +
                         ")"
@@ -674,6 +674,8 @@ public class JdbcStore extends Store {
         try {
             final PreparedStatement preparedStatement = connection.prepareStatement("select BUG_ID FROM BUG WHERE APP=? AND TITLE=?");
             try {
+                title = StringUtils.abbreviate(title, TITLE_SIZE);
+
                 preparedStatement.setString(1, app);
                 preparedStatement.setString(2, title);
 

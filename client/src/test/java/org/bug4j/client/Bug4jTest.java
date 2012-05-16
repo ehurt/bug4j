@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Cedric Dandoy
+ * Copyright 2012 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.bug4j.client;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
@@ -168,6 +169,12 @@ public class Bug4jTest {
     @Test
     public void testNoStack() throws Exception {
         Bug4jAgent.report("Just a message", null);
+        Bug4jAgent.shutdown();
+    }
+
+    @Test
+    public void testLongTitle() throws Exception {
+        Bug4jAgent.report(StringUtils.repeat("This is a long title", 100), null);
         Bug4jAgent.shutdown();
     }
 
