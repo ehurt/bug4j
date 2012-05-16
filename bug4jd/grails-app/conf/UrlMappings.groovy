@@ -23,7 +23,8 @@ class UrlMappings {
             }
         }
 
-        "/"(view: "/index")
+        "/"(controller: "home")
+        "/dev"(view: "/dev")
         "/br/ses"(controller: "incoming", action: "createSession")
         "/br/in"(controller: "incoming", action: "check")
         "/br/bug"(controller: "incoming", action: "bug")

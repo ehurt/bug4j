@@ -14,10 +14,7 @@
  *    limitations under the License.
  */
 
-import org.bug4j.App
-import org.bug4j.Bug
-import org.bug4j.ClientSession
-import org.bug4j.Hit
+import org.bug4j.*
 
 class ApplicationController {
 
@@ -49,8 +46,17 @@ class ApplicationController {
         if (id) {
             appInstance = App.get(id)
             appInstance.properties = params
+            appInstance.appPackages*.delete()
+            appInstance.appPackages.clear()
         } else {
             appInstance = new App(params)
+        }
+        params.appPackageValue?.each {
+            if (it) {
+                final appPackages = new AppPackages(packageName: it)
+                appPackages.setApp(appInstance)
+                appInstance.addToAppPackages(appPackages)
+            }
         }
         if (!appInstance.save(flush: true)) {
             render(view: "edit", model: [appInstance: appInstance])

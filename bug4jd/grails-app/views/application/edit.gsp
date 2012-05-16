@@ -14,14 +14,24 @@
   -    limitations under the License.
   --}%
 
-
-
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta name='layout' content='main'/>
     <title>Application</title>
     <g:set var="entityName" value="${message(code: 'app.label', default: 'Application')}"/>
+    <script type="text/javascript">
+        function addPkg() {
+            var clone = $("#add-pkg-tr-template").clone();
+            clone.attr("id", "")
+                    .insertBefore("#add-pkg-tr-template")
+                    .show();
+            clone.find("input").focus()
+        }
+        function deletePkg(elm) {
+            elm.parent().parent().remove();
+        }
+    </script>
 </head>
 
 <body>

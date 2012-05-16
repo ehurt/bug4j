@@ -98,7 +98,7 @@
   -    limitations under the License.
   --}%
 
-<g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
+    <g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
 
 <div id="status" role="complementary">
     <h1>Application Status</h1>
