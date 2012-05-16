@@ -16,6 +16,9 @@
 
 package org.bug4j.server.processor;
 
+import org.apache.commons.lang3.StringUtils;
+import org.bug4j.server.store.Store;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -88,7 +91,7 @@ public class StackAnalyzer {
     }
 
 
-    protected String analyze(String exceptionClass, Iterator<String> iterator) {
+    private String analyze(String exceptionClass, Iterator<String> iterator) {
         String ret = null;
         boolean findBetter = true;
         while (iterator.hasNext()) {
@@ -113,6 +116,7 @@ public class StackAnalyzer {
                                     shortExceptionClassName = "Exception";
                                 }
                                 ret = shortExceptionClassName + " at " + location;
+                                ret = StringUtils.abbreviate(ret, Store.TITLE_SIZE);
                                 findBetter = false;
                             }
                         }

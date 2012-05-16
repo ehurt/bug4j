@@ -136,7 +136,7 @@ public class JdbcStore extends Store {
                         "CREATE TABLE BUG (" +
                         " BUG_ID INT GENERATED ALWAYS AS IDENTITY," +
                         " APP VARCHAR(32) NOT NULL," +
-                        " TITLE VARCHAR(256) NOT NULL," +
+                        " TITLE VARCHAR("+TITLE_SIZE+") NOT NULL," +
                         " EXTINCT TIMESTAMP," +
                         " UNEXTINCT TIMESTAMP" +
                         ")"
@@ -1469,6 +1469,7 @@ public class JdbcStore extends Store {
         try {
             final PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO BUG (APP, TITLE, EXTINCT) VALUES(?,?,NULL)", Statement.RETURN_GENERATED_KEYS);
             try {
+                title = StringUtils.abbreviate(title, TITLE_SIZE);
                 preparedStatement.setString(1, app);
                 preparedStatement.setString(2, title);
                 preparedStatement.executeUpdate();
