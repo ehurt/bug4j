@@ -48,6 +48,12 @@ public class Bug4jTest {
             LOGGER.error("Something else happened.", e);
         }
 
+        try {
+            doSomethingBad();
+        } catch (Exception e) {
+            LOGGER.warn("just a warning", e);
+        }
+
         LogManager.shutdown();
         Bug4jAgent.shutdown();
         Assert.assertEquals(2, Bug4jAgent.getReported());
