@@ -45,7 +45,7 @@ public class Bug4jAppender extends AppenderSkeleton {
         if (level.isGreaterOrEqual(Level.WARN)) {
             final String message = event.getRenderedMessage();
             final ThrowableInformation throwableInformation = event.getThrowableInformation();
-            final Throwable throwable = throwableInformation.getThrowable();
+            Throwable throwable = throwableInformation == null ? null : throwableInformation.getThrowable();
             Bug4jAgent.report(message, throwable);
         }
     }

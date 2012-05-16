@@ -39,11 +39,6 @@ public class Bug4jAgent {
     private static final int MAX_ENQUEUE = 200;
 
     /**
-     * When the server does not respond, this is how long we wait until we retry
-     */
-    private static final int RETRY_MILLIS = 10 * 1000;
-
-    /**
      * Avoid re-entrance caused by calls to log4j during the initialization
      */
     private static AtomicBoolean _isEntered = new AtomicBoolean(false);
@@ -139,7 +134,7 @@ public class Bug4jAgent {
 
         enqueue(STOP);
         try {
-            _clientThread.join(RETRY_MILLIS * 2);
+            _clientThread.join(2000);
             _clientThread = null;
         } catch (InterruptedException e) {
             //
@@ -148,13 +143,14 @@ public class Bug4jAgent {
     }
 
     private void run() throws InterruptedException {
+        boolean isServerReceiving = true;
         while (true) {
             final ReportableEvent reportableEvent = getNextReportableEvent();
             if (reportableEvent == null) {
                 break;
             }
-            while (!processSafely(reportableEvent)) {
-                Thread.sleep(RETRY_MILLIS); // Try again in 10 seconds
+            if (isServerReceiving) {
+                isServerReceiving = processSafely(reportableEvent);
             }
         }
     }

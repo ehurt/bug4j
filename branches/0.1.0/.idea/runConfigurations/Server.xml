@@ -11,7 +11,6 @@
       </artifact>
     </deployment>
     <server-settings>
-      <option name="DEPLOY_TOMCAT_APPS" value="false" />
       <option name="BASE_DIRECTORY_NAME" value="Tomcat_7_bug4j" />
     </server-settings>
     <predefined_log_file id="TOMCAT_LOCALHOST_LOG_ID" enabled="true" />
