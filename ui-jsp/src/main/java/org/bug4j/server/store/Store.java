@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class Store {
+    public static final int TITLE_SIZE = 256;
     private static final String PREF_DEFAULT_APP = "DEFAULT_APP";
 
     protected Store() {
