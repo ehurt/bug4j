@@ -156,9 +156,7 @@ class BugService {
 
         final List<String> stackLines = stackString ? TextToLines.toLineList(stackString.trim()) : [];
         if (message) {
-            if (message.size() >= 1024) {
-                message = message.substring(0, 1024)
-            }
+            message = StringUtils.abbreviate(message, Bug.TITLE_SIZE)
         }
 
         Bug bug = null

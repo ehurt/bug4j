@@ -34,6 +34,7 @@ import org.apache.log4j.spi.ThrowableInformation;
  */
 public class Bug4jAppender extends AppenderSkeleton {
     private final Bug4jStarter _bug4jStarter = new Bug4jStarter();
+    private Level _minLevel = Level.WARN;
 
     public Bug4jAppender() {
     }
@@ -42,10 +43,10 @@ public class Bug4jAppender extends AppenderSkeleton {
     @Override
     protected void append(LoggingEvent event) {
         final Level level = event.getLevel();
-        if (level.isGreaterOrEqual(Level.WARN)) {
+        if (level.isGreaterOrEqual(_minLevel)) {
             final String message = event.getRenderedMessage();
             final ThrowableInformation throwableInformation = event.getThrowableInformation();
-            final Throwable throwable = throwableInformation.getThrowable();
+            Throwable throwable = throwableInformation == null ? null : throwableInformation.getThrowable();
             Bug4jAgent.report(message, throwable);
         }
     }
@@ -94,6 +95,11 @@ public class Bug4jAppender extends AppenderSkeleton {
     @SuppressWarnings({"UnusedDeclaration"})
     public void setBuildNumber(int buildNumber) {
         _bug4jStarter.setBuildNumber(buildNumber);
+    }
+
+    @SuppressWarnings({"UnusedDeclaration"})
+    public void setReportLevel(String level) {
+        _minLevel = Level.toLevel(level);
     }
 
     /**
