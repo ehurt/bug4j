@@ -20,15 +20,45 @@
 <g:hiddenField name="id" value="${appInstance?.id}"/>
 
 <div class="fieldcontain ${hasErrors(bean: appInstance, field: 'label', 'error')} ">
-    <label for="label">
+    <label for="label" style="width: auto;">
         <g:message code="app.label.label" default="Label"/>
     </label>
     <g:textField name="label" value="${appInstance?.label}"/>
 </div>
 
 <div class="fieldcontain ${hasErrors(bean: appInstance, field: 'code', 'error')} ">
-    <label for="code">
+    <label for="code" style="width: auto;">
         <g:message code="app.code.label" default="Code"/>
     </label>
     <g:textField name="code" value="${appInstance?.code}"/>
+</div>
+
+<div id="app-pkg-div">
+    <table style="width: auto;">
+        <tr><td></td><td>Packages</td></tr>
+        <g:each in="${appInstance.appPackages?.sort {it.packageName}}" var="appPackage" status="lineno">
+            <tr>
+                <td>
+                    <g:img dir="images/skin" file="delete.png" onclick="deletePkg(\$(this));"/>
+                </td>
+                <td>
+                    <g:textField name="appPackageValue" value="${appPackage.packageName}" size="40"/>
+                </td>
+            </tr>
+        </g:each>
+        <tr id="add-pkg-tr-template" style="display: none;">
+            <td>
+                <g:img dir="images/skin" file="delete.png" onclick="deletePkg(\$(this));"/>
+            </td>
+            <td>
+                <g:textField name="appPackageValue" value="" size="40"/>
+            </td>
+        </tr>
+        <tr id="add-pkg-tr">
+            <td></td>
+            <td>
+                <span style="border-bottom: 1px dotted #000000;cursor: pointer;" onclick="addPkg();">Add</span>
+            </td>
+        </tr>
+    </table>
 </div>
