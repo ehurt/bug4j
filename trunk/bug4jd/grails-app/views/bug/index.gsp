@@ -119,7 +119,6 @@
     }
 
     #hit-row, td {
-        white-space: nowrap;
     }
 
     #filter-div {
@@ -148,7 +147,7 @@
     </div>
 
     <div id="filter-form">
-        <g:form params="${params}">
+        <g:form params="${params}" method="get">
             <div>
                 <label for="applyFilter.from">From</label>
                 <g:textField id="filter-when-from" name="applyFilter.from" value="${filter.fromDate}"/>

@@ -52,9 +52,14 @@ public final class BugProcessor {
     /**
      * @return the bugid that was matched.
      */
-    public static long process(final Store store, long sessionId, String app, @Nullable String message, long dateReported, @Nullable String user, String stackText) {
-        stackText = stackText.trim();
-        final List<String> stackLines = stackText.isEmpty() ? null : TextToLines.toLineList(stackText);
+    public static long process(final Store store, long sessionId, String app, @Nullable String message, long dateReported, @Nullable String user, @Nullable String stackText) {
+        final List<String> stackLines;
+        if (stackText != null) {
+            stackText = stackText.trim();
+            stackLines = stackText.isEmpty() ? null : TextToLines.toLineList(stackText);
+        } else {
+            stackLines = null;
+        }
 
         // First try based on the full hash of the exception.
         // In theory the client should not have sent the stack if an exact match already existed.
@@ -155,7 +160,7 @@ public final class BugProcessor {
     private static Long identifyBugByTitle(Store store, String app, String title) {
         Long ret = null;
         final List<Long> bugIds = store.getBugIdByTitle(app, title);
-        if (bugIds.size() == 1) {
+        if (bugIds.size() > 0) {
             ret = bugIds.get(0);
         }
         return ret;

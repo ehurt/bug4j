@@ -43,6 +43,10 @@ class HttpConnector {
     private long _sessionId;
 
     private HttpConnector(String serverUrl, String proxyHost, int proxyPort, String applicationName, String applicationVersion, long buildDate, boolean devBuild, Integer buildNumber) {
+        serverUrl = serverUrl.trim();
+        if (!serverUrl.endsWith("/")) {
+            serverUrl = serverUrl + "/";
+        }
         _serverUri = serverUrl;
         _applicationName = applicationName;
         _applicationVersion = applicationVersion;
@@ -102,7 +106,7 @@ class HttpConnector {
     }
 
     public boolean reportHit(String message, String user, String hash) {
-        final String response = send("/br/in",
+        final String response = send("br/in",
                 ParamConstants.PARAM_SESSION_ID, Long.toString(_sessionId),
                 ParamConstants.PARAM_APPLICATION_NAME, _applicationName,
                 ParamConstants.PARAM_MESSAGE, message,
@@ -114,7 +118,7 @@ class HttpConnector {
 
     public void reportBug(String message, String user, String[] stackLines) {
         final String stackText = toText(stackLines);
-        send("/br/bug",
+        send("br/bug",
                 ParamConstants.PARAM_SESSION_ID, Long.toString(_sessionId),
                 ParamConstants.PARAM_APPLICATION_NAME, _applicationName,
                 ParamConstants.PARAM_MESSAGE, message,
@@ -137,7 +141,7 @@ class HttpConnector {
     }
 
     private void createSession() {
-        final String response = send("/br/ses"
+        final String response = send("br/ses"
                 , ParamConstants.PARAM_APPLICATION_NAME, _applicationName
                 , ParamConstants.PARAM_APPLICATION_VERSION, _applicationVersion
                 , ParamConstants.PARAM_BUILD_DATE, Long.toString(_buildDate)
