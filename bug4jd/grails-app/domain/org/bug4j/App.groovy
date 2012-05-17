@@ -32,9 +32,16 @@ class App {
             appPackages: AppPackages,
             bugs: Bug,
             clientSessions: ClientSession,
+            statCount: StatCount,
+            stats: Stat
     ]
 
     static mapping = {
         table 'APP'
+        appPackages cascade: 'all-delete-orphan'
+        bugs cascade: 'all-delete-orphan'
+        clientSessions cascade: 'all-delete-orphan'
+        statCount cascade: 'all-delete-orphan'
+        stats cascade: 'all-delete-orphan'
     }
 }

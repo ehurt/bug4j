@@ -14,7 +14,8 @@
  *    limitations under the License.
  */
 
-import org.bug4j.*
+import org.bug4j.App
+import org.bug4j.AppPackages
 
 class ApplicationController {
 
@@ -72,14 +73,6 @@ class ApplicationController {
     def delete() {
         final id = params.id
         final appInstance = App.get(id)
-        ClientSession.findAllByApp(appInstance).each {ClientSession clientSession ->
-            Hit.findAllByClientSession(clientSession)*.delete()
-            clientSession.delete()
-        }
-        Bug.findAllByApp(appInstance).each {Bug bug ->
-            bug.strains*.delete()
-            bug.delete()
-        }
         appInstance.delete()
         flash.message = message(code: 'default.deleted.message', args: [message(code: 'app.label', default: 'Application'), appInstance.label])
         redirect(action: 'index')

@@ -30,6 +30,7 @@ class Bug {
         title(blank: false, maxSize: TITLE_SIZE)
         extinct(nullable: true)
         unextinct(nullable: true)
+        strains(nullable: true)
     }
 
     static belongsTo = [
@@ -45,5 +46,7 @@ class Bug {
     static mapping = {
         table 'BUG'
         title index: 'BUG_TITLE_IDX'
+        hits cascade: 'all-delete-orphan'
+        strains cascade: 'all-delete-orphan'
     }
 }

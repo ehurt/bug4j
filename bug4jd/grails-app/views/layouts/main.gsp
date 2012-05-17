@@ -35,14 +35,31 @@
     <g:javascript library="jquery" plugin="jquery"/>
 
     <style>
-    #banner_ul {
-        display: inline-block;
+    #banner-table {
+        margin: 0;
     }
 
-    #banner_ul>li {
-        display: inline;
+    #banner-tr, #banner-tr:hover {
+        padding: 0;
+        background-color: transparent;
     }
 
+    #banner-logo-td {
+        padding: 0;
+    }
+
+    #banner-appname-td {
+        text-align: left;
+        padding-left: 3em;
+        white-space: nowrap;
+        font-size: 1.5em;
+    }
+
+    #banner-last-td {
+        text-align: right;
+        padding-right: 2em;
+        vertical-align: middle;
+    }
     </style>
     <g:layoutHead/>
     <r:layoutResources/>
@@ -50,11 +67,17 @@
 
 <body>
 <div id="banner" role="banner">
-    <ul id="banner_ul">
-        <li>
-            <a href="${createLink(uri: '/')}"><img src="${resource(dir: 'images', file: 'little_swatter.png')}" alt="Bug4j"/></a>
-        </li>
-    </ul>
+    <table id="banner-table">
+        <tr id="banner-tr">
+            <td id="banner-logo-td">
+                <a href="${createLink(uri: '/')}"><img src="${resource(dir: 'images', file: 'little_swatter.png')}" alt="Bug4j"/></a>
+            </td>
+            <td id="banner-appname-td">
+                ${app?.label}
+            </td>
+            <td id="banner-last-td" style="width:100%;"><g:link controller="admin">Administration</g:link></td>
+        </tr>
+    </table>
 </div>
 <g:layoutBody/>
 <div class="footer" role="contentinfo"></div>
