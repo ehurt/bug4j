@@ -154,21 +154,25 @@ class BugService {
 
     def reportBug(ClientSession clientSession, App app, String message, long dateReported, String user, String stackString) {
 
-        final List<String> stackLines = stackString ? TextToLines.toLineList(stackString.trim()) : [];
+        final List<String> stackLines = stackString ? TextToLines.toLineList(stackString.trim()) : null;
         if (message) {
             message = StringUtils.abbreviate(message, Bug.TITLE_SIZE)
         }
 
         Bug bug = null
         Stack stack = null
+        String fullHash = null
 
         // First try based on the full hash of the exception.
-        final String fullHash = hash(message, stackLines);
-        def results = Stack.find("from Stack s, Hit h, Bug b where s.hash=:hash and s=h.stack and h.bug=b and b.app=:app",
-                [app: app, hash: fullHash])
-        if (results) {
-            bug = (Bug) results[2]
-            stack = (Stack) results[0]
+        if (stackLines) {
+            fullHash = FullStackHashCalculator.getTextHash(stackLines);
+
+            def results = Stack.find("from Stack s, Hit h, Bug b where s.hash=:hash and s=h.stack and h.bug=b and b.app=:app",
+                    [app: app, hash: fullHash])
+            if (results) {
+                bug = (Bug) results[2]
+                stack = (Stack) results[0]
+            }
         }
 
         if (!bug) {
@@ -217,7 +221,7 @@ class BugService {
                 final stackText = new StackText(stack: stack)
                 stackText.writeStackString(stackString)
                 stack.setStackText(stackText)
-
+                stack.save(failOnError: true)
             } else {
                 bug = identifyBugByTitle(app, stackLines, message);
                 if (!bug) {
@@ -225,9 +229,7 @@ class BugService {
                     app.addToBugs(bug)
                 }
                 bug.save(failOnError: true)
-                stack = new Stack(hash: fullHash)
             }
-            stack.save(failOnError: true)
         }
         final newHit = new Hit(
                 bug: bug,
@@ -241,22 +243,11 @@ class BugService {
         if (clientSession) {
             clientSession.addToHits(newHit)
         }
-        stack.addToHits(newHit)
-        newHit.save(failOnError: true)
-
-        return bug.id;
-    }
-
-    private static String hash(String message, List<String> stackLines) {
-        final String ret;
-        final List<String> hashable;
-        if (stackLines != null) {
-            hashable = stackLines;
-        } else {
-            hashable = Collections.singletonList(message);
+        if (stack) {
+            stack.addToHits(newHit)
         }
-        ret = FullStackHashCalculator.getTextHash(hashable);
-        return ret;
+        newHit.save(failOnError: true)
+        return bug.id;
     }
 
     /**
@@ -264,52 +255,75 @@ class BugService {
      * This addresses the case for example of a NPE at the exact same location but from different code paths.
      * To match, the underlying causes must be identical.
      */
-    private Bug identifyBugByTitle(App app, List<String> thisStackLines, String title) {
+    private Bug identifyBugByTitle(App app, List<String> stackLines, String title) {
         final StackAnalyzer stackAnalyzer = new StackAnalyzer();
-        final List<String> thisCauses = stackAnalyzer.getCauses(thisStackLines);
-        final List<Bug> bugs = Bug.findAllByAppAndTitle(app, title)
-        for (Bug bug : bugs) {
-            List<Hit> hits = bug.hits.sort {it.dateReported}.reverse()
-            hits.each {Hit hit ->
-                final stack = hit.stack
-                if (stack) {
-                    final StackText stackText = stack.stackText
-                    final String thatStackText = stackText.text
-                    final List<String> thatStackLines = TextToLines.toLineList(thatStackText);
-                    final List<String> thatCauses = stackAnalyzer.getCauses(thatStackLines);
-                    if (thisCauses.equals(thatCauses)) {
+        if (stackLines) {
+            final List<String> thisCauses = stackAnalyzer.getCauses(stackLines);
+            final List<Bug> bugs = Bug.findAllByAppAndTitle(app, title)
+            for (Bug bug : bugs) {
+                List<Hit> hits = bug.hits.sort {it.dateReported}.reverse()
+                hits.each {Hit hit ->
+                    final thatStack = hit.stack
+                    List<String> thatCauses = null
+                    final String thatStackString = thatStack?.stackText?.text
+                    if (thatStackString) {
+                        final List<String> thatStackLines = TextToLines.toLineList(thatStackString);
+                        thatCauses = stackAnalyzer.getCauses(thatStackLines);
+                    }
+                    if (thisCauses == null && thatCauses == null) {
+                        return bug;
+                    }
+                    if (thisCauses != null && thisCauses.equals(thatCauses)) {
                         return bug;
                     }
                 }
-
             }
+        } else {
+            def bugs = Bug.executeQuery("select b from Bug b where b.title=:title",
+                    [title: title],
+                    [fetchSize: 1]
+            )
+            if (bugs) {
+                return bugs[0]
+            }
+
         }
         return null;
     }
 
 
     public void importFile(File file) {
-        if (file.name.endsWith('.zip')) {
-            file.withInputStream {
-                final zipInputStream = new ZipInputStream(it)
-                try {
-                    final entry = zipInputStream.nextEntry
-                    if (entry.name != 'bugs.xml') {
-                        throw new IllegalArgumentException('Invalid file: ' + file)
-                    }
-                    importFile(zipInputStream)
-                } finally {
-                    zipInputStream.close()
-                }
-            }
-        } else {
-            file.withInputStream {
-                importFile(it)
-            }
+        file.withInputStream {
+            importNamedInputStream(it, file.name)
         }
     }
 
-    private void importFile(InputStream inputStream) {
+    public void importNamedInputStream(InputStream inputStream, String fileName) {
+        if (fileName.endsWith('.zip')) {
+            final zipInputStream = new ZipInputStream(inputStream)
+            try {
+                final entry = zipInputStream.nextEntry
+                if (entry.name != 'bugs.xml') {
+                    throw new IllegalArgumentException('Invalid file: ' + fileName)
+                }
+                importInputStream(zipInputStream)
+            } finally {
+                zipInputStream.close()
+            }
+        } else {
+            importInputStream(inputStream)
+        }
+    }
+
+    private App identifyApp(String appId) {
+        App app = App.findByCode(appId)
+        if (!app) {
+            app = App.findByLabel(appId)
+        }
+        return app
+    }
+
+    private void importInputStream(InputStream inputStream) {
         final DateFormat dateFormat = SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.FULL, SimpleDateFormat.FULL);
 
         def reader = SAXParserFactory.newInstance().newSAXParser().XMLReader
@@ -343,10 +357,10 @@ class BugService {
 
                         break;
                     case 'app':
-                        String appName = atts.getValue('name')
-                        _app = App.findByLabel(appName)
+                        String appId = atts.getValue('name')
+                        _app = identifyApp(appId)
                         if (!_app) {
-                            _app = new App(label: appName, code: appName)
+                            _app = new App(label: appId, code: appId)
                             _app.save(flush: true)
                         }
                         break
@@ -384,6 +398,18 @@ class BugService {
                         final bugId = atts.getValue('id')
                         _bugTitle = atts.getValue('title')
                         break
+
+                    case 'bugs':
+                        final appId = atts.getValue('app')
+                        if (appId) {
+                            _app = App.findByCode(appId)
+                            if (!_app) {
+                                _app = new App(label: appId, code: appId)
+                                _app.save(flush: true)
+                            }
+                        }
+                        break;
+
                     case 'hit':
                         _hitId = atts.getValue('id')
                         _sessionId = atts.getValue('sessionId')

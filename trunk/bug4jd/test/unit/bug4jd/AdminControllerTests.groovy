@@ -13,26 +13,17 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+package bug4jd
 
-package org.bug4j
+import grails.test.mixin.TestFor
 
-class Strain {
+/**
+ * See the API for {@link grails.test.mixin.web.ControllerUnitTestMixin} for usage instructions
+ */
+@TestFor(AdminController)
+class AdminControllerTests {
 
-    String hash
-
-    static constraints = {
-    }
-
-    static belongsTo = [
-            bug: Bug,
-    ]
-
-    static hasMany = [
-            stacks: Stack,
-    ]
-
-    static mapping = {
-        hash(index: 'STRAIN_HASH_IDX')
-        stacks cascade: 'all-delete-orphan'
+    void testSomething() {
+        fail "Implement me"
     }
 }

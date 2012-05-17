@@ -26,9 +26,9 @@ class HomeController {
 
         def appStats = [:]
 
+        def app = null
         final apps = App.list()
         if (apps) {
-            def app
             if (appCode) {
                 app = App.findByCode(appCode)
             } else {
@@ -42,6 +42,7 @@ class HomeController {
         }
 
         return [
+                app: app,
                 daysBack: daysBack,
                 apps: apps,
                 appStats: appStats,

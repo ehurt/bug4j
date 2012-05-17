@@ -42,5 +42,6 @@ class Stack {
 
     static mapping = {
         hash index: 'STACK_HASH_IDX'
+        hits cascade: 'all-delete-orphan'
     }
 }

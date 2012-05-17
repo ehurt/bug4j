@@ -66,23 +66,25 @@ public class StackAnalyzer {
      * @return a list of exception class names
      */
     public List<String> getCauses(List<String> stackLines) {
-        final List<String> ret = new ArrayList<String>();
-        final Iterator<String> iterator = stackLines.iterator();
-        if (iterator.hasNext()) {
+        if (stackLines != null) {
+            final List<String> ret = new ArrayList<String>();
+            final Iterator<String> iterator = stackLines.iterator();
+            if (iterator.hasNext()) {
 
-            final String messageLine = iterator.next();
-            final String firstExceptionClass = getExceptionClass(messageLine);
-            ret.add(firstExceptionClass);
+                final String messageLine = iterator.next();
+                final String firstExceptionClass = getExceptionClass(messageLine);
+                ret.add(firstExceptionClass);
 
-            while (iterator.hasNext()) {
-                final String stackLine = iterator.next();
-                if (stackLine.startsWith("Caused by: ")) {
-                    final String substring = stackLine.substring("Caused by: ".length());
-                    final String exceptionClass = getExceptionClass(substring);
-                    ret.add(exceptionClass);
+                while (iterator.hasNext()) {
+                    final String stackLine = iterator.next();
+                    if (stackLine.startsWith("Caused by: ")) {
+                        final String substring = stackLine.substring("Caused by: ".length());
+                        final String exceptionClass = getExceptionClass(substring);
+                        ret.add(exceptionClass);
+                    }
                 }
+                return ret;
             }
-            return ret;
         }
         return null;
     }
