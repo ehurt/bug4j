@@ -22,7 +22,7 @@ class BootStrap {
     def init = { servletContext ->
         if (!App.count) {
             final app = new App(label: 'bug4jDemo', code: 'bug4jDemo')
-            final appPackages = new AppPackages(app: app, packageName: 'org.bug4j.demo')
+            final appPackages = new AppPackages(app: app, packageName: 'org.bug4j')
             app.addToAppPackages(appPackages)
             app.save()
         }

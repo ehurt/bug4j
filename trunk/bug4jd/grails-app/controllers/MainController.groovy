@@ -66,4 +66,15 @@ class MainController {
             render(text: 'Failed', contentType: 'text/plain')
         }
     }
+
+    def deleteDemoBugs() {
+        try {
+            final app = App.findByCode('bug4jDemo')
+            app.bugs*.delete()
+            app.bugs.clear()
+            render text: 'Bugs deleted'
+        } catch (Exception e) {
+            e.printStackTrace()
+        }
+    }
 }

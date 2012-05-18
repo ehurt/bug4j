@@ -95,9 +95,12 @@ class HttpConnector {
             final HttpResponse httpResponse = _httpClient.execute(httpPost);
             final StatusLine statusLine = httpResponse.getStatusLine();
             final int statusCode = statusLine.getStatusCode();
+            final HttpEntity entity = httpResponse.getEntity();
+            final String response = EntityUtils.toString(entity);
             if (statusCode == 200) {
-                final HttpEntity entity = httpResponse.getEntity();
-                ret = EntityUtils.toString(entity);
+                ret = response;
+            } else {
+                System.err.println(response);
             }
         } catch (IOException e) {
             throw new IllegalStateException("Error while contacting the server");
@@ -113,7 +116,7 @@ class HttpConnector {
                 ParamConstants.PARAM_USER, user,
                 ParamConstants.PARAM_HASH, hash
         );
-        return response.equals("New");
+        return "New".equals(response);
     }
 
     public void reportBug(String message, String user, String[] stackLines) {

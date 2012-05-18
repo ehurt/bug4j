@@ -26,6 +26,7 @@ import org.junit.Test;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * This is a test
@@ -124,13 +125,14 @@ public class Bug4jTest {
 
     @Test
     public void testSameTitle() throws Exception {
+        final Random random = new Random();
         {
             final IllegalStateException e = new IllegalStateException("SameTitle");
             e.setStackTrace(new StackTraceElement[]{
                     new StackTraceElement("org.bug4j.SomeClass", "someMethod", "SomeClass.java", 100),
-                    new StackTraceElement("org.bug4j.SomeClass", "someMethod", "SomeClass.java", 200),
-                    new StackTraceElement("org.bug4j.SomeClass", "someMethod", "SomeClass.java", 300),
-                    new StackTraceElement("org.bug4j.SomeClass", "someMethod", "SomeClass.java", 400),
+                    new StackTraceElement("org.bug4j.SomeClass", "someMethod", "SomeClass.java", random.nextInt()),
+                    new StackTraceElement("org.bug4j.SomeClass", "someMethod", "SomeClass.java", random.nextInt()),
+                    new StackTraceElement("org.bug4j.SomeClass", "someMethod", "SomeClass.java", random.nextInt()),
             });
             Bug4jAgent.report("testSameTitle", e);
         }
@@ -139,13 +141,12 @@ public class Bug4jTest {
             final IllegalStateException e = new IllegalStateException("SameTitle");
             e.setStackTrace(new StackTraceElement[]{
                     new StackTraceElement("org.bug4j.SomeClass", "someMethod", "SomeClass.java", 100),
-                    new StackTraceElement("org.bug4j.someOtherClass", "someOtherMethod", "SomeClass.java", 123),
-                    new StackTraceElement("org.bug4j.someOtherClass", "someOtherMethod", "SomeClass.java", 456),
-                    new StackTraceElement("org.bug4j.someOtherClass", "someMethod", "SomeClass.java", 400),
+                    new StackTraceElement("org.bug4j.someOtherClass", "someOtherMethod", "SomeClass.java", random.nextInt()),
+                    new StackTraceElement("org.bug4j.someOtherClass", "someOtherMethod", "SomeClass.java", random.nextInt()),
+                    new StackTraceElement("org.bug4j.someOtherClass", "someMethod", "SomeClass.java", random.nextInt()),
             });
             Bug4jAgent.report("testSameTitle", e);
         }
-
         Bug4jAgent.shutdown();
         Assert.assertEquals(2, Bug4jAgent.getReported());
     }
@@ -180,7 +181,7 @@ public class Bug4jTest {
 
     @Test
     public void testLongTitle() throws Exception {
-        Bug4jAgent.report(StringUtils.repeat("This is a long title", 100), null);
+        Bug4jAgent.report(StringUtils.repeat("This_is_a_long_title", 100), null);
         Bug4jAgent.shutdown();
     }
 

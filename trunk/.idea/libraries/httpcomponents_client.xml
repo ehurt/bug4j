@@ -11,6 +11,13 @@
     <JAVADOC />
     <SOURCES>
       <root url="jar://$dep-home$/httpcomponents-client-4.1.1/httpcomponents-client-4.1.1-src.zip!/httpcomponents-client-4.1.1/httpclient/src/main/java" />
+      <root url="jar://$dep-home$/httpcomponents-client-4.1.1/httpcomponents-client-4.1.1-src.zip!/httpcomponents-client-4.1.1/httpclient-cache/src/main/java" />
+      <root url="jar://$dep-home$/httpcomponents-client-4.1.1/httpcomponents-client-4.1.1-src.zip!/httpcomponents-client-4.1.1/httpmime/src/main/java" />
+      <root url="jar://$dep-home$/httpcomponents-client-4.1.1/httpcomponents-client-4.1.1-src.zip!/httpcomponents-client-4.1.1/httpclient-contrib/src/main/java" />
+      <root url="jar://$dep-home$/httpcomponents-client-4.1.1/httpcomponents-core-4.1.1-src.zip!/httpcomponents-core-4.1.1/httpcore-contrib/src/main/java" />
+      <root url="jar://$dep-home$/httpcomponents-client-4.1.1/httpcomponents-core-4.1.1-src.zip!/httpcomponents-core-4.1.1/httpcore-nio/src/main/java" />
+      <root url="jar://$dep-home$/httpcomponents-client-4.1.1/httpcomponents-core-4.1.1-src.zip!/httpcomponents-core-4.1.1/httpcore/src/main/java" />
+      <root url="jar://$dep-home$/httpcomponents-client-4.1.1/httpcomponents-core-4.1.1-src.zip!/httpcomponents-core-4.1.1/httpcore-ab/src/main/java" />
     </SOURCES>
   </library>
 </component>
