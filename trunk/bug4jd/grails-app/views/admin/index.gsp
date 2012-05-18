@@ -81,7 +81,7 @@
             <div id="imp-div" class="expandable">
                 <g:form action="doimp" method="post" enctype="multipart/form-data" onsubmit="whenImp();">
                     <input type="file" name="file">
-                    <input type="submit">
+                    <input type="submit" value="Import">
                 </g:form>
             </div>
 
