@@ -95,7 +95,6 @@ class BugController {
                 ${queryCond}
                 """
         final total = Bug.executeQuery(countSql, queryParams)
-        println "Total: ${total}"
         final bugs = list.collect {
             return [
                     'bug_id': it[0],

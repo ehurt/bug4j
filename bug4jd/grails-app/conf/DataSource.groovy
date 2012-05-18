@@ -32,7 +32,7 @@ environments {
         dataSource {
             if (true) {
                 driverClassName = "oracle.jdbc.OracleDriver"
-                dbCreate = "create-drop" // one of 'create', 'create-drop', 'update', 'validate', ''
+                dbCreate = "update" // one of 'create', 'create-drop', 'update', 'validate', ''
                 url = "jdbc:oracle:thin:@127.0.0.1:1521:orcl"
                 username = "bug4j"
                 password = "bug4j"
