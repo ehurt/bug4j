@@ -34,9 +34,12 @@ class IncomingController {
             try {
                 ClientSession clientSession = bugService.createSession(appCode, appVersion, dataMillis, devBuild, buildNumber, remoteAddr)
                 render(text: clientSession.id, contentType: 'text/plain')
+                log.info "Created a session"
             } catch (IllegalArgumentException e) {
+                log.error("Failed to create a session", e)
                 response.sendError(400, e.getMessage())
             } catch (IllegalStateException e) {
+                log.error("Failed to create a session", e)
                 response.sendError(500, e.getMessage())
             }
         } catch (Exception e) {
@@ -56,16 +59,18 @@ class IncomingController {
                 if (bugService.isNewBug(sessionId, appCode, message, user, hash)) {
                     render(text: 'New', contentType: 'text/plain')
                 } else {
-                    println "Reported hit"
+                    log.info "Reported hit"
                     render(text: 'Old', contentType: 'text/plain')
                 }
             } catch (IllegalArgumentException e) {
+                log.error("Failed to check", e)
                 response.sendError(400, e.getMessage())
             } catch (IllegalStateException e) {
+                log.error("Failed to check", e)
                 response.sendError(500, e.getMessage())
             }
         } catch (Exception e) {
-            log.error("Failed to create a session", e)
+            log.error("Failed to check", e)
         }
     }
 
@@ -78,9 +83,11 @@ class IncomingController {
             final String user = params.u
             final String stackText = params.s
             def bugId = bugService.reportBug(Long.parseLong(sessionId), appCode, message, dateReported, user, stackText)
-            println "Reported bug ${bugId}"
-        } catch (Exception e) {
+            log.info "Reported bug ${bugId}"
+            render(text: bugId, contentType: 'text/plain')
+        } catch (Throwable e) {
             log.error("Failed to create a session", e)
         }
+        println "<-bug"
     }
 }

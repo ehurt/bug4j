@@ -262,10 +262,10 @@ class BugService {
             final List<Bug> bugs = Bug.findAllByAppAndTitle(app, title)
             for (Bug bug : bugs) {
                 List<Hit> hits = bug.hits.sort {it.dateReported}.reverse()
-                hits.each {Hit hit ->
+                Bug ret = hits.findResult {Hit hit ->
                     final thatStack = hit.stack
                     List<String> thatCauses = null
-                    final String thatStackString = thatStack?.stackText?.text
+                    final String thatStackString = thatStack?.stackText?.readStackString()
                     if (thatStackString) {
                         final List<String> thatStackLines = TextToLines.toLineList(thatStackString);
                         thatCauses = stackAnalyzer.getCauses(thatStackLines);
@@ -276,6 +276,9 @@ class BugService {
                     if (thisCauses != null && thisCauses.equals(thatCauses)) {
                         return bug;
                     }
+                }
+                if (ret) {
+                    return ret;
                 }
             }
         } else {

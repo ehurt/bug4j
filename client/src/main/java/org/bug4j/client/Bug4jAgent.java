@@ -162,7 +162,7 @@ public class Bug4jAgent {
             process(reportableEvent);
             ret = true;
         } catch (Exception e) {
-            // ret stays false
+            e.printStackTrace();
         }
         return ret;
     }

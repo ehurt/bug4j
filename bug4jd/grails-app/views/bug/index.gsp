@@ -46,6 +46,7 @@
     #bugs {
         width: 50%;
         float: left;
+        overflow-x: hidden;
     }
 
     #hits {
