@@ -36,6 +36,11 @@ class User {
         lastSignedIn(nullable: true)
     }
 
+    static hasMany = [
+            preferences: UserPreference
+    ]
+
+
     static mapping = {
         table 'BUG4J_USER'
         password column: '`password`'

@@ -13,16 +13,15 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-
 package org.bug4j
 
 import grails.test.mixin.TestFor
 
 /**
- * See the API for {@link grails.test.mixin.domain.DomainClassUnitTestMixin} for usage instructions
+ * See the API for {@link grails.test.mixin.services.ServiceUnitTestMixin} for usage instructions
  */
-@TestFor(UserPreferences)
-class UserPreferencesTests {
+@TestFor(UserPreferenceService)
+class UserPreferenceServiceTests {
 
     void testSomething() {
         fail "Implement me"
