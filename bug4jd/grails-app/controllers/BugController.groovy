@@ -23,6 +23,8 @@ import java.text.DateFormat
 
 class BugController {
 
+    def userPreferenceService
+
     def index() {
         if (!params.sort) params.sort = 'bug_id'
         if (!params.order) params.order = 'desc'
@@ -104,25 +106,34 @@ class BugController {
                     'lastHitDate': it[4],
             ]
         }
+
+        def showHits
+        if (params.showHits) {
+            showHits = params.showHits == 'true'
+            userPreferenceService.setPreference('showHits', showHits)
+        } else {
+            showHits = userPreferenceService.getBooleanPreference('showHits')
+        }
+
         def reparam = filterMap(params, ['sort', 'order', 'max', 'offset', 'appCode', 'fromDay', 'toDay'])
+
         return [
                 app: selectedApp,
                 bugs: bugs,
                 total: total[0],
                 filter: filter,
-                params: reparam
+                showHits: showHits,
+                params: reparam,
         ]
     }
 
     def hits() {
         final bugid = params.bugid
 
-        if (!params.max) params.max = 100
-        if (!params.sort) params.sort = 'dateReported'
-        if (!params.order) params.order = 'desc'
-
         final bug = Bug.get(bugid)
-        final hits = Hit.findAllByBug(bug, [max: 100, sort: "dateReported", order: "desc", offset: 0])
+        final hits = Hit.findAllByBug(bug, [
+                max: 100, sort: "dateReported", order: "desc", offset: 0
+        ])
         render(template: 'hits', model: [hits: hits])
     }
 
@@ -131,6 +142,14 @@ class BugController {
         final Hit hit = Hit.get(hitid)
 
         render(template: 'hit', model: [hit: hit])
+    }
+
+    def bug() {
+        final id = params.id
+        final bug = Bug.get(id)
+        return [
+                bug: bug
+        ]
     }
 
     private App getApp() {

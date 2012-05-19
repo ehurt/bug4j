@@ -88,6 +88,5 @@ class IncomingController {
         } catch (Throwable e) {
             log.error("Failed to create a session", e)
         }
-        println "<-bug"
     }
 }

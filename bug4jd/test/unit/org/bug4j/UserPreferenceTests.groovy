@@ -16,16 +16,15 @@
 
 package org.bug4j
 
-class UserPreferences {
-    String key
-    String value
+import grails.test.mixin.TestFor
 
-    static constraints = {
-        key blank: false, maxSize: 1024
-        value maxSize: 1024
+/**
+ * See the API for {@link grails.test.mixin.domain.DomainClassUnitTestMixin} for usage instructions
+ */
+@TestFor(UserPreference)
+class UserPreferenceTests {
+
+    void testSomething() {
+        fail "Implement me"
     }
-
-    static belongsTo = [
-            user: User,
-    ]
 }

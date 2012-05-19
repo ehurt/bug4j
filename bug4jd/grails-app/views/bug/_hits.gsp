@@ -14,10 +14,8 @@
   -    limitations under the License.
   --}%
 
-
-
 <%@ page import="java.text.DateFormat; java.text.SimpleDateFormat" %>
-<div>
+<div id="hits">
     <div id="hit-table">
         <table>
             <thead>
@@ -33,7 +31,7 @@
             <g:each in="${hits}" var="hit" status="lineno">
                 <tr class="hit-row ${lineno ? "" : "hit-row-selected"}" onclick="whenHitClicked(this, '${hit.id}')">
                     <td>${hit.id}</td>
-                    <td>${dateFormat.format(hit.dateReported)}</td>
+                    <td style="white-space: nowrap;">${dateFormat.format(hit.dateReported)}</td>
                     <td>${hit.reportedBy}</td>
                     <td class="hit-message">${hit.message}</td>
                 </tr>

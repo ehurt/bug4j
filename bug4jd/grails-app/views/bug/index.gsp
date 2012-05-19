@@ -21,15 +21,11 @@
     <title>Bugs - ${app.code} - ${app.label}</title>
     <script type="text/javascript">
         function whenBugClicked(elm, bugId) {
-            $(".bug-row-selected").removeClass("bug-row-selected");
-            $(elm).addClass('bug-row-selected');
-        ${remoteFunction(action:'hits', update:'hits', params: '\'bugid=\' + bugId')}
-        }
-
-        function whenHitClicked(elm, hitId) {
-            $(".hit-row-selected").removeClass('hit-row-selected');
-            $(elm).addClass('hit-row-selected');
-        ${remoteFunction(action:'hit', update:'hit', params: '\'hitid=\' + hitId')}
+            if (${showHits}) {
+                $(".bug-row-selected").removeClass("bug-row-selected");
+                $(elm).addClass('bug-row-selected');
+            ${remoteFunction(action:'hits', update:'hits', params: '\'bugid=\' + bugId')}
+            }
         }
 
         function showFilterForm() {
@@ -40,130 +36,57 @@
             $("#filter-when-from").val('');
             $("#filter-when-to").val('');
         }
+
+        function whenHitClicked(elm, hitId) {
+            $(".hit-row-selected").removeClass('hit-row-selected');
+            $(elm).addClass('hit-row-selected');
+        ${remoteFunction(action:'hit', update:'hit', params: '\'hitid=\' + hitId')}
+        }
+
     </script>
     <style type="text/css">
-
-    #bugs {
-        width: 50%;
-        float: left;
-        overflow-x: hidden;
-    }
-
-    #hits {
-        width: 49%;
-        float: right;
-    }
-
-    #hit-table {
-        height: 300px;
-        overflow-x: hidden;
-        overflow-y: scroll;
-    }
-
-    #stack {
-        border-top: 1px solid #E1F2B6;
-        max-height: 500px;
-        overflow-x: scroll;
-        overflow-y: scroll;
-        display: block;
-        font-family: monospace;
-        white-space: pre;
-    }
-
-    .stack-dim {
-        color: #d3d3d3;
-    }
-
-    .stack-highlight {
-        color: #000000;
-    }
-
-    .clear {
-        clear: both;
-    }
-
-    tr:hover {
-        background: inherit;
-    }
-
     .bug-row:hover {
-        background: #E1F2B6;
-        cursor: pointer;
+    ${  showHits?'cursor: pointer;':''  }
     }
 
-    .bug-row-selected {
-        background: #eeffc3;
-        font-weight: bold;
-    }
-
-    .hit-row:hover {
-        background: #E1F2B6;
-        cursor: pointer;
-    }
-
-    .hit-row-selected {
-        background: #eeffc3;
-        font-weight: bold;
-    }
-
-    .hit {
-        border: 1px solid #E1F2B6;
-        padding: 3px;
-    }
-
-    th {
-        white-space: nowrap;
-    }
-
-    .hit-message {
-        overflow-x: hidden;
-    }
-
-    #hit-row, td {
-    }
-
-    #filter-div {
-        margin: 5px;
-        cursor: pointer;
-    }
-
-    #filter-display {
-        border: 1px solid #ddd;
-        border-radius: 2px;
-        padding: 2px;
-    }
-
-    #filter-form {
-        display: none;
-        margin: 5px 0 5px 10px;
-    }
     </style>
 </head>
 
 <body>
 <div>
-    <div id="filter-div" onclick="showFilterForm();">
-        <span style="text-decoration: underline">Filter:</span>
-        <span id="filter-display">${filter.display}</span>
-    </div>
-
-    <div id="filter-form">
-        <g:form params="${params}" method="get">
-            <div>
-                <label for="applyFilter.from">From</label>
-                <g:textField id="filter-when-from" name="applyFilter.from" value="${filter.fromDate}"/>
-                <label for="applyFilter.to">to</label>
-                <g:textField id="filter-when-to" name="applyFilter.to" value="${filter.toDate}"/>
-                <span style="border-bottom: 1px dotted;cursor: pointer;" onclick="clearWhenFilter();">clear</span>
+    <div id="bugs" class="${showHits ? 'bugs-with-hits' : 'bugs-without-hits'}">
+        <div>
+            <div id="filter-div" style="float:left;" onclick="showFilterForm();">
+                <span style="text-decoration: underline">Filter:</span>
+                <g:if test="${filter.display}">
+                    <span id="filter-display">${filter.display}</span>
+                </g:if>
             </div>
+            <g:if test="${!showHits}">
+                <div style="float: right;width: 16px;margin-top: 3px;">
+                    <g:link params="${params + [showHits: true]}">
+                        <g:img dir="images/skin" file="arrow_left.png" title="Show Hits"/>
+                    </g:link>
+                </div>
+            </g:if>
+            <div class="clear"></div>
+        </div>
 
-            <div style="margin: 5px 0 0 5px;">
-                <g:submitButton name="Apply"/>
-            </div>
-        </g:form>
-    </div>
+        <div id="filter-form">
+            <g:form params="${params}" method="get">
+                <div>
+                    <label for="applyFilter.from">From</label>
+                    <g:textField id="filter-when-from" name="applyFilter.from" value="${filter.fromDate}"/>
+                    <label for="applyFilter.to">to</label>
+                    <g:textField id="filter-when-to" name="applyFilter.to" value="${filter.toDate}"/>
+                    <span style="border-bottom: 1px dotted;cursor: pointer;" onclick="clearWhenFilter();">clear</span>
+                </div>
 
-    <div id="bugs">
+                <div style="margin: 5px 0 0 5px;">
+                    <g:submitButton name="Apply"/>
+                </div>
+            </g:form>
+        </div>
         <table>
             <tr>
                 <g:sortableColumn property="bug_id" title="${message(code: 'bug.id.label', default: 'ID')}" defaultOrder="desc" params="${params}"/>
@@ -176,9 +99,18 @@
                 DateFormat dateFormat = SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT)
             %>
             <g:each in="${bugs}" var="bug" status="lineno">
-                <tr class="bug-row ${lineno == 0 ? ' bug-row-selected' : ''}" onclick="whenBugClicked(this, '${bug.bug_id}');">
+                <tr class="bug-row ${lineno == 0 && showHits ? ' bug-row-selected' : ''}" onclick="whenBugClicked(this, '${bug.bug_id}');">
                     <td>${bug.bug_id}</td>
-                    <td>${bug.bug_title}</td>
+                    <td>
+                        <g:if test="${!showHits}">
+                            <g:link action="bug" params="[id: bug.bug_id]">
+                                ${bug.bug_title}
+                            </g:link>
+                        </g:if>
+                        <g:else>
+                            ${bug.bug_title}
+                        </g:else>
+                    </td>
                     <td>${bug.hitCount}</td>
                     <td>${dateFormat.format(bug.firstHitDate)}</td>
                     <td>${dateFormat.format(bug.lastHitDate)}</td>
@@ -190,19 +122,25 @@
                 <g:link params="${params + [max: (params.max as int) + 10]}">More</g:link>
             </div>
         </g:if>
-
     </div>
 
-    <div id="hits">
-        <%
-            def hits = []
-            if (bugs) {
-                long bugId = bugs[0].bug_id as long
-                hits = Bug.get(bugId).hits
-            }
-        %>
-        <g:render template="hits" model="[hits: hits]"/>
-    </div>
+    <g:if test="${showHits}">
+        <div id="hits-section">
+            <%
+                def hits = []
+                if (bugs) {
+                    long bugId = bugs[0].bug_id as long
+                    hits = Bug.get(bugId).hits
+                }
+            %>
+            <div id="hits-header" style="margin:5px;height: 1.5em;">
+                <g:link params="${params + [showHits: false]}">
+                    <g:img dir="images/skin" file="arrow_right.png" title="Hide Hits"/>
+                </g:link>
+            </div>
+            <g:render template="hits" model="[hits: hits]"/>
+        </div>
+    </g:if>
 
     <div class="clear"></div>
 </div>
