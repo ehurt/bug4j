@@ -46,7 +46,7 @@
     </script>
     <style type="text/css">
     .bug-row:hover {
-    ${     showHits?'cursor: pointer;':''     }
+    ${       showHits?'cursor: pointer;':''       }
     }
 
     </style>
@@ -141,7 +141,9 @@
                     hits = Hit.findAllByBug(bug, [sort: 'id', order: 'desc'])
                 }
             %>
-            <g:render template="hits" model="[hits: hits]"/>
+            <div id="hits">
+                <g:render template="hits" model="[hits: hits]"/>
+            </div>
         </div>
     </g:if>
 
