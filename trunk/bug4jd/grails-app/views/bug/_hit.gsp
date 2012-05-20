@@ -18,7 +18,7 @@
 <% if (!hitTab) hitTab = 'stack' %>
 <div class="tab">
     <g:remoteLink id="${hit?.id}" update="hit" action="stack" class="tab-item${hitTab == 'stack' ? ' active-tab-item' : ''}">Stack</g:remoteLink>
-    <g:remoteLink id="${hit?.id}" update="hit" action="session" class="tab-item${hitTab == 'session' ? ' active-tab-item' : ''}">Session</g:remoteLink>
+    <g:remoteLink id="${hit?.id}" update="hit" action="hitInfo" class="tab-item${hitTab == 'info' ? ' active-tab-item' : ''}">Information</g:remoteLink>
 </div>
 
 <div style="border: solid #48802C;border-top-width: 0;border-right-width: 1px;border-bottom-width: 1px;border-left-width: 1px;">
@@ -32,8 +32,11 @@
                 ${stackHtml}
             </div>
         </g:if>
+        <g:else>
+            <div style="height: 100px;padding: 5px;">No stack available</div>
+        </g:else>
     </g:if>
-    <g:if test="${hitTab == 'session'}">
+    <g:if test="${hitTab == 'info'}">
         <% def clientSession = hit.clientSession %>
         <g:if test="${clientSession}">
             <%
@@ -50,7 +53,7 @@
             </table>
         </g:if>
         <g:else>
-            <P>Session information not available</P>
+            <div style="height: 100px;padding: 5px;">Information available</div>
         </g:else>
     </g:if>
 </div>

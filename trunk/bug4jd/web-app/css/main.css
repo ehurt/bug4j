@@ -671,11 +671,13 @@ th {
 
 #stack {
     max-height: 500px;
+    min-height: 200px;
     overflow-x: scroll;
     overflow-y: scroll;
     display: block;
     font-family: monospace;
     white-space: nowrap;
+    padding: 5px;
 }
 
 .stack-dim {
@@ -723,6 +725,8 @@ a.tab-item {
     border-top: 1px solid #94ab7e;
     border-left: 1px solid #94ab7e;
     border-right: 1px solid #94ab7e;
+    border-top-left-radius: 0.3em;
+    border-top-right-radius: 0.3em;
 }
 
 a.tab-item {
