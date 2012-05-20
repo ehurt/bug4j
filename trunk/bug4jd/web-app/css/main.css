@@ -670,13 +670,12 @@ th {
 }
 
 #stack {
-    border-top: 1px solid #E1F2B6;
     max-height: 500px;
     overflow-x: scroll;
     overflow-y: scroll;
     display: block;
     font-family: monospace;
-    white-space: pre;
+    white-space: nowrap;
 }
 
 .stack-dim {
@@ -712,3 +711,36 @@ th {
 #hit-row, td {
 }
 
+.tab {
+    border-bottom: 1px solid #48802C;
+    padding-bottom: 4px;
+    padding-left: 4px;
+}
+
+a.tab-item {
+    background-color: #EEFFC3;
+    padding: 4px;
+    border-top: 1px solid #94ab7e;
+    border-left: 1px solid #94ab7e;
+    border-right: 1px solid #94ab7e;
+}
+
+a.tab-item {
+    text-decoration: none;
+}
+
+a.active-tab-item {
+    border-color: #48802C;
+    border: 2px 2px 0 2px;
+    background-color: #48802C;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+a:hover.tab-item {
+    background-color: #ddeeb2;
+}
+
+a:hover.active-tab-item {
+    background-color: #48802C;
+}

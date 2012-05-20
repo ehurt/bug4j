@@ -147,6 +147,18 @@ class BugController {
         ]
     }
 
+    def stack() {
+        final hitId = params.id
+        final hit = Hit.get(hitId)
+        render(template: 'hit', model: [hit: hit])
+    }
+
+    def session() {
+        final hitId = params.id
+        final hit = Hit.get(hitId)
+        render(template: 'hit', model: [hit: hit, hitTab: 'session'])
+    }
+
     private App getApp() {
         App app = null
 
