@@ -14,7 +14,7 @@
   -    limitations under the License.
   --}%
 
-<%@ page import="java.text.DateFormat; java.text.SimpleDateFormat; org.bug4j.Bug" contentType="text/html;charset=UTF-8" %>
+<%@ page import="org.bug4j.Hit; java.text.DateFormat; java.text.SimpleDateFormat; org.bug4j.Bug" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta name='layout' content='main'/>
@@ -24,7 +24,7 @@
             if (${showHits}) {
                 $(".bug-row-selected").removeClass("bug-row-selected");
                 $(elm).addClass('bug-row-selected');
-            ${remoteFunction(action:'hits', update:'hits', params: '\'bugid=\' + bugId')}
+            ${remoteFunction(action:'hits', update:'hits', params: '\'id=\' + bugId + \'&sort=id&order=desc\'')}
             }
         }
 
@@ -46,7 +46,7 @@
     </script>
     <style type="text/css">
     .bug-row:hover {
-    ${  showHits?'cursor: pointer;':''  }
+    ${     showHits?'cursor: pointer;':''     }
     }
 
     </style>
@@ -64,7 +64,7 @@
             </div>
             <g:if test="${!showHits}">
                 <div style="float: right;width: 16px;margin-top: 3px;">
-                    <g:link params="${params + [showHits: true]}">
+                    <g:link params="${params + [sh: 'y']}">
                         <g:img dir="images/skin" file="arrow_left.png" title="Show Hits"/>
                     </g:link>
                 </div>
@@ -102,8 +102,8 @@
                 <tr class="bug-row ${lineno == 0 && showHits ? ' bug-row-selected' : ''}" onclick="whenBugClicked(this, '${bug.bug_id}');">
                     <td>${bug.bug_id}</td>
                     <td>
-                        <g:if test="${!showHits}">
-                            <g:link action="bug" params="[id: bug.bug_id]">
+                        <g:if test="${true}">
+                            <g:link action="bug" params="[id: bug.bug_id, sort: 'id', order: 'desc']">
                                 ${bug.bug_title}
                             </g:link>
                         </g:if>
@@ -126,18 +126,21 @@
 
     <g:if test="${showHits}">
         <div id="hits-section">
-            <%
-                def hits = []
-                if (bugs) {
-                    long bugId = bugs[0].bug_id as long
-                    hits = Bug.get(bugId).hits
-                }
-            %>
             <div id="hits-header" style="margin:5px;height: 1.5em;">
-                <g:link params="${params + [showHits: false]}">
+                <g:link params="${params - [sh: 'y']}">
                     <g:img dir="images/skin" file="arrow_right.png" title="Hide Hits"/>
                 </g:link>
             </div>
+
+            <%
+                def hits = null
+                if (bugs) {
+                    def firstBug = bugs[0]
+                    long bugId = firstBug.bug_id as long
+                    def bug = Bug.get(bugId)
+                    hits = Hit.findAllByBug(bug, [sort: 'id', order: 'desc'])
+                }
+            %>
             <g:render template="hits" model="[hits: hits]"/>
         </div>
     </g:if>

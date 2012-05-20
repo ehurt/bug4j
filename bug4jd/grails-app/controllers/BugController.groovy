@@ -108,14 +108,12 @@ class BugController {
         }
 
         def showHits
-        if (params.showHits) {
-            showHits = params.showHits == 'true'
+        if (params.sh) {
+            showHits = params.sh == 'y'
             userPreferenceService.setPreference('showHits', showHits)
         } else {
             showHits = userPreferenceService.getBooleanPreference('showHits')
         }
-
-        def reparam = filterMap(params, ['sort', 'order', 'max', 'offset', 'appCode', 'fromDay', 'toDay'])
 
         return [
                 app: selectedApp,
@@ -123,17 +121,14 @@ class BugController {
                 total: total[0],
                 filter: filter,
                 showHits: showHits,
-                params: reparam,
         ]
     }
 
     def hits() {
-        final bugid = params.bugid
+        final bugid = params.id
 
         final bug = Bug.get(bugid)
-        final hits = Hit.findAllByBug(bug, [
-                max: 100, sort: "dateReported", order: "desc", offset: 0
-        ])
+        final hits = Hit.findAllByBug(bug, params)
         render(template: 'hits', model: [hits: hits])
     }
 
@@ -155,13 +150,13 @@ class BugController {
     private App getApp() {
         App app = null
 
-        String appCode = params.appCode
+        String appCode = params.a
         if (appCode) {
             app = App.findByCode(appCode)
         }
 
         if (!app) {
-            appCode = session.appCode
+            appCode = session.a
             if (appCode) {
                 app = App.findByCode(appCode)
             }
@@ -171,20 +166,8 @@ class BugController {
             app = App.list(max: 1).first()
         }
 
-        session.appCode = app?.code
+        session.a = app?.code
 
         return app
     }
-
-    private static def filterMap(Map map, List keys) {
-        def ret = [:]
-        for (Object key : keys) {
-            final value = map.get(key)
-            if (value) {
-                ret.put(key, value)
-            }
-        }
-        return ret
-    }
-
 }
