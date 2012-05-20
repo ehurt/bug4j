@@ -153,10 +153,10 @@ class BugController {
         render(template: 'hit', model: [hit: hit])
     }
 
-    def session() {
+    def hitInfo() {
         final hitId = params.id
         final hit = Hit.get(hitId)
-        render(template: 'hit', model: [hit: hit, hitTab: 'session'])
+        render(template: 'hit', model: [hit: hit, hitTab: 'info'])
     }
 
     private App getApp() {
