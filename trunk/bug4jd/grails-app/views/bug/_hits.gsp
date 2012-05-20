@@ -19,10 +19,12 @@
     <div id="hit-table">
         <table>
             <thead>
-            <g:sortableColumn property="id" title="${message(code: 'hit.id.label', default: 'ID')}" style="width: 5em;"/>
-            <g:sortableColumn property="dateReported" title="${message(code: 'hit.dateReported.label', default: 'Date Reported')}" style="width: 20em;"/>
-            <g:sortableColumn property="reportedBy" title="${message(code: 'hit.reportedBy.label', default: 'Reported By')}" style="width: 15em;"/>
-            <g:sortableColumn property="message" title="${message(code: 'hit.message.label', default: 'Message')}" style="width: 100%;"/>
+            <tr>
+                <util:remoteSortableColumn update="hit-table" action="hits" params="${params}" property="id" defaultOrder="desc" title="${message(code: 'hit.id.label', default: 'ID')}" style="width: 5em;"/>
+                <util:remoteSortableColumn update="hit-table" action="hits" params="${params}" property="dateReported" title="${message(code: 'hit.dateReported.label', default: 'Date Reported')}" style="width: 20em;"/>
+                <util:remoteSortableColumn update="hit-table" action="hits" params="${params}" property="reportedBy" title="${message(code: 'hit.reportedBy.label', default: 'Reported By')}" style="width: 15em;"/>
+                <util:remoteSortableColumn update="hit-table" action="hits" params="${params}" property="message" title="${message(code: 'hit.message.label', default: 'Message')}" style="width: 100%;"/>
+            </tr>
             </thead>
             <tbody id="hit-tbody">
             <%

@@ -13,7 +13,7 @@
   -    See the License for the specific language governing permissions and
   -    limitations under the License.
   --}%
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="org.bug4j.Hit" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta name='layout' content='main'/>
@@ -35,7 +35,10 @@
 <body>
 <div style="margin:5px 10px;">
     <div id="bug-title">${bug.id} - ${bug.title}</div>
-    <g:render template="hits" model="[hits: bug.hits]"/>
+    <%
+        def hits = Hit.findAllByBug(bug, [sort: 'id', order: 'desc'])
+    %>
+    <g:render template="hits" model="[hits: hits]"/>
 </div>
 </body>
 </html>
