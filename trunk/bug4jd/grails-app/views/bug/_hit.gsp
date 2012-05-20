@@ -43,7 +43,12 @@
                 DateFormat sessionDateFormat = SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.SHORT, SimpleDateFormat.SHORT)
             %>
             <table>
-                <tr><td style="width: 5em;">Session:</td><td>${clientSession.id}</td></tr>
+                <tr>
+                    <td style="width: 5em;">Session:</td>
+                    <td>
+                        <g:link action="clientSession" id="${clientSession.id}">${clientSession.id}</g:link>
+                    </td>
+                </tr>
                 <tr><td>Host:</td><td>${clientSession.hostName}</td></tr>
                 <tr><td>Version:</td><td>${clientSession.appVersion}</td></tr>
                 <tr><td>Built:</td><td>${clientSession.dateBuilt ? sessionDateFormat.format(clientSession.dateBuilt) : ''}</td></tr>

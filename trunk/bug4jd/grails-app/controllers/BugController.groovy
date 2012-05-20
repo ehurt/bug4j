@@ -16,6 +16,7 @@
 
 import org.bug4j.App
 import org.bug4j.Bug
+import org.bug4j.ClientSession
 import org.bug4j.Hit
 import org.bug4j.server.util.DateUtil
 
@@ -157,6 +158,16 @@ class BugController {
         final hitId = params.id
         final hit = Hit.get(hitId)
         render(template: 'hit', model: [hit: hit, hitTab: 'info'])
+    }
+
+    def clientSession() {
+        final id = params.id
+        final clientSession = ClientSession.get(id)
+        final hits = Hit.findAllByClientSession(clientSession)
+        return [
+                clientSession: clientSession,
+                hits: hits,
+        ]
     }
 
     private App getApp() {
