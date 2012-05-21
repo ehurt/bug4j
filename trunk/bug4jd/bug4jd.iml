@@ -53,11 +53,10 @@
         <jarDirectory url="file://$MODULE_DIR$/lib" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="bug4jd-grailsPlugins" />
     <orderEntry type="library" name="apache-derby" level="project" />
     <orderEntry type="library" name="ojdbc6" level="project" />
-    <orderEntry type="module" module-name="common" />
     <orderEntry type="library" name="apache-commons-lang" level="project" />
+    <orderEntry type="module" module-name="bug4jd-grailsPlugins" />
   </component>
 </module>
 

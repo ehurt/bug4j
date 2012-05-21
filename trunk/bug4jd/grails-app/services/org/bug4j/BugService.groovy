@@ -13,18 +13,13 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-
-
-
-
-
 package org.bug4j
 
 import org.apache.commons.lang.StringUtils
-import org.bug4j.common.FullStackHashCalculator
-import org.bug4j.common.TextToLines
+import org.bug4j.server.processor.FullStackHashCalculator
 import org.bug4j.server.processor.StackAnalyzer
 import org.bug4j.server.processor.StackPathHashCalculator
+import org.bug4j.server.processor.TextToLines
 import org.xml.sax.Attributes
 import org.xml.sax.InputSource
 import org.xml.sax.helpers.DefaultHandler
