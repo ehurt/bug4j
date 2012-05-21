@@ -4,8 +4,8 @@
     <facet type="web" name="GrailsWeb">
       <configuration>
         <webroots>
-          <root url="file://$USER_HOME_GRAILS$/2.0.2/projects/bug4jd/plugins/jquery-1.7.1/web-app" relative="/" />
           <root url="file://$USER_HOME_GRAILS$/2.0.2/projects/bug4jd/plugins/remote-pagination-0.3/web-app" relative="/" />
+          <root url="file://$USER_HOME_GRAILS$/2.0.2/projects/bug4jd/plugins/jquery-1.7.1/web-app" relative="/" />
         </webroots>
         <sourceRoots />
       </configuration>
