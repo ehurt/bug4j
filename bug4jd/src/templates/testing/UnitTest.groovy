@@ -1,3 +1,5 @@
+@artifact.package @import static org.junit.Assert.*
+
 /*
  * Copyright 2012 Cedric Dandoy
  *
@@ -13,24 +15,25 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
 
-package org.bug4j
+/**
+ * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
+ */
+@TestMixin(GrailsUnitTestMixin)
+class @artifact .name @{
 
-class UserPreference {
-    String key
-    String value
+void setUp () {
+// Setup logic here
+}
 
-    static constraints = {
-        key blank: false, maxSize: 1024
-        value maxSize: 1024
-    }
+void tearDown() {
+    // Tear down logic here
+}
 
-    static belongsTo = [
-            user: User,
-    ]
+void testSomething() {
+    fail "Implement me"
+}
 
-    static mapping = {
-        key column: 'pref_key'
-        value column: 'pref_value'
-    }
 }

@@ -1,3 +1,10 @@
+@artifact.package @class @artifact.name @{
+
+def filters = {
+all (controller: '*', action: '*') {
+before = {
+
+}
 /*
  * Copyright 2012 Cedric Dandoy
  *
@@ -13,24 +20,12 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+after = { Map model ->
 
-package org.bug4j
+}
+afterView = { Exception e ->
 
-class UserPreference {
-    String key
-    String value
-
-    static constraints = {
-        key blank: false, maxSize: 1024
-        value maxSize: 1024
-    }
-
-    static belongsTo = [
-            user: User,
-    ]
-
-    static mapping = {
-        key column: 'pref_key'
-        value column: 'pref_value'
-    }
+}
+}
+}
 }

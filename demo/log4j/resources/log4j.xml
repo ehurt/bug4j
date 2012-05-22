@@ -25,7 +25,7 @@
     </layout>
   </appender>
   <appender name="bug4j" class="org.bug4j.client.Bug4jAppender">
-    <param name="serverUrl" value="http://127.0.0.1:8063/bug4jd"/>
+    <param name="serverUrl" value="http://127.0.0.1:8063/"/>
     <param name="applicationName" value="bug4jDemo"/>
     <param name="applicationVersion" value="1.0"/>
     <param name="buildDate" value="@@@buildDate@@@"/>
