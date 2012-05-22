@@ -1,3 +1,5 @@
+@artifact.package @
+
 /*
  * Copyright 2012 Cedric Dandoy
  *
@@ -13,24 +15,15 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+import grails.test.mixin.TestFor
 
-package org.bug4j
+/**
+ * See the API for {@link grails.test.mixin.services.ServiceUnitTestMixin} for usage instructions
+ */
+@TestFor(@artifact.testclass @ )
+class @artifact.name @{
 
-class UserPreference {
-    String key
-    String value
-
-    static constraints = {
-        key blank: false, maxSize: 1024
-        value maxSize: 1024
-    }
-
-    static belongsTo = [
-            user: User,
-    ]
-
-    static mapping = {
-        key column: 'pref_key'
-        value column: 'pref_value'
-    }
+void testSomething () {
+fail "Implement me"
+}
 }

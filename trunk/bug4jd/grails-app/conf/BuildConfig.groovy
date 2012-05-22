@@ -49,6 +49,10 @@ grails.project.dependency.resolution = {
 
         // runtime 'mysql:mysql-connector-java:5.1.16'
         runtime 'org.apache.commons:commons-lang3:3.0.1'
+
+        runtime 'org.apache.derby:derby:10.8.2.2'
+        runtime 'org.apache.derby:derbynet:10.8.2.2'
+        runtime 'org.apache.derby:derbyclient:10.8.2.2'
     }
 
     plugins {

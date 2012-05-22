@@ -13,24 +13,6 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-
-package org.bug4j
-
-class UserPreference {
-    String key
-    String value
-
-    static constraints = {
-        key blank: false, maxSize: 1024
-        value maxSize: 1024
-    }
-
-    static belongsTo = [
-            user: User,
-    ]
-
-    static mapping = {
-        key column: 'pref_key'
-        value column: 'pref_value'
-    }
+@artifact.package @class @artifact.name @{
+static scaffold = true
 }

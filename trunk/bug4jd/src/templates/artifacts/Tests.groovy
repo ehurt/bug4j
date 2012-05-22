@@ -13,24 +13,19 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+@artifact.package @import grails.test.*
 
-package org.bug4j
+class @artifact.name @extends @artifact.superclass @{
+protected void setUp () {
+super.setUp ()
+}
 
-class UserPreference {
-    String key
-    String value
+protected void tearDown() {
+    super.tearDown()
+}
 
-    static constraints = {
-        key blank: false, maxSize: 1024
-        value maxSize: 1024
-    }
+void testSomething() {
 
-    static belongsTo = [
-            user: User,
-    ]
+}
 
-    static mapping = {
-        key column: 'pref_key'
-        value column: 'pref_value'
-    }
 }

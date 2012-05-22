@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <!--
   ~ Copyright 2012 Cedric Dandoy
   ~
@@ -14,13 +14,20 @@
   ~    See the License for the specific language governing permissions and
   ~    limitations under the License.
   -->
-<ivy-module version="2.0">
-  <info organisation="org.bug4j" module="bug4jd"/>
-  <configurations defaultconfmapping="build->default">
-    <conf name="build"/>
-  </configurations>
-  <dependencies>
-    <dependency org="org.grails" name="grails-bootstrap" rev="2.0.2" conf="build"/>
-    <dependency org="org.codehaus.groovy" name="groovy-all" rev="1.8.6"/>
-  </dependencies>
-</ivy-module>
+<!DOCTYPE hibernate-configuration PUBLIC
+        '-//Hibernate/Hibernate Configuration DTD 3.0//EN'
+        'http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd'>
+
+<hibernate-configuration>
+
+  <session-factory>
+    <!--
+     <mapping package='com.books' />
+
+     <mapping class='com.books.Book' />
+
+     <mapping resource='someresource.hbm.xml'/>
+   -->
+  </session-factory>
+
+</hibernate-configuration>
