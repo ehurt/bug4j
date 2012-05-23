@@ -40,7 +40,8 @@
         </tbody>
     </table>
 </div>
-
-<div id="hit">
-    <g:render template="hit" model="[hit: hits ? hits.iterator().next() : []]"/>
-</div>
+<g:if test="${hits}">
+    <div id="hit">
+        <g:render template="hit" model="[hit: hits ? hits.iterator().next() : []]"/>
+    </div>
+</g:if>
