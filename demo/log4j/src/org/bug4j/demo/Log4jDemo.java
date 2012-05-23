@@ -17,7 +17,6 @@
 package org.bug4j.demo;
 
 import org.apache.log4j.Logger;
-import org.bug4j.client.Bug4jAgent;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -31,17 +30,12 @@ import java.io.InputStream;
 public class Log4jDemo {
     private static final Logger LOGGER = Logger.getLogger(Log4jDemo.class);
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String... args) throws Exception {
         try {
             System.out.println("\n\nCausing an exception...\n\n");
             calling();
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-        } finally {
-            // The bug reports are enqueued and consumbed by a background thread.
-            // Since our demo application exits right away the bug has probably not been sent yet.
-            // Using Bug4jAgent.shutdown() will wait until all bugs have been sent.
-            Bug4jAgent.shutdown();
         }
     }
 

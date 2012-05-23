@@ -59,6 +59,7 @@ public class Bug4jAgent {
         if (_isEntered.compareAndSet(false, true)) {
             try {
                 if (!isStarted()) {
+                    addShutdownHook();
                     synchronized (Bug4jAgent.class) {
                         _reported = 0;
 
@@ -153,6 +154,15 @@ public class Bug4jAgent {
                 isServerReceiving = processSafely(reportableEvent);
             }
         }
+    }
+
+    private static void addShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(new Thread("bug4j-shutdown") {
+            @Override
+            public void run() {
+                shutdown();
+            }
+        });
     }
 
     private boolean processSafely(ReportableEvent reportableEvent) {
