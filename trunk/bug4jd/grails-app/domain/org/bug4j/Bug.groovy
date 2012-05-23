@@ -25,6 +25,7 @@ class Bug {
     String title
     Date extinct
     Date unextinct
+    boolean multiReport = false
 
     static constraints = {
         title(blank: false, maxSize: TITLE_SIZE)

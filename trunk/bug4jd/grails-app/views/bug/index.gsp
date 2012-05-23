@@ -46,7 +46,7 @@
     </script>
     <style type="text/css">
     .bug-row:hover {
-    ${       showHits?'cursor: pointer;':''       }
+    ${        showHits?'cursor: pointer;':''        }
     }
 
     </style>
@@ -74,15 +74,23 @@
 
         <div id="filter-form">
             <g:form params="${params}" method="get">
-                <div>
-                    <label for="applyFilter.from">From</label>
-                    <g:textField id="filter-when-from" name="applyFilter.from" value="${filter.fromDate}"/>
-                    <label for="applyFilter.to">to</label>
-                    <g:textField id="filter-when-to" name="applyFilter.to" value="${filter.toDate}"/>
-                    <span style="border-bottom: 1px dotted;cursor: pointer;" onclick="clearWhenFilter();">clear</span>
-                </div>
+                <table style="width: auto;">
+                    <tr>
+                        <td><label for="applyFilter.from">From</label></td>
+                        <td><g:textField id="filter-when-from" name="applyFilter.from" value="${filter.fromDate}"/></td>
+                        <td><label for="applyFilter.to">to</label></td>
+                        <td><g:textField id="filter-when-to" name="applyFilter.to" value="${filter.toDate}"/></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td colspan="3">
+                            <g:checkBox name="applyFilter.includeSingleHost" value="${filter.includeSingleHost}"/> Include hits reported from a single host
+                        </td>
+                    </tr>
+                </table>
 
                 <div style="margin: 5px 0 0 5px;">
+                    <g:submitButton name="Clear" onclick="clearWhenFilter();return false;"/>
                     <g:submitButton name="Apply"/>
                 </div>
             </g:form>

@@ -18,14 +18,18 @@
 
 package org.bug4j
 
+import org.apache.commons.lang.StringUtils
+
 class Hit {
     Date dateReported
     String reportedBy
     String message
+    String remoteAddr
 
     static constraints = {
         reportedBy(nullable: true)
         message(nullable: true, maxSize: 1024)
+        remoteAddr(nullable: true, maxSize: 256)
         stack(nullable: true)
         clientSession(nullable: true)
     }
@@ -42,5 +46,12 @@ class Hit {
     static mapping = {
         bug index: 'HIT_BUG_IDX'
         stack index: 'HIT_STACK_IDX'
+    }
+
+    void setRemoteAddr(String remoteAddr) {
+        if (remoteAddr) {
+            remoteAddr = StringUtils.abbreviate(remoteAddr, 256)
+        }
+        this.remoteAddr = remoteAddr
     }
 }

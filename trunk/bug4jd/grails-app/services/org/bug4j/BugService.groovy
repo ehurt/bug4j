@@ -33,7 +33,7 @@ import javax.xml.parsers.SAXParserFactory
 class BugService {
     ClientSession createSession(String appCode,
                                 String appVersion,
-                                Long dataMillis,
+                                Long buildDateMillis,
                                 String devBuild,
                                 Integer buildNumber,
                                 String remoteAddr) {
@@ -49,7 +49,7 @@ class BugService {
         final clientSession = new ClientSession(
                 app: app,
                 appVersion: appVersion,
-                dateBuilt: new Timestamp(dataMillis),
+                dateBuilt: new Timestamp(buildDateMillis),
                 devBuild: 'Y'.equals(devBuild),
                 buildNumber: buildNumber,
                 hostName: remoteAddr,
@@ -71,6 +71,7 @@ class BugService {
                      String appCode,
                      String message,
                      String user,
+                     String remoteAddr,
                      String hash) {
 
         log.debug("check ${sessionId}-${appCode}-${user}-${hash}-${message}")
@@ -106,9 +107,11 @@ class BugService {
                     stack: stack,
                     dateReported: new Date(),
                     reportedBy: user,
-                    message: message
+                    message: message,
+                    remoteAddr: remoteAddr,
             )
             bug.addToHits(newHit)
+            testForMultiReports(bug, remoteAddr)
             if (clientSession) {
                 clientSession.addToHits(newHit)
             }
@@ -123,7 +126,7 @@ class BugService {
     /**
      * Reports a bug
      */
-    def reportBug(long sessionId, String appCode, String message, long dateReported, String user, String stackString) {
+    def reportBug(long sessionId, String appCode, String message, long dateReported, String user, String remoteAddr, String stackString) {
 
         if (sessionId == null) {
             throw new IllegalArgumentException('Invalid request parameters')
@@ -144,10 +147,10 @@ class BugService {
             throw new IllegalArgumentException(errorMessage)
         }
 
-        reportBug(clientSession, app, message, dateReported, user, stackString)
+        reportBug(clientSession, app, message, dateReported, user, remoteAddr, stackString)
     }
 
-    def reportBug(ClientSession clientSession, App app, String message, long dateReported, String user, String stackString) {
+    def reportBug(ClientSession clientSession, App app, String message, long dateReported, String user, String remoteAddr, String stackString) {
 
         final List<String> stackLines = stackString ? TextToLines.toLineList(stackString.trim()) : null;
         if (message) {
@@ -157,6 +160,7 @@ class BugService {
         Bug bug = null
         Stack stack = null
         String fullHash = null
+        boolean isNewBug = false;
 
         // First try based on the full hash of the exception.
         if (stackLines) {
@@ -202,6 +206,7 @@ class BugService {
                         bug = new Bug(app: app, title: title)
                         app.addToBugs(bug)
                         bug.save(failOnError: true)
+                        isNewBug = true
                     } // else ==> _matchByCauses++
                     strain = new Strain(bug: bug, hash: strainHash)
                     bug.addToStrains(strain)
@@ -232,7 +237,8 @@ class BugService {
                 stack: stack,
                 dateReported: new Date(dateReported),
                 reportedBy: user,
-                message: message
+                message: message,
+                remoteAddr: remoteAddr,
         )
         bug.addToHits(newHit)
         if (clientSession) {
@@ -241,8 +247,22 @@ class BugService {
         if (stack) {
             stack.addToHits(newHit)
         }
+        if (!isNewBug) {
+            testForMultiReports(bug, remoteAddr)
+        }
         newHit.save(failOnError: true)
         return bug.id;
+    }
+
+    private void testForMultiReports(Bug bug, String remoteAddr) {
+        if (!bug.multiReport) {
+            final hitFromOtherAddr = Hit.executeQuery("from Hit h where h.bug=:bug and h.remoteAddr != :remoteAddr",
+                    [bug: bug, remoteAddr: remoteAddr])
+            if (hitFromOtherAddr) {
+                bug.multiReport = true
+                bug.save()
+            }
+        }
     }
 
     /**
@@ -337,6 +357,7 @@ class BugService {
             String _hitId
             String _sessionId
             String _message
+            String _remoteAddr
             String _appVer
             long _dateReported
             String _stackString
@@ -416,6 +437,7 @@ class BugService {
                         _dateReported = dateFormat.parse(dateString).getTime()
                         _appVer = atts.getValue('appVer')
                         _message = atts.getValue('message')
+                        _remoteAddr = atts.getValue('remoteAddr')
                         _stackString = ''
                         break;
                 }
@@ -447,7 +469,8 @@ class BugService {
                         break
                     case 'hit':
                         final clientSession = _sessions.get(_sessionId)
-                        reportBug(clientSession, _app, _message, _dateReported, _user, _stackString)
+                        final remoteAddr = _remoteAddr ? _remoteAddr : clientSession?.hostName
+                        reportBug(clientSession, _app, _message, _dateReported, _user, remoteAddr, _stackString)
                         _hitId = null
                         break;
                 }

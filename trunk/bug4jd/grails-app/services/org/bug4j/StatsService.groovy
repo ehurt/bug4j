@@ -55,6 +55,7 @@ class StatsService {
         final list = Hit.executeQuery("""select year(h.dateReported),month(h.dateReported),day(h.dateReported), count(distinct b.id)
                         from Hit h, Bug b
                         where b.app=?
+                        and b.multiReport = true
                         and b=h.bug
                         and h.dateReported >= ?
                         group by year(h.dateReported),month(h.dateReported),day(h.dateReported)""",
@@ -82,6 +83,7 @@ class StatsService {
         final list = Hit.executeQuery("""select year(h.dateReported),month(h.dateReported),day(h.dateReported), count(*)
                         from Hit h, Bug b
                         where b.app=?
+                        and b.multiReport = true
                         and b=h.bug
                         and h.dateReported >= ?
                         group by year(h.dateReported),month(h.dateReported),day(h.dateReported)""",
