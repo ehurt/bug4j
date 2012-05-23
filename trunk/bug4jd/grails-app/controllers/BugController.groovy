@@ -20,8 +20,6 @@ import org.bug4j.ClientSession
 import org.bug4j.Hit
 import org.bug4j.server.util.DateUtil
 
-import java.text.DateFormat
-
 class BugController {
 
     def userPreferenceService
@@ -35,50 +33,31 @@ class BugController {
         def selectedApp = getApp()
         def queryParams = [app: selectedApp]
         def queryCond = ''
-        def filter = [display: '']
-        final today = DateUtil.adjustToDayBoundary(new Date(), DateUtil.TimeAdjustType.BEGINNING_OF_DAY)
+        def filter = ''
 
-        Date fromDate = null
-        Date toDate = null
-        boolean includeSingleHost = false
-        if (params.applyFilter) {
-            if (params.applyFilter.from) fromDate = DateUtil.interpretDate(params.applyFilter.from, DateUtil.TimeAdjustType.BEGINNING_OF_DAY)
-            if (params.applyFilter.to) toDate = DateUtil.interpretDate(params.applyFilter.to, DateUtil.TimeAdjustType.END_OF_DAY)
-            if (params.applyFilter.includeSingleHost) includeSingleHost = true
-        } else {
-            if (params.fromDay) {
-                fromDate = today.minus(params.fromDay as int)
+        if (params.from) {
+            Date fromDate = DateUtil.interpretDate(params.from, DateUtil.TimeAdjustType.BEGINNING_OF_DAY)
+            if (fromDate) {
                 queryCond += " and h.dateReported>=:fromDate"
                 queryParams += [fromDate: fromDate]
+                filter += "from:${params.from} "
             }
+        }
 
-            if (params.toDay) {
-                toDate = today.minus(params.toDay as int)
+        if (params.to) {
+            Date toDate = DateUtil.interpretDate(params.to, DateUtil.TimeAdjustType.END_OF_DAY)
+            if (toDate) {
                 queryCond += " and h.dateReported<=:toDate"
                 queryParams += [toDate: toDate]
-            }
-            if (params.includeSingleHost) {
-                includeSingleHost = true
+                filter += "to:${params.to} "
             }
         }
 
-        DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.SHORT);
-
-        if (fromDate) {
-            if (toDate) {
-                filter.display = "between ${dateFormat.format(fromDate)} and ${dateFormat.format(toDate)}"
-            } else {
-                filter.display = "after ${dateFormat.format(fromDate)}"
-            }
-        } else {
-            if (toDate) {
-                filter.display = "before ${dateFormat.format(toDate)}"
-            }
+        boolean includeSingleHost = false
+        if (params.includeSingleHost) {
+            includeSingleHost = true
+            filter += "showSingleHost "
         }
-        if (includeSingleHost) filter.display += " single-host"
-        if (fromDate) filter.fromDate = dateFormat.format(fromDate)
-        if (toDate) filter.toDate = dateFormat.format(toDate)
-
         if (!includeSingleHost) {
             queryCond += " and b.multiReport = true"
         }
@@ -129,13 +108,30 @@ class BugController {
                 app: selectedApp,
                 bugs: bugs,
                 total: total[0],
-                filter: filter,
                 showHits: showHits,
+                filter: filter,
         ]
     }
 
+    def filter() {
+        final reParams = [
+                sort: params.sort,
+                order: params.order,
+                max: params.max,
+                offset: params.offset,
+                a: params.a,
+                sh: params.sh,
+        ]
+
+        if (params.filterFrom) reParams += [from: params.filterFrom]
+        if (params.filterTo) reParams += [to: params.filterTo]
+        if (params.filterIncludeSingleHost) reParams += [includeSingleHost: params.filterIncludeSingleHost]
+
+        redirect(action: 'index', params: reParams)
+    }
+
     def hits() {
-        final bugid = params.id
+        final bugid = params.id as Long
 
         final bug = Bug.get(bugid)
         final hits = Hit.findAllByBug(bug, params)

@@ -33,8 +33,9 @@
         }
 
         function clearWhenFilter() {
-            $("#filter-when-from").val('');
-            $("#filter-when-to").val('');
+            $("#filterFrom").val('');
+            $("#filterTo").val('');
+            $("#filterIncludeSingleHost").attr('checked', false)
         }
 
         function whenHitClicked(elm, hitId) {
@@ -46,7 +47,7 @@
     </script>
     <style type="text/css">
     .bug-row:hover {
-    ${        showHits?'cursor: pointer;':''        }
+    ${ showHits?'cursor: pointer;':'' }
     }
 
     </style>
@@ -58,8 +59,8 @@
         <div>
             <div id="filter-div" style="float:left;" onclick="showFilterForm();">
                 <span style="text-decoration: underline">Filter:</span>
-                <g:if test="${filter.display}">
-                    <span id="filter-display">${filter.display}</span>
+                <g:if test="${filter}">
+                    <span id="filter-display">${filter}</span>
                 </g:if>
             </div>
             <g:if test="${!showHits}">
@@ -73,24 +74,26 @@
         </div>
 
         <div id="filter-form">
-            <g:form params="${params}" method="get">
+            <g:form id="filter-form-form" action="filter" params="${params}" method="post">
                 <table style="width: auto;">
                     <tr>
-                        <td><label for="applyFilter.from">From</label></td>
-                        <td><g:textField id="filter-when-from" name="applyFilter.from" value="${filter.fromDate}"/></td>
-                        <td><label for="applyFilter.to">to</label></td>
-                        <td><g:textField id="filter-when-to" name="applyFilter.to" value="${filter.toDate}"/></td>
+                        <td><label for="filterFrom">From</label></td>
+                        <td><g:textField name="filterFrom" value="${params.from}"/></td>
+                        <td><label for="filterTo">to</label></td>
+                        <td><g:textField id="filterTo" name="filterTo" value="${params.to}"/></td>
                     </tr>
                     <tr>
                         <td></td>
                         <td colspan="3">
-                            <g:checkBox name="applyFilter.includeSingleHost" value="${filter.includeSingleHost}"/> Include hits reported from a single host
+                            <g:checkBox name="filterIncludeSingleHost" value="${params.includeSingleHost}"/>
+                            <label for="filterIncludeSingleHost">Include hits reported from a single host</label>
                         </td>
                     </tr>
                 </table>
 
                 <div style="margin: 5px 0 0 5px;">
-                    <g:submitButton name="Clear" onclick="clearWhenFilter();return false;"/>
+                    %{--<input type="reset" value="Clear" onclick="clearWhenFilter();return false;"/>--}%
+                    <g:submitButton name="Clear" onclick="clearWhenFilter();"/>
                     <g:submitButton name="Apply"/>
                 </div>
             </g:form>
