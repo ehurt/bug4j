@@ -249,35 +249,26 @@ public class Exporter {
         final Set<Bug> bugs = app.getBugs();
         for (Bug bug : bugs) {
             xmlStreamWriter.writeStartElement("bug");
-            xmlStreamWriter.writeAttribute("id", Long.toString(bug.id));
-            xmlStreamWriter.writeAttribute("title", bug.getTitle());
+            xmlStreamWriter.writeAttribute("id", bug.id as String);
+            xmlStreamWriter.writeAttribute("title", bug.title);
             xmlStreamWriter.writeStartElement("hits");
-            final Set<Hit> hits = bug.getHits();
-            for (Hit hit : hits) {
+            for (Hit hit : bug.hits) {
                 xmlStreamWriter.writeStartElement("hit");
-                xmlStreamWriter.writeAttribute("id", Long.toString(hit.id));
-                final ClientSession clientSession = hit.getClientSession();
-                final String reportedBy = hit.getReportedBy();
-                final String message = hit.getMessage();
-                final Stack stack = hit.getStack();
-                String stackString = null;
-                if (stack != null) {
-                    final StackText stackText = stack.getStackText();
-                    if (stackText != null) {
-                        stackString = stackText.readStackString();
-                    }
-                }
+                xmlStreamWriter.writeAttribute("id", hit.id as String);
+                final String stackString = hit.stack?.stackText?.readStackString()
 
-                if (clientSession != null) {
-                    Object id = clientSession.getId();
-                    xmlStreamWriter.writeAttribute("sessionId", id.toString());
+                if (hit.clientSession != null) {
+                    xmlStreamWriter.writeAttribute("sessionId", hit.clientSession.id.toString());
                 }
-                xmlStreamWriter.writeAttribute("date", _dateFormat.format(hit.getDateReported()));
-                if (reportedBy != null) {
-                    xmlStreamWriter.writeAttribute("user", reportedBy);
+                xmlStreamWriter.writeAttribute("date", _dateFormat.format(hit.dateReported));
+                if (hit.reportedBy != null) {
+                    xmlStreamWriter.writeAttribute("user", hit.reportedBy);
                 }
-                if (message != null) {
-                    xmlStreamWriter.writeAttribute("message", message);
+                if (hit.message != null) {
+                    xmlStreamWriter.writeAttribute("message", hit.message);
+                }
+                if (hit.remoteAddr) {
+                    xmlStreamWriter.writeAttribute("remoteAddr", hit.remoteAddr);
                 }
                 if (stackString != null) {
                     xmlStreamWriter.writeCharacters("\n");

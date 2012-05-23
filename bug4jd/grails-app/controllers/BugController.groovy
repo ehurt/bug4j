@@ -40,9 +40,11 @@ class BugController {
 
         Date fromDate = null
         Date toDate = null
+        boolean includeSingleHost = false
         if (params.applyFilter) {
             if (params.applyFilter.from) fromDate = DateUtil.interpretDate(params.applyFilter.from, DateUtil.TimeAdjustType.BEGINNING_OF_DAY)
             if (params.applyFilter.to) toDate = DateUtil.interpretDate(params.applyFilter.to, DateUtil.TimeAdjustType.END_OF_DAY)
+            if (params.applyFilter.includeSingleHost) includeSingleHost = true
         } else {
             if (params.fromDay) {
                 fromDate = today.minus(params.fromDay as int)
@@ -54,6 +56,9 @@ class BugController {
                 toDate = today.minus(params.toDay as int)
                 queryCond += " and h.dateReported<=:toDate"
                 queryParams += [toDate: toDate]
+            }
+            if (params.includeSingleHost) {
+                includeSingleHost = true
             }
         }
 
@@ -70,9 +75,13 @@ class BugController {
                 filter.display = "before ${dateFormat.format(toDate)}"
             }
         }
-
+        if (includeSingleHost) filter.display += " single-host"
         if (fromDate) filter.fromDate = dateFormat.format(fromDate)
         if (toDate) filter.toDate = dateFormat.format(toDate)
+
+        if (!includeSingleHost) {
+            queryCond += " and b.multiReport = true"
+        }
 
         final sql = """
                 select
