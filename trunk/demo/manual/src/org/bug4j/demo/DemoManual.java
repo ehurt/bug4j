@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Cedric Dandoy
+ * Copyright 2012 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -35,11 +35,6 @@ public class DemoManual {
             e.printStackTrace();
             Bug4jAgent.report("Just pretending something failed in class DemoManual", e);
         }
-
-        // The bug reports are enqueued and consumbed by a background thread.
-        // Since our demo application exits right away the bug has probably not been sent yet.
-        // Using Bug4jAgent.shutdown() will wait until all bugs have been sent.
-        Bug4jAgent.shutdown();
     }
 
     private static void foo() {
