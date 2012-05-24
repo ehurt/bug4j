@@ -14,7 +14,7 @@
   -    limitations under the License.
   --}%
 
-<%@ page import="org.bug4j.Hit; java.text.DateFormat; java.text.SimpleDateFormat; org.bug4j.Bug" contentType="text/html;charset=UTF-8" %>
+<%@ page import="org.bug4j.server.util.StringUtil; org.apache.commons.lang.StringUtils; org.bug4j.Hit; java.text.DateFormat; java.text.SimpleDateFormat; org.bug4j.Bug" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta name='layout' content='main'/>
@@ -47,7 +47,7 @@
     </script>
     <style type="text/css">
     .bug-row:hover {
-    ${ showHits?'cursor: pointer;':'' }
+    ${      showHits?'cursor: pointer;':''      }
     }
 
     </style>
@@ -113,13 +113,16 @@
                 <tr class="bug-row ${lineno == 0 && showHits ? ' bug-row-selected' : ''}" onclick="whenBugClicked(this, '${bug.bug_id}');">
                     <td>${bug.bug_id}</td>
                     <td>
+                        <%
+                            String bugTitle = StringUtil.chopLenghtyString((String) bug.bug_title, 60)
+                        %>
                         <g:if test="${true}">
                             <g:link action="bug" params="[id: bug.bug_id, sort: 'id', order: 'desc']">
-                                ${bug.bug_title}
+                                ${bugTitle}
                             </g:link>
                         </g:if>
                         <g:else>
-                            ${bug.bug_title}
+                            ${bugTitle}
                         </g:else>
                     </td>
                     <td>${bug.hitCount}</td>
