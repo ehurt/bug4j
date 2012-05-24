@@ -27,6 +27,10 @@ class StackText {
     @Column(length = 102400)
     Blob text
 
+    String textString
+
+    static transients = ['textString']
+
     static constraints = {
     }
 
@@ -39,14 +43,15 @@ class StackText {
     }
 
     String readStackString() {
-        String stackString = null
-        if (text) {
-            final int length = (int) text.length()
-            final bytes = text.getBytes(1, length)
-            stackString = new String(bytes)
+        if (!textString) {
+            if (text) {
+                final int length = (int) text.length()
+                final bytes = text.getBytes(1, length)
+                textString = new String(bytes)
+            }
         }
 
-        return stackString
+        return textString
     }
 
     void writeStackString(String stackString) {

@@ -32,7 +32,7 @@ hibernate {
 environments {
     development {
         dataSource {
-            switch ('oracle') {
+            switch ('derby') {
                 case 'h2':
                     dbCreate = "create-drop"
                     url = "jdbc:h2:mem:testDb;MVCC=TRUE"
