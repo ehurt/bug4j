@@ -135,12 +135,14 @@ class BugController {
 
         final bug = Bug.get(bugid)
         final hits = Hit.findAllByBug(bug, params)
+        hits*.loadStack()
         render(template: 'hits', model: [hits: hits])
     }
 
     def hit() {
         final hitid = params.hitid
         final Hit hit = Hit.get(hitid)
+        hit.loadStack()
 
         render(template: 'hit', model: [hit: hit])
     }
@@ -148,8 +150,12 @@ class BugController {
     def bug() {
         final id = params.id
         final bug = Bug.get(id)
+        def hits = Hit.findAllByBug(bug, params)
+        hits*.loadStack()
+
         return [
-                bug: bug
+                bug: bug,
+                hits: hits,
         ]
     }
 

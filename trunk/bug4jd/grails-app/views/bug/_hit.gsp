@@ -26,7 +26,7 @@
         <g:if test="${hit?.stack?.stackText}">
             <div id="stack">
                 <%
-                    String stackText = hit.stack?.stackText?.readStackString()
+                    String stackText = hit.stack?.stackText?.textString
                     String stackHtml = BugService.stackToHtml(stackText, hit.bug.app.appPackages*.packageName)
                 %>
                 ${stackHtml}

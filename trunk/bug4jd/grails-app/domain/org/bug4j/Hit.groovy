@@ -54,4 +54,13 @@ class Hit {
         }
         this.remoteAddr = remoteAddr
     }
+
+    /**
+     * Derby requires a transaction to read blobs
+     */
+    void loadStack() {
+        Hit.withTransaction {
+            stack?.stackText?.readStackString()
+        }
+    }
 }

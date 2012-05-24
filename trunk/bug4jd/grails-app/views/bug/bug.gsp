@@ -36,9 +36,7 @@
 <body>
 <div style="margin:5px 10px;">
     <div id="bug-title">${bug.id} - ${bug.title}</div>
-    <%
-        def hits = Hit.findAllByBug(bug, [sort: 'id', order: 'desc'])
-    %>
+
     <div id="hits">
         <g:render template="hits" model="[hits: hits]"/>
     </div>
