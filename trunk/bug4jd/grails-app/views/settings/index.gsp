@@ -13,24 +13,14 @@
   -    See the License for the specific language governing permissions and
   -    limitations under the License.
   --}%
-
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta name='layout' content='main'/>
-    <title>Edit User</title>
-    <g:set var="entityName" value="${message(code: 'user.label', default: 'User')}"/>
+    <title>Settings</title>
 </head>
 
 <body>
-<div class="nav" role="navigation">
-    <ul>
-        <li><a class="home" href="${createLink(controller: 'admin')}"><g:message code="default.adminHome.label"/></a></li>
-        <li><g:link class="list" action="list"><g:message code="default.list.label" args="[entityName]"/></g:link></li>
-        <li><g:link class="delete" action="delete" id="${userInstance.id}"><g:message code="default.button.delete.label" args="['User']"/></g:link></li>
-    </ul>
-</div>
-
 <g:if test="${flash.message}">
     <div class="message" role="status">${flash.message}</div>
 </g:if>
@@ -41,19 +31,34 @@
         </g:eachError>
     </ul>
 </g:hasErrors>
+<h1>Settings</h1>
 
-<g:form action="save" role="main">
-    <fieldset class="form">
-        <g:render template="form"/>
-    </fieldset>
-    <fieldset class="buttons">
-        <g:submitButton name="create" class="save" value="${
-            userInstance.id ?
-            message(code: 'default.button.update.label', default: 'Update') :
-            message(code: 'default.button.create.label', default: 'Create')
-        }"/>
-    </fieldset>
-</g:form>
+<div style="width: 500px;margin-left: 100px;">
+    <g:form name="edit" method="post">
 
+        <div class="fieldcontain">
+            <label for="username">
+                <g:message code="user.username.label" default="Name:"/>
+            </label>
+            ${userInstance?.username}
+        </div>
+
+        <div class="fieldcontain ${hasErrors(bean: userInstance, field: 'password', 'error')} ">
+            <label for="password">
+                <g:message code="user.password.label" default="Password:"/>
+            </label>
+            <g:passwordField name="password" value="${displayPassword}"/>
+        </div>
+
+        <div class="fieldcontain ${hasErrors(bean: userInstance, field: 'email', 'error')} ">
+            <label for="email">
+                <g:message code="user.email.label" default="Email:"/>
+            </label>
+            <g:textField name="email" value="${userInstance.email}"/>
+        </div>
+
+        <g:actionSubmit action="index" value="Update"/>
+    </g:form>
+</div>
 </body>
 </html>

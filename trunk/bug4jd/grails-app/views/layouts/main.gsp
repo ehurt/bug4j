@@ -58,6 +58,16 @@
         padding-right: 2em;
         vertical-align: middle;
     }
+
+    #banner-user-menu {
+        display: none;
+        position: absolute;
+        top: 2em;
+        right: 10em;
+        border: 1px solid #000000;
+        height: 5em;
+        background: #ffffff;
+    }
     </style>
     <g:layoutHead/>
     <r:layoutResources/>
@@ -73,7 +83,22 @@
             <td id="banner-appname-td">
                 ${app?.label}
             </td>
-            <td id="banner-last-td" style="width:100%;"><g:link controller="admin">Administration</g:link></td>
+            <td id="banner-last-td" style="width:100%;">
+                <sec:ifLoggedIn>
+                    Hi <g:link controller="settings"><sec:username/></g:link>
+
+                    <div id="banner-user-menu">
+                        <g:link controller="logout">Log out</g:link>
+                    </div>
+                    <sec:ifAllGranted roles="ROLE_ADMIN">
+                        |
+                        <g:link controller="admin">Administration</g:link>
+                    </sec:ifAllGranted>
+                </sec:ifLoggedIn>
+                <sec:ifNotLoggedIn>
+                    <g:link controller="login" action="auth" params="['spring-security-redirect': createLink(params: params)]">Log in</g:link>
+                </sec:ifNotLoggedIn>
+            </td>
         </tr>
     </table>
 </div>

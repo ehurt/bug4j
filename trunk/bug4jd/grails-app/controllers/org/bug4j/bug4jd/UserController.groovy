@@ -13,10 +13,14 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-
+package org.bug4j.bug4jd
+import grails.plugins.springsecurity.Secured
 import org.bug4j.User
 
+@Secured(['ROLE_ADMIN'])
 class UserController {
+    public static final String DUMMY_PASSWORD = "***************"
+
     static defaultAction = "list"
 
     def index() {
@@ -41,8 +45,11 @@ class UserController {
     def edit() {
         final id = params.id
         final User user = User.get(id)
+
+        final authorities = user.getAuthorities()*.authority
         return [
-                userInstance: user
+                userInstance: user,
+                authorities: authorities,
         ]
     }
 
@@ -51,6 +58,9 @@ class UserController {
         final id = params.id
         if (id) {
             userInstance = User.get(id)
+            if (params.password == DUMMY_PASSWORD) {
+                params.remove('password')
+            }
             userInstance.properties = params
         } else {
             userInstance = new User(params)

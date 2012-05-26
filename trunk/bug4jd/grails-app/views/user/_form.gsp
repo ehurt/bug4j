@@ -16,7 +16,7 @@
 
 
 
-<%@ page import="org.bug4j.User" %>
+<%@ page import="org.bug4j.Role; org.bug4j.User" %>
 <g:hiddenField name="id" value="${userInstance?.id}"/>
 
 <div class="fieldcontain ${hasErrors(bean: userInstance, field: 'username', 'error')} ">
@@ -30,7 +30,7 @@
     <label for="password">
         <g:message code="user.password.label" default="Password"/>
     </label>
-    <g:textField name="password" value="${userInstance?.password}"/>
+    <g:passwordField name="password" value="${org.bug4j.bug4jd.UserController.DUMMY_PASSWORD}"/>
 </div>
 
 <div class="fieldcontain ${hasErrors(bean: userInstance, field: 'enabled', 'error')} ">
@@ -38,5 +38,12 @@
         <g:message code="user.enabled.label" default="Enabled"/>
     </label>
     <g:checkBox name="enabled" value="${userInstance?.enabled}"/>
+</div>
+
+<div class="fieldcontain ${hasErrors(bean: userInstance, field: 'enabled', 'error')} ">
+    <label for="admin">
+        <g:message code="user.admin.label" default="Administrator"/>
+    </label>
+    <g:checkBox name="admin" value="${authorities.contains(Role.ADMIN)}"/>
 </div>
 
