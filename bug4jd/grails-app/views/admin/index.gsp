@@ -76,6 +76,7 @@
     <h1>Administration</h1>
     <ul>
         <li><g:link controller="application">Applications</g:link></li>
+        <li><g:link controller="user">Users</g:link></li>
         <li>
             <g:link onclick="toggleDiv('#imp-div');return false;">Import</g:link>
             <div id="imp-div" class="expandable">

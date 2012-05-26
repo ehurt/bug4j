@@ -14,9 +14,11 @@
  *    limitations under the License.
  */
 
+import grails.plugins.springsecurity.Secured
 import org.bug4j.App
 import org.bug4j.AppPackages
 
+@Secured(['ROLE_ADMIN'])
 class ApplicationController {
 
     def index() {

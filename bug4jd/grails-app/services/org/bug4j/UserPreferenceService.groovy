@@ -23,14 +23,16 @@ class UserPreferenceService {
     def springSecurityService
 
     String getStringPreference(String key) {
+        String ret = DEFAULT_PREFS[key]
         final User user = (User) springSecurityService.getCurrentUser()
         if (user) {
             // TODO: This has not been tested
             final preference = user.preferences.find {it.key == key}
-            return preference.value
-        } else {
-            return DEFAULT_PREFS[key]
+            if (preference) {
+                ret = preference.value
+            }
         }
+        return ret
     }
 
     boolean getBooleanPreference(String key) {

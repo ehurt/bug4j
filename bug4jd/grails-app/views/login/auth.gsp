@@ -17,7 +17,7 @@
   -    limitations under the License.
   --}%
 
-<g:message code="springSecurity.login.title"/></title>
+        <g:message code="springSecurity.login.title"/></title>
     <style type='text/css' media='screen'>
     #login {
         margin: 15px 0px;
@@ -110,6 +110,8 @@
         </g:if>
 
         <form action='${postUrl}' method='POST' id='loginForm' class='cssform' autocomplete='off'>
+            <input type='hidden' name='spring-security-redirect' value='${params['spring-security-redirect']}'/>
+
             <p>
                 <label for='username'><g:message code="springSecurity.login.username.label"/>:</label>
                 <input type='text' class='text_' name='j_username' id='username'/>

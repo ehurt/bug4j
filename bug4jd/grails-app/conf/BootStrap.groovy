@@ -14,8 +14,7 @@
  *    limitations under the License.
  */
 
-import org.bug4j.App
-import org.bug4j.AppPackages
+import org.bug4j.*
 
 class BootStrap {
 
@@ -25,6 +24,15 @@ class BootStrap {
             final appPackages = new AppPackages(app: app, packageName: 'org.bug4j')
             app.addToAppPackages(appPackages)
             app.save()
+        }
+
+        if (!User.count) {
+            final user = new User(username: 'bug4j', password: 'bug4j', enabled: true)
+            final role = new Role(authority: Role.ADMIN)
+            final userRole = new UserRole(user: user, role: role)
+            user.save(true)
+            role.save(true)
+            userRole.save(true)
         }
     }
 

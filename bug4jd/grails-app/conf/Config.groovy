@@ -113,6 +113,7 @@ log4j = {
 grails.plugins.springsecurity.userLookup.userDomainClassName = 'org.bug4j.User'
 grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'org.bug4j.UserRole'
 grails.plugins.springsecurity.authority.className = 'org.bug4j.Role'
+grails.plugins.springsecurity.anon.userAttribute = 'anonymousUser, ROLE_ANONYMOUS'
 
 // CDA
 grails.app.context = '/'

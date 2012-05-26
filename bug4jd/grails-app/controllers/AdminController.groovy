@@ -13,11 +13,14 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
+import grails.plugins.springsecurity.Secured
 import org.bug4j.App
 
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
+@Secured(['ROLE_ADMIN'])
 class AdminController {
 
     def bugService

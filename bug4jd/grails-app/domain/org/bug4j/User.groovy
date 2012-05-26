@@ -32,7 +32,7 @@ class User {
     static constraints = {
         username(blank: false, unique: true)
         password(blank: false)
-        email(nullable: true)
+        email(nullable: true, email: true)
         lastSignedIn(nullable: true)
     }
 
