@@ -126,7 +126,7 @@ class BugService {
     /**
      * Reports a bug
      */
-    def reportBug(long sessionId, String appCode, String message, long dateReported, String user, String remoteAddr, String stackString) {
+    long reportBug(long sessionId, String appCode, String message, long dateReported, String user, String remoteAddr, String stackString) {
 
         if (sessionId == null) {
             throw new IllegalArgumentException('Invalid request parameters')
@@ -150,7 +150,7 @@ class BugService {
         reportBug(clientSession, app, message, dateReported, user, remoteAddr, stackString)
     }
 
-    def reportBug(ClientSession clientSession, App app, String message, long dateReported, String user, String remoteAddr, String stackString) {
+    long reportBug(ClientSession clientSession, App app, String message, long dateReported, String user, String remoteAddr, String stackString) {
 
         final List<String> stackLines = stackString ? TextToLines.toLineList(stackString.trim()) : null;
         if (message) {
@@ -256,11 +256,13 @@ class BugService {
 
     private void testForMultiReports(Bug bug, String remoteAddr) {
         if (!bug.multiReport) {
-            final hitFromOtherAddr = Hit.executeQuery("from Hit h where h.bug=:bug and h.remoteAddr != :remoteAddr",
-                    [bug: bug, remoteAddr: remoteAddr])
-            if (hitFromOtherAddr) {
-                bug.multiReport = true
-                bug.save()
+            if (remoteAddr) { // if remoteAddr is null we can't tell
+                final hitFromOtherAddr = Hit.executeQuery("from Hit h where h.bug=:bug and h.remoteAddr != :remoteAddr",
+                        [bug: bug, remoteAddr: remoteAddr])
+                if (hitFromOtherAddr) {
+                    bug.multiReport = true
+                    bug.save()
+                }
             }
         }
     }
@@ -275,25 +277,28 @@ class BugService {
         if (stackLines) {
             final List<String> thisCauses = stackAnalyzer.getCauses(stackLines);
             final List<Bug> bugs = Bug.findAllByAppAndTitle(app, title)
-            for (Bug bug : bugs) {
-                List<Hit> hits = bug.hits.sort {it.dateReported}.reverse()
-                Bug ret = hits.findResult {Hit hit ->
-                    final thatStack = hit.stack
-                    List<String> thatCauses = null
-                    final String thatStackString = thatStack?.stackText?.readStackString()
-                    if (thatStackString) {
-                        final List<String> thatStackLines = TextToLines.toLineList(thatStackString);
-                        thatCauses = stackAnalyzer.getCauses(thatStackLines);
+            Hit.withTransaction {
+                for (Bug bug : bugs) {
+                    List<Hit> hits = bug.hits.sort {it.dateReported}.reverse()
+                    Bug ret = hits.findResult {Hit hit ->
+                        final thatStack = hit.stack
+                        List<String> thatCauses = null
+
+                        final String thatStackString = thatStack?.stackText?.readStackString()
+                        if (thatStackString) {
+                            final List<String> thatStackLines = TextToLines.toLineList(thatStackString);
+                            thatCauses = stackAnalyzer.getCauses(thatStackLines);
+                        }
+                        if (thisCauses == null && thatCauses == null) {
+                            return bug;
+                        }
+                        if (thisCauses != null && thisCauses.equals(thatCauses)) {
+                            return bug;
+                        }
                     }
-                    if (thisCauses == null && thatCauses == null) {
-                        return bug;
+                    if (ret) {
+                        return ret;
                     }
-                    if (thisCauses != null && thisCauses.equals(thatCauses)) {
-                        return bug;
-                    }
-                }
-                if (ret) {
-                    return ret;
                 }
             }
         } else {

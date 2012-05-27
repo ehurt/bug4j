@@ -154,7 +154,9 @@ public class Exporter {
         xmlStreamWriter.writeAttribute("code", app.getCode());
         exportPackages(xmlStreamWriter, app);
         exportSessions(xmlStreamWriter, app);
-        exportBugs(xmlStreamWriter, app);
+        App.withTransaction { // Need a transaction for derby to read the stack traces
+            exportBugs(xmlStreamWriter, app);
+        }
         xmlStreamWriter.writeEndElement();
     }
 

@@ -17,10 +17,7 @@
 import org.bug4j.server.util.DerbyUtil
 
 dataSource {
-    driverClassName = "org.h2.Driver"
     pooled = true
-    username = "sa"
-    password = ""
 //    loggingSql = true
 }
 hibernate {
@@ -34,8 +31,11 @@ environments {
         dataSource {
             switch ('derby') {
                 case 'h2':
+                    driverClassName = "org.h2.Driver"
                     dbCreate = "create-drop"
                     url = "jdbc:h2:mem:testDb;MVCC=TRUE"
+                    username = "sa"
+                    password = ""
                     break;
                 case 'oracle':
                     driverClassName = "oracle.jdbc.OracleDriver"
@@ -66,8 +66,11 @@ environments {
     }
     test {
         dataSource {
+            driverClassName = "org.h2.Driver"
             dbCreate = "update"
             url = "jdbc:h2:mem:testDb;MVCC=TRUE"
+            username = "sa"
+            password = ""
         }
     }
     production {

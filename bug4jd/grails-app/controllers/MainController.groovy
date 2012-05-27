@@ -77,4 +77,39 @@ class MainController {
             e.printStackTrace()
         }
     }
+
+    def generateTestData() {
+        try {
+            def exceptionTexts = (1..10).collect {createRandomStackTrace()}
+            def remoteAddresses = (1..10).collect {'192.168.0.' + it}
+            def nowInMs = System.currentTimeMillis()
+            def reportDates = (0..60).collect {nowInMs - (1000L * 60 * 60 * 24 * it)}
+
+            final r = new Random()
+            (1..100).each {
+                final buildDate = System.currentTimeMillis()
+                final exceptionText = exceptionTexts[r.nextInt(exceptionTexts.size())]
+                final remoteAddress = remoteAddresses[r.nextInt(remoteAddresses.size())]
+                final reportDate = reportDates[r.nextInt(reportDates.size())]
+                final clientSession = bugService.createSession('bug4jDemo', '1.0', buildDate, 'N', 123, remoteAddress)
+                bugService.reportBug(clientSession.id, 'bug4jDemo', 'test', reportDate, 'cdandoy', remoteAddress, exceptionText)
+            }
+            render(text: 'Done', contentType: 'text/plain')
+
+        } catch (Exception e) {
+            e.printStackTrace()
+        }
+    }
+
+    private static String createRandomStackTrace() {
+        final random = new Random()
+        final randomPart = (1..10).collect {
+            "\n\tat test.t(test.java:${random.nextInt(100) + 10})"
+        }.join('')
+        String ret = "Exception in thread \"Thread-${random.nextInt(100)}\" java.lang.NullPointerException\n" +
+                "\tat java.lang.System.arraycopy(Native Method)" +
+                randomPart +
+                '\n\tat test.main(test.java:10)'
+        return ret
+    }
 }
