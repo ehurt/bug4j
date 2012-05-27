@@ -45,12 +45,6 @@
         }
 
     </script>
-    <style type="text/css">
-    .bug-row:hover {
-    ${      showHits?'cursor: pointer;':''      }
-    }
-
-    </style>
 </head>
 
 <body>
