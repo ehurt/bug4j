@@ -19,7 +19,7 @@
     <meta name='layout' content='main'/>
     <title>Main</title>
     <script type="text/javascript">
-        function preImport(ref, text) {
+        function preRun(ref, text) {
             $("#" + ref).text(text)
         }
     </script>
@@ -27,18 +27,23 @@
 
 <body>
 <div style="margin: 30px 0 0 30px">
-    <g:remoteLink action="testImport" before="preImport('testImport','Importing');" update="testImport">Import D:/bug4j/bugs.zip</g:remoteLink>
+    <g:remoteLink action="testImport" before="preRun('testImport','Importing');" update="testImport">Import D:/bug4j/bugs.zip</g:remoteLink>
     <span id="testImport" style="margin-left: 10px;"></span>
 </div>
 
 <div style="margin: 30px 0 0 30px">
-    <g:remoteLink action="testImport2" before="preImport('testImport2','Importing');" update="testImport2">Import C:/Users/dandoy/Downloads/bug4j/Discovery Manager.xml</g:remoteLink>
+    <g:remoteLink action="testImport2" before="preRun('testImport2','Importing');" update="testImport2">Import C:/Users/dandoy/Downloads/bug4j/Discovery Manager.xml</g:remoteLink>
     <span id="testImport2" style="margin-left: 10px;"></span>
 </div>
 
 <div style="margin: 30px 0 0 30px">
-    <g:remoteLink action="generateStats" before="preImport('generateStats','Running');" update="generateStats">Generate statistics</g:remoteLink>
+    <g:remoteLink action="generateStats" before="preRun('generateStats','Running');" update="generateStats">Generate statistics</g:remoteLink>
     <span id="generateStats" style="margin-left: 10px;"></span>
+</div>
+
+<div style="margin: 30px 0 0 30px">
+    <g:remoteLink action="generateTestData" before="preRun('generateTestData','Running');" update="generateTestData">Generate test data</g:remoteLink>
+    <span id="generateTestData" style="margin-left: 10px;"></span>
 </div>
 </body>
 </html>

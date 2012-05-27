@@ -68,7 +68,7 @@ class StatsService {
             def dayReported = it[2] as int
             int count = it[3] as int
             final calendar = new GregorianCalendar(yearReported, monthReported - 1, dayReported)
-            final int thenInDays = calendar.timeInMillis / 1000 / 60 / 60 / 24
+            final int thenInDays = calendar.timeInMillis / (1000L * 60 * 60 * 24)
             stats[thenInDays] = count
         }
 
@@ -125,8 +125,11 @@ class StatsService {
      * Fill the stats for the bug or hit graph
      */
     private def getBugsOrHits(App app, int daysBack, String countType) {
-        final int nowInDays = System.currentTimeMillis() / 1000 / 60 / 60 / 24
+        final long dayInMs = 1000 * 60 * 60 * 24
+        final int nowInDays = System.currentTimeMillis() / dayInMs
         final int startInDays = nowInDays - daysBack
+
+        println "Today is day#${nowInDays}"
 
         def ret = (0..daysBack).collect {0}
         def statCounts = StatCount.findAllByAppAndCountTypeAndDayGreaterThanEquals(app, countType, startInDays)
@@ -134,6 +137,7 @@ class StatsService {
             final day = statHitCount.day
             final hitCount = statHitCount.countValue
             final daysAgo = nowInDays - day
+            println "Hit count for day#${day}:${hitCount}"
             ret[daysBack - daysAgo] = hitCount
         }
         return ret
