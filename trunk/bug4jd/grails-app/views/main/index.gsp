@@ -20,30 +20,41 @@
     <title>Main</title>
     <script type="text/javascript">
         function preRun(ref, text) {
+            $(".result").text('')
             $("#" + ref).text(text)
         }
     </script>
+    <style type="text/css">
+    .result {
+        margin-left: 10px;
+    }
+    </style>
 </head>
 
 <body>
 <div style="margin: 30px 0 0 30px">
     <g:remoteLink action="testImport" before="preRun('testImport','Importing');" update="testImport">Import D:/bug4j/bugs.zip</g:remoteLink>
-    <span id="testImport" style="margin-left: 10px;"></span>
+    <span id="testImport" class="result"></span>
 </div>
 
 <div style="margin: 30px 0 0 30px">
     <g:remoteLink action="testImport2" before="preRun('testImport2','Importing');" update="testImport2">Import C:/Users/dandoy/Downloads/bug4j/Discovery Manager.xml</g:remoteLink>
-    <span id="testImport2" style="margin-left: 10px;"></span>
+    <span id="testImport2" class="result"></span>
 </div>
 
 <div style="margin: 30px 0 0 30px">
     <g:remoteLink action="generateStats" before="preRun('generateStats','Running');" update="generateStats">Generate statistics</g:remoteLink>
-    <span id="generateStats" style="margin-left: 10px;"></span>
+    <span id="generateStats" class="result"></span>
 </div>
 
 <div style="margin: 30px 0 0 30px">
     <g:remoteLink action="generateTestData" before="preRun('generateTestData','Running');" update="generateTestData">Generate test data</g:remoteLink>
-    <span id="generateTestData" style="margin-left: 10px;"></span>
+    <span id="generateTestData" class="result"></span>
+</div>
+
+<div style="margin: 30px 0 0 30px">
+    <g:remoteLink action="deleteDemoBugs" before="preRun('deleteDemoBugs','Running');" update="deleteDemoBugs">Clear demo bugs</g:remoteLink>
+    <span id="deleteDemoBugs" class="result"></span>
 </div>
 </body>
 </html>

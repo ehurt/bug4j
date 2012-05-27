@@ -136,7 +136,7 @@
     <ul>
         <g:each in="${apps}" var="app">
             <li class="app-sel ${appStats?.app?.id == app.id ? 'app-sel-selected' : ''}">
-                <g:link params="[appCode: app.code, daysBack: daysBack]" class="app-sel-link">
+                <g:link params="[a: app.code, daysBack: daysBack]" class="app-sel-link">
                     ${app.label}
                 </g:link>
             </li>
@@ -150,14 +150,14 @@
         <div class="app-section">
             <div id="app-title">
                 <span id="app-title-span">${appStats.app.label}</span>
-                <g:link controller="bug" params="[appCode: appStats.app.code]" class="app-title-browse-link">(browse)</g:link>
+                <g:link controller="bug" params="[a: appStats.app.code]" class="app-title-browse-link">(browse)</g:link>
             </div>
 
             <div id="app-daysback">
                 Statistics over the last:
                 <g:each in="${[7, 14, 30, 360]}" var="it" status="lineno">
                     <g:if test="${it != daysBack}">
-                        ${lineno ? ',' : ''}<g:link params="[appCode: appStats.app.code, daysBack: it]">${it}</g:link>
+                        ${lineno ? ',' : ''}<g:link params="[a: appStats.app.code, daysBack: it]">${it}</g:link>
                     </g:if>
                     <g:else>
                         ${lineno ? ',' : ''}<span style="font-weight: bold;">${it}</span>
@@ -189,27 +189,27 @@
                         <tr>
                             <td>New Bugs:</td>
                             <td>
-                                <g:link controller="bug" params="[appCode: appStats.app.code, fromDay: 0]" class="${appStats.bugCount.todayHot ? 'stat-hot' : ''}">${appStats.bugCount.today}</g:link>
+                                <g:link controller="bug" params="[a: appStats.app.code, fromDay: 0]" class="${appStats.bugCount.todayHot ? 'stat-hot' : ''}">${appStats.bugCount.today}</g:link>
                             </td>
                             <td>
-                                <g:link controller="bug" params="[appCode: appStats.app.code, fromDay: 1, toDay: 0]" class="${appStats.bugCount.yesterdayHot ? 'stat-hot' : ''}">${appStats.bugCount.yesterday}</g:link>
+                                <g:link controller="bug" params="[a: appStats.app.code, fromDay: 1, toDay: 0]" class="${appStats.bugCount.yesterdayHot ? 'stat-hot' : ''}">${appStats.bugCount.yesterday}</g:link>
                             </td>
                             <td>${appStats.bugCount.avg}</td>
                             <td>
-                                <g:link controller="bug" params="[appCode: appStats.app.code, fromDay: daysBack]">${appStats.bugCount.total}</g:link>
+                                <g:link controller="bug" params="[a: appStats.app.code, fromDay: daysBack]">${appStats.bugCount.total}</g:link>
                             </td>
                         </tr>
                         <tr>
                             <td>New Hits:</td>
                             <td>
-                                <g:link controller="bug" params="[appCode: appStats.app.code, fromDay: 0]" class="${appStats.hitCount.todayHot ? 'stat-hot' : ''}">${appStats.hitCount.today}</g:link>
+                                <g:link controller="bug" params="[a: appStats.app.code, fromDay: 0]" class="${appStats.hitCount.todayHot ? 'stat-hot' : ''}">${appStats.hitCount.today}</g:link>
                             </td>
                             <td class="${appStats.hitCount.yesterdayHot ? 'stat-hot' : ''}">
-                                <g:link controller="bug" params="[appCode: appStats.app.code, fromDay: 1, toDay: 0]" class="${appStats.hitCount.yesterdayHot ? 'stat-hot' : ''}">${appStats.hitCount.yesterday}</g:link>
+                                <g:link controller="bug" params="[a: appStats.app.code, fromDay: 1, toDay: 0]" class="${appStats.hitCount.yesterdayHot ? 'stat-hot' : ''}">${appStats.hitCount.yesterday}</g:link>
                             </td>
                             <td>${appStats.hitCount.avg}</td>
                             <td>
-                                <g:link controller="bug" params="[appCode: appStats.app.code, fromDay: daysBack]">${appStats.hitCount.total}</g:link>
+                                <g:link controller="bug" params="[a: appStats.app.code, fromDay: daysBack]">${appStats.hitCount.total}</g:link>
                             </td>
                         </tr>
                         </tbody>

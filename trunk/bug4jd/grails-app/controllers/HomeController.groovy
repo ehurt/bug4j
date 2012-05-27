@@ -20,7 +20,7 @@ class HomeController {
     def statsService
 
     def index() {
-        def appCode = params.appCode
+        def appCode = params.a
         int daysBack = params.daysBack ? params.daysBack as int : 7
         statsService.generateStats(false)
 

@@ -104,12 +104,12 @@ class MainController {
     private static String createRandomStackTrace() {
         final random = new Random()
         final randomPart = (1..10).collect {
-            "\n\tat test.t(test.java:${random.nextInt(100) + 10})"
+            "\n\tat org.bug4j.test.t(test.java:${random.nextInt(100) + 10})"
         }.join('')
         String ret = "Exception in thread \"Thread-${random.nextInt(100)}\" java.lang.NullPointerException\n" +
                 "\tat java.lang.System.arraycopy(Native Method)" +
                 randomPart +
-                '\n\tat test.main(test.java:10)'
+                '\n\tat org.bug4j.main(test.java:10)'
         return ret
     }
 }
