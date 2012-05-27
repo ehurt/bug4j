@@ -29,7 +29,7 @@
                     String stackText = hit.stack?.stackText?.textString
                     String stackHtml = BugService.stackToHtml(stackText, hit.bug.app.appPackages*.packageName)
                 %>
-                ${stackHtml}
+                <pre>${stackHtml}</pre>
             </div>
         </g:if>
         <g:else>
