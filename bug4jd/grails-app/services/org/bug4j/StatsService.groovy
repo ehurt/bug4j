@@ -129,15 +129,12 @@ class StatsService {
         final int nowInDays = System.currentTimeMillis() / dayInMs
         final int startInDays = nowInDays - daysBack
 
-        println "Today is day#${nowInDays}"
-
         def ret = (0..daysBack).collect {0}
         def statCounts = StatCount.findAllByAppAndCountTypeAndDayGreaterThanEquals(app, countType, startInDays)
         statCounts.each {StatCount statHitCount ->
             final day = statHitCount.day
             final hitCount = statHitCount.countValue
             final daysAgo = nowInDays - day
-            println "Hit count for day#${day}:${hitCount}"
             ret[daysBack - daysAgo] = hitCount
         }
         return ret
