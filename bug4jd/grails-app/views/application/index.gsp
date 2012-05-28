@@ -41,8 +41,8 @@
     <h1>Applications</h1>
     <table>
         <tr>
-            <th>Label</th>
-            <th>Code</th>
+            <g:sortableColumn property="label" title="${message(code: 'app.label.label', default: 'Name')}" params="${params}"/>
+            <g:sortableColumn property="code" title="${message(code: 'app.code.label', default: 'Code')}" params="${params}"/>
         </tr>
         <g:each in="${apps}" var="app">
             <tr>
