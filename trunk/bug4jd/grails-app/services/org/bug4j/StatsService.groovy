@@ -15,29 +15,48 @@
  */
 package org.bug4j
 
+import groovy.time.TimeCategory
 import org.bug4j.server.util.DateUtil
 
 class StatsService {
 
     def generateStats(boolean forceRecalc) {
-        App.list().each {
-            if (forceRecalc) {
-                Stat.findByApp(it)?.delete()
+        use(TimeCategory) {
+            final anHourAgo = 1.hour.ago
+            App.list().each {app ->
+                app.withTransaction {
+                    app.lock()
+                    boolean update = false
+                    Date since = new Date(0)
+                    if (forceRecalc) {
+                        update = true
+                    } else {
+                        final Stat stat = Stat.findByApp(app)
+                        if (!stat || stat.dateLastGenerated < anHourAgo) {
+                            update = true
+                            if (stat) {
+                                since = stat.dateLastGenerated
+                            }
+                        }
+                    }
+                    if (update) {
+                        generateStats(app, since)
+                    }
+                }
             }
-            generateStats(it)
         }
     }
 
-    def generateStats(App app) {
+    def generateStats(App app, Date since) {
         try {
             Stat stat = Stat.findByApp(app)
             if (!stat) {
-                stat = new Stat(dateLastGenerated: new Date(0))
+                stat = new Stat()
                 stat.app = app
             }
-            generateStatsCount(app, stat.dateLastGenerated)
             stat.dateLastGenerated = new Date()
-            stat.save(failOnError: true)
+            generateStatsCount(app, since)
+            stat.save()
         } catch (Exception e) {
             log.error("Failed to generate statistics", e)
         }
