@@ -72,6 +72,11 @@ class MainController {
             final app = App.findByCode('bug4jDemo')
             app.bugs*.delete()
             app.bugs.clear()
+            app.stats*.delete()
+            app.stats.clear()
+            app.statCount*.delete()
+            app.statCount.clear()
+            app.save()
             render text: 'Bugs deleted'
         } catch (Exception e) {
             e.printStackTrace()
