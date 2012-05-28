@@ -80,13 +80,15 @@ class MainController {
 
     def generateTestData() {
         try {
+            final t0 = System.currentTimeMillis()
+            final nbrReports = 100
             def exceptionTexts = (1..10).collect {createRandomStackTrace()}
             def remoteAddresses = (1..10).collect {'192.168.0.' + it}
             def nowInMs = System.currentTimeMillis()
             def reportDates = (0..60).collect {nowInMs - (1000L * 60 * 60 * 24 * it)}
 
             final r = new Random()
-            (1..100).each {
+            (1..nbrReports).each {
                 final buildDate = System.currentTimeMillis()
                 final exceptionText = exceptionTexts[r.nextInt(exceptionTexts.size())]
                 final remoteAddress = remoteAddresses[r.nextInt(remoteAddresses.size())]
@@ -94,7 +96,8 @@ class MainController {
                 final clientSession = bugService.createSession('bug4jDemo', '1.0', buildDate, 'N', 123, remoteAddress)
                 bugService.reportBug(clientSession.id, 'bug4jDemo', 'test', reportDate, 'cdandoy', remoteAddress, exceptionText)
             }
-            render(text: 'Done', contentType: 'text/plain')
+            final t1 = System.currentTimeMillis()
+            render(text: "Generated ${nbrReports} reports in ${(t1 - t0) / 1000}s", contentType: 'text/plain')
 
         } catch (Exception e) {
             e.printStackTrace()

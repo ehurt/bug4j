@@ -26,12 +26,14 @@ class Bug {
     Date extinct
     Date unextinct
     boolean multiReport = false
+    double hot
 
     static constraints = {
         title(blank: false, maxSize: TITLE_SIZE)
         extinct(nullable: true)
         unextinct(nullable: true)
         strains(nullable: true)
+        hot(nullable: true)
     }
 
     static belongsTo = [

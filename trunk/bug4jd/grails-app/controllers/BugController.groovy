@@ -68,12 +68,13 @@ class BugController {
                     b.title as bug_title,
                     count(h.id) as hitCount,
                     min(h.dateReported) as firstHitDate,
-                    max(h.dateReported) as lastHitDate
+                    max(h.dateReported) as lastHitDate,
+                    b.hot
                 from Bug b, Hit h
                 where b.app=:app
                 and b=h.bug
                 ${queryCond}
-                group by b.id,b.title
+                group by b.id,b.title,b.hot
                 order by ${params.sort} ${params.order}
                 """
         final List list = Bug.executeQuery(sql, queryParams, [max: params.max, offset: params.offset])
@@ -93,6 +94,7 @@ class BugController {
                     'hitCount': it[2],
                     'firstHitDate': it[3],
                     'lastHitDate': it[4],
+                    hot: it[5]
             ]
         }
 

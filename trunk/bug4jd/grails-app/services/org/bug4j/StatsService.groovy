@@ -49,6 +49,7 @@ class StatsService {
         Date adjustedSince = DateUtil.adjustToDayBoundary(since, DateUtil.TimeAdjustType.BEGINNING_OF_DAY)
         generateStatsBugCount(app, adjustedSince)
         generateStatsHitCount(app, adjustedSince)
+        generateHot(app, adjustedSince)
     }
 
     private def generateStatsBugCount = {App app, Date adjustedSince ->
@@ -173,5 +174,36 @@ class StatsService {
             }
         }
         return ret
+    }
+
+    private def generateHot = {App app, Date adjustedSince ->
+        long dayInMs = 1000L * 24 * 60 * 60
+        long now = System.currentTimeMillis()
+        long range = dayInMs * 30L
+        long oldest = now - range
+        double boost = 7
+
+        // Count how many hosts have reported over the range
+        final q = Hit.executeQuery('select count(h.remoteAddr) from Hit h where h.dateReported>:date',
+                [date: new Date(now - range)])
+        final long nbrHosts = (long) q[0]
+
+        app.bugs.each {Bug bug ->
+            double weight = 0
+            def hosts = new HashSet<String>()
+            Hit.findAllByBugAndDateReportedGreaterThan(bug, new Date(oldest)).each {Hit hit ->
+                final dateReported = hit.dateReported.getTime()
+                final msAgo = (now - dateReported) / range
+                // = 1-1/(1+EXP(-(B1*2*$D$1)+$D$1))
+                final thisWeight = 1D - 1D / (1 + Math.exp(-(msAgo * boost * 2) + boost))
+
+//                println "   hit ${hit.id} - ${msAgo} - ${thisWeight} - ${hit.dateReported}"
+                weight += thisWeight
+                hosts.add(hit.remoteAddr)
+            }
+            weight *= hosts.size() / nbrHosts
+            bug.hot = weight
+            bug.save()
+        }
     }
 }
