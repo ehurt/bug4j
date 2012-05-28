@@ -27,7 +27,7 @@ class HomeController {
         def appStats = [:]
 
         def app = null
-        final apps = App.list()
+        final apps = App.list([sort: 'label', order: 'asc'])
         if (apps) {
             if (appCode) {
                 app = App.findByCode(appCode)

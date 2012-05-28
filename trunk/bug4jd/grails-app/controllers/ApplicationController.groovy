@@ -22,6 +22,8 @@ import org.bug4j.AppPackages
 class ApplicationController {
 
     def index() {
+        if (!params.sort) params.sort = 'label'
+        if (!params.order) params.order = 'asc'
         final apps = App.list(params)
         final total = App.count
         return [
