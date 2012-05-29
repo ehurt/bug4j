@@ -44,9 +44,7 @@ public class FullStackHashCalculator {
             final byte[] bytes = messageDigest.digest();
             final BigInteger bigInt = new BigInteger(1, bytes);
             ret = bigInt.toString(36);
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        } catch (UnsupportedEncodingException e) {
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
         return ret;

@@ -277,7 +277,7 @@ class BugService {
         if (stackLines) {
             final List<String> thisCauses = stackAnalyzer.getCauses(stackLines);
             final List<Bug> bugs = Bug.findAllByAppAndTitle(app, title)
-            Hit.withTransaction {
+            return Hit.withTransaction {
                 for (Bug bug : bugs) {
                     List<Hit> hits = bug.hits.sort {it.dateReported}.reverse()
                     Bug ret = hits.findResult {Hit hit ->
