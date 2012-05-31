@@ -17,8 +17,6 @@
 package org.bug4j.client;
 
 import org.bug4j.common.FullStackHashCalculator;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -208,7 +206,6 @@ public class Bug4jAgent {
         }
     }
 
-    @NotNull
     private static String hash(ReportableEvent reportableEvent) {
         final String ret;
         final String[] throwableStrRep = reportableEvent.getThrowableStrRep();
@@ -225,7 +222,7 @@ public class Bug4jAgent {
      * @param message   An error message
      * @param throwable the exception to report
      */
-    public static void report(@Nullable String message, @Nullable Throwable throwable) {
+    public static void report(String message, Throwable throwable) {
         if (message != null || throwable != null) { // do not allow both to be null. We wouldn't have much to do
             final ReportableEvent reportableEvent = ReportableEvent.createReportableEvent(message, throwable);
             enqueue(reportableEvent);

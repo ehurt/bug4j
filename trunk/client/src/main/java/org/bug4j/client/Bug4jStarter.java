@@ -18,6 +18,7 @@ package org.bug4j.client;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -37,7 +38,8 @@ public final class Bug4jStarter {
 
     private void readDefaultSettings() {
         final Properties properties = readProperties();
-        for (String name : properties.stringPropertyNames()) {
+        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+            final String name = (String) entry.getKey();
             final String value = properties.getProperty(name);
             if ("server".equals(name)) {
                 setServerUrl(value);
