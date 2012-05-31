@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Cedric Dandoy
+ * Copyright 2012 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ public class Bug4jUncaughtExceptionHandler implements Thread.UncaughtExceptionHa
     private Bug4jUncaughtExceptionHandler() {
     }
 
-    @Override
     public void uncaughtException(Thread thread, Throwable throwable) {
         Bug4jAgent.report("Uncaught exception", throwable);
     }

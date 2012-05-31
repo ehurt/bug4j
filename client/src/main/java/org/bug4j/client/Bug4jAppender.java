@@ -51,13 +51,11 @@ public class Bug4jAppender extends AppenderSkeleton {
         }
     }
 
-    @Override
     public void close() {
         // Cannot shutdown the client because it may be locked by the log4j shutdown
         // Client.shutdown();
     }
 
-    @Override
     public boolean requiresLayout() {
         return false;
     }

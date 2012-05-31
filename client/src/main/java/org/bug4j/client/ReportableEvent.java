@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Cedric Dandoy
+ * Copyright 2012 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@
 package org.bug4j.client;
 
 import org.bug4j.common.TextToLines;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -28,35 +26,30 @@ class ReportableEvent {
     private final String[] _throwableStrRep;
     private final String _user;
 
-    public ReportableEvent(@Nullable String message, @Nullable String[] throwableStrRep, @Nullable String user) {
+    public ReportableEvent(String message, String[] throwableStrRep, String user) {
         _message = message;
         _throwableStrRep = throwableStrRep;
         _user = user;
     }
 
-    @Nullable
     public String getMessage() {
         return _message;
     }
 
-    @Nullable
     public String[] getThrowableStrRep() {
         return _throwableStrRep;
     }
 
-    @Nullable
     public String getUser() {
         return _user;
     }
 
-    @NotNull
-    public static ReportableEvent createReportableEvent(@Nullable String message, @Nullable Throwable throwable) {
+    public static ReportableEvent createReportableEvent(String message, Throwable throwable) {
         final String[] throwableStrRep = createStringRepresentation(throwable);
         final String user = System.getProperty("user.name", null);
         return new ReportableEvent(message, throwableStrRep, user);
     }
 
-    @Nullable
     private static String[] createStringRepresentation(Throwable throwable) {
         String[] ret = null;
         if (throwable != null) {
