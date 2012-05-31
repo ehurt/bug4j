@@ -48,4 +48,12 @@ class HomeController {
                 appStats: appStats,
         ]
     }
+
+    def refreshStatistics() {
+        def appCode = params.a
+        final app = App.findByCode(appCode)
+        statsService.generateStats(app, true)
+        flash.message = 'Statistics have been re-generated'
+        redirect(action: 'index')
+    }
 }

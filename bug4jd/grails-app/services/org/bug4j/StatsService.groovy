@@ -21,27 +21,30 @@ import org.bug4j.server.util.DateUtil
 class StatsService {
 
     def generateStats(boolean forceRecalc) {
+        App.list().each {app ->
+            generateStats(app, forceRecalc)
+        }
+    }
+
+    def generateStats(App app, boolean forceRecalc) {
         use(TimeCategory) {
             final anHourAgo = 1.hour.ago
-            App.list().each {app ->
-                app.withTransaction {
-                    app.lock()
-                    boolean update = false
-                    Date since = new Date(0)
-                    if (forceRecalc) {
+            app.withTransaction {
+                boolean update = false
+                Date since = new Date(0)
+                if (forceRecalc) {
+                    update = true
+                } else {
+                    final Stat stat = Stat.findByApp(app)
+                    if (!stat || stat.dateLastGenerated < anHourAgo) {
                         update = true
-                    } else {
-                        final Stat stat = Stat.findByApp(app)
-                        if (!stat || stat.dateLastGenerated < anHourAgo) {
-                            update = true
-                            if (stat) {
-                                since = stat.dateLastGenerated
-                            }
+                        if (stat) {
+                            since = stat.dateLastGenerated
                         }
                     }
-                    if (update) {
-                        generateStats(app, since)
-                    }
+                }
+                if (update) {
+                    generateStats(app, since)
                 }
             }
         }
@@ -75,7 +78,7 @@ class StatsService {
         final list = Hit.executeQuery("""select year(h.dateReported),month(h.dateReported),day(h.dateReported), count(distinct b.id)
                         from Hit h, Bug b
                         where b.app=?
-                        and b.multiReport = true
+                        ${app.multiHost ? 'and b.multiReport = true' : ''}
                         and b=h.bug
                         and h.dateReported >= ?
                         group by year(h.dateReported),month(h.dateReported),day(h.dateReported)""",
@@ -103,7 +106,7 @@ class StatsService {
         final list = Hit.executeQuery("""select year(h.dateReported),month(h.dateReported),day(h.dateReported), count(*)
                         from Hit h, Bug b
                         where b.app=?
-                        and b.multiReport = true
+                        ${app.multiHost ? 'and b.multiReport = true' : ''}
                         and b=h.bug
                         and h.dateReported >= ?
                         group by year(h.dateReported),month(h.dateReported),day(h.dateReported)""",

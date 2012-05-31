@@ -25,7 +25,7 @@ class Bug {
     String title
     Date extinct
     Date unextinct
-    boolean multiReport = false
+    boolean multiReport
     double hot
 
     static constraints = {

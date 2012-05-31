@@ -615,6 +615,11 @@ a.skip {
     clear: both;
 }
 
+/* Application */
+#app-pkg-div {
+    margin-top: 40px;
+}
+
 /* bugs */
 #bugs {
 }

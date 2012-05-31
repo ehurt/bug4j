@@ -33,6 +33,13 @@
     <g:textField name="code" value="${appInstance?.code}"/>
 </div>
 
+<div class="fieldcontain ${hasErrors(bean: appInstance, field: 'multiHost', 'error')} ">
+    <g:checkBox name="multiHost" value="${appInstance.multiHost}"/>
+    <label for="multiHost" style="width: auto;">
+        <g:message code="app.multiHost.label" default="Expects reports from multiple hosts"/>
+    </label>
+</div>
+
 <div id="app-pkg-div">
     <table style="width: auto;">
         <tr><td></td><td>Packages</td></tr>

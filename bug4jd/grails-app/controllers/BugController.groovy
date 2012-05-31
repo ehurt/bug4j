@@ -53,14 +53,18 @@ class BugController {
             }
         }
 
-        boolean includeSingleHost = false
+        boolean includeSingleHost
         if (params.includeSingleHost) {
             includeSingleHost = true
-            filter += "showSingleHost "
+        } else {
+            includeSingleHost = !selectedApp.multiHost
         }
-        if (!includeSingleHost) {
+        if (includeSingleHost) {
+            filter += "showSingleHost "
+        } else {
             queryCond += " and b.multiReport = true"
         }
+        params.includeSingleHost = includeSingleHost
 
         final sql = """
                 select

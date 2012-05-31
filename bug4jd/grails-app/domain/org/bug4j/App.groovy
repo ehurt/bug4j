@@ -22,6 +22,11 @@ class App {
 
     String label
     String code
+    /**
+     * Determines if we expect reports from multiple hosts.
+     * This influences not only the display but also the statistics.
+     */
+    boolean multiHost
 
     static constraints = {
         label blank: false, unique: true
