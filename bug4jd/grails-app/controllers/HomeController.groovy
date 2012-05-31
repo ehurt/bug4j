@@ -14,6 +14,7 @@
  *    limitations under the License.
  */
 
+import grails.plugins.springsecurity.Secured
 import org.bug4j.App
 
 class HomeController {
@@ -49,6 +50,7 @@ class HomeController {
         ]
     }
 
+    @Secured(['ROLE_ADMIN'])
     def refreshStatistics() {
         def appCode = params.a
         final app = App.findByCode(appCode)

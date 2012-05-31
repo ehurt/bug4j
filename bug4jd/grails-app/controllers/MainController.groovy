@@ -14,10 +14,10 @@
  *    limitations under the License.
  */
 
-
-
+import grails.plugins.springsecurity.Secured
 import org.bug4j.App
 
+@Secured(['ROLE_ADMIN'])
 class MainController {
     def bugService
     def statsService
