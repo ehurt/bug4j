@@ -26,6 +26,17 @@ class Bug {
     Date extinct
     Date unextinct
     boolean multiReport
+
+    /**
+     * The unique identified in an external 'bug database'
+     */
+    String reportedId
+
+    /**
+     * The value to display for an externally reported bug
+     */
+    String reportedLabel
+
     double hot
 
     static constraints = {
@@ -33,6 +44,8 @@ class Bug {
         extinct(nullable: true)
         unextinct(nullable: true)
         strains(nullable: true)
+        reportedId(nullable: true)
+        reportedLabel(nullable: true)
         hot(nullable: true)
     }
 

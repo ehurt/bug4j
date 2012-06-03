@@ -31,6 +31,8 @@ import java.util.zip.ZipInputStream
 import javax.xml.parsers.SAXParserFactory
 
 class BugService {
+    def extensionService
+
     ClientSession createSession(String appCode,
                                 String appVersion,
                                 Long buildDateMillis,
@@ -117,6 +119,7 @@ class BugService {
             }
             stack.addToHits(newHit)
             newHit.save()
+            extensionService.whenHit(newHit)
             return false
         } else {
             return true
@@ -206,6 +209,7 @@ class BugService {
                         bug = new Bug(app: app, title: title)
                         app.addToBugs(bug)
                         bug.save(failOnError: true)
+                        extensionService.whenBug(bug)
                         isNewBug = true
                     } // else ==> _matchByCauses++
                     strain = new Strain(bug: bug, hash: strainHash)
@@ -227,8 +231,9 @@ class BugService {
                 if (!bug) {
                     bug = new Bug(app: app, title: message)
                     app.addToBugs(bug)
+                    bug.save(failOnError: true)
+                    extensionService.whenBug(bug)
                 }
-                bug.save(failOnError: true)
             }
         }
         final newHit = new Hit(
@@ -251,6 +256,9 @@ class BugService {
             testForMultiReports(bug, remoteAddr)
         }
         newHit.save(failOnError: true)
+
+        extensionService.whenHit(newHit)
+
         return bug.id;
     }
 
