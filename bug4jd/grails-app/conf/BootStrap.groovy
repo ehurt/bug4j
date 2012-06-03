@@ -17,8 +17,13 @@
 import org.bug4j.*
 
 class BootStrap {
+    def extensionService
 
     def init = { servletContext ->
+        final catalinaHome = System.getProperty('catalina.home')
+        final catalinaHomeFile = new File(catalinaHome, 'extensions')
+        extensionService.init(catalinaHomeFile)
+
         if (!App.count) {
             final app = new App(label: 'bug4jDemo', code: 'bug4jDemo')
             final appPackages = new AppPackages(app: app, packageName: 'org.bug4j')
