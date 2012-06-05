@@ -37,6 +37,9 @@ public class Log4jDemo {
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }
+
+        System.out.println("The error has been reported.\n" +
+                "Please remember that the statistics are updated every hour.");
     }
 
     private static void calling() {
