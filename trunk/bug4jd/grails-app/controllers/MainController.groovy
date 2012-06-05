@@ -30,11 +30,6 @@ class MainController {
         ]
     }
 
-    def export() {
-        response.setContentType("text/xml")
-        bugService.export(response.outputStream)
-    }
-
     def testImport() {
         try {
             final zipFile = new File('D:/bug4j/bugs.zip')

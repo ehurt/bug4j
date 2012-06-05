@@ -415,6 +415,7 @@ class BugService {
                         final buildNumber = atts.getValue('buildNumber')
                         final clientSession = new ClientSession(
                                 app: _app,
+                                appVersion: appVer,
                                 dateBuilt: new Timestamp(buildDate),
                                 devBuild: false,
                                 buildNumber: buildNumber as int,
@@ -490,13 +491,6 @@ class BugService {
             }
         })
         reader.parse(new InputSource(inputStream))
-    }
-
-    public void export(OutputStream outputStream) {
-        final exporter = new Exporter()
-        final users = User.list()
-        final apps = App.list()
-        exporter.exportAll(outputStream, users, apps)
     }
 
     public static String stackToHtml(String stackString, List<String> packages) {

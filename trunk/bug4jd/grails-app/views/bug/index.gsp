@@ -99,7 +99,7 @@
                 <g:sortableColumn property="hitCount" title="${message(code: 'bug.hitCount.label', default: 'Hits')}" defaultOrder="desc" params="${params}"/>
                 <g:sortableColumn property="firstHitDate" title="${message(code: 'bug.firstHitDate.label', default: 'First Hit')}" defaultOrder="desc" params="${params}"/>
                 <g:sortableColumn property="lastHitDate" title="${message(code: 'bug.lastHitDate.label', default: 'Last Hit')}" defaultOrder="desc" params="${params}"/>
-                <g:sortableColumn property="hot" title="${message(code: 'bug.hot.label', default: 'Hot')}" defaultOrder="desc" params="${params}"/>
+                <g:sortableColumn property="hot" title="${message(code: 'bug.heat.label', default: 'Heat')}" defaultOrder="desc" params="${params}"/>
             </tr>
             <%
                 DateFormat dateFormat = SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT)
