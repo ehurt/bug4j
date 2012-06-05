@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package org.bug4j.common;
+package org.bug4j.client;
 
 import org.junit.Assert;
 import org.junit.Test;

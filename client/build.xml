@@ -29,7 +29,6 @@
     <path refid="log4j.lib"/>
     <path refid="httpcomponents-client.lib"/>
     <path refid="commons-lang.lib"/>
-    <pathelement location="${production.output}/common"/>
   </path>
 
   <path id="test.class.path">
@@ -43,7 +42,6 @@
   <target name="jar">
     <jar destfile="${module.jar}">
       <fileset dir="${production.output}/client"/>
-      <fileset dir="${production.output}/common"/>
     </jar>
   </target>
 

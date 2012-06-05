@@ -16,8 +16,6 @@
 
 package org.bug4j.client;
 
-import org.bug4j.common.TextToLines;
-
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
