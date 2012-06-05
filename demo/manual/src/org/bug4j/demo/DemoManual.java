@@ -35,6 +35,8 @@ public class DemoManual {
             e.printStackTrace();
             Bug4jAgent.report("Just pretending something failed in class DemoManual", e);
         }
+        System.out.println("The error has been reported.\n" +
+                "Please remember that the statistics are updated every hour.");
     }
 
     private static void foo() {

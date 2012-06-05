@@ -39,14 +39,14 @@
         <exclude name="/webapps/bug4j.war"/>
         <exclude name="/work/**"/>
       </fileset>
-      <fileset dir="ui-jsp/src/main/resources/server/"/>
     </copy>
     <mkdir dir="${dist}/server/logs"/>
     <mkdir dir="${dist}/server/temp"/>
     <copy todir="${dist}" overwrite="true">
-      <fileset dir="ui-jsp/src/main/resources/"/>
+      <fileset dir="resources/"/>
     </copy>
     <replace file="${dist}/server/conf/server.xml" token="8080" value="8063"/>
+    <replace file="${dist}/server/conf/server.xml" token="8005" value="8064"/>
     <copy tofile="${dist}/server/webapps/ROOT.war" file="bug4jd/target/bug4jd-0.1.war"/>
     <!--
             <copy todir="${dist}/server/webapps/ROOT/static">
