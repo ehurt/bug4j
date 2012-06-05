@@ -15,7 +15,9 @@
  */
 
 import grails.plugins.springsecurity.Secured
+import org.apache.commons.io.output.CloseShieldOutputStream
 import org.bug4j.App
+import org.bug4j.Exporter
 
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -43,12 +45,31 @@ class AdminController {
     }
 
     def exp() {
+        def appId = params.id
+        final app = App.get(appId)
         response.addHeader('Content-Type', 'text/xml')
-        response.addHeader('Content-Disposition', 'attachment; filename="bugs.zip"');
+        response.addHeader('Content-Disposition', "attachment; filename=\"${app.code}.zip\"");
         final OutputStream outputStream = response.outputStream
         final zipOutputStream = new ZipOutputStream(outputStream)
         zipOutputStream.putNextEntry(new ZipEntry('bugs.xml'))
-        zipOutputStream.write("Sorry, export is not available yet".bytes)
+
+        final exporter = new Exporter()
+        exporter.exportApplication(new CloseShieldOutputStream(zipOutputStream), app)
+
+        zipOutputStream.closeEntry()
+        zipOutputStream.close()
+    }
+
+    def expAll() {
+        response.addHeader('Content-Type', 'text/xml')
+        response.addHeader('Content-Disposition', 'attachment; filename="bug4j.zip"');
+        final OutputStream outputStream = response.outputStream
+        final zipOutputStream = new ZipOutputStream(outputStream)
+        zipOutputStream.putNextEntry(new ZipEntry('bugs.xml'))
+
+        final exporter = new Exporter()
+        exporter.exportAll(new CloseShieldOutputStream(zipOutputStream))
+
         zipOutputStream.closeEntry()
         zipOutputStream.close()
     }

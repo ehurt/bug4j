@@ -13,11 +13,6 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-
-
-
-
-
 package org.bug4j;
 
 
@@ -52,6 +47,26 @@ public class Exporter {
     }
 
     public Exporter() {
+    }
+
+    public void exportAll(OutputStream outputStream) throws XMLStreamException, IOException {
+        withXMLStreamWriter(outputStream, new Streamer() {
+            @Override
+            public void stream(XMLStreamWriter xmlStreamWriter) throws XMLStreamException {
+                final users = User.findAll()
+                final apps = App.findAll()
+                exportAll(xmlStreamWriter, users, apps);
+            }
+        });
+    }
+
+    public void exportApplication(OutputStream outputStream, App app) throws XMLStreamException, IOException {
+        withXMLStreamWriter(outputStream, new Streamer() {
+            @Override
+            public void stream(XMLStreamWriter xmlStreamWriter) throws XMLStreamException {
+                exportApp(xmlStreamWriter, app)
+            }
+        });
     }
 
     private void writeString(XMLStreamWriter xmlStreamWriter, String qName, String value) throws XMLStreamException {
@@ -89,24 +104,6 @@ public class Exporter {
         if (timestamp != null) {
             xmlStreamWriter.writeAttribute(qName, _dateFormat.format(timestamp));
         }
-    }
-
-    public void exportAll(OutputStream outputStream, final Collection<User> users, final Collection<App> apps) throws XMLStreamException, IOException {
-        withXMLStreamWriter(outputStream, new Streamer() {
-            @Override
-            public void stream(XMLStreamWriter xmlStreamWriter) throws XMLStreamException {
-                exportAll(xmlStreamWriter, users, apps);
-            }
-        });
-    }
-
-    public void exportAppBugs(OutputStream outputStream, final App app) throws XMLStreamException, IOException {
-        withXMLStreamWriter(outputStream, new Streamer() {
-            @Override
-            public void stream(XMLStreamWriter xmlStreamWriter) throws XMLStreamException {
-                exportAppBugs(xmlStreamWriter, app);
-            }
-        });
     }
 
     private void withXMLStreamWriter(OutputStream outputStream, Streamer streamer) throws XMLStreamException, IOException {
@@ -150,8 +147,9 @@ public class Exporter {
 
     private void exportApp(XMLStreamWriter xmlStreamWriter, App app) throws XMLStreamException {
         xmlStreamWriter.writeStartElement("app");
-        xmlStreamWriter.writeAttribute("name", app.getLabel());
-        xmlStreamWriter.writeAttribute("code", app.getCode());
+        xmlStreamWriter.writeAttribute("name", app.label);
+        xmlStreamWriter.writeAttribute("code", app.code);
+        xmlStreamWriter.writeAttribute("multiHost", app.multiHost.toString());
         exportPackages(xmlStreamWriter, app);
         exportSessions(xmlStreamWriter, app);
         App.withTransaction { // Need a transaction for derby to read the stack traces
@@ -162,31 +160,25 @@ public class Exporter {
 
     private void exportSessions(XMLStreamWriter xmlStreamWriter, App app) throws XMLStreamException {
         final Set<ClientSession> sessions = app.getClientSessions();
-        if (!sessions.isEmpty()) {
-            xmlStreamWriter.writeStartElement("sessions");
-            for (ClientSession session : sessions) {
-                xmlStreamWriter.writeStartElement("session");
-
-                final long sessionId = session.id
-                final String version = session.appVersion
-                final Timestamp firstHit = session.firstHit
-                final String hostName = session.hostName
-                final Timestamp dateBuilt = session.dateBuilt
-                final boolean devBuild = session.devBuild
-                final Integer buildNumber = session.buildNumber
-
-                writeLong(xmlStreamWriter, "sessionId", sessionId)
-                writeString(xmlStreamWriter, "appVer", version)
-                writeTimestamp(xmlStreamWriter, "firstHit", firstHit)
-                writeString(xmlStreamWriter, "hostName", hostName)
-                writeTimestamp(xmlStreamWriter, "buildDate", dateBuilt)
-                writeBoolean(xmlStreamWriter, "devBuild", devBuild)
-                writeInteger(xmlStreamWriter, "buildNumber", buildNumber)
-
-                xmlStreamWriter.writeEndElement();
-            }
-            xmlStreamWriter.writeEndElement();
+        xmlStreamWriter.writeStartElement("sessions");
+        for (ClientSession session : sessions) {
+            exportSession(xmlStreamWriter, session)
         }
+        xmlStreamWriter.writeEndElement();
+    }
+
+    private void exportSession(XMLStreamWriter xmlStreamWriter, ClientSession session) throws XMLStreamException {
+        xmlStreamWriter.writeStartElement("session");
+
+        writeLong(xmlStreamWriter, "sessionId", session.id)
+        writeString(xmlStreamWriter, "appVer", session.appVersion)
+        writeTimestamp(xmlStreamWriter, "buildDate", session.dateBuilt)
+        writeBoolean(xmlStreamWriter, "devBuild", session.devBuild)
+        writeInteger(xmlStreamWriter, "buildNumber", session.buildNumber)
+        writeString(xmlStreamWriter, "hostName", session.hostName)
+        writeTimestamp(xmlStreamWriter, "firstHit", session.firstHit)
+
+        xmlStreamWriter.writeEndElement();
     }
 
     private void exportPackages(XMLStreamWriter xmlStreamWriter, App app) throws XMLStreamException {
@@ -222,14 +214,26 @@ public class Exporter {
         final String escapedPassword = StringEscapeUtils.escapeXml(password);
         xmlStreamWriter.writeAttribute("password", escapedPassword);
 
+        if (!user.isEnabled()) {
+            xmlStreamWriter.writeAttribute("disabled", "true");
+        }
+
+        if (user.isAccountExpired()) {
+            xmlStreamWriter.writeAttribute("expired", "true");
+        }
+
+        if (user.isAccountLocked()) {
+            xmlStreamWriter.writeAttribute("locked", "true");
+        }
+
+        if (user.isPasswordExpired()) {
+            xmlStreamWriter.writeAttribute("passwordExpired", "true");
+        }
+
         final String email = user.getEmail();
         final String escapedEmail = StringEscapeUtils.escapeXml(email);
         if (email != null) {
             xmlStreamWriter.writeAttribute("email", escapedEmail);
-        }
-
-        if (!user.isEnabled()) {
-            xmlStreamWriter.writeAttribute("disabled", "true");
         }
 
         final Date lastSignedIn = user.getLastSignedIn();
@@ -237,13 +241,19 @@ public class Exporter {
             writeDate(xmlStreamWriter, "lastSignedIn", lastSignedIn);
         }
 
-        xmlStreamWriter.writeEndElement();
-    }
+        xmlStreamWriter.writeStartElement('pref')
+        user.preferences.each {
+            xmlStreamWriter.writeAttribute('key', StringEscapeUtils.escapeXml(it.key))
+            xmlStreamWriter.writeAttribute('value', StringEscapeUtils.escapeXml(it.value))
+        }
+        xmlStreamWriter.writeEndElement()
 
-    private void exportAppBugs(final XMLStreamWriter xmlStreamWriter, App app) throws XMLStreamException {
-        xmlStreamWriter.writeStartElement("bugs");
-        xmlStreamWriter.writeAttribute("app", app.getCode());
-        exportBugs(xmlStreamWriter, app);
+        xmlStreamWriter.writeStartElement('roles')
+        user.authorities.each {
+            xmlStreamWriter.writeAttribute('role', it.authority)
+        }
+        xmlStreamWriter.writeEndElement()
+
         xmlStreamWriter.writeEndElement();
     }
 
@@ -253,34 +263,55 @@ public class Exporter {
             xmlStreamWriter.writeStartElement("bug");
             xmlStreamWriter.writeAttribute("id", bug.id as String);
             xmlStreamWriter.writeAttribute("title", bug.title);
-            xmlStreamWriter.writeStartElement("hits");
-            for (Hit hit : bug.hits) {
-                xmlStreamWriter.writeStartElement("hit");
-                xmlStreamWriter.writeAttribute("id", hit.id as String);
-                final String stackString = hit.stack?.stackText?.readStackString()
+            if (bug.extinct) {
+                writeDate(xmlStreamWriter, 'extinct', bug.extinct)
+            }
+            if (bug.unextinct) {
+                writeDate(xmlStreamWriter, 'unextinct', bug.unextinct)
+            }
+            if (bug.reportedId) {
+                xmlStreamWriter.writeAttribute('reportedId', bug.reportedId)
+            }
+            if (bug.reportedLabel) {
+                xmlStreamWriter.writeAttribute('reportedLabel', _unicodeEscaper.translate(bug.reportedLabel))
+            }
+            // hot not exported, it is re-calculated
 
-                if (hit.clientSession != null) {
-                    xmlStreamWriter.writeAttribute("sessionId", hit.clientSession.id.toString());
-                }
-                xmlStreamWriter.writeAttribute("date", _dateFormat.format(hit.dateReported));
-                if (hit.reportedBy != null) {
-                    xmlStreamWriter.writeAttribute("user", hit.reportedBy);
-                }
-                if (hit.message != null) {
-                    xmlStreamWriter.writeAttribute("message", hit.message);
-                }
-                if (hit.remoteAddr) {
-                    xmlStreamWriter.writeAttribute("remoteAddr", hit.remoteAddr);
-                }
-                if (stackString != null) {
-                    xmlStreamWriter.writeCharacters("\n");
-                    xmlStreamWriter.writeCData(_unicodeEscaper.translate(stackString));
-                    xmlStreamWriter.writeCharacters("\n");
-                }
-                xmlStreamWriter.writeEndElement();
+            // strains not exported, they will be re-created on import
+
+            xmlStreamWriter.writeStartElement("hits");
+            bug.hits.each {
+                exportHit(xmlStreamWriter, it)
             }
             xmlStreamWriter.writeEndElement();
+
             xmlStreamWriter.writeEndElement();
         }
+    }
+
+    private void exportHit(final XMLStreamWriter xmlStreamWriter, Hit hit) throws XMLStreamException {
+        xmlStreamWriter.writeStartElement("hit");
+        xmlStreamWriter.writeAttribute("id", hit.id as String);
+
+        if (hit.clientSession != null) {
+            xmlStreamWriter.writeAttribute("sessionId", hit.clientSession.id.toString());
+        }
+        writeDate(xmlStreamWriter, 'date', hit.dateReported)
+        if (hit.reportedBy) {
+            xmlStreamWriter.writeAttribute("user", hit.reportedBy);
+        }
+        if (hit.message) {
+            xmlStreamWriter.writeAttribute("message", hit.message);
+        }
+        if (hit.remoteAddr) {
+            xmlStreamWriter.writeAttribute("remoteAddr", hit.remoteAddr);
+        }
+        final String stackString = hit.stack?.stackText?.readStackString()
+        if (stackString != null) {
+            xmlStreamWriter.writeCharacters("\n");
+            xmlStreamWriter.writeCData(_unicodeEscaper.translate(stackString));
+            xmlStreamWriter.writeCharacters("\n");
+        }
+        xmlStreamWriter.writeEndElement();
     }
 }
