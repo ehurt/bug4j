@@ -19,7 +19,6 @@
     <mkdir dir="${dist}/client/lib"/>
     <copy todir="${dist}/client" file="${artifacts.output}/bug4j.jar"/>
     <zip destfile="${dist}/client/bug4j-src.zip">
-      <fileset dir="common/src/main/java/"/>
       <fileset dir="client/src/main/java/"/>
     </zip>
     <copy todir="${dist}/client/lib">
@@ -79,7 +78,6 @@
 
   <target name="compile">
     <mkdir dir="${production.output}"/>
-    <ant dir="common" target="compile"/>
     <ant dir="client" target="compile"/>
     <!-- This fails because of jlines.
       <ant dir="bug4jd" target="war"/>
@@ -94,13 +92,11 @@
 
   <target name="test">
     <mkdir dir="${production.output}"/>
-    <ant dir="common" target="test"/>
     <ant dir="client" target="test"/>
     <ant dir="bug4jd" target="test"/>
   </target>
 
   <target name="clean">
-    <ant dir="common" target="clean"/>
     <ant dir="client" target="clean"/>
     <ant dir="bug4jd" target="clean"/>
     <ant dir="demo/log4j" target="clean"/>
