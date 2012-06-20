@@ -223,7 +223,9 @@ class StatsService {
                 weight += thisWeight
                 hosts.add(hit.remoteAddr)
             }
-            weight *= hosts.size() / nbrHosts
+            if (nbrHosts) {
+                weight *= hosts.size() / nbrHosts
+            }
             bug.hot = weight
             bug.save()
         }

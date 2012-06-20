@@ -15,13 +15,15 @@
  */
 package org.bug4j.server.util
 
-/**
- */
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+
 class DateUtil {
     public static enum TimeAdjustType {
         BEGINNING_OF_DAY, END_OF_DAY
     }
     private static final DATE_PATTERN_MM_DD_YYYY = ~/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/
+    private static final DateFormat DATE_FORMAT = SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.SHORT, SimpleDateFormat.SHORT)
 
     public static Date interpretDate(def s, TimeAdjustType adjustType) {
         Date ret = null
@@ -65,5 +67,31 @@ class DateUtil {
 
     public static int toDays(long timeInMillis) {
         timeInMillis / 1000 / 60 / 60 / 24
+    }
+
+    public static String toHumanString(Date date) {
+        final tonight = adjustToDayBoundary(new Date(), TimeAdjustType.END_OF_DAY)
+        final millisBack = tonight.time - date.time
+        final int daysBack = millisBack / (24 * 60 * 60 * 1000)
+        switch (daysBack) {
+            case 0: return 'today';
+            case 1: return 'yesterday';
+            case 2: return 'two days ago';
+        }
+        return null
+    }
+
+    public static String formatDate(Date date) {
+        final ret = ""
+        if (date) {
+            synchronized (DATE_FORMAT) {
+                ret = DATE_FORMAT.format(date)
+            }
+            final humanString = toHumanString(date)
+            if (humanString) {
+                ret += " (" + humanString + ")"
+            }
+        }
+        return ret
     }
 }

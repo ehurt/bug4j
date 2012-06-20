@@ -621,23 +621,6 @@ a.skip {
 }
 
 /* bugs */
-#bugs {
-}
-
-.bugs-with-hits {
-    width: 50%;
-    float: left;
-    overflow-x: hidden;
-}
-
-.bugs-without-hits {
-}
-
-#hits-section {
-    width: 49%;
-    float: right;
-}
-
 tr:hover {
     background: inherit;
 }
