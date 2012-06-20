@@ -14,15 +14,19 @@
  *    limitations under the License.
  */
 
+import grails.converters.JSON
+import groovy.sql.Sql
 import org.bug4j.App
 import org.bug4j.Bug
 import org.bug4j.ClientSession
 import org.bug4j.Hit
 import org.bug4j.server.util.DateUtil
 
+import javax.sql.DataSource
+
 class BugController {
 
-    def userPreferenceService
+    DataSource dataSource
 
     def index() {
         if (!params.sort) params.sort = 'bug_id'
@@ -102,19 +106,10 @@ class BugController {
             ]
         }
 
-        def showHits
-        if (params.sh) {
-            showHits = params.sh == 'y'
-            userPreferenceService.setPreference('showHits', showHits)
-        } else {
-            showHits = userPreferenceService.getBooleanPreference('showHits')
-        }
-
         return [
                 app: selectedApp,
                 bugs: bugs,
                 total: total[0],
-                showHits: showHits,
                 filter: filter,
         ]
     }
@@ -126,7 +121,6 @@ class BugController {
                 max: params.max,
                 offset: params.offset,
                 a: params.a,
-                sh: params.sh,
         ]
 
         if (params.filterFrom) reParams += [from: params.filterFrom]
@@ -209,5 +203,58 @@ class BugController {
         session.a = app?.code
 
         return app
+    }
+
+    def bugInfoData() {
+        final bugId = params.id
+        final sql = new Sql(dataSource.connection)
+        final row = sql.firstRow("select count(*), count(distinct reported_by), min(date_reported), max(date_reported) from hit h where h.BUG_ID=${bugId}")
+        try {
+            def bugInfo = [
+                    count: row[0],
+                    reportedByCount: "${row[1]} ${row[1] <= 1 ? 'user' : 'users'}",
+                    minDateReported: DateUtil.formatDate((Date) row[2]),
+                    maxDateReported: DateUtil.formatDate((Date) row[3]),
+            ]
+            // Derby does not support two count(distinct) so we must query this separately
+            row = sql.firstRow("select count(distinct REMOTE_ADDR) from hit h where h.BUG_ID=${bugId}")
+            bugInfo.remoteAddrCount = "${row[0]} ${row[0] <= 1 ? 'host' : 'hosts'}"
+
+            Map<Date, Long> hitDays = [:]
+            def tonight = DateUtil.adjustToDayBoundary(new Date(), DateUtil.TimeAdjustType.END_OF_DAY)
+            hitDays[tonight] = 0
+            sql.eachRow("select date_reported from hit h where h.BUG_ID=${bugId}") {
+                final dateReported = DateUtil.adjustToDayBoundary(it.DATE_REPORTED, DateUtil.TimeAdjustType.BEGINNING_OF_DAY)
+                Long hitCount = hitDays.get(dateReported)
+                if (!hitCount) {
+                    hitCount = 0;
+                    if (!hitDays[dateReported - 1]) {
+                        hitDays[dateReported - 1] = 0
+                    }
+                    if (!hitDays[dateReported + 1]) {
+                        hitDays[dateReported + 1] = 0
+                    }
+                }
+                hitCount++
+                hitDays.put(dateReported, hitCount)
+            }
+            def rows = hitDays.collect {Date key, Long value ->
+                def date = "Date(${1900 + key.getYear()}, ${key.getMonth()}, ${key.getDate()})"
+                return [c: [[v: date], [v: value]]]
+            }
+            bugInfo.timeLineData = [
+                    cols: [
+                            [id: 'date', label: 'Date', type: 'date'],
+                            [id: 'hits', label: 'Hits', type: 'number'],
+                    ],
+                    rows: rows,
+            ]
+
+
+            render bugInfo as JSON
+
+        } finally {
+            sql.close()
+        }
     }
 }

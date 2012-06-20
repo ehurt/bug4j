@@ -14,18 +14,36 @@
   -    limitations under the License.
   --}%
 
-<%@ page import="org.bug4j.server.util.StringUtil; org.apache.commons.lang.StringUtils; org.bug4j.Hit; java.text.DateFormat; java.text.SimpleDateFormat; org.bug4j.Bug" contentType="text/html;charset=UTF-8" %>
+<%@ page import="org.bug4j.server.util.DateUtil; org.bug4j.server.util.StringUtil; org.apache.commons.lang.StringUtils; org.bug4j.Hit; java.text.DateFormat; java.text.SimpleDateFormat; org.bug4j.Bug" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta name='layout' content='main'/>
     <title>Bugs - ${app.code} - ${app.label}</title>
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
     <script type="text/javascript">
+        function drawVisualization(data) {
+            $("#bugInfo-count").text(data.count)
+            $("#bugInfo-reportedByCount").text(data.reportedByCount)
+            $("#bugInfo-remoteAddrCount").text(data.remoteAddrCount)
+            $("#bugInfo-minDateReported").text(data.minDateReported)
+            $("#bugInfo-maxDateReported").text(data.maxDateReported)
+            var dataTable = new google.visualization.DataTable(data.timeLineData, 0.6);
+
+            var annotatedtimeline = new google.visualization.AnnotatedTimeLine(document.getElementById('hit-graph'));
+        <%
+                def now = DateUtil.adjustToDayBoundary(new Date(), DateUtil.TimeAdjustType.END_OF_DAY)
+            %>
+            annotatedtimeline.draw(dataTable, {
+                'displayAnnotations':false,
+                'zoomStartTime':new Date(${(now-5).time}),
+                'zoomEndTime':new Date(${now.time})
+            });
+        }
+
         function whenBugClicked(elm, bugId) {
-            if (${showHits}) {
-                $(".bug-row-selected").removeClass("bug-row-selected");
-                $(elm).addClass('bug-row-selected');
-            ${remoteFunction(action:'hits', update:'hits', params: '\'id=\' + bugId + \'&sort=id&order=desc\'')}
-            }
+            $(".bug-row-selected").removeClass("bug-row-selected");
+            $(elm).addClass('bug-row-selected');
+        ${remoteFunction(action:'bugInfoData', onSuccess: 'drawVisualization(data)', params: '\'id=\' + bugId + \'\'')}
         }
 
         function showFilterForm() {
@@ -43,13 +61,15 @@
             $(elm).addClass('hit-row-selected');
         ${remoteFunction(action:'hit', update:'hit', params: '\'hitid=\' + hitId')}
         }
+        google.load('visualization', '1', {packages:['annotatedtimeline']});
 
     </script>
+
 </head>
 
 <body>
 <div>
-    <div id="bugs" class="${showHits ? 'bugs-with-hits' : 'bugs-without-hits'}">
+    <div id="bugs" style="width: 50%; float: left; overflow-x: hidden;">
         <div>
             <div id="filter-div" style="float:left;" onclick="showFilterForm();">
                 <span style="text-decoration: underline">Filter:</span>
@@ -57,13 +77,7 @@
                     <span id="filter-display">${filter}</span>
                 </g:if>
             </div>
-            <g:if test="${!showHits}">
-                <div style="float: right;width: 16px;margin-top: 3px;">
-                    <g:link params="${params + [sh: 'y']}">
-                        <g:img dir="images/skin" file="arrow_left.png" title="Show Hits"/>
-                    </g:link>
-                </div>
-            </g:if>
+
             <div class="clear"></div>
         </div>
 
@@ -92,72 +106,88 @@
                 </div>
             </g:form>
         </div>
-        <table>
-            <tr>
-                <g:sortableColumn property="bug_id" title="${message(code: 'bug.id.label', default: 'ID')}" defaultOrder="desc" params="${params}"/>
-                <g:sortableColumn property="bug_title" title="${message(code: 'bug.title.label', default: 'Title')}" params="${params}"/>
-                <g:sortableColumn property="hitCount" title="${message(code: 'bug.hitCount.label', default: 'Hits')}" defaultOrder="desc" params="${params}"/>
-                <g:sortableColumn property="firstHitDate" title="${message(code: 'bug.firstHitDate.label', default: 'First Hit')}" defaultOrder="desc" params="${params}"/>
-                <g:sortableColumn property="lastHitDate" title="${message(code: 'bug.lastHitDate.label', default: 'Last Hit')}" defaultOrder="desc" params="${params}"/>
-                <g:sortableColumn property="hot" title="${message(code: 'bug.heat.label', default: 'Heat')}" defaultOrder="desc" params="${params}"/>
-            </tr>
-            <%
-                DateFormat dateFormat = SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT)
-            %>
-            <g:each in="${bugs}" var="bug" status="lineno">
-                <tr class="bug-row ${lineno == 0 && showHits ? ' bug-row-selected' : ''}" onclick="whenBugClicked(this, '${bug.bug_id}');">
-                    <td>${bug.bug_id}</td>
-                    <td>
-                        <%
-                            String bugTitle = StringUtil.chopLenghtyString((String) bug.bug_title, 60)
-                        %>
-                        <g:if test="${true}">
-                            <g:link action="bug" params="[id: bug.bug_id, sort: 'id', order: 'desc']">
-                                ${bugTitle}
-                            </g:link>
-                        </g:if>
-                        <g:else>
-                            ${bugTitle}
-                        </g:else>
-                    </td>
-                    <td>${bug.hitCount}</td>
-                    <td>${dateFormat.format(bug.firstHitDate)}</td>
-                    <td>${dateFormat.format(bug.lastHitDate)}</td>
-                    <td>${(int) (bug.hot * 100)}%</td>
+        <g:if test="${bugs}">
+            <table style="cursor: pointer;">
+                <tr>
+                    <g:sortableColumn property="bug_id" title="${message(code: 'bug.id.label', default: 'ID')}" defaultOrder="desc" params="${params}"/>
+                    <g:sortableColumn property="bug_title" title="${message(code: 'bug.title.label', default: 'Title')}" params="${params}"/>
+                    <g:sortableColumn property="hitCount" title="${message(code: 'bug.hitCount.label', default: 'Hits')}" defaultOrder="desc" params="${params}"/>
+                    <g:sortableColumn property="firstHitDate" title="${message(code: 'bug.firstHitDate.label', default: 'First Hit')}" defaultOrder="desc" params="${params}"/>
+                    <g:sortableColumn property="lastHitDate" title="${message(code: 'bug.lastHitDate.label', default: 'Last Hit')}" defaultOrder="desc" params="${params}"/>
+                    <g:sortableColumn property="hot" title="${message(code: 'bug.heat.label', default: 'Heat')}" defaultOrder="desc" params="${params}"/>
                 </tr>
-            </g:each>
-        </table>
-        <g:if test="${bugs.size() < total}">
-            <div class="pagination">
-                <g:link params="${params + [max: (params.max as int) + 10]}">More</g:link>
-            </div>
+                <%
+                    DateFormat dateFormat = SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT)
+                %>
+                <g:each in="${bugs}" var="bug" status="lineno">
+                    <tr class="bug-row" ${lineno == 0 ? 'id="row0"' : ''} onclick="whenBugClicked(this, '${bug.bug_id}');">
+                        <td>${bug.bug_id}</td>
+                        <td>
+                            <%
+                                String bugTitle = StringUtil.chopLenghtyString((String) bug.bug_title, 60)
+                            %>
+                            <g:if test="${true}">
+                                <g:link action="bug" params="[id: bug.bug_id, sort: 'id', order: 'desc']">
+                                    ${bugTitle}
+                                </g:link>
+                            </g:if>
+                            <g:else>
+                                ${bugTitle}
+                            </g:else>
+                        </td>
+                        <td>${bug.hitCount}</td>
+                        <td>${dateFormat.format(bug.firstHitDate)}</td>
+                        <td>${dateFormat.format(bug.lastHitDate)}</td>
+                        <td>${(int) (bug.hot * 100)}%</td>
+                    </tr>
+                </g:each>
+            </table>
+            <g:if test="${bugs.size() < total}">
+                <div class="pagination">
+                    <g:link params="${params + [max: (params.max as int) + 10]}">More</g:link>
+                </div>
+            </g:if>
         </g:if>
+        <g:else>
+            <h1 style="margin: 15px;">No bugs!</h1>
+        </g:else>
     </div>
 
-    <g:if test="${showHits}">
-        <div id="hits-section">
-            <div id="hits-header" style="margin:5px;height: 1.5em;">
-                <g:link params="${params - [sh: 'y']}">
-                    <g:img dir="images/skin" file="arrow_right.png" title="Hide Hits"/>
-                </g:link>
-            </div>
+    <g:if test="${bugs}">
+        <div id="info-section" style="width: 49%; float: right;">
+            <table>
+                <tr>
+                    <td style="width: 10em;">Hits:</td>
+                    <td id="bugInfo-count"></td>
+                </tr>
+                <tr>
+                    <td>Reported by:</td>
+                    <td id="bugInfo-reportedByCount"></td>
+                </tr>
+                <tr>
+                    <td>Reported from:</td>
+                    <td id="bugInfo-remoteAddrCount"></td>
+                </tr>
+                <tr>
+                    <td>First report:</td>
+                    <td id="bugInfo-minDateReported"></td>
+                </tr>
+                <tr>
+                    <td>Last report:</td>
+                    <td id="bugInfo-maxDateReported"></td>
+                </tr>
+            </table>
 
-            <%
-                def hits = null
-                if (bugs) {
-                    def firstBug = bugs[0]
-                    long bugId = firstBug.bug_id as long
-                    def bug = Bug.get(bugId)
-                    hits = Hit.findAllByBug(bug, [sort: 'id', order: 'desc'])
-                }
-            %>
-            <div id="hits">
-                <g:render template="hits" model="[hits: hits]"/>
-            </div>
+            <div id="hit-graph" style="width: 95%;height: 400px;"></div>
         </div>
     </g:if>
 
     <div class="clear"></div>
 </div>
+<g:if test="${bugs}">
+    <g:javascript>
+        whenBugClicked($("#row0"), ${bugs[0].bug_id});
+    </g:javascript>
+</g:if>
 </body>
 </html>
