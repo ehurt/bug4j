@@ -14,8 +14,6 @@
   -    limitations under the License.
   --}%
 
-
-
 <%@ page import="org.bug4j.Role; org.bug4j.User" %>
 <g:hiddenField name="id" value="${userInstance?.id}"/>
 
@@ -30,7 +28,7 @@
     <label for="password">
         <g:message code="user.password.label" default="Password"/>
     </label>
-    <g:passwordField name="password" value="${org.bug4j.bug4jd.UserController.DUMMY_PASSWORD}"/>
+    <g:passwordField name="password" value="${userInstance.password ? org.bug4j.bug4jd.UserController.DUMMY_PASSWORD : ''}"/>
 </div>
 
 <div class="fieldcontain ${hasErrors(bean: userInstance, field: 'enabled', 'error')} ">
