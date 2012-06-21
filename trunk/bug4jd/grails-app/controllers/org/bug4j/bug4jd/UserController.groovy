@@ -14,6 +14,7 @@
  *    limitations under the License.
  */
 package org.bug4j.bug4jd
+
 import grails.plugins.springsecurity.Secured
 import org.bug4j.User
 
@@ -39,22 +40,25 @@ class UserController {
 
     def create() {
         final User user = new User(params)
-        render(view: 'edit', model: [userInstance: user])
+        render(view: 'edit', model: [
+                userInstance: user,
+                authorities: []
+        ])
     }
 
     def edit() {
         final id = params.id
         final User user = User.get(id)
 
-        final authorities = user.getAuthorities()*.authority
         return [
                 userInstance: user,
-                authorities: authorities,
+                authorities: user.getAuthorities()*.authority,
         ]
     }
 
     def save() {
         def userInstance
+        def authorities
         final id = params.id
         if (id) {
             userInstance = User.get(id)
@@ -62,11 +66,17 @@ class UserController {
                 params.remove('password')
             }
             userInstance.properties = params
+            authorities = userInstance.getAuthorities()*.authority
         } else {
             userInstance = new User(params)
+            authorities = []
         }
         if (!userInstance.save(flush: true)) {
-            render(view: "edit", model: [userInstance: userInstance])
+            render(view: "edit",
+                    model: [
+                            userInstance: userInstance,
+                            authorities: authorities
+                    ])
             return
         }
 
