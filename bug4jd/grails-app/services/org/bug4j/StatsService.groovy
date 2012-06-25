@@ -210,21 +210,24 @@ class StatsService {
                 [date: new Date(now - range)])
         final long nbrHosts = (long) q[0]
 
+        final isMultiHost = app.isMultiHost()
         app.bugs.each {Bug bug ->
             double weight = 0
-            def hosts = new HashSet<String>()
-            Hit.findAllByBugAndDateReportedGreaterThan(bug, new Date(oldest)).each {Hit hit ->
-                final dateReported = hit.dateReported.getTime()
-                final msAgo = (now - dateReported) / range
-                // = 1-1/(1+EXP(-(B1*2*$D$1)+$D$1))
-                final thisWeight = 1D - 1D / (1 + Math.exp(-(msAgo * boost * 2) + boost))
+            if (!isMultiHost || bug.isMultiReport()) {
+                def hosts = new HashSet<String>()
+                Hit.findAllByBugAndDateReportedGreaterThan(bug, new Date(oldest)).each {Hit hit ->
+                    final dateReported = hit.dateReported.getTime()
+                    final msAgo = (now - dateReported) / range
+                    // = 1-1/(1+EXP(-(B1*2*$D$1)+$D$1))
+                    final thisWeight = 1D - 1D / (1 + Math.exp(-(msAgo * boost * 2) + boost))
 
-//                println "   hit ${hit.id} - ${msAgo} - ${thisWeight} - ${hit.dateReported}"
-                weight += thisWeight
-                hosts.add(hit.remoteAddr)
-            }
-            if (nbrHosts) {
-                weight *= hosts.size() / nbrHosts
+                    //                println "   hit ${hit.id} - ${msAgo} - ${thisWeight} - ${hit.dateReported}"
+                    weight += thisWeight
+                    hosts.add(hit.remoteAddr)
+                }
+                if (nbrHosts) {
+                    weight *= hosts.size() / nbrHosts
+                }
             }
             bug.hot = weight
             bug.save()
