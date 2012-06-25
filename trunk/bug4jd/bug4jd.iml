@@ -66,6 +66,7 @@
       <sourceFolder url="file://$MODULE_DIR$/grails-app/taglib" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test/unit" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/test/integration" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/grails-app/jobs" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/target/classes" />
     </content>
@@ -81,6 +82,7 @@
           <root url="jar://$USER_HOME_GRAILS$/ivy-cache/org.apache.derby/derbyclient/jars/derbyclient-10.8.2.2.jar!/" />
           <root url="jar://$USER_HOME_GRAILS$/ivy-cache/org.apache.derby/derbynet/jars/derbynet-10.8.2.2.jar!/" />
           <root url="jar://$USER_HOME_GRAILS$/ivy-cache/org.apache.derby/derby/jars/derby-10.8.2.2.jar!/" />
+          <root url="jar://$USER_HOME_GRAILS$/ivy-cache/org.quartz-scheduler/quartz/jars/quartz-1.8.4.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
