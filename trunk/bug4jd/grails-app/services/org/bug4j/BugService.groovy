@@ -409,18 +409,31 @@ class BugService {
                     case 'session':
                         final String sessionId = atts.getValue('sessionId')
                         final appVer = atts.getValue('appVer')
-                        final firstHit = dateFormat.parse(atts.getValue('firstHit')).getTime()
+
+                        def firstHitTimestamp = null
+                        final firstHitString = atts.getValue('firstHit')
+                        if (firstHitString != null) {
+                            final firstHit = dateFormat.parse(firstHitString).getTime()
+                            firstHitTimestamp = new Timestamp(firstHit)
+                        }
                         final hostName = atts.getValue('hostName')
-                        final buildDate = dateFormat.parse(atts.getValue('buildDate')).getTime()
+
+                        def buildDateTimestamp = null;
+                        final buildDateString = atts.getValue('buildDate')
+                        if (buildDateString) {
+                            final buildDate = dateFormat.parse(buildDateString).getTime()
+                            buildDateTimestamp = new Timestamp(buildDate)
+                        }
+
                         final buildNumber = atts.getValue('buildNumber')
                         final clientSession = new ClientSession(
                                 app: _app,
                                 appVersion: appVer,
-                                dateBuilt: new Timestamp(buildDate),
+                                dateBuilt: buildDateTimestamp,
                                 devBuild: false,
-                                buildNumber: buildNumber as int,
+                                buildNumber: buildNumber as Integer,
                                 hostName: hostName,
-                                firstHit: new Timestamp(firstHit)
+                                firstHit: firstHitTimestamp
                         )
                         _app.addToClientSessions(clientSession)
                         clientSession.save(flush: true)
