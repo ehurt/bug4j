@@ -195,27 +195,27 @@
                     <tr>
                         <td>New Bugs:</td>
                         <td>
-                            <g:link controller="bug" params="[a: appStats.app.code, fromDay: 0]" class="${appStats.bugCount.todayHot ? 'stat-hot' : ''}">${appStats.bugCount.today}</g:link>
+                            <g:link controller="bug" params="[a: appStats.app.code, from: dateLinks.todayFrom, to: dateLinks.todayTo]" class="${appStats.bugCount.todayHot ? 'stat-hot' : ''}">${appStats.bugCount.today}</g:link>
                         </td>
                         <td>
-                            <g:link controller="bug" params="[a: appStats.app.code, fromDay: 1, toDay: 0]" class="${appStats.bugCount.yesterdayHot ? 'stat-hot' : ''}">${appStats.bugCount.yesterday}</g:link>
+                            <g:link controller="bug" params="[a: appStats.app.code, from: dateLinks.yesterdayFrom, to: dateLinks.yesterdayTo]" class="${appStats.bugCount.yesterdayHot ? 'stat-hot' : ''}">${appStats.bugCount.yesterday}</g:link>
                         </td>
                         <td>${appStats.bugCount.avg}</td>
                         <td>
-                            <g:link controller="bug" params="[a: appStats.app.code, fromDay: daysBack]">${appStats.bugCount.total}</g:link>
+                            <g:link controller="bug" params="[a: appStats.app.code, from: dateLinks.daysBackFrom, to: dateLinks.daysBackTo]">${appStats.bugCount.total}</g:link>
                         </td>
                     </tr>
                     <tr>
                         <td>New Hits:</td>
                         <td>
-                            <g:link controller="bug" params="[a: appStats.app.code, fromDay: 0]" class="${appStats.hitCount.todayHot ? 'stat-hot' : ''}">${appStats.hitCount.today}</g:link>
+                            <g:link controller="bug" params="[a: appStats.app.code, from: dateLinks.todayFrom, to: dateLinks.todayTo]" class="${appStats.hitCount.todayHot ? 'stat-hot' : ''}">${appStats.hitCount.today}</g:link>
                         </td>
                         <td class="${appStats.hitCount.yesterdayHot ? 'stat-hot' : ''}">
-                            <g:link controller="bug" params="[a: appStats.app.code, fromDay: 1, toDay: 0]" class="${appStats.hitCount.yesterdayHot ? 'stat-hot' : ''}">${appStats.hitCount.yesterday}</g:link>
+                            <g:link controller="bug" params="[a: appStats.app.code, from: dateLinks.yesterdayFrom, to: dateLinks.yesterdayTo]" class="${appStats.hitCount.yesterdayHot ? 'stat-hot' : ''}">${appStats.hitCount.yesterday}</g:link>
                         </td>
                         <td>${appStats.hitCount.avg}</td>
                         <td>
-                            <g:link controller="bug" params="[a: appStats.app.code, fromDay: daysBack]">${appStats.hitCount.total}</g:link>
+                            <g:link controller="bug" params="[a: appStats.app.code, from: dateLinks.daysBackFrom, to: dateLinks.daysBackTo]">${appStats.hitCount.total}</g:link>
                         </td>
                     </tr>
                     </tbody>
