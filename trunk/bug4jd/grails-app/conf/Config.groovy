@@ -116,3 +116,4 @@ grails.plugins.springsecurity.anon.userAttribute = 'anonymousUser, ROLE_ANONYMOU
 
 // CDA
 grails.app.context = '/'
+grails.plugins.springsecurity.ldap.active = false
