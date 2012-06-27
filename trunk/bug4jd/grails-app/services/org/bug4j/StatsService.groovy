@@ -18,7 +18,11 @@ package org.bug4j
 import groovy.time.TimeCategory
 import org.bug4j.server.util.DateUtil
 
+import javax.sql.DataSource
+
 class StatsService {
+
+    DataSource dataSource
 
     def generateStats(boolean forceRecalc) {
         App.list().each {app ->
@@ -75,24 +79,28 @@ class StatsService {
     }
 
     private def generateStatsBugCount = {App app, Date adjustedSince ->
-        final list = Hit.executeQuery("""select year(h.dateReported),month(h.dateReported),day(h.dateReported), count(distinct b.id)
+        final list = Hit.executeQuery("""select min(h.dateReported)
                         from Hit h, Bug b
                         where b.app=?
                         ${app.multiHost ? 'and b.multiReport = true' : ''}
                         and b=h.bug
-                        and h.dateReported >= ?
-                        group by year(h.dateReported),month(h.dateReported),day(h.dateReported)""",
-                [app, adjustedSince])
+                        group by b.id
+""",
+                [app])
 
         Map<Integer, Integer> stats = [:]
         list.each {
-            def yearReported = it[0] as int
-            def monthReported = it[1] as int
-            def dayReported = it[2] as int
-            int count = it[3] as int
-            final calendar = new GregorianCalendar(yearReported, monthReported - 1, dayReported)
-            final int thenInDays = calendar.timeInMillis / (1000L * 60 * 60 * 24)
-            stats[thenInDays] = count
+            Date dateFirstReported = (Date) it
+            if (dateFirstReported > adjustedSince) { // Hibernate does not support "having"
+                final int thenInDays = dateFirstReported.time / (1000L * 60 * 60 * 24)
+
+                final oldValue = stats[thenInDays]
+                if (oldValue) {
+                    stats[thenInDays] = oldValue + 1
+                } else {
+                    stats[thenInDays] = 1
+                }
+            }
         }
 
         stats.each {
