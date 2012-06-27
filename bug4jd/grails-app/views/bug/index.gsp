@@ -20,7 +20,7 @@
     <meta name='layout' content='main'/>
     <title>Bugs - ${app.code} - ${app.label}</title>
     <script type="text/javascript" src="http://www.google.com/jsapi"></script>
-    <script type="text/javascript" src="../js/CalendarPopup.js"></script>
+    <script type="text/javascript" src="${resource(dir: 'js', file: 'CalendarPopup.js')}"></script>
     <script type="text/javascript">
 
         var calFilter = new CalendarPopup("filterCal");
