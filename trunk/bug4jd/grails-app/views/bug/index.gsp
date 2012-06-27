@@ -90,13 +90,15 @@
                         <td><label for="filterTo">to</label></td>
                         <td><g:textField id="filterTo" name="filterTo" value="${params.to}"/></td>
                     </tr>
-                    <tr>
-                        <td></td>
-                        <td colspan="3">
-                            <g:checkBox name="filterIncludeSingleHost" value="${params.includeSingleHost}"/>
-                            <label for="filterIncludeSingleHost">Include hits reported from a single host</label>
-                        </td>
-                    </tr>
+                    <g:if test="${app.isMultiHost()}">
+                        <tr>
+                            <td></td>
+                            <td colspan="3">
+                                <g:checkBox name="filterIncludeSingleHost" value="${params.includeSingleHost}"/>
+                                <label for="filterIncludeSingleHost">Include hits reported from a single host</label>
+                            </td>
+                        </tr>
+                    </g:if>
                 </table>
 
                 <div style="margin: 5px 0 0 5px;">
