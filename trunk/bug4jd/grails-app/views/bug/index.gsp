@@ -20,7 +20,11 @@
     <meta name='layout' content='main'/>
     <title>Bugs - ${app.code} - ${app.label}</title>
     <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script type="text/javascript" src="../js/CalendarPopup.js"></script>
     <script type="text/javascript">
+
+        var calFilter = new CalendarPopup("filterCal");
+
         function drawVisualization(data) {
             $("#bugInfo-count").text(data.count)
             $("#bugInfo-reportedByCount").text(data.reportedByCount)
@@ -64,7 +68,7 @@
         google.load('visualization', '1', {packages:['annotatedtimeline']});
 
     </script>
-
+    <link rel="stylesheet" href="${resource(dir: 'css', file: 'CalendarPopup.css')}" type="text/css">
 </head>
 
 <body>
@@ -86,9 +90,23 @@
                 <table style="width: auto;">
                     <tr>
                         <td><label for="filterFrom">From</label></td>
-                        <td><g:textField name="filterFrom" value="${params.from}"/></td>
+                        <td>
+                            <g:textField id="filterFrom" name="filterFrom" value="${params.from}"/>
+                            <a href="#" onclick="calFilter.select(document.getElementById('filterFrom'), 'filterFromCalLink', 'MM/dd/yyyy');
+                            return false;" id="filterFromCalLink">
+                                <g:img dir="images" file="calendar.png"/>
+
+                            </a>
+                        </td>
                         <td><label for="filterTo">to</label></td>
-                        <td><g:textField id="filterTo" name="filterTo" value="${params.to}"/></td>
+                        <td>
+                            <g:textField id="filterTo" name="filterTo" value="${params.to}"/>
+                            <a href="#" onclick="calFilter.select(document.getElementById('filterTo'), 'filterToCalLink', 'MM/dd/yyyy');
+                            return false;" id="filterToCalLink">
+                                <g:img dir="images" file="calendar.png"/>
+
+                            </a>
+                        </td>
                     </tr>
                     <g:if test="${app.isMultiHost()}">
                         <tr>
@@ -191,5 +209,8 @@
         whenBugClicked($("#row0"), ${bugs[0].bug_id});
     </g:javascript>
 </g:if>
+
+<div id="filterCal" style="position:absolute;visibility:hidden;background-color:white;layer-background-color:white;"></div>
+
 </body>
 </html>

@@ -16,6 +16,9 @@
 
 import grails.plugins.springsecurity.Secured
 import org.bug4j.App
+import org.bug4j.server.util.DateUtil
+
+import java.text.SimpleDateFormat
 
 class HomeController {
     def statsService
@@ -42,11 +45,27 @@ class HomeController {
             appStats.hitCount = statsService.getHitCounts(app, daysBack)
         }
 
+        final simpleDateFormat = new SimpleDateFormat('M/d/y')
+        def now = new Date()
+
+        def dateLinks = [
+                todayFrom: simpleDateFormat.format(DateUtil.adjustToDayBoundary(now, DateUtil.TimeAdjustType.BEGINNING_OF_DAY)),
+                todayTo: simpleDateFormat.format(DateUtil.adjustToDayBoundary(now, DateUtil.TimeAdjustType.END_OF_DAY)),
+
+                yesterdayFrom: simpleDateFormat.format(DateUtil.adjustToDayBoundary(now - 1, DateUtil.TimeAdjustType.BEGINNING_OF_DAY)),
+                yesterdayTo: simpleDateFormat.format(DateUtil.adjustToDayBoundary(now - 1, DateUtil.TimeAdjustType.END_OF_DAY)),
+
+                daysBackFrom: simpleDateFormat.format(DateUtil.adjustToDayBoundary(now - daysBack, DateUtil.TimeAdjustType.BEGINNING_OF_DAY)),
+                daysBackTo: simpleDateFormat.format(DateUtil.adjustToDayBoundary(now, DateUtil.TimeAdjustType.END_OF_DAY)),
+
+        ]
+
         return [
                 app: app,
                 daysBack: daysBack,
                 apps: apps,
                 appStats: appStats,
+                dateLinks: dateLinks
         ]
     }
 
