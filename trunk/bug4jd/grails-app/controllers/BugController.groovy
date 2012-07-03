@@ -16,17 +16,16 @@
 
 import grails.converters.JSON
 import groovy.sql.Sql
-import org.bug4j.App
-import org.bug4j.Bug
-import org.bug4j.ClientSession
-import org.bug4j.Hit
 import org.bug4j.server.util.DateUtil
 
 import javax.sql.DataSource
 
+import org.bug4j.*
+
 class BugController {
 
     DataSource dataSource
+    def springSecurityService
 
     def index() {
         if (!params.sort) params.sort = 'bug_id'
@@ -200,24 +199,10 @@ class BugController {
         return app
     }
 
-    def bugInfoData() {
-        final bugId = params.id
+    def getTimelineData() {
         final sql = new Sql(dataSource.connection)
         try {
-            def row = sql.firstRow("select count(*), count(distinct reported_by), min(date_reported), max(date_reported) from hit h where h.BUG_ID=${bugId}")
-            def bugInfo = [
-                    count: row[0],
-                    reportedByCount: "${row[1]} ${row[1] <= 1 ? 'user' : 'users'}",
-                    minDateReported: DateUtil.formatDate((Date) row[2]),
-                    maxDateReported: DateUtil.formatDate((Date) row[3]),
-            ]
-            // Derby does not support two count(distinct) so we must query this separately
-            row = sql.firstRow("select count(distinct REMOTE_ADDR) from hit h where h.BUG_ID=${bugId}")
-            bugInfo.remoteAddrCount = "${row[0]} ${row[0] <= 1 ? 'host' : 'hosts'}"
-
-            bugInfo.reportedBy = sql.rows("select distinct reported_by from hit h where h.BUG_ID=${bugId}").collect {it[0]}.join(', ')
-            bugInfo.remoteAddr = sql.rows("select distinct remote_addr from hit h where h.BUG_ID=${bugId}").collect {it[0]}.join(', ')
-
+            final bugId = params.id as long
             Map<Date, Long> hitDays = [:]
             def tonight = DateUtil.adjustToDayBoundary(new Date(), DateUtil.TimeAdjustType.END_OF_DAY)
             hitDays[tonight] = 0
@@ -240,19 +225,90 @@ class BugController {
                 def date = "Date(${1900 + key.getYear()}, ${key.getMonth()}, ${key.getDate()})"
                 return [c: [[v: date], [v: value]]]
             }
-            bugInfo.timeLineData = [
+            def timeLineData = [
                     cols: [
                             [id: 'date', label: 'Date', type: 'date'],
                             [id: 'hits', label: 'Hits', type: 'number'],
                     ],
                     rows: rows,
             ]
+            render timeLineData as JSON
+        } finally {
+            sql.close()
+        }
+    }
 
+    def getBugInfo = {
+        final bugId = params.id as long
+        final sql = new Sql(dataSource.connection)
+        try {
+            def row = sql.firstRow("select count(*), count(distinct reported_by), min(date_reported), max(date_reported) from hit h where h.BUG_ID=${bugId}")
+            def bugInfo = [
+                    count: row[0],
+                    reportedByCount: "${row[1]} ${row[1] <= 1 ? 'user' : 'users'}",
+                    minDateReported: DateUtil.formatDate((Date) row[2]),
+                    maxDateReported: DateUtil.formatDate((Date) row[3]),
+            ]
+            // Derby does not support two count(distinct) so we must query this separately
+            row = sql.firstRow("select count(distinct REMOTE_ADDR) from hit h where h.BUG_ID=${bugId}")
+            bugInfo.remoteAddrCount = "${row[0]} ${row[0] <= 1 ? 'host' : 'hosts'}"
 
-            render bugInfo as JSON
+            bugInfo.reportedBy = sql.rows("select distinct reported_by from hit h where h.BUG_ID=${bugId}").collect {it[0]}.join(', ')
+            bugInfo.remoteAddr = sql.rows("select distinct remote_addr from hit h where h.BUG_ID=${bugId}").collect {it[0]}.join(', ')
+            final bug = Bug.get(bugId)
+            final comments = Comment.findAllByBug(bug, [sort: 'dateAdded', order: 'asc'])
+
+            render(template: 'bugInfo',
+                    model: [
+                            bugId: bugId,
+                            bugData: bugInfo,
+                            comments: comments
+                    ])
 
         } finally {
             sql.close()
         }
+    }
+
+    def addComment = {
+        final bugId = params.bugId as long
+        final newComment = params.newComment
+        final bug = Bug.get(bugId)
+        final username = springSecurityService.principal?.username
+        final comment = new Comment(
+                text: newComment,
+                dateAdded: new Date(),
+                addedBy: username
+        )
+        comment.bug = bug
+
+        if (!comment.validate()) {
+            final errors = comment.errors
+            println errors
+        }
+        comment.save(flush: true)
+
+        final comments = Comment.findAllByBug(bug, [sort: 'dateAdded', order: 'asc'])
+        render(template: "comments",
+                model: [
+                        bugId: bugId,
+                        comments: comments
+                ])
+    }
+
+    def removeComment = {
+        final commentId = params.id as long
+        final comment = Comment.get(commentId)
+        final bug = comment.bug
+        final username = springSecurityService.principal?.username
+        if (comment.addedBy == username) {
+            comment.delete();
+        }
+        final comments = Comment.findAllByBug(bug, [sort: 'dateAdded', order: 'asc'])
+        render(template: "comments",
+                model: [
+                        bugId: bug.id,
+                        comments: comments
+                ])
     }
 }
