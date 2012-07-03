@@ -260,33 +260,43 @@ public class Exporter {
     private void exportBugs(final XMLStreamWriter xmlStreamWriter, App app) throws XMLStreamException {
         final Set<Bug> bugs = app.getBugs();
         for (Bug bug : bugs) {
-            xmlStreamWriter.writeStartElement("bug");
-            xmlStreamWriter.writeAttribute("id", bug.id as String);
-            xmlStreamWriter.writeAttribute("title", bug.title);
-            if (bug.extinct) {
-                writeDate(xmlStreamWriter, 'extinct', bug.extinct)
-            }
-            if (bug.unextinct) {
-                writeDate(xmlStreamWriter, 'unextinct', bug.unextinct)
-            }
-            if (bug.reportedId) {
-                xmlStreamWriter.writeAttribute('reportedId', bug.reportedId)
-            }
-            if (bug.reportedLabel) {
-                xmlStreamWriter.writeAttribute('reportedLabel', _unicodeEscaper.translate(bug.reportedLabel))
-            }
-            // hot not exported, it is re-calculated
-
-            // strains not exported, they will be re-created on import
-
-            xmlStreamWriter.writeStartElement("hits");
-            bug.hits.each {
-                exportHit(xmlStreamWriter, it)
-            }
-            xmlStreamWriter.writeEndElement();
-
-            xmlStreamWriter.writeEndElement();
+            exportBug(xmlStreamWriter, bug)
         }
+    }
+
+    private void exportBug(final XMLStreamWriter xmlStreamWriter, Bug bug) throws XMLStreamException {
+        xmlStreamWriter.writeStartElement("bug");
+        xmlStreamWriter.writeAttribute("id", bug.id as String);
+        xmlStreamWriter.writeAttribute("title", bug.title);
+        if (bug.extinct) {
+            writeDate(xmlStreamWriter, 'extinct', bug.extinct)
+        }
+        if (bug.unextinct) {
+            writeDate(xmlStreamWriter, 'unextinct', bug.unextinct)
+        }
+        if (bug.reportedId) {
+            xmlStreamWriter.writeAttribute('reportedId', bug.reportedId)
+        }
+        if (bug.reportedLabel) {
+            xmlStreamWriter.writeAttribute('reportedLabel', _unicodeEscaper.translate(bug.reportedLabel))
+        }
+        // hot not exported, it is re-calculated
+
+        // strains not exported, they will be re-created on import
+
+        xmlStreamWriter.writeStartElement("hits");
+        bug.hits.each {
+            exportHit(xmlStreamWriter, it)
+        }
+        xmlStreamWriter.writeEndElement();
+
+        xmlStreamWriter.writeStartElement("comments");
+        Comment.findAllByBug(bug).each {
+            exportComment(xmlStreamWriter, it)
+        }
+        xmlStreamWriter.writeEndElement();
+
+        xmlStreamWriter.writeEndElement();
     }
 
     private void exportHit(final XMLStreamWriter xmlStreamWriter, Hit hit) throws XMLStreamException {
@@ -312,6 +322,16 @@ public class Exporter {
             xmlStreamWriter.writeCData(_unicodeEscaper.translate(stackString));
             xmlStreamWriter.writeCharacters("\n");
         }
+        xmlStreamWriter.writeEndElement();
+    }
+
+    private void exportComment(final XMLStreamWriter xmlStreamWriter, Comment comment) throws XMLStreamException {
+        xmlStreamWriter.writeStartElement("comment");
+        xmlStreamWriter.writeAttribute("addedBy", comment.addedBy);
+        writeDate(xmlStreamWriter, 'dateAdded', comment.dateAdded)
+        xmlStreamWriter.writeCharacters("\n");
+        xmlStreamWriter.writeCData(_unicodeEscaper.translate(comment.text))
+        xmlStreamWriter.writeCharacters("\n");
         xmlStreamWriter.writeEndElement();
     }
 }
