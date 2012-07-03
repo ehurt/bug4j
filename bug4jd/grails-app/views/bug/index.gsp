@@ -25,15 +25,8 @@
 
         var calFilter = new CalendarPopup("filterCal");
 
-        function drawVisualization(data) {
-            $("#bugInfo-count").text(data.count);
-            $("#bugInfo-reportedByCount").text(data.reportedByCount);
-            $("#bugInfo-reportedByCount").prop("title", data.reportedBy);
-            $("#bugInfo-remoteAddrCount").text(data.remoteAddrCount);
-            $("#bugInfo-remoteAddrCount").prop("title", data.remoteAddr);
-            $("#bugInfo-minDateReported").text(data.minDateReported);
-            $("#bugInfo-maxDateReported").text(data.maxDateReported);
-            var dataTable = new google.visualization.DataTable(data.timeLineData, 0.6);
+        function drawVisualization(timeLineData) {
+            var dataTable = new google.visualization.DataTable(timeLineData, 0.6);
 
             var annotatedtimeline = new google.visualization.AnnotatedTimeLine(document.getElementById('hit-graph'));
         <%
@@ -49,7 +42,8 @@
         function whenBugClicked(elm, bugId) {
             $(".bug-row-selected").removeClass("bug-row-selected");
             $(elm).addClass('bug-row-selected');
-        ${remoteFunction(action:'bugInfoData', onSuccess: 'drawVisualization(data)', params: '\'id=\' + bugId + \'\'')}
+        ${remoteFunction(action: 'getBugInfo', update: 'info-section', params: '\'id=\' + bugId + \'\'')}
+        ${remoteFunction(action:'getTimelineData', onSuccess: 'drawVisualization(data)', params: '\'id=\' + bugId + \'\'')}
         }
 
         function showFilterForm() {
@@ -189,15 +183,10 @@
     </div>
 
     <g:if test="${bugs}">
-        <div id="info-section" style="width: 49%; float: right;">
+        <div style="width: 49%; float: right;">
             <div id="hit-graph" style="width: 95%;height: 400px;"></div>
 
-            <div style="border: 1px solid #DFDFDF ;margin: 15px 10px;padding: 5px;">
-                <div><span id="bugInfo-count"></span> hits</div>
-
-                <div>Reported by <span class="info-span" id="bugInfo-reportedByCount"></span> from <span class="info-span" id="bugInfo-remoteAddrCount"></span></div>
-
-                <div>Reported between <span id="bugInfo-minDateReported"></span> and <span id="bugInfo-maxDateReported"></span></div>
+            <div id="info-section">
             </div>
         </div>
     </g:if>
