@@ -367,14 +367,18 @@ class BugService {
             App _app
             String _bugTitle
 
+            Long _bugId
             String _hitId
             String _sessionId
             String _message
             String _remoteAddr
             String _appVer
             long _dateReported
-            String _stackString
+            String _text
             Map<String, ClientSession> _sessions = new HashMap<String, ClientSession>()
+
+            String _commentAddedBy
+            long _commentDateAdded
 
             void startElement(String ns, String localName, String qName, Attributes atts) {
                 switch (qName) {
@@ -465,19 +469,25 @@ class BugService {
                         _appVer = atts.getValue('appVer')
                         _message = atts.getValue('message')
                         _remoteAddr = atts.getValue('remoteAddr')
-                        _stackString = ''
+                        _text = ''
                         break;
+
+                    case 'comment':
+                        _commentAddedBy = atts.getValue('addedBy')
+                        final String dateAddedString = atts.getValue('dateAdded')
+                        _commentDateAdded = dateFormat.parse(dateAddedString).getTime()
+                        _text = ''
                 }
             }
 
             void characters(char[] chars, int offset, int length) {
-                if (_hitId) {
+                if (_hitId || _commentAddedBy) {
                     final String s = new String(chars, offset, length)
                     final String trimmed = StringUtils.remove(s, '\n')
                     trimmed = StringUtils.remove(trimmed, '\r')
                     trimmed = StringUtils.remove(trimmed, ' ')
                     if (trimmed) {
-                        _stackString = s
+                        _text = s
                     }
                 }
             }
@@ -497,8 +507,25 @@ class BugService {
                     case 'hit':
                         final clientSession = _sessions.get(_sessionId)
                         final remoteAddr = _remoteAddr ? _remoteAddr : clientSession?.hostName
-                        reportBug(clientSession, _app, _message, _dateReported, _user, remoteAddr, _stackString)
+                        _bugId = reportBug(clientSession, _app, _message, _dateReported, _user, remoteAddr, _text)
                         _hitId = null
+                        break;
+                    case 'comment':
+                        final bug = Bug.get(_bugId)
+                        String text;
+                        Date dateAdded
+                        String addedBy
+                        final comment = new Comment(
+                                dateAdded: new Date(_commentDateAdded),
+                                addedBy: _commentAddedBy,
+                                text: _text,
+                        )
+                        comment.bug = bug
+                        if (!comment.validate()) {
+                            println comment.errors
+                        }
+                        comment.save()
+                        _commentAddedBy = null
                         break;
                 }
             }

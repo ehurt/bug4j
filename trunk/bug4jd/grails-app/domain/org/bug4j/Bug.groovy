@@ -50,7 +50,8 @@ class Bug {
 
     static hasMany = [
             hits: Hit,
-            strains: Strain
+            strains: Strain,
+            comments: Comment,
     ]
 
     static mapping = {
@@ -58,6 +59,6 @@ class Bug {
         title index: 'BUG_TITLE_IDX'
         hits cascade: 'all-delete-orphan'
         strains cascade: 'all-delete-orphan'
+        comments cascade: 'all-delete-orphan'
     }
-
 }
