@@ -26,11 +26,13 @@
         var calFilter = new CalendarPopup("filterCal");
 
         function drawVisualization(data) {
-            $("#bugInfo-count").text(data.count)
-            $("#bugInfo-reportedByCount").text(data.reportedByCount)
-            $("#bugInfo-remoteAddrCount").text(data.remoteAddrCount)
-            $("#bugInfo-minDateReported").text(data.minDateReported)
-            $("#bugInfo-maxDateReported").text(data.maxDateReported)
+            $("#bugInfo-count").text(data.count);
+            $("#bugInfo-reportedByCount").text(data.reportedByCount);
+            $("#bugInfo-reportedByCount").prop("title", data.reportedBy);
+            $("#bugInfo-remoteAddrCount").text(data.remoteAddrCount);
+            $("#bugInfo-remoteAddrCount").prop("title", data.remoteAddr);
+            $("#bugInfo-minDateReported").text(data.minDateReported);
+            $("#bugInfo-maxDateReported").text(data.maxDateReported);
             var dataTable = new google.visualization.DataTable(data.timeLineData, 0.6);
 
             var annotatedtimeline = new google.visualization.AnnotatedTimeLine(document.getElementById('hit-graph'));
@@ -69,6 +71,19 @@
 
     </script>
     <link rel="stylesheet" href="${resource(dir: 'css', file: 'CalendarPopup.css')}" type="text/css">
+    <style type="text/css">
+    .info-span {
+        background-color: #EFEFEF;
+        -moz-border-radius: 0.3em;
+        -webkit-border-radius: 0.3em;
+        border-radius: 0.3em;
+        padding: 0 .3em
+    }
+
+    table {
+        border: none;
+    }
+    </style>
 </head>
 
 <body>
@@ -127,7 +142,7 @@
             </g:form>
         </div>
         <g:if test="${bugs}">
-            <table style="cursor: pointer;">
+            <table style="border-top: 1px solid #DFDFDF; border-collapse: collapse; cursor: pointer;">
                 <tr>
                     <g:sortableColumn property="bug_id" title="${message(code: 'bug.id.label', default: 'ID')}" defaultOrder="desc" params="${params}"/>
                     <g:sortableColumn property="bug_title" title="${message(code: 'bug.title.label', default: 'Title')}" params="${params}"/>
@@ -175,30 +190,15 @@
 
     <g:if test="${bugs}">
         <div id="info-section" style="width: 49%; float: right;">
-            <table>
-                <tr>
-                    <td style="width: 10em;">Hits:</td>
-                    <td id="bugInfo-count"></td>
-                </tr>
-                <tr>
-                    <td>Reported by:</td>
-                    <td id="bugInfo-reportedByCount"></td>
-                </tr>
-                <tr>
-                    <td>Reported from:</td>
-                    <td id="bugInfo-remoteAddrCount"></td>
-                </tr>
-                <tr>
-                    <td>First report:</td>
-                    <td id="bugInfo-minDateReported"></td>
-                </tr>
-                <tr>
-                    <td>Last report:</td>
-                    <td id="bugInfo-maxDateReported"></td>
-                </tr>
-            </table>
-
             <div id="hit-graph" style="width: 95%;height: 400px;"></div>
+
+            <div style="border: 1px solid #DFDFDF ;margin: 15px 10px;padding: 5px;">
+                <div><span id="bugInfo-count"></span> hits</div>
+
+                <div>Reported by <span class="info-span" id="bugInfo-reportedByCount"></span> from <span class="info-span" id="bugInfo-remoteAddrCount"></span></div>
+
+                <div>Reported between <span id="bugInfo-minDateReported"></span> and <span id="bugInfo-maxDateReported"></span></div>
+            </div>
         </div>
     </g:if>
 

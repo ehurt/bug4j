@@ -203,8 +203,8 @@ class BugController {
     def bugInfoData() {
         final bugId = params.id
         final sql = new Sql(dataSource.connection)
-        final row = sql.firstRow("select count(*), count(distinct reported_by), min(date_reported), max(date_reported) from hit h where h.BUG_ID=${bugId}")
         try {
+            def row = sql.firstRow("select count(*), count(distinct reported_by), min(date_reported), max(date_reported) from hit h where h.BUG_ID=${bugId}")
             def bugInfo = [
                     count: row[0],
                     reportedByCount: "${row[1]} ${row[1] <= 1 ? 'user' : 'users'}",
@@ -214,6 +214,9 @@ class BugController {
             // Derby does not support two count(distinct) so we must query this separately
             row = sql.firstRow("select count(distinct REMOTE_ADDR) from hit h where h.BUG_ID=${bugId}")
             bugInfo.remoteAddrCount = "${row[0]} ${row[0] <= 1 ? 'host' : 'hosts'}"
+
+            bugInfo.reportedBy = sql.rows("select distinct reported_by from hit h where h.BUG_ID=${bugId}").collect {it[0]}.join(', ')
+            bugInfo.remoteAddr = sql.rows("select distinct remote_addr from hit h where h.BUG_ID=${bugId}").collect {it[0]}.join(', ')
 
             Map<Date, Long> hitDays = [:]
             def tonight = DateUtil.adjustToDayBoundary(new Date(), DateUtil.TimeAdjustType.END_OF_DAY)
