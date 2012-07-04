@@ -64,6 +64,12 @@ class BugController {
             }
         }
 
+        if (params.includeIgnored) {
+            filter += "includeIgnored "
+        } else {
+            queryCond += " and b.ignore = false"
+        }
+
         final sql = """
                 select
                     b.id as bug_id,
@@ -120,6 +126,7 @@ class BugController {
         if (params.filterFrom) reParams += [from: params.filterFrom]
         if (params.filterTo) reParams += [to: params.filterTo]
         if (params.filterIncludeSingleHost) reParams += [includeSingleHost: params.filterIncludeSingleHost]
+        if (params.filterIncludeIgnored) reParams += [includeIgnored: params.filterIncludeIgnored]
 
         redirect(action: 'index', params: reParams)
     }
@@ -260,6 +267,7 @@ class BugController {
 
             render(template: 'bugInfo',
                     model: [
+                            bug: bug,
                             bugId: bugId,
                             bugData: bugInfo,
                             comments: comments
@@ -274,7 +282,7 @@ class BugController {
         final bugId = params.bugId as long
         final newComment = params.newComment
         final bug = Bug.get(bugId)
-        final username = springSecurityService.principal?.username
+        final username = springSecurityService.principal.username
         final comment = new Comment(
                 text: newComment,
                 dateAdded: new Date(),
@@ -300,7 +308,7 @@ class BugController {
         final commentId = params.id as long
         final comment = Comment.get(commentId)
         final bug = comment.bug
-        final username = springSecurityService.principal?.username
+        final username = springSecurityService.principal.username
         if (comment.addedBy == username) {
             comment.delete();
         }
@@ -310,5 +318,19 @@ class BugController {
                         bugId: bug.id,
                         comments: comments
                 ])
+    }
+
+    def ignore = {
+        final bugId = params.id
+        final bug = Bug.get(bugId)
+        bug.ignore = true
+        bug.save();
+    }
+
+    def unignore = {
+        final bugId = params.id
+        final bug = Bug.get(bugId)
+        bug.ignore = false
+        bug.save();
     }
 }

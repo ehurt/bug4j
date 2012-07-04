@@ -54,6 +54,7 @@
             $("#filterFrom").val('');
             $("#filterTo").val('');
             $("#filterIncludeSingleHost").attr('checked', false)
+            $("#filterIncludeIgnored").attr('checked', false)
         }
 
         function whenHitClicked(elm, hitId) {
@@ -117,6 +118,13 @@
                             </a>
                         </td>
                     </tr>
+                    <tr>
+                        <td></td>
+                        <td colspan="3">
+                            <g:checkBox name="filterIncludeIgnored" value="${params.includeIgnored}"/>
+                            <label for="filterIncludeIgnored">Include bugs marked as ignored</label>
+                        </td>
+                    </tr>
                     <g:if test="${app.isMultiHost()}">
                         <tr>
                             <td></td>
@@ -129,7 +137,6 @@
                 </table>
 
                 <div style="margin: 5px 0 0 5px;">
-                    %{--<input type="reset" value="Clear" onclick="clearWhenFilter();return false;"/>--}%
                     <g:submitButton name="Clear" onclick="clearWhenFilter();"/>
                     <g:submitButton name="Apply"/>
                 </div>

@@ -14,6 +14,41 @@
   -    limitations under the License.
   --}%
 <div style="margin: 10px 10px;">
+
+    <sec:ifLoggedIn>
+        <div style="margin: 3px;">Actions:
+            <a href="#"
+               style="padding: 3px;"
+               onclick="
+                   $('#showNewCommentDiv').hide();
+                   $('#newCommentDiv').show('fast');
+                   $('#bugComments').show('fast');
+                   $('#newCommentTextArea').focus();
+                   return false;
+               ">
+                Comment
+            </a>
+            <a id="ignoreLink"
+               style="display: ${bug.ignore ? 'none' : 'inline'}"
+               href="#"
+               onclick="${remoteFunction(action: 'ignore', params: [id: bugId])};
+               $('#unIgnoreLink').show();
+               $('#ignoreLink').hide();
+               ">
+                Ignore
+            </a>
+            <a id="unIgnoreLink"
+               style="display: ${bug.ignore ? 'inline' : 'none'}"
+               href="#"
+               onclick="${remoteFunction(action: 'unignore', params: [id: bugId])};
+               $('#ignoreLink').show();
+               $('#unIgnoreLink').hide();
+               ">
+                Un-Ignore
+            </a>
+        </div>
+    </sec:ifLoggedIn>
+
     <div style="border: 1px solid #DFDFDF;padding: 5px;margin-top: 5px;">
         <div>${bugData.count} hits</div>
 
@@ -33,9 +68,10 @@
 
     </div>
 
-    <g:if test="${sec.loggedInUserInfo(field: "username") || comments}">
-        <div id="bugComments" style="border: 1px solid #DFDFDF;padding: 5px;margin-top: 5px;">
-            <g:render template="comments" model="[bugId: bugId, comment: bugData.comment]"/>
-        </div>
-    </g:if>
+    <%
+        String display = comments ? "" : " display:none;";
+    %>
+    <div id="bugComments" style="border: 1px solid #DFDFDF;padding: 5px;margin-top: 5px;${display}">
+        <g:render template="comments" model="[bugId: bugId, comment: bugData.comment]"/>
+    </div>
 </div>
