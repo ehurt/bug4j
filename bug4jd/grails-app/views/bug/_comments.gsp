@@ -14,21 +14,6 @@
   -    limitations under the License.
   --}%
 <%@ page import="org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils; java.text.DateFormat; java.text.SimpleDateFormat" %>
-%{--
-  - Copyright 2012 Cedric Dandoy
-  -
-  -    Licensed under the Apache License, Version 2.0 (the "License");
-  -    you may not use this file except in compliance with the License.
-  -    You may obtain a copy of the License at
-  -
-  -        http://www.apache.org/licenses/LICENSE-2.0
-  -
-  -    Unless required by applicable law or agreed to in writing, software
-  -    distributed under the License is distributed on an "AS IS" BASIS,
-  -    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  -    See the License for the specific language governing permissions and
-  -    limitations under the License.
-  --}%
 
 <%
     DateFormat dateFormat = SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.SHORT, SimpleDateFormat.SHORT)
@@ -76,16 +61,3 @@
     </tr>
 </table>
 
-<sec:ifLoggedIn>
-    <div id="showNewCommentDiv">
-        <a href="#"
-           onclick="
-               $('#showNewCommentDiv').hide();
-               $('#newCommentDiv').show('fast');
-               $('#newCommentTextArea').focus();
-               return false;
-           ">
-            Add comment
-        </a>
-    </div>
-</sec:ifLoggedIn>

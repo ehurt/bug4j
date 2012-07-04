@@ -21,6 +21,7 @@ class Bug {
     Date extinct
     Date unextinct
     boolean multiReport
+    boolean ignore
 
     /**
      * The unique identified in an external 'bug database'
