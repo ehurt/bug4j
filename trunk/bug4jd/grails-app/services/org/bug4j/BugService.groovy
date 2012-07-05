@@ -359,10 +359,7 @@ class BugService {
 
         def reader = SAXParserFactory.newInstance().newSAXParser().XMLReader
         reader.setContentHandler(new DefaultHandler() {
-            String _user
-            String _password
-            boolean _admin
-            boolean _external
+            String _userName
 
             App _app
             String _bugTitle
@@ -383,15 +380,36 @@ class BugService {
             void startElement(String ns, String localName, String qName, Attributes atts) {
                 switch (qName) {
                     case 'user':
-                        _user = atts.getValue('userName')
-                        _password = atts.getValue('password')
-                        _admin = 'true' == atts.getValue('admin')
-                        _external = 'true' == atts.getValue('external')
-                        if (!User.findByUsername(_user)) {
-                            new User(username: _user, password: _password, enabled: true).save(flush: true)
+                        _userName = atts.getValue('userName')
+                        String password = atts.getValue('password')
+                        String email = atts.getValue('email')
+                        boolean admin = 'true' == atts.getValue('admin')
+                        boolean externalAuthentication = 'true' == atts.getValue('externalAuthentication') || 'true' == atts.getValue('external')
+                        if (!User.findByUsername(_userName)) {
+                            final user = new User(
+                                    username: _userName,
+                                    password: password,
+                                    enabled: true,
+                                    externalAuthentication: externalAuthentication,
+                                    email: email
+                            ).save(flush: true)
+                            if (admin) { // That's a 0.1 version
+                                UserRole.create(user, Role.findByAuthority(Role.USER))
+                                UserRole.create(user, Role.findByAuthority(Role.ADMIN))
+                            }
                         }
 
                         break;
+
+                    case 'role':
+                        final user = User.findByUsername(_userName)
+                        String roleName = atts.getValue('name')
+                        final role = Role.findByAuthority(roleName)
+                        if (role) {
+                            UserRole.create(user, role)
+                        }
+                        break;
+
                     case 'app':
                         String appId = atts.getValue('name')
                         _app = identifyApp(appId)
@@ -463,7 +481,7 @@ class BugService {
                     case 'hit':
                         _hitId = atts.getValue('id')
                         _sessionId = atts.getValue('sessionId')
-                        _user = atts.getValue('user')
+                        _userName = atts.getValue('user')
                         String dateString = atts.getValue('date')
                         _dateReported = dateFormat.parse(dateString).getTime()
                         _appVer = atts.getValue('appVer')
@@ -507,7 +525,7 @@ class BugService {
                     case 'hit':
                         final clientSession = _sessions.get(_sessionId)
                         final remoteAddr = _remoteAddr ? _remoteAddr : clientSession?.hostName
-                        _bugId = reportBug(clientSession, _app, _message, _dateReported, _user, remoteAddr, _text)
+                        _bugId = reportBug(clientSession, _app, _message, _dateReported, _userName, remoteAddr, _text)
                         _hitId = null
                         break;
                     case 'comment':
