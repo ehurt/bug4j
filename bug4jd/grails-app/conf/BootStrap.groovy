@@ -14,12 +14,33 @@
  *    limitations under the License.
  */
 
+import org.apache.commons.io.IOUtils
 import org.bug4j.*
 
 class BootStrap {
     def extensionService
 
     def init = { servletContext ->
+
+        // Install the default ~/.bug4j/bug4j-config.groovy
+        try {
+            final userHome = new File(System.getProperty('user.home'))
+            if (userHome.isDirectory()) {
+                final File bug4j = new File(userHome, '.bug4j')
+                bug4j.mkdir()
+                final File configFile = new File(bug4j, 'bug4j-config.groovy')
+                if (!configFile.exists()) {
+                    final inputStream = getClass().getClassLoader().getResourceAsStream('org/bug4j/server/resources/bug4j-config.groovy.txt')
+                    if (inputStream) {
+                        configFile.withOutputStream {OutputStream outputStream ->
+                            IOUtils.copy(inputStream, outputStream)
+                        }
+                    }
+                }
+            }
+        } catch (IOException ignore) {
+        }
+
         final catalinaHome = System.getProperty('catalina.home')
         final catalinaHomeFile = new File(catalinaHome, 'extensions')
         extensionService.init(catalinaHomeFile)
@@ -32,12 +53,13 @@ class BootStrap {
         }
 
         if (!User.count) {
-            final user = new User(username: 'bug4j', password: 'bug4j', enabled: true)
-            final role = new Role(authority: Role.ADMIN)
-            final userRole = new UserRole(user: user, role: role)
-            user.save(true)
-            role.save(true)
-            userRole.save(true)
+            new Role(authority: Role.ANONYMOUS).save()
+            final userRole = new Role(authority: Role.USER).save()
+            final adminRole = new Role(authority: Role.ADMIN).save(true)
+
+            final defaultUser = new User(username: 'bug4j', password: 'bug4j', enabled: true).save()
+            UserRole.create(defaultUser, userRole)
+            UserRole.create(defaultUser, adminRole)
         }
     }
 

@@ -16,4 +16,9 @@
 
 // Place your Spring DSL code here
 beans = {
+    userDetailsService(org.bug4j.server.security.CustomUserDetailsService)
+
+    ldapUserDetailsMapper(org.bug4j.server.security.CustomUserDetailsContextMapper) {
+        springSecurityService = ref("springSecurityService")
+    }
 }

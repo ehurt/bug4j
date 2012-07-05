@@ -16,7 +16,9 @@
 package org.bug4j.bug4jd
 
 import grails.plugins.springsecurity.Secured
+import org.bug4j.Role
 import org.bug4j.User
+import org.bug4j.UserRole
 
 @Secured(['ROLE_ADMIN'])
 class UserController {
@@ -29,6 +31,10 @@ class UserController {
     }
 
     def list() {
+        if (!params.sort) params.sort = 'username'
+        if (!params.order) params.order = 'asc'
+        if (!params.max) params.max = 10
+        if (!params.offset) params.offset = 0
 
         final users = User.list(params)
         int count = User.count
@@ -79,6 +85,7 @@ class UserController {
                     ])
             return
         }
+        UserRole.create(userInstance, Role.findByAuthority(Role.USER))
 
         flash.message = id ?
                         message(code: 'default.updated.message', args: [message(code: 'user.label', default: 'User'), userInstance.username]) :
@@ -91,6 +98,39 @@ class UserController {
         final userInstance = User.get(id)
         userInstance.delete()
         flash.message = message(code: 'default.deleted.message', args: [message(code: 'user.label', default: 'User'), userInstance.username])
+        redirect(action: 'list')
+    }
+
+    def bulk() {
+
+    }
+
+    def bulkSave() {
+        final String names = params.names
+        final split = names.split("[\n\r;]")
+        split.each {
+            if (it) {
+                String username = it
+                String email = null
+                final emailWithNameMatcher = it =~ /(.*)<(.*)>/
+                if (emailWithNameMatcher.matches()) {
+                    username = emailWithNameMatcher[0][2]
+                    email = username
+                }
+
+                if (!email) {
+                    if (username.contains('@')) {
+                        email = username
+                    }
+                }
+
+                if (!User.findByUsername(it)) {
+                    final user = new User(username: username, externalAuthentication: true, enabled: true, email: email).save()
+                    UserRole.create(user, Role.findByAuthority(Role.USER))
+                }
+            }
+        }
+        flash.message = 'Users created'
         redirect(action: 'list')
     }
 }

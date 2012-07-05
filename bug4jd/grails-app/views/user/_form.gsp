@@ -24,7 +24,14 @@
     <g:textField name="username" value="${userInstance?.username}"/>
 </div>
 
-<div class="fieldcontain ${hasErrors(bean: userInstance, field: 'password', 'error')} ">
+<div class="fieldcontain ${hasErrors(bean: userInstance, field: 'externalAuthentication', 'error')} ">
+    <label for="enabled">
+        <g:message code="user.externalAuthentication.label" default="LDAP Authentication"/>
+    </label>
+    <g:checkBox name="externalAuthentication" value="${userInstance?.externalAuthentication}" onchange="setPasswordVisibility();"/>
+</div>
+
+<div id="passwordSection" class="fieldcontain ${hasErrors(bean: userInstance, field: 'password', 'error')} ">
     <label for="password">
         <g:message code="user.password.label" default="Password"/>
     </label>
@@ -44,4 +51,16 @@
     </label>
     <g:checkBox name="admin" value="${authorities.contains(Role.ADMIN)}"/>
 </div>
+
+<script type="text/javascript">
+    function setPasswordVisibility(){
+        if($("#externalAuthentication").is(':checked')){
+            $("#passwordSection").hide()
+        }else{
+            $("#passwordSection").show()
+        }
+    }
+
+    setPasswordVisibility()
+</script>
 

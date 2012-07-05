@@ -93,8 +93,6 @@ log4j = {
 
     info "grails.app"
 
-    debug "org.springframework.security.ldap"
-
     error 'org.codehaus.groovy.grails.web.servlet',  //  controllers
             'org.codehaus.groovy.grails.web.pages', //  GSP
             'org.codehaus.groovy.grails.web.sitemesh', //  layouts
@@ -113,7 +111,12 @@ grails.plugins.springsecurity.userLookup.userDomainClassName = 'org.bug4j.User'
 grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'org.bug4j.UserRole'
 grails.plugins.springsecurity.authority.className = 'org.bug4j.Role'
 grails.plugins.springsecurity.anon.userAttribute = 'anonymousUser, ROLE_ANONYMOUS'
+grails.plugins.springsecurity.rememberMe.cookieName = 'bug4j_remember_me'
+
+grails.plugins.springsecurity.ldap.active = false
+grails.plugins.springsecurity.ldap.authorities.retrieveGroupRoles = false
+grails.plugins.springsecurity.ldap.authorities.retrieveDatabaseRoles = true
+
 
 // CDA
 grails.app.context = '/'
-grails.plugins.springsecurity.ldap.active = false
