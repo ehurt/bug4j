@@ -13,49 +13,38 @@
   -    See the License for the specific language governing permissions and
   -    limitations under the License.
   --}%
-
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta name='layout' content='main'/>
-    <title>Users</title>
+    <title>Create Users</title>
     <g:set var="entityName" value="${message(code: 'user.label', default: 'User')}"/>
-    <style type="text/css">
-    .create-bulk {
-        background: url(../images/skin/table_add.png) no-repeat 0.7em center;
-        text-indent: 25px;
-    }
-
-    </style>
 </head>
 
 <body>
 <div class="nav" role="navigation">
     <ul>
         <li><a class="home" href="${createLink(controller: 'admin')}"><g:message code="default.adminHome.label"/></a></li>
-        <li><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]"/></g:link></li>
-        <li><g:link class="create-bulk" action="bulk"><g:message code="default.bulk.label" default="Bulk Create"/></g:link></li>
+        <li><g:link class="list" action="list"><g:message code="default.list.label" args="[entityName]"/></g:link></li>
     </ul>
 </div>
+<g:if test="${flash.message}">
+    <div class="message" role="status">${flash.message}</div>
+</g:if>
 
-<div class="content" role="main">
-    <g:if test="${flash.message}">
-        <div class="message" role="status">${flash.message}</div>
-    </g:if>
-    <h1>Users</h1>
+<g:form action="bulkSave">
+    <fieldset class="form">
 
-    <table>
-        <tr>
-            <th>User Name</th>
-        </tr>
-        <g:each in="${users}" var="user">
-            <tr><td><g:link action="edit" id="${user.id}">${user.username.encodeAsHTML()}</g:link></td></tr>
-        </g:each>
-    </table>
+        <div><label for="names">User Names:</label></div>
 
-    <div class="pagination">
-        <g:paginate total="${total}"/>
-    </div>
-</div>
+        <div><g:textArea id="names" name="names" rows="10" cols="200" style="width: 80em;"/></div>
+    </fieldset>
+    <fieldset class="buttons">
+        <g:submitButton name="create" class="save" value="${message(code: 'default.button.create.label', default: 'Create')}"/>
+    </fieldset>
+</g:form>
+<script type="text/javascript">
+    $("#names").focus()
+</script>
 </body>
 </html>

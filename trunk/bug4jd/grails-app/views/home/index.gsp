@@ -13,7 +13,7 @@
   -    See the License for the specific language governing permissions and
   -    limitations under the License.
   --}%
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils" contentType="text/html;charset=UTF-8" %>
 <html xmlns="http://www.w3.org/1999/html">
 <head>
     <meta name='layout' content='main'/>
@@ -132,6 +132,10 @@
 </head>
 
 <body>
+<!--
+    Username: <sec:username/>
+    Authorities: ${SpringSecurityUtils.getPrincipalAuthorities()}
+    -->
 <div id="app-sel-div">
     <ul>
         <g:each in="${apps}" var="app">

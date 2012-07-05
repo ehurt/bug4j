@@ -22,6 +22,7 @@ class User {
 
     String username
     String password
+    boolean externalAuthentication
     boolean enabled = true
     boolean accountExpired
     boolean accountLocked
@@ -31,19 +32,21 @@ class User {
 
     static constraints = {
         username(blank: false, unique: true)
-        password(blank: false)
+        password(nullable: true)
         email(nullable: true, email: true)
         lastSignedIn(nullable: true)
+        externalAuthentication(nullable: true)
     }
 
     static hasMany = [
-            preferences: UserPreference
+            preferences: UserPreference,
+            userRoles: UserRole,
     ]
-
 
     static mapping = {
         table 'BUG4J_USER'
         password column: '`password`'
+        userRoles cascade: 'all-delete-orphan'
     }
 
     Set<Role> getAuthorities() {

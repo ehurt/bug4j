@@ -1,0 +1,8 @@
+
+// LDAP configuration.
+grails.plugins.springsecurity.ldap.active = false // Off by default
+grails.plugins.springsecurity.ldap.context.managerDn = 'uid=admin,ou=system'
+grails.plugins.springsecurity.ldap.context.managerPassword = 'secret'
+grails.plugins.springsecurity.ldap.context.server = 'ldap://localhost:10389'
+grails.plugins.springsecurity.ldap.authorities.groupSearchBase = 'ou=groups,dc=yourcompany,dc=com'
+grails.plugins.springsecurity.ldap.search.base = 'dc=yourcompany,dc=com'
