@@ -214,6 +214,10 @@ public class Exporter {
         final String escapedPassword = StringEscapeUtils.escapeXml(password);
         xmlStreamWriter.writeAttribute("password", escapedPassword);
 
+        if (user.isExternalAuthentication()) {
+            xmlStreamWriter.writeAttribute("externalAuthentication", "true");
+        }
+
         if (!user.isEnabled()) {
             xmlStreamWriter.writeAttribute("disabled", "true");
         }
@@ -241,16 +245,20 @@ public class Exporter {
             writeDate(xmlStreamWriter, "lastSignedIn", lastSignedIn);
         }
 
-        xmlStreamWriter.writeStartElement('pref')
-        user.preferences.each {
-            xmlStreamWriter.writeAttribute('key', StringEscapeUtils.escapeXml(it.key))
-            xmlStreamWriter.writeAttribute('value', StringEscapeUtils.escapeXml(it.value))
+        if (user.preferences) {
+            xmlStreamWriter.writeStartElement('pref')
+            user.preferences.each {
+                xmlStreamWriter.writeAttribute('key', StringEscapeUtils.escapeXml(it.key))
+                xmlStreamWriter.writeAttribute('value', StringEscapeUtils.escapeXml(it.value))
+            }
+            xmlStreamWriter.writeEndElement()
         }
-        xmlStreamWriter.writeEndElement()
 
         xmlStreamWriter.writeStartElement('roles')
         user.authorities.each {
-            xmlStreamWriter.writeAttribute('role', it.authority)
+            xmlStreamWriter.writeStartElement('role')
+            xmlStreamWriter.writeAttribute('name', it.authority)
+            xmlStreamWriter.writeEndElement()
         }
         xmlStreamWriter.writeEndElement()
 
