@@ -20,14 +20,39 @@
     <meta name='layout' content='main'/>
     <title>Edit User</title>
     <g:set var="entityName" value="${message(code: 'user.label', default: 'User')}"/>
+    <style type="text/css">
+    .list-user {
+        background: url('${resource(dir:'/images/skin', file:'user.png')}') no-repeat 0.7em center;
+        text-indent: 25px;
+    }
+
+    .delete-user {
+        background: url('${resource(dir:'/images/skin', file:'user_delete.png')}') no-repeat 0.7em center;
+        text-indent: 25px;
+    }
+    </style>
 </head>
 
 <body>
 <div class="nav" role="navigation">
     <ul>
-        <li><a class="home" href="${createLink(controller: 'admin')}"><g:message code="default.adminHome.label"/></a></li>
-        <li><g:link class="list" action="list"><g:message code="default.list.label" args="[entityName]"/></g:link></li>
-        <li><g:link class="delete" action="delete" id="${userInstance.id}"><g:message code="default.button.delete.label" args="['User']"/></g:link></li>
+        <li>
+            <g:link class="admin-home" controller="admin">
+                <g:message code="default.adminHome.label"/>
+            </g:link>
+        </li>
+
+        <li>
+            <g:link class="list-user" action="list">
+                <g:message code="default.list.label" args="[entityName]"/>
+            </g:link>
+        </li>
+
+        <li>
+            <g:link class="delete-user" action="delete" id="${userInstance.id}">
+                <g:message code="default.button.delete.label" args="['User']"/>
+            </g:link>
+        </li>
     </ul>
 </div>
 

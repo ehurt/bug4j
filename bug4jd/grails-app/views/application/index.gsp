@@ -22,15 +22,28 @@
     <meta name='layout' content='main'/>
     <title>Applications</title>
     <g:set var="entityName" value="${message(code: 'app.label', default: 'Application')}"/>
-
+    <style type="text/css">
+    .create-application {
+        background: url('${resource(dir:'/images/skin', file:'application_add.png')}') no-repeat 0.7em center;
+        text-indent: 25px;
+    }
+    </style>
 </head>
 
 <body>
 
 <div class="nav" role="navigation">
     <ul>
-        <li><a class="home" href="${createLink(controller: 'admin')}"><g:message code="default.adminHome.label"/></a></li>
-        <li><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]"/></g:link></li>
+        <li>
+            <g:link class="admin-home" controller="admin">
+                <g:message code="default.adminHome.label"/>
+            </g:link>
+        </li>
+        <li>
+            <g:link class="create-application" action="create">
+                <g:message code="default.new.label" args="[entityName]"/>
+            </g:link>
+        </li>
     </ul>
 </div>
 

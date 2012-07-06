@@ -92,7 +92,9 @@
                     </div>
                     <sec:ifAllGranted roles="ROLE_ADMIN">
                         |
-                        <g:link controller="admin">Administration</g:link>
+                        <g:link controller="admin">
+                            Administration
+                        </g:link>
                     </sec:ifAllGranted>
                 </sec:ifLoggedIn>
                 <sec:ifNotLoggedIn>
