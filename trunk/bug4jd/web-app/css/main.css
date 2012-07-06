@@ -201,7 +201,7 @@ img {
     text-decoration: underline;
 }
 
-.nav a.home, .nav a.list, .nav a.create, .nav a.delete {
+.nav a.home, .nav a.list, .nav a.create, .nav a.delete, .nav a.admin-home {
     background-position: 0.7em center;
     background-repeat: no-repeat;
     text-indent: 25px;
@@ -209,6 +209,10 @@ img {
 
 .nav a.home {
     background-image: url(../images/skin/house.png);
+}
+
+.nav a.admin-home {
+    background-image: url(../images/skin/cog.png);
 }
 
 .nav a.list {

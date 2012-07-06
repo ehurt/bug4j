@@ -21,20 +21,36 @@
     <title>Users</title>
     <g:set var="entityName" value="${message(code: 'user.label', default: 'User')}"/>
     <style type="text/css">
+    .create-user {
+        background: url('${resource(dir:'/images/skin', file:'user_add.png')}') no-repeat 0.7em center;
+        text-indent: 25px;
+    }
+
     .create-bulk {
         background: url(../images/skin/table_add.png) no-repeat 0.7em center;
         text-indent: 25px;
     }
-
     </style>
 </head>
 
 <body>
 <div class="nav" role="navigation">
     <ul>
-        <li><a class="home" href="${createLink(controller: 'admin')}"><g:message code="default.adminHome.label"/></a></li>
-        <li><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]"/></g:link></li>
-        <li><g:link class="create-bulk" action="bulk"><g:message code="default.bulk.label" default="Bulk Create"/></g:link></li>
+        <li>
+            <g:link class="admin-home" controller="admin">
+                <g:message code="default.adminHome.label"/>
+            </g:link>
+        </li>
+        <li>
+            <g:link class="create-user" action="create">
+                <g:message code="default.new.label" args="[entityName]"/>
+            </g:link>
+        </li>
+        <li>
+            <g:link class="create-bulk" action="bulk">
+                <g:message code="default.bulk.label" default="Bulk Create"/>
+            </g:link>
+        </li>
     </ul>
 </div>
 

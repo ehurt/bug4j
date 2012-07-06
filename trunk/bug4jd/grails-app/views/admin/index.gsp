@@ -44,6 +44,11 @@
         padding-left: .25em;
     }
 
+    .content >ul>li {
+        display: block;
+        margin: 20px;
+    }
+
     .expandable {
         display: none;
     }
@@ -73,12 +78,28 @@
     <g:if test="${flash.message}">
         <div class="message" role="status">${flash.message}</div>
     </g:if>
-    <h1>Administration</h1>
+    <h1><g:img dir="images/skin" file="cog.png"/> Administration</h1>
+
     <ul>
-        <li><g:link controller="application">Applications</g:link></li>
-        <li><g:link controller="user">Users</g:link></li>
         <li>
-            <g:link onclick="toggleDiv('#imp-div');return false;">Import</g:link>
+            <g:link controller="application">
+                <g:img dir="images/skin" file="application_edit.png"/>
+                Applications
+            </g:link>
+        </li>
+
+        <li>
+            <g:link controller="user">
+                <g:img dir="images/skin" file="user_edit.png"/>
+                Users
+            </g:link>
+        </li>
+
+        <li>
+            <g:link onclick="toggleDiv('#imp-div');return false;">
+                <g:img dir="images/skin" file="application_get.png"/>
+                Import
+            </g:link>
             <div id="imp-div" class="expandable">
                 <g:form action="doimp" method="post" enctype="multipart/form-data" onsubmit="whenImp();">
                     <input type="file" name="file">
@@ -90,8 +111,12 @@
                 <g:img uri="/images/spinner.gif"/><span style="margin-left: 1em;">Importing...</span>
             </div>
         </li>
+
         <li>
-            <g:link action="exp" onclick="toggleDiv('#exp-div');return false;">Export</g:link>
+            <g:link action="exp" onclick="toggleDiv('#exp-div');return false;">
+                <g:img dir="images/skin" file="application_put.png"/>
+                Export
+            </g:link>
             <ul id="exp-div" class="expandable">
                 <li>
                     <g:link action="expAll">All</g:link>

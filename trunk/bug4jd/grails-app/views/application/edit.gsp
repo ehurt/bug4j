@@ -32,15 +32,34 @@
             elm.parent().parent().remove();
         }
     </script>
+    <style type="text/css">
+    .list-application {
+        background: url('${resource(dir:'/images/skin', file:'application_cascade.png')}') no-repeat 0.7em center;
+        text-indent: 25px;
+    }
+
+    .delete-application {
+        background: url('${resource(dir:'/images/skin', file:'application_delete.png')}') no-repeat 0.7em center;
+        text-indent: 25px;
+    }
+    </style>
 </head>
 
 <body>
 <div class="nav" role="navigation">
     <ul>
-        <li><a class="home" href="${createLink(controller: 'admin')}"><g:message code="default.adminHome.label"/></a></li>
-        <li><g:link class="list" action="index"><g:message code="default.list.label" args="[entityName]"/></g:link></li>
+        <li>
+            <g:link class="admin-home" controller="admin">
+                <g:message code="default.adminHome.label"/>
+            </g:link>
+        </li>
+        <li><g:link class="list-application" action="index"><g:message code="default.list.label" args="[entityName]"/></g:link></li>
         <g:if test="${appInstance.id}">
-            <li><g:link class="delete" action="delete" id="${appInstance.id}"><g:message code="default.button.delete.label" args="['Application']"/></g:link></li>
+            <li>
+                <g:link class="delete-application" action="delete" id="${appInstance.id}">
+                    <g:message code="default.button.delete.label" args="['Application']"/>
+                </g:link>
+            </li>
         </g:if>
     </ul>
 </div>
