@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.bug4j
+package org.bug4j.server
 
 import org.apache.commons.lang.StringUtils
 import org.bug4j.server.processor.FullStackHashCalculator
@@ -29,6 +29,8 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.zip.ZipInputStream
 import javax.xml.parsers.SAXParserFactory
+
+import org.bug4j.*
 
 class BugService {
     def extensionService

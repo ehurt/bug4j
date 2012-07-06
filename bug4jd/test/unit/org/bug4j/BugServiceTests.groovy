@@ -17,6 +17,7 @@
 package org.bug4j
 
 import grails.test.mixin.TestFor
+import org.bug4j.server.BugService
 
 /**
  * See the API for {@link grails.test.mixin.services.ServiceUnitTestMixin} for usage instructions

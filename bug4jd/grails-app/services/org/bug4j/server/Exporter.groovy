@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.bug4j;
+package org.bug4j.server;
 
 
 import com.sun.xml.internal.txw2.output.IndentingXMLStreamWriter
@@ -28,6 +28,8 @@ import java.text.SimpleDateFormat
 import javax.xml.stream.XMLOutputFactory
 import javax.xml.stream.XMLStreamException
 import javax.xml.stream.XMLStreamWriter
+
+import org.bug4j.*
 
 public class Exporter {
 

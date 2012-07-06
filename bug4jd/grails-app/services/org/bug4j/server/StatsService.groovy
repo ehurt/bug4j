@@ -13,12 +13,14 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.bug4j
+package org.bug4j.server
 
 import groovy.time.TimeCategory
 import org.bug4j.server.util.DateUtil
 
 import javax.sql.DataSource
+
+import org.bug4j.*
 
 class StatsService {
 

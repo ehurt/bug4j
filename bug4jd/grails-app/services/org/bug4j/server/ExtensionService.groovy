@@ -13,11 +13,13 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.bug4j
+package org.bug4j.server
 
 import groovy.io.FileType
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.io.filefilter.WildcardFileFilter
+import org.bug4j.Bug
+import org.bug4j.Hit
 import org.codehaus.groovy.runtime.InvokerHelper
 
 import java.util.jar.JarFile

@@ -13,7 +13,7 @@
   -    See the License for the specific language governing permissions and
   -    limitations under the License.
   --}%
-<%@ page import="java.text.SimpleDateFormat; java.text.DateFormat; org.bug4j.BugService" %>
+<%@ page import="java.text.SimpleDateFormat; java.text.DateFormat; org.bug4j.server.BugService" %>
 
 <% if (!hitTab) hitTab = 'stack' %>
 <div class="tab">
