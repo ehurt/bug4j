@@ -13,8 +13,10 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+package org.bug4j.server
+
+
 import org.bug4j.User
-import org.bug4j.bug4jd.UserController
 
 /**
  */
