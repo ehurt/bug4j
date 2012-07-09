@@ -37,9 +37,6 @@ class Hit {
             stack: Stack,
     ]
 
-    static hasOne = [
-    ]
-
     static mapping = {
         bug index: 'HIT_BUG_IDX'
         stack index: 'HIT_STACK_IDX'

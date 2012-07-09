@@ -27,6 +27,7 @@ import org.xml.sax.helpers.DefaultHandler
 import java.sql.Timestamp
 import java.text.DateFormat
 import java.text.SimpleDateFormat
+import java.util.regex.Pattern
 import java.util.zip.ZipInputStream
 import javax.xml.parsers.SAXParserFactory
 
@@ -319,17 +320,21 @@ class BugService {
             if (bugs) {
                 return bugs[0]
             }
-
         }
+
+        final MergePattern mergePattern = MergePattern.list().find {
+            final pattern = Pattern.compile(it.patternString)
+            final matcher = pattern.matcher(title)
+            return matcher.matches()
+        }
+
+        if (mergePattern) {
+            return mergePattern.bug
+        }
+
         return null;
     }
 
-
-    public void importFile(File file) {
-        file.withInputStream {
-            importNamedInputStream(it, file.name)
-        }
-    }
 
     public void importNamedInputStream(InputStream inputStream, String fileName) {
         if (fileName.endsWith('.zip')) {
@@ -358,199 +363,216 @@ class BugService {
 
     private void importInputStream(InputStream inputStream) {
         final DateFormat dateFormat = SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.FULL, SimpleDateFormat.FULL);
+        def _mergePatterns = []
 
         def reader = SAXParserFactory.newInstance().newSAXParser().XMLReader
-        reader.setContentHandler(new DefaultHandler() {
-            String _userName
+        Bug.withTransaction {
 
-            App _app
-            String _bugTitle
+            reader.setContentHandler(new DefaultHandler() {
+                String _userName
 
-            Long _bugId
-            String _hitId
-            String _sessionId
-            String _message
-            String _remoteAddr
-            String _appVer
-            long _dateReported
-            String _text
-            Map<String, ClientSession> _sessions = new HashMap<String, ClientSession>()
+                App _app
+                String _bugTitle
 
-            String _commentAddedBy
-            long _commentDateAdded
+                Long _bugId
+                String _hitId
+                String _sessionId
+                String _message
+                String _remoteAddr
+                String _appVer
+                long _dateReported
+                String _text
+                Map<String, ClientSession> _sessions = new HashMap<String, ClientSession>()
 
-            void startElement(String ns, String localName, String qName, Attributes atts) {
-                switch (qName) {
-                    case 'user':
-                        _userName = atts.getValue('userName')
-                        String password = atts.getValue('password')
-                        String email = atts.getValue('email')
-                        boolean admin = 'true' == atts.getValue('admin')
-                        boolean externalAuthentication = 'true' == atts.getValue('externalAuthentication') || 'true' == atts.getValue('external')
-                        if (!User.findByUsername(_userName)) {
-                            final user = new User(
-                                    username: _userName,
-                                    password: password,
-                                    enabled: true,
-                                    externalAuthentication: externalAuthentication,
-                                    email: email
-                            ).save(flush: true)
-                            if (admin) { // That's a 0.1 version
-                                UserRole.create(user, Role.findByAuthority(Role.USER))
-                                UserRole.create(user, Role.findByAuthority(Role.ADMIN))
+                String _commentAddedBy
+                long _commentDateAdded
+
+                void startElement(String ns, String localName, String qName, Attributes atts) {
+                    switch (qName) {
+                        case 'user':
+                            _userName = atts.getValue('userName')
+                            String password = atts.getValue('password')
+                            String email = atts.getValue('email')
+                            boolean admin = 'true' == atts.getValue('admin')
+                            boolean externalAuthentication = 'true' == atts.getValue('externalAuthentication') || 'true' == atts.getValue('external')
+                            if (!User.findByUsername(_userName)) {
+                                final user = new User(
+                                        username: _userName,
+                                        password: password,
+                                        enabled: true,
+                                        externalAuthentication: externalAuthentication,
+                                        email: email
+                                ).save(flush: true)
+                                if (admin) { // That's a 0.1 version
+                                    UserRole.create(user, Role.findByAuthority(Role.USER))
+                                    UserRole.create(user, Role.findByAuthority(Role.ADMIN))
+                                }
                             }
-                        }
 
-                        break;
+                            break;
 
-                    case 'role':
-                        final user = User.findByUsername(_userName)
-                        String roleName = atts.getValue('name')
-                        final role = Role.findByAuthority(roleName)
-                        if (role) {
-                            UserRole.create(user, role)
-                        }
-                        break;
+                        case 'role':
+                            final user = User.findByUsername(_userName)
+                            String roleName = atts.getValue('name')
+                            final role = Role.findByAuthority(roleName)
+                            if (role) {
+                                UserRole.create(user, role)
+                            }
+                            break;
 
-                    case 'app':
-                        String appId = atts.getValue('name')
-                        _app = identifyApp(appId)
-                        if (!_app) {
-                            _app = new App(label: appId, code: appId)
-                            _app.save(flush: true)
-                        }
-                        break
-
-                    case 'package':
-                        final packageName = atts.getValue('name')
-                        if (!AppPackages.findByAppAndPackageName(_app, packageName)) {
-                            final appPackages = new AppPackages(app: _app, packageName: packageName)
-                            _app.addToAppPackages(appPackages)
-                            appPackages.save(flush: true)
-                        }
-                        break;
-
-                    case 'session':
-                        final String sessionId = atts.getValue('sessionId')
-                        final appVer = atts.getValue('appVer')
-
-                        def firstHitTimestamp = null
-                        final firstHitString = atts.getValue('firstHit')
-                        if (firstHitString != null) {
-                            final firstHit = dateFormat.parse(firstHitString).getTime()
-                            firstHitTimestamp = new Timestamp(firstHit)
-                        }
-                        final hostName = atts.getValue('hostName')
-
-                        def buildDateTimestamp = null;
-                        final buildDateString = atts.getValue('buildDate')
-                        if (buildDateString) {
-                            final buildDate = dateFormat.parse(buildDateString).getTime()
-                            buildDateTimestamp = new Timestamp(buildDate)
-                        }
-
-                        final buildNumber = atts.getValue('buildNumber')
-                        final clientSession = new ClientSession(
-                                app: _app,
-                                appVersion: appVer,
-                                dateBuilt: buildDateTimestamp,
-                                devBuild: false,
-                                buildNumber: buildNumber as Integer,
-                                hostName: hostName,
-                                firstHit: firstHitTimestamp
-                        )
-                        _app.addToClientSessions(clientSession)
-                        clientSession.save(flush: true)
-                        _sessions.put(sessionId, clientSession)
-                        break;
-
-                    case 'bug':
-                        final bugId = atts.getValue('id')
-                        _bugTitle = atts.getValue('title')
-                        break
-
-                    case 'bugs':
-                        final appId = atts.getValue('app')
-                        if (appId) {
-                            _app = App.findByCode(appId)
+                        case 'app':
+                            String appId = atts.getValue('name')
+                            _app = identifyApp(appId)
                             if (!_app) {
                                 _app = new App(label: appId, code: appId)
                                 _app.save(flush: true)
                             }
-                        }
-                        break;
+                            break
 
-                    case 'hit':
-                        _hitId = atts.getValue('id')
-                        _sessionId = atts.getValue('sessionId')
-                        _userName = atts.getValue('user')
-                        String dateString = atts.getValue('date')
-                        _dateReported = dateFormat.parse(dateString).getTime()
-                        _appVer = atts.getValue('appVer')
-                        _message = atts.getValue('message')
-                        _remoteAddr = atts.getValue('remoteAddr')
-                        _text = ''
-                        break;
+                        case 'package':
+                            final packageName = atts.getValue('name')
+                            if (!AppPackages.findByAppAndPackageName(_app, packageName)) {
+                                final appPackages = new AppPackages(app: _app, packageName: packageName)
+                                _app.addToAppPackages(appPackages)
+                                appPackages.save(flush: true)
+                            }
+                            break;
 
-                    case 'comment':
-                        _commentAddedBy = atts.getValue('addedBy')
-                        final String dateAddedString = atts.getValue('dateAdded')
-                        _commentDateAdded = dateFormat.parse(dateAddedString).getTime()
-                        _text = ''
-                }
-            }
+                        case 'session':
+                            final String sessionId = atts.getValue('sessionId')
+                            final appVer = atts.getValue('appVer')
 
-            void characters(char[] chars, int offset, int length) {
-                if (_hitId || _commentAddedBy) {
-                    final String s = new String(chars, offset, length)
-                    final String trimmed = StringUtils.remove(s, '\n')
-                    trimmed = StringUtils.remove(trimmed, '\r')
-                    trimmed = StringUtils.remove(trimmed, ' ')
-                    if (trimmed) {
-                        _text = s
+                            def firstHitTimestamp = null
+                            final firstHitString = atts.getValue('firstHit')
+                            if (firstHitString != null) {
+                                final firstHit = dateFormat.parse(firstHitString).getTime()
+                                firstHitTimestamp = new Timestamp(firstHit)
+                            }
+                            final hostName = atts.getValue('hostName')
+
+                            def buildDateTimestamp = null;
+                            final buildDateString = atts.getValue('buildDate')
+                            if (buildDateString) {
+                                final buildDate = dateFormat.parse(buildDateString).getTime()
+                                buildDateTimestamp = new Timestamp(buildDate)
+                            }
+
+                            final buildNumber = atts.getValue('buildNumber')
+                            final clientSession = new ClientSession(
+                                    app: _app,
+                                    appVersion: appVer,
+                                    dateBuilt: buildDateTimestamp,
+                                    devBuild: false,
+                                    buildNumber: buildNumber as Integer,
+                                    hostName: hostName,
+                                    firstHit: firstHitTimestamp
+                            )
+                            _app.addToClientSessions(clientSession)
+                            clientSession.save(flush: true)
+                            _sessions.put(sessionId, clientSession)
+                            break;
+
+                        case 'bug':
+//                            final bugId = atts.getValue('id')
+                            _bugTitle = atts.getValue('title')
+                            break
+
+                        case 'bugs':
+                            final appId = atts.getValue('app')
+                            if (appId) {
+                                _app = App.findByCode(appId)
+                                if (!_app) {
+                                    _app = new App(label: appId, code: appId)
+                                    _app.save(flush: true)
+                                }
+                            }
+                            break;
+
+                        case 'hit':
+                            _hitId = atts.getValue('id')
+                            _sessionId = atts.getValue('sessionId')
+                            _userName = atts.getValue('user')
+                            String dateString = atts.getValue('date')
+                            _dateReported = dateFormat.parse(dateString).getTime()
+                            _appVer = atts.getValue('appVer')
+                            _message = atts.getValue('message')
+                            _remoteAddr = atts.getValue('remoteAddr')
+                            _text = ''
+                            break;
+
+                        case 'comment':
+                            _commentAddedBy = atts.getValue('addedBy')
+                            final String dateAddedString = atts.getValue('dateAdded')
+                            _commentDateAdded = dateFormat.parse(dateAddedString).getTime()
+                            _text = ''
+                            break;
+
+                        case 'mergePattern':
+                            String pattern = atts.getValue('pattern')
+                            _mergePatterns += [bugId: _bugId, pattern: pattern]
+                            break;
                     }
                 }
-            }
 
-            void endElement(String ns, String localName, String qName) {
-                switch (qName) {
-                    case 'user':
-                        break
-                    case 'app':
-                        _app = null
-                        break
-                    case 'package':
-                        break;
-                    case 'bug':
-                        _bugTitle = null
-                        break
-                    case 'hit':
-                        final clientSession = _sessions.get(_sessionId)
-                        final remoteAddr = _remoteAddr ? _remoteAddr : clientSession?.hostName
-                        _bugId = reportBug(clientSession, _app, _message, _dateReported, _userName, remoteAddr, _text)
-                        _hitId = null
-                        break;
-                    case 'comment':
-                        final bug = Bug.get(_bugId)
-                        String text;
-                        Date dateAdded
-                        String addedBy
-                        final comment = new Comment(
-                                dateAdded: new Date(_commentDateAdded),
-                                addedBy: _commentAddedBy,
-                                text: _text,
-                        )
-                        comment.bug = bug
-                        if (!comment.validate()) {
-                            println comment.errors
+                void characters(char[] chars, int offset, int length) {
+                    if (_hitId || _commentAddedBy) {
+                        final String s = new String(chars, offset, length)
+                        final String trimmed = StringUtils.remove(s, '\n')
+                        trimmed = StringUtils.remove(trimmed, '\r')
+                        trimmed = StringUtils.remove(trimmed, ' ')
+                        if (trimmed) {
+                            _text = s
                         }
-                        comment.save()
-                        _commentAddedBy = null
-                        break;
+                    }
                 }
+
+                void endElement(String ns, String localName, String qName) {
+                    switch (qName) {
+                        case 'user':
+                            break
+                        case 'app':
+                            _app = null
+                            break
+                        case 'package':
+                            break;
+                        case 'bug':
+                            _bugTitle = null
+                            break
+                        case 'hit':
+                            final clientSession = _sessions.get(_sessionId)
+                            final remoteAddr = _remoteAddr ? _remoteAddr : clientSession?.hostName
+                            _bugId = reportBug(clientSession, _app, _message, _dateReported, _userName, remoteAddr, _text)
+                            _hitId = null
+                            break;
+                        case 'comment':
+                            final bug = Bug.get(_bugId)
+                            String text;
+                            Date dateAdded
+                            String addedBy
+                            final comment = new Comment(
+                                    dateAdded: new Date(_commentDateAdded),
+                                    addedBy: _commentAddedBy,
+                                    text: _text,
+                            )
+                            comment.bug = bug
+                            if (!comment.validate()) {
+                                println comment.errors
+                            }
+                            comment.save()
+                            _commentAddedBy = null
+                            break;
+                    }
+                }
+            })
+            reader.parse(new InputSource(inputStream))
+        }
+
+        Bug.withTransaction {
+            _mergePatterns.each {
+                final bug = Bug.get(it.bugId)
+                merge(bug, it.pattern)
             }
-        })
-        reader.parse(new InputSource(inputStream))
+        }
     }
 
     public static String stackToHtml(String stackString, List<String> packages) {
@@ -583,5 +605,34 @@ class BugService {
 
     private static String highlightStackLine(String line, boolean highlight) {
         return "<div class=\"${highlight ? 'stack-highlight' : 'stack-dim'}\">${line.encodeAsHTML()}</div>"
+    }
+
+    public int merge(Bug bug, String titlePattern) {
+        int ret = 0
+        final app = bug.app
+        final pattern = Pattern.compile(titlePattern)
+
+        final bugs = Bug.findAllByApp(app, [sort: 'id', order: 'asc'])
+        bugs.each {Bug matchingBug ->
+            final String title = matchingBug.title
+            final matcher = pattern.matcher(title)
+            if (matcher.matches()) {
+                if (bug.id != matchingBug.id) {
+                    Hit.executeUpdate("update Hit set bug=:bug where bug=:matchingBug", [bug: bug, matchingBug: matchingBug])
+                    Strain.executeUpdate("update Strain set bug=:bug where bug=:matchingBug", [bug: bug, matchingBug: matchingBug])
+                    Comment.executeUpdate("update Comment set bug=:bug where bug=:matchingBug", [bug: bug, matchingBug: matchingBug])
+                    MergePattern.executeUpdate("update MergePattern set bug=:bug where bug=:matchingBug", [bug: bug, matchingBug: matchingBug])
+
+                    app.removeFromBugs(matchingBug)
+                    matchingBug.delete()
+                }
+                ret++
+            }
+        }
+
+        final mergePattern = new MergePattern(patternString: titlePattern)
+        mergePattern.bug = bug
+        mergePattern.save()
+        return ret
     }
 }

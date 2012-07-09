@@ -15,17 +15,19 @@
  */
 package org.bug4j.server
 
-
 import grails.converters.JSON
 import groovy.sql.Sql
 import org.bug4j.server.util.DateUtil
 
+import java.util.regex.Pattern
+import java.util.regex.PatternSyntaxException
 import javax.sql.DataSource
 
 import org.bug4j.*
 
 class BugController {
 
+    def bugService
     DataSource dataSource
     def springSecurityService
 
@@ -87,7 +89,10 @@ class BugController {
                 group by b.id,b.title,b.hot
                 order by ${params.sort} ${params.order}
                 """
-        final List list = Bug.executeQuery(sql, queryParams, [max: params.max, offset: params.offset])
+        final List list = Bug.executeQuery(sql, queryParams, [
+                max: params.max,
+                offset: params.offset,
+        ])
 
         final countSql = """
                 select count(distinct b.id) as total
@@ -334,5 +339,57 @@ class BugController {
         final bug = Bug.get(bugId)
         bug.ignore = false
         bug.save();
+    }
+
+    def merge = {
+        final bugId = params.id
+        final String pat = params.pat
+        flash.error = null
+
+        final bug = Bug.get(bugId)
+        List<Bug> matchingBugs = null
+        int total = 0
+
+
+        if (params.create) {
+            try {
+                final int mergedCount = bugService.merge(bug, pat)
+                flash.message = "${mergedCount} bugs merged"
+                redirect(action: 'bug', params: [id: bugId])
+                return;
+            } catch (PatternSyntaxException e) {
+                flash.error = e.getMessage()
+            }
+        } else {
+            if (!pat) {
+                final String charsToEscape = '\\[].^$?*+'.collect {'\\' + it}.sum()
+                pat = bug.title.replaceAll("([${charsToEscape}])", '\\\\$1')
+            }
+
+            if (params.test) {
+                try {
+                    final pattern = Pattern.compile(pat)
+                    final bugs = Bug.list(sort: 'id', order: 'asc')
+                    matchingBugs = []
+                    bugs.each {Bug matchingBug ->
+                        final String title = matchingBug.title
+                        final matcher = pattern.matcher(title)
+                        if (matcher.matches()) {
+                            matchingBugs.add(matchingBug)
+                        }
+                    }
+
+                } catch (PatternSyntaxException e) {
+                    flash.error = e.getMessage()
+                }
+            }
+        }
+
+        return [
+                bug: bug,
+                pat: pat,
+                matchingBugs: matchingBugs,
+                total: total,
+        ]
     }
 }

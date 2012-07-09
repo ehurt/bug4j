@@ -33,6 +33,5 @@ class Strain {
 
     static mapping = {
         hash(index: 'STRAIN_HASH_IDX')
-        stacks cascade: 'all-delete-orphan'
     }
 }

@@ -33,13 +33,8 @@
 
 <body>
 <div style="margin: 30px 0 0 30px">
-    <g:remoteLink action="testImport" before="preRun('testImport','Importing');" update="testImport">Import D:/bug4j/bugs.zip</g:remoteLink>
-    <span id="testImport" class="result"></span>
-</div>
-
-<div style="margin: 30px 0 0 30px">
-    <g:remoteLink action="testImport2" before="preRun('testImport2','Importing');" update="testImport2">Import C:/Users/dandoy/Downloads/bug4j/Discovery Manager.xml</g:remoteLink>
-    <span id="testImport2" class="result"></span>
+    <g:remoteLink action="test" before="preRun('test','Testing');" update="test">Test Something</g:remoteLink>
+    <span id="test" class="result"></span>
 </div>
 
 <div style="margin: 30px 0 0 30px">

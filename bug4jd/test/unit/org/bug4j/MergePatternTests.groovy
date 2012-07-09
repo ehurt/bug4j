@@ -13,35 +13,17 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-
-
-
 package org.bug4j
 
-class App {
+import grails.test.mixin.TestFor
 
-    String label
-    String code
-    /**
-     * Determines if we expect reports from multiple hosts.
-     * This influences not only the display but also the statistics.
-     */
-    boolean multiHost
+/**
+ * See the API for {@link grails.test.mixin.domain.DomainClassUnitTestMixin} for usage instructions
+ */
+@TestFor(MergePattern)
+class MergePatternTests {
 
-    static constraints = {
-        label blank: false, unique: true
-        code blank: false, unique: true
-    }
-
-    static hasMany = [
-            appPackages: AppPackages,
-            bugs: Bug,
-            clientSessions: ClientSession,
-            statCount: StatCount,
-            stats: Stat
-    ]
-
-    static mapping = {
-        table 'APP'
+    void testSomething() {
+        fail "Implement me"
     }
 }

@@ -13,35 +13,16 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-
-
-
 package org.bug4j
 
-class App {
+class MergePattern {
 
-    String label
-    String code
-    /**
-     * Determines if we expect reports from multiple hosts.
-     * This influences not only the display but also the statistics.
-     */
-    boolean multiHost
+    String patternString
 
     static constraints = {
-        label blank: false, unique: true
-        code blank: false, unique: true
     }
 
-    static hasMany = [
-            appPackages: AppPackages,
-            bugs: Bug,
-            clientSessions: ClientSession,
-            statCount: StatCount,
-            stats: Stat
+    static belongsTo = [
+            bug: Bug,
     ]
-
-    static mapping = {
-        table 'APP'
-    }
 }

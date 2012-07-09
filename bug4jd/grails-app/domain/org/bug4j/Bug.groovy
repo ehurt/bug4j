@@ -53,13 +53,11 @@ class Bug {
             hits: Hit,
             strains: Strain,
             comments: Comment,
+            mergePatterns: MergePattern,
     ]
 
     static mapping = {
         table 'BUG'
         title index: 'BUG_TITLE_IDX'
-        hits cascade: 'all-delete-orphan'
-        strains cascade: 'all-delete-orphan'
-        comments cascade: 'all-delete-orphan'
     }
 }

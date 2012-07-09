@@ -28,6 +28,7 @@
                ">
                 Comment
             </a>
+            &nbsp;
             <a id="ignoreLink"
                style="display: ${bug.ignore ? 'none' : 'inline'}"
                href="#"
@@ -46,6 +47,8 @@
                ">
                 Un-Ignore
             </a>
+            &nbsp;
+            <g:link action="merge" params="[id: bug.id]">Merge</g:link>
         </div>
     </sec:ifLoggedIn>
 
