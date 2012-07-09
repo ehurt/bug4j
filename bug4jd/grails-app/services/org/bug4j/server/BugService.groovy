@@ -422,9 +422,10 @@ class BugService {
 
                         case 'app':
                             String appId = atts.getValue('name')
+                            boolean multiHost = 'true' == atts.getValue('multiHost')
                             _app = identifyApp(appId)
                             if (!_app) {
-                                _app = new App(label: appId, code: appId)
+                                _app = new App(label: appId, code: appId, multiHost: multiHost)
                                 _app.save(flush: true)
                             }
                             break
