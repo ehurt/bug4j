@@ -15,7 +15,6 @@
  */
 package org.bug4j.server
 
-
 import grails.plugins.springsecurity.Secured
 import org.bug4j.App
 
@@ -32,24 +31,12 @@ class MainController {
         ]
     }
 
-    def testImport() {
+    def test() {
         try {
-            final zipFile = new File('D:/bug4j/bugs.zip')
-            bugService.importFile(zipFile)
-            render(text: 'Imported', contentType: 'text/plain')
-        } catch (Exception e) {
-            log.error("Failed to import file", e)
-            render(text: 'Failed', contentType: 'text/plain')
-        }
-    }
 
-    def testImport2() {
-        try {
-            final zipFile = new File('C:/Users/dandoy/Downloads/bug4j/Discovery Manager.xml')
-            bugService.importFile(zipFile)
-            render(text: 'Imported', contentType: 'text/plain')
+            render(text: 'Done', contentType: 'text/plain')
         } catch (Exception e) {
-            log.error("Failed to import file", e)
+            log.error("Failed", e)
             render(text: 'Failed', contentType: 'text/plain')
         }
     }
@@ -69,10 +56,16 @@ class MainController {
             final app = App.findByCode('bug4jDemo')
             app.bugs*.delete()
             app.bugs.clear()
+
+            app.clientSessions*.delete()
+            app.clientSessions.clear()
+
             app.stats*.delete()
             app.stats.clear()
+
             app.statCount*.delete()
             app.statCount.clear()
+
             app.save()
             render text: 'Bugs deleted'
         } catch (Exception e) {

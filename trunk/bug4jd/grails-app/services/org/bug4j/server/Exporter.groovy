@@ -300,12 +300,28 @@ public class Exporter {
         }
         xmlStreamWriter.writeEndElement();
 
-        xmlStreamWriter.writeStartElement("comments");
-        Comment.findAllByBug(bug).each {
-            exportComment(xmlStreamWriter, it)
+        if (bug.comments) {
+            xmlStreamWriter.writeStartElement("comments");
+            bug.comments.each {
+                exportComment(xmlStreamWriter, it)
+            }
+            xmlStreamWriter.writeEndElement();
         }
-        xmlStreamWriter.writeEndElement();
 
+        if (bug.mergePatterns) {
+            xmlStreamWriter.writeStartElement("mergePatterns");
+            bug.mergePatterns.each {
+                exportMergePatterns(xmlStreamWriter, it)
+            }
+            xmlStreamWriter.writeEndElement();
+        }
+
+        xmlStreamWriter.writeEndElement();
+    }
+
+    private void exportMergePatterns(XMLStreamWriter xmlStreamWriter, MergePattern mergePattern) {
+        xmlStreamWriter.writeStartElement("mergePattern");
+        xmlStreamWriter.writeAttribute("pattern", mergePattern.patternString);
         xmlStreamWriter.writeEndElement();
     }
 

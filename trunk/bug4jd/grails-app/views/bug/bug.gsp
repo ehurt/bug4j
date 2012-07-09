@@ -34,6 +34,9 @@
 </head>
 
 <body>
+<g:if test="${flash.message}">
+    <div class="message" role="status">${flash.message}</div>
+</g:if>
 <div style="margin:5px 10px;">
     <div id="bug-title">${bug.id} - ${bug.title}</div>
 
