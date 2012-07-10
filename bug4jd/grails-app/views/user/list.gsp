@@ -27,7 +27,7 @@
     }
 
     .create-bulk {
-        background: url(../images/skin/table_add.png) no-repeat 0.7em center;
+        background: url('${resource(dir:'/images/skin', file:'table_add.png')}') no-repeat 0.7em center;
         text-indent: 25px;
     }
     </style>

@@ -64,7 +64,6 @@ class UserController {
 
     def save() {
         def userInstance
-        def authorities
         final id = params.id
         if (id) {
             userInstance = User.get(id)
@@ -72,20 +71,28 @@ class UserController {
                 params.remove('password')
             }
             userInstance.properties = params
-            authorities = userInstance.getAuthorities()*.authority
         } else {
             userInstance = new User(params)
-            authorities = []
         }
         if (!userInstance.save(flush: true)) {
             render(view: "edit",
                     model: [
                             userInstance: userInstance,
-                            authorities: authorities
+                            authorities: userInstance.getAuthorities()*.authority
                     ])
             return
         }
-        UserRole.create(userInstance, Role.findByAuthority(Role.USER))
+
+        def authorities = [Role.USER]
+        if (params.admin) {
+            authorities += Role.ADMIN
+        }
+
+        UserRole.removeAll(userInstance)
+        userInstance.authorities.clear()
+        authorities.each {
+            UserRole.create(userInstance, Role.findByAuthority(it))
+        }
 
         flash.message = id ?
                         message(code: 'default.updated.message', args: [message(code: 'user.label', default: 'User'), userInstance.username]) :
