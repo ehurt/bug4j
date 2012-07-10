@@ -623,9 +623,7 @@ class BugService {
                     Strain.executeUpdate("update Strain set bug=:bug where bug=:matchingBug", [bug: bug, matchingBug: matchingBug])
                     Comment.executeUpdate("update Comment set bug=:bug where bug=:matchingBug", [bug: bug, matchingBug: matchingBug])
                     MergePattern.executeUpdate("update MergePattern set bug=:bug where bug=:matchingBug", [bug: bug, matchingBug: matchingBug])
-
-                    app.removeFromBugs(matchingBug)
-                    matchingBug.delete()
+                    Bug.executeUpdate("delete Bug where id=:matchingBug", [matchingBug: matchingBug.id])
                 }
                 ret++
             }
