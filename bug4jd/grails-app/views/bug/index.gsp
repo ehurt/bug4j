@@ -180,7 +180,7 @@
             </table>
             <g:if test="${bugs.size() < total}">
                 <div class="pagination">
-                    <g:link params="${params + [max: (params.max as int) + 10]}">More</g:link>
+                    <g:link params="${params + [max: (params.max as int) + 20]}">More</g:link>
                 </div>
             </g:if>
         </g:if>

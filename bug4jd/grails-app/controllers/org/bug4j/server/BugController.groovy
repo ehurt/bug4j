@@ -34,7 +34,7 @@ class BugController {
     def index() {
         if (!params.sort) params.sort = 'bug_id'
         if (!params.order) params.order = 'desc'
-        if (!params.max) params.max = 10
+        if (!params.max) params.max = 20
         if (!params.offset) params.offset = 0
 
         def selectedApp = getApp()
