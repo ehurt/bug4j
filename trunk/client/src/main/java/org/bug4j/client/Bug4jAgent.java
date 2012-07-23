@@ -45,6 +45,7 @@ public class Bug4jAgent {
     private final ReportLRU _reportLRU = new ReportLRU();
 
     private HttpConnector _connector;
+    private boolean _isInitialized;
     private final Settings _settings;
 
     private Bug4jAgent(Settings settings) {
@@ -100,7 +101,8 @@ public class Bug4jAgent {
     }
 
     private void init() {
-        if (_connector == null) {
+        if (!_isInitialized) {
+            _isInitialized = true;
             final String serverUrl = _settings.getServerUrl();
             final String applicationName = _settings.getApplicationName();
             final String applicationVersion = _settings.getApplicationVersion();
@@ -109,10 +111,14 @@ public class Bug4jAgent {
             final Integer buildNumber = _settings.getBuildNumber();
             final String proxyHost = _settings.getProxyHost();
             final int proxyPort = _settings.getProxyPort();
-            _connector = HttpConnector.createHttpConnector(
-                    serverUrl, proxyHost, proxyPort,
-                    applicationName, applicationVersion,
-                    buildDate, devBuild, buildNumber);
+            try {
+                _connector = HttpConnector.createHttpConnector(
+                        serverUrl, proxyHost, proxyPort,
+                        applicationName, applicationVersion,
+                        buildDate, devBuild, buildNumber);
+            } catch (Exception e) {
+                SimpleLogger.error("Failed to initialize Bug4j: " + e.getMessage());
+            }
         }
     }
 
@@ -187,20 +193,22 @@ public class Bug4jAgent {
     }
 
     private void process(ReportableEvent reportableEvent) {
-        final String textHash = hash(reportableEvent);
-        if (_reportLRU.put(textHash)) { // Refrain from sending the same eror
-            final String message = reportableEvent.getMessage();
-            final String user = reportableEvent.getUser();
-            final boolean isNew = _connector.reportHit(message, user, textHash);
-            if (isNew) {
-                final String[] throwableStrRep = reportableEvent.getThrowableStrRep();
-                _connector.reportBug(
-                        message,
-                        user,
-                        throwableStrRep
-                );
+        if (_connector != null) {
+            final String textHash = hash(reportableEvent);
+            if (_reportLRU.put(textHash)) { // Refrain from sending the same eror
+                final String message = reportableEvent.getMessage();
+                final String user = reportableEvent.getUser();
+                final boolean isNew = _connector.reportHit(message, user, textHash);
+                if (isNew) {
+                    final String[] throwableStrRep = reportableEvent.getThrowableStrRep();
+                    _connector.reportBug(
+                            message,
+                            user,
+                            throwableStrRep
+                    );
+                }
+                _reported++;
             }
-            _reported++;
         }
     }
 
