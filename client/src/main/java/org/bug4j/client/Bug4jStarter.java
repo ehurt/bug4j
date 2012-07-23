@@ -38,43 +38,44 @@ public final class Bug4jStarter {
 
     private void readDefaultSettings() {
         final Properties properties = readProperties();
-        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-            final String name = (String) entry.getKey();
-            final String value = properties.getProperty(name);
-            if ("server".equals(name)) {
-                setServerUrl(value);
-                SimpleLogger.error("bug4j warning: property 'server' is deprecated. Please use 'server.url' instead");
-            } else if ("server.url".equals(name)) {
-                setServerUrl(value);
-            } else if ("application.name".equals(name)) {
-                setApplicationName(value);
-            } else if ("application.version".equals(name)) {
-                setApplicationVersion(value);
-            } else if ("build.date".equals(name)) {
-                setBuildDate(value);
-            } else if ("devbuild".equals(name)) {
-                setDevBuild(Boolean.parseBoolean(value));
-            } else if ("build.number".equals(name)) {
-                if (name.length() > 0) {
-                    try {
-                        final int buildNumber = Integer.parseInt(value);
-                        setBuildNumber(buildNumber);
-                    } catch (NumberFormatException e) {
-                        // ignore
+        if (properties != null) {
+            for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+                final String name = (String) entry.getKey();
+                final String value = properties.getProperty(name);
+                if ("server".equals(name)) {
+                    setServerUrl(value);
+                    SimpleLogger.error("bug4j warning: property 'server' is deprecated. Please use 'server.url' instead");
+                } else if ("server.url".equals(name)) {
+                    setServerUrl(value);
+                } else if ("application.name".equals(name)) {
+                    setApplicationName(value);
+                } else if ("application.version".equals(name)) {
+                    setApplicationVersion(value);
+                } else if ("build.date".equals(name)) {
+                    setBuildDate(value);
+                } else if ("devbuild".equals(name)) {
+                    setDevBuild(Boolean.parseBoolean(value));
+                } else if ("build.number".equals(name)) {
+                    if (name.length() > 0) {
+                        try {
+                            final int buildNumber = Integer.parseInt(value);
+                            setBuildNumber(buildNumber);
+                        } catch (NumberFormatException e) {
+                            // ignore
+                        }
                     }
+                } else if ("proxy".equals(name)) {
+                    setProxy(value);
+                } else {
+                    SimpleLogger.error("Unknown property: " + name);
                 }
-            } else if ("proxy".equals(name)) {
-                setProxy(value);
-            } else {
-                SimpleLogger.error("Unknown property: " + name);
             }
         }
     }
 
     private static Properties readProperties() {
         final Properties ret = new Properties();
-        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        final InputStream inputStream = classLoader.getResourceAsStream("bug4j.properties");
+        final InputStream inputStream = searchBug4jPropertyFile();
         if (inputStream != null) {
             try {
                 try {
@@ -88,6 +89,24 @@ public final class Bug4jStarter {
             }
         }
         return ret;
+    }
+
+    private static InputStream searchBug4jPropertyFile() {
+        final ClassLoader[] classLoaders = {
+                Thread.currentThread().getContextClassLoader(),
+                Bug4jStarter.class.getClassLoader(),
+                ClassLoader.getSystemClassLoader()
+        };
+        for (ClassLoader classLoader : classLoaders) {
+            if (classLoader != null) {
+                final InputStream inputStream = classLoader.getResourceAsStream("bug4j.properties");
+                if (inputStream != null) {
+                    return inputStream;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
