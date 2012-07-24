@@ -201,7 +201,7 @@ img {
     text-decoration: underline;
 }
 
-.nav a.home, .nav a.list, .nav a.create, .nav a.delete, .nav a.admin-home {
+.nav a.home, .nav a.list, .nav a.create, .nav a.delete, .nav a.admin-home, a.action-back {
     background-position: 0.7em center;
     background-repeat: no-repeat;
     text-indent: 25px;
@@ -225,6 +225,10 @@ img {
 
 .nav a.create {
     background-image: url(../images/skin/database_add.png);
+}
+
+.action-back {
+    background-image: url(../images/skin/arrow_left.png);
 }
 
 /* CREATE/EDIT FORMS AND SHOW PAGES */
@@ -499,8 +503,12 @@ th.desc a {
     background: #ffffff;
 }
 
-th:hover, tr:hover {
-    background: #E1F2B6;
+.sortable:hover {
+    background: #f0f8ff;
+}
+
+.table-hover tr:hover {
+    background: #f0f8ff;
 }
 
 /* PAGINATION */
@@ -624,13 +632,6 @@ a.skip {
 }
 
 /* bugs */
-tr:hover {
-    background: inherit;
-}
-
-.bug-row:hover {
-    background: #E1F2B6;
-}
 
 th {
     white-space: nowrap;
@@ -677,10 +678,6 @@ th {
 
 .stack-highlight {
     color: #000000;
-}
-
-.bug-row-selected {
-    background: #eeffc3;
 }
 
 .hit-row:hover {

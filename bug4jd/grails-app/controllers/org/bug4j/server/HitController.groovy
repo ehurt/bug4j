@@ -13,22 +13,28 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.bug4j
+package org.bug4j.server
 
-class Comment {
-    String text;
-    Date dateAdded
-    String addedBy
+import org.bug4j.Bug
+import org.bug4j.Hit
 
-    static constraints = {
-        text(blank: false, maxSize: 1024)
-    }
+class HitController {
 
-    static belongsTo = [
-            bug: Bug,
-    ]
+    def index() {
+        final bugId = params.id
+        if (!params.sort) params.sort = 'id'
+        if (!params.order) params.order = 'desc'
+        if (!params.max) params.max = 50
+        if (!params.offset) params.offset = 0
 
-    static mapping = {
-        table 'BUG4J_COMMENT'
+        final bug = Bug.get(bugId)
+        final hits = Hit.findAllByBug(bug, params)
+        final total = Hit.countByBug(bug, params)
+
+        return [
+                bug: bug,
+                hits: hits,
+                total: total,
+        ]
     }
 }

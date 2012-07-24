@@ -15,6 +15,8 @@
  */
 package org.bug4j.server.util
 
+import oracle.sql.TIMESTAMP
+
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 
@@ -53,7 +55,8 @@ class DateUtil {
         return ret
     }
 
-    public static Date adjustToDayBoundary(Date date, TimeAdjustType adjustType) {
+    public static Date adjustToDayBoundary(date, TimeAdjustType adjustType) {
+        date = fixDate(date)
         final calendarSince = date.toCalendar()
         calendarSince.set(Calendar.HOUR_OF_DAY, 0)
         calendarSince.set(Calendar.MINUTE, 0)
@@ -69,6 +72,17 @@ class DateUtil {
         timeInMillis / 1000 / 60 / 60 / 24
     }
 
+    /**
+     * Fix an Oracle TIMESTAMP into a real date
+     */
+    public static Date fixDate(date) {
+        if (date instanceof TIMESTAMP) {
+            final TIMESTAMP ts = (TIMESTAMP) date;
+            date = ts.dateValue()
+        }
+        return date
+    }
+
     public static String toHumanString(Date date) {
         final tonight = adjustToDayBoundary(new Date(), TimeAdjustType.END_OF_DAY)
         final millisBack = tonight.time - date.time
@@ -81,7 +95,9 @@ class DateUtil {
         return null
     }
 
-    public static String formatDate(Date date) {
+    public static String formatDate(date) {
+
+        date = fixDate(date)
         final ret = ""
         if (date) {
             synchronized (DATE_FORMAT) {

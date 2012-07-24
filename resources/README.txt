@@ -16,3 +16,7 @@ I still need to add some example programs but for now please refer to the online
 
 4) Configuring the bug4j server
 bug4j runs on Apache Tomcat so please refer to the Tomcat documentation.
+
+Thanks
+Icons by http://p.yusukekamiyamane.com/ and http://www.famfamfam.com/
+

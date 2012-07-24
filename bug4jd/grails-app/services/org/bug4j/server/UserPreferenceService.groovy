@@ -48,12 +48,12 @@ class UserPreferenceService {
             // TODO: This has not been tested
             def preference = user.preferences.find {it.key == key}
             if (!preference) {
-                preference = new UserPreference()
+                preference = new UserPreference(key: key)
                 preference.user = user
                 user.addToPreferences(preference)
             }
             preference.value = value as String
-            user.save()
+            user.save(true)
         }
     }
 }

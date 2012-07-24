@@ -29,7 +29,7 @@ hibernate {
 environments {
     development {
         dataSource {
-            switch ('derby') {
+            switch ('oracle') {
                 case 'h2':
                     driverClassName = "org.h2.Driver"
                     dbCreate = "create-drop"
