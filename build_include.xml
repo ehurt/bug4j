@@ -103,6 +103,12 @@
             <file name="log4j-1.2.16.jar"/>
         </filelist>
     </path>
+  
+    <path id="oracle.lib">
+        <filelist dir="${dep-home}/oracle-11.2.0">
+            <file name="ojdbc6.jar"/>
+        </filelist>
+    </path>
 
     <path id="spring-framework.lib">
         <fileset dir="${dep-home}/spring-framework-3.0.5.RELEASE/dist/">

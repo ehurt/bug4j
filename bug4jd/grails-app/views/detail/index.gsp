@@ -87,7 +87,7 @@
 
     #bug-title {
         font-size: large;
-    ${                bug.ignore?'text-decoration: line-through;':''                }
+    ${                 bug.ignore?'text-decoration: line-through;':''                 }
     }
 
     .section {
@@ -155,7 +155,7 @@
             </g:else>
         </li>
         <li>
-            <g:link class="action-merge" controller="admin">
+            <g:link class="action-merge" controller="merge" action="merge" params="[id: bug.id]">
                 <g:message code="detail.action.merge.label" default="Merge"/>
             </g:link>
         </li>

@@ -26,7 +26,7 @@ grails.project.dependency.resolution = {
         // uncomment to disable ehcache
         // excludes 'ehcache'
     }
-    log "error" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
+    log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     checksums true // Whether to verify checksums on resolve
 
     repositories {
@@ -43,7 +43,11 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.codehaus.org"
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
+
+        // Hardcoded path to the jar fiels
+        flatDir name: 'oraRepo', dirs: 'c:/java/oracle-11.2.0'
     }
+
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
@@ -53,6 +57,7 @@ grails.project.dependency.resolution = {
         runtime 'org.apache.derby:derby:10.8.2.2'
         runtime 'org.apache.derby:derbynet:10.8.2.2'
         runtime 'org.apache.derby:derbyclient:10.8.2.2'
+        compile 'com.oracle:ojdbc6.jar:11.2.0'
     }
 
     plugins {

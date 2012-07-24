@@ -16,7 +16,6 @@
 package org.bug4j.server
 
 import groovy.sql.Sql
-import oracle.sql.TIMESTAMP
 import org.bug4j.server.util.DateUtil
 
 import javax.sql.DataSource
@@ -24,6 +23,7 @@ import javax.sql.DataSource
 import org.bug4j.*
 
 class DetailController {
+    def springSecurityService
     DataSource dataSource
     def userPreferenceService
     def bugService
@@ -122,16 +122,8 @@ class DetailController {
         try {
             def ret = [:]
             def row = sql.firstRow("select count(*), count(distinct reported_by), min(date_reported), max(date_reported) from hit h where h.BUG_ID=${bugId}")
-            def minDateReported = row[2]
-            if (minDateReported instanceof TIMESTAMP) {
-                final TIMESTAMP ts = (TIMESTAMP) minDateReported;
-                minDateReported = ts.dateValue()
-            }
-            final maxDateReported = row[3]
-            if (maxDateReported instanceof TIMESTAMP) {
-                final TIMESTAMP ts = (TIMESTAMP) maxDateReported;
-                maxDateReported = ts.dateValue()
-            }
+            def minDateReported = DateUtil.fixDate(row[2])
+            final maxDateReported = DateUtil.fixDate(row[3])
             ret += [
                     count: row[0],
                     reportedByCount: "${row[1]} ${row[1] <= 1 ? 'user' : 'users'}",
@@ -203,5 +195,47 @@ class DetailController {
         final state = params.state
         userPreferenceService.setPreference("expand." + section, state)
         render(text: '100')
+    }
+
+    def addComment = {
+        final bugId = params.bugId as long
+        final newComment = params.newComment
+        final bug = Bug.get(bugId)
+        final username = springSecurityService.principal.username
+        final comment = new Comment(
+                text: newComment,
+                dateAdded: new Date(),
+                addedBy: username
+        )
+        comment.bug = bug
+
+        if (!comment.validate()) {
+            final errors = comment.errors
+            println errors
+        }
+        comment.save(flush: true)
+
+        final comments = Comment.findAllByBug(bug, [sort: 'dateAdded', order: 'asc'])
+        render(template: "comments",
+                model: [
+                        bug: bug,
+                        comments: comments
+                ])
+    }
+
+    def removeComment = {
+        final commentId = params.id as long
+        final comment = Comment.get(commentId)
+        final bug = comment.bug
+        final username = springSecurityService.principal.username
+        if (comment.addedBy == username) {
+            comment.delete();
+        }
+        final comments = Comment.findAllByBug(bug, [sort: 'dateAdded', order: 'asc'])
+        render(template: "comments",
+                model: [
+                        bug: bug,
+                        comments: comments
+                ])
     }
 }
