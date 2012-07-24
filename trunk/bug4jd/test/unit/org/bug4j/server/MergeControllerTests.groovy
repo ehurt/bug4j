@@ -15,20 +15,15 @@
  */
 package org.bug4j.server
 
-import org.bug4j.Stack
+import grails.test.mixin.TestFor
 
-class StackController {
+/**
+ * See the API for {@link grails.test.mixin.web.ControllerUnitTestMixin} for usage instructions
+ */
+@TestFor(MergeController)
+class MergeControllerTests {
 
-    def index() {
-        final stackId = params.id
-        final stack = Stack.withTransaction {
-            final stack = Stack.get(stackId)
-            stack.stackText.readStackString()
-            return stack
-        }
-        return [
-                stack: stack,
-                bug: stack.strain.bug,
-        ]
+    void testSomething() {
+        fail "Implement me"
     }
 }

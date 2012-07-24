@@ -29,7 +29,7 @@
                                 <g:img dir="images/skin"
                                        file="delete.png"
                                        onclick="
-                                       ${remoteFunction(controller: 'bug', action: 'removeComment', params: [id: comment.id])};
+                                       ${remoteFunction(action: 'removeComment', params: [id: comment.id])};
                                        \$('#comment-${lineno}').hide('fast');
                                        "/>
                             </g:if>
@@ -53,7 +53,7 @@
                 <textarea id="newCommentTextArea" name="newComment" rows="4" cols="80" style="width: 100%;height: 4em;"></textarea>
 
                 <div>
-                    <g:submitToRemote url="[controller: 'bug', action: 'addComment']" value="Add" update="bugComments"/>
+                    <g:submitToRemote url="[action: 'addComment']" value="Add" update="bugComments"/>
                 </div>
             </g:form>
         </td>

@@ -15,22 +15,13 @@
  */
 package org.bug4j.server
 
-import grails.converters.JSON
-import groovy.sql.Sql
-import org.bug4j.server.util.DateUtil
-
-import java.util.regex.Pattern
-import java.util.regex.PatternSyntaxException
-import javax.sql.DataSource
-
-import org.bug4j.*
+import org.bug4j.App
+import org.bug4j.Bug
 
 class BugController {
 
     public static final ArrayList<String> PARAM_NAMES = ['a', 'from', 'to', 'includeSingleHost', 'includeIgnored', 'sort', 'order', 'max', 'offset', 'max']
     def bugService
-    DataSource dataSource
-    def springSecurityService
 
     def index() {
         if (!params.sort) params.sort = 'id'
@@ -97,57 +88,6 @@ class BugController {
         redirect(action: 'index', params: reParams)
     }
 
-    def hits() {
-        final bugid = params.id as Long
-
-        final bug = Bug.get(bugid)
-        final hits = Hit.findAllByBug(bug, params)
-        hits*.loadStack()
-        render(template: 'hits', model: [hits: hits])
-    }
-
-    def hit() {
-        final hitid = params.hitid
-        final Hit hit = Hit.get(hitid)
-        hit.loadStack()
-
-        render(template: 'hit', model: [hit: hit])
-    }
-
-    def bug() {
-        final id = params.id
-        final bug = Bug.get(id)
-        def hits = Hit.findAllByBug(bug, params)
-        hits*.loadStack()
-
-        return [
-                bug: bug,
-                hits: hits,
-        ]
-    }
-
-    def stack() {
-        final hitId = params.id
-        final hit = Hit.get(hitId)
-        render(template: 'hit', model: [hit: hit])
-    }
-
-    def hitInfo() {
-        final hitId = params.id
-        final hit = Hit.get(hitId)
-        render(template: 'hit', model: [hit: hit, hitTab: 'info'])
-    }
-
-    def clientSession() {
-        final id = params.id
-        final clientSession = ClientSession.get(id)
-        final hits = Hit.findAllByClientSession(clientSession)
-        return [
-                clientSession: clientSession,
-                hits: hits,
-        ]
-    }
-
     private App getApp() {
         App app = null
 
@@ -170,185 +110,5 @@ class BugController {
         session.a = app?.code
 
         return app
-    }
-
-    def getTimelineData() {
-        final sql = new Sql(dataSource.connection)
-        try {
-            final bugId = params.id as long
-            Map<Date, Long> hitDays = [:]
-            def tonight = DateUtil.adjustToDayBoundary(new Date(), DateUtil.TimeAdjustType.END_OF_DAY)
-            hitDays[tonight] = 0
-            sql.eachRow("select date_reported from hit h where h.BUG_ID=${bugId}") {
-                final dateReported = DateUtil.adjustToDayBoundary(it.DATE_REPORTED, DateUtil.TimeAdjustType.BEGINNING_OF_DAY)
-                Long hitCount = hitDays.get(dateReported)
-                if (!hitCount) {
-                    hitCount = 0;
-                    if (!hitDays[dateReported - 1]) {
-                        hitDays[dateReported - 1] = 0
-                    }
-                    if (!hitDays[dateReported + 1]) {
-                        hitDays[dateReported + 1] = 0
-                    }
-                }
-                hitCount++
-                hitDays.put(dateReported, hitCount)
-            }
-            def rows = hitDays.collect {Date key, Long value ->
-                def date = "Date(${1900 + key.getYear()}, ${key.getMonth()}, ${key.getDate()})"
-                return [c: [[v: date], [v: value]]]
-            }
-            def timeLineData = [
-                    cols: [
-                            [id: 'date', label: 'Date', type: 'date'],
-                            [id: 'hits', label: 'Hits', type: 'number'],
-                    ],
-                    rows: rows,
-            ]
-            render timeLineData as JSON
-        } finally {
-            sql.close()
-        }
-    }
-
-    def getBugInfo = {
-        final bugId = params.id as long
-        final sql = new Sql(dataSource.connection)
-        try {
-            def row = sql.firstRow("select count(*), count(distinct reported_by), min(date_reported), max(date_reported) from hit h where h.BUG_ID=${bugId}")
-            def bugInfo = [
-                    count: row[0],
-                    reportedByCount: "${row[1]} ${row[1] <= 1 ? 'user' : 'users'}",
-                    minDateReported: DateUtil.formatDate(row[2]),
-                    maxDateReported: DateUtil.formatDate(row[3]),
-            ]
-            // Derby does not support two count(distinct) so we must query this separately
-            row = sql.firstRow("select count(distinct REMOTE_ADDR) from hit h where h.BUG_ID=${bugId}")
-            bugInfo.remoteAddrCount = "${row[0]} ${row[0] <= 1 ? 'host' : 'hosts'}"
-
-            bugInfo.reportedBy = sql.rows("select distinct reported_by from hit h where h.BUG_ID=${bugId}").collect {it[0]}.join(', ')
-            bugInfo.remoteAddr = sql.rows("select distinct remote_addr from hit h where h.BUG_ID=${bugId}").collect {it[0]}.join(', ')
-            final bug = Bug.get(bugId)
-            final comments = Comment.findAllByBug(bug, [sort: 'dateAdded', order: 'asc'])
-
-            render(template: 'bugInfo',
-                    model: [
-                            bug: bug,
-                            bugId: bugId,
-                            bugData: bugInfo,
-                            comments: comments
-                    ])
-
-        } finally {
-            sql.close()
-        }
-    }
-
-    def addComment = {
-        final bugId = params.bugId as long
-        final newComment = params.newComment
-        final bug = Bug.get(bugId)
-        final username = springSecurityService.principal.username
-        final comment = new Comment(
-                text: newComment,
-                dateAdded: new Date(),
-                addedBy: username
-        )
-        comment.bug = bug
-
-        if (!comment.validate()) {
-            final errors = comment.errors
-            println errors
-        }
-        comment.save(flush: true)
-
-        final comments = Comment.findAllByBug(bug, [sort: 'dateAdded', order: 'asc'])
-        render(template: "comments",
-                model: [
-                        bugId: bugId,
-                        comments: comments
-                ])
-    }
-
-    def removeComment = {
-        final commentId = params.id as long
-        final comment = Comment.get(commentId)
-        final bug = comment.bug
-        final username = springSecurityService.principal.username
-        if (comment.addedBy == username) {
-            comment.delete();
-        }
-        final comments = Comment.findAllByBug(bug, [sort: 'dateAdded', order: 'asc'])
-        render(template: "comments",
-                model: [
-                        bugId: bug.id,
-                        comments: comments
-                ])
-    }
-
-    def ignore = {
-        final bugId = params.id
-        final bug = Bug.get(bugId)
-        bug.ignore = true
-        bug.save();
-    }
-
-    def unignore = {
-        final bugId = params.id
-        final bug = Bug.get(bugId)
-        bug.ignore = false
-        bug.save();
-    }
-
-    def merge = {
-        final bugId = params.id
-        final String pat = params.pat
-        flash.error = null
-
-        final bug = Bug.get(bugId)
-        List<Bug> matchingBugs = null
-        int total = 0
-
-
-        if (params.create) {
-            try {
-                final int mergedCount = bugService.merge(bug, pat)
-                flash.message = "${mergedCount} bugs merged"
-                redirect(action: 'bug', params: [id: bugId])
-                return;
-            } catch (PatternSyntaxException e) {
-                flash.error = e.getMessage()
-            }
-        } else {
-            if (!pat) {
-                final String charsToEscape = '\\[].^$?*+'.collect {'\\' + it}.sum()
-                pat = bug.title.replaceAll("([${charsToEscape}])", '\\\\$1')
-            }
-
-            if (params.test) {
-                try {
-                    final pattern = Pattern.compile(pat)
-                    final bugs = Bug.list(sort: 'id', order: 'asc')
-                    matchingBugs = []
-                    bugs.each {Bug matchingBug ->
-                        final String title = matchingBug.title
-                        final matcher = pattern.matcher(title)
-                        if (matcher.matches()) {
-                            matchingBugs.add(matchingBug)
-                        }
-                    }
-
-                } catch (PatternSyntaxException e) {
-                    flash.error = e.getMessage()
-                }
-            }
-        }
-
-        return [
-                bug: bug,
-                pat: pat,
-                matchingBugs: matchingBugs,
-                total: total,
-        ]
     }
 }
