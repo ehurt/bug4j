@@ -13,22 +13,18 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.bug4j
+package org.bug4j.server
 
-class Comment {
-    String text;
-    Date dateAdded
-    String addedBy
+import org.bug4j.Stack
 
-    static constraints = {
-        text(blank: false, maxSize: 1024)
-    }
+class StackController {
 
-    static belongsTo = [
-            bug: Bug,
-    ]
-
-    static mapping = {
-        table 'BUG4J_COMMENT'
+    def index() {
+        final stackId = params.id
+        final stack = Stack.get(stackId)
+        return [
+                stack: stack,
+                bug: stack.strain.bug,
+        ]
     }
 }

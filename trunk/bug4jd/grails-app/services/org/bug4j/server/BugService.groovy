@@ -20,6 +20,7 @@ import org.bug4j.server.processor.FullStackHashCalculator
 import org.bug4j.server.processor.StackAnalyzer
 import org.bug4j.server.processor.StackPathHashCalculator
 import org.bug4j.server.processor.TextToLines
+import org.bug4j.server.util.DateUtil
 import org.xml.sax.Attributes
 import org.xml.sax.InputSource
 import org.xml.sax.helpers.DefaultHandler
@@ -402,7 +403,7 @@ class BugService {
                                         enabled: true,
                                         externalAuthentication: externalAuthentication,
                                         email: email
-                                ).save(flush: true)
+                                ).save()
                                 if (admin) { // That's a 0.1 version
                                     UserRole.create(user, Role.findByAuthority(Role.USER))
                                     UserRole.create(user, Role.findByAuthority(Role.ADMIN))
@@ -426,7 +427,7 @@ class BugService {
                             _app = identifyApp(appId)
                             if (!_app) {
                                 _app = new App(label: appId, code: appId, multiHost: multiHost)
-                                _app.save(flush: true)
+                                _app.save()
                             }
                             break
 
@@ -435,7 +436,7 @@ class BugService {
                             if (!AppPackages.findByAppAndPackageName(_app, packageName)) {
                                 final appPackages = new AppPackages(app: _app, packageName: packageName)
                                 _app.addToAppPackages(appPackages)
-                                appPackages.save(flush: true)
+                                appPackages.save()
                             }
                             break;
 
@@ -469,7 +470,7 @@ class BugService {
                                     firstHit: firstHitTimestamp
                             )
                             _app.addToClientSessions(clientSession)
-                            clientSession.save(flush: true)
+                            clientSession.save()
                             _sessions.put(sessionId, clientSession)
                             break;
 
@@ -484,7 +485,7 @@ class BugService {
                                 _app = App.findByCode(appId)
                                 if (!_app) {
                                     _app = new App(label: appId, code: appId)
-                                    _app.save(flush: true)
+                                    _app.save()
                                 }
                             }
                             break;
@@ -633,5 +634,61 @@ class BugService {
         mergePattern.bug = bug
         mergePattern.save()
         return ret
+    }
+
+    def queryBugsParamsAndCondAndFilter(app, from, to, includeSingleHost, includeIgnored, sort, order, max, offset) {
+        def queryParams = [app: app]
+        def queryCond = ''
+        def filter = ''
+
+        if (from) {
+            Date fromDate = DateUtil.interpretDate(from, DateUtil.TimeAdjustType.BEGINNING_OF_DAY)
+            if (fromDate) {
+                queryCond += " and h.dateReported>=:fromDate"
+                queryParams += [fromDate: fromDate]
+                filter += "from:${from} "
+            }
+        }
+
+        if (to) {
+            Date toDate = DateUtil.interpretDate(to, DateUtil.TimeAdjustType.END_OF_DAY)
+            if (toDate) {
+                queryCond += " and h.dateReported<=:toDate"
+                queryParams += [toDate: toDate]
+                filter += "to:${to} "
+            }
+        }
+
+        if (app.multiHost) {
+            if (includeSingleHost) {
+                filter += "showSingleHost "
+            } else {
+                queryCond += " and b.multiReport = true"
+            }
+        }
+
+        if (includeIgnored) {
+            filter += "includeIgnored "
+        } else {
+            queryCond += " and b.ignore = false"
+        }
+
+        final sql = """
+                select
+                    b.id as id,
+                    b.title as title,
+                    count(h.id) as hitCount,
+                    min(h.dateReported) as firstHitDate,
+                    max(h.dateReported) as lastHitDate,
+                    b.hot
+                from Bug b, Hit h
+                where b.app=:app
+                and b=h.bug
+                ${queryCond}
+                group by b.id,b.title,b.hot
+                order by ${sort} ${order}
+                """
+
+        return [sql, queryParams, queryCond, filter]
     }
 }

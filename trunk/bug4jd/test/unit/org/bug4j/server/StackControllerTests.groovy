@@ -13,22 +13,17 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.bug4j
+package org.bug4j.server
 
-class Comment {
-    String text;
-    Date dateAdded
-    String addedBy
+import grails.test.mixin.TestFor
 
-    static constraints = {
-        text(blank: false, maxSize: 1024)
-    }
+/**
+ * See the API for {@link grails.test.mixin.web.ControllerUnitTestMixin} for usage instructions
+ */
+@TestFor(StackController)
+class StackControllerTests {
 
-    static belongsTo = [
-            bug: Bug,
-    ]
-
-    static mapping = {
-        table 'BUG4J_COMMENT'
+    void testSomething() {
+        fail "Implement me"
     }
 }

@@ -27,68 +27,26 @@ import org.bug4j.*
 
 class BugController {
 
+    public static final ArrayList<String> PARAM_NAMES = ['a', 'from', 'to', 'includeSingleHost', 'includeIgnored', 'sort', 'order', 'max', 'offset', 'max']
     def bugService
     DataSource dataSource
     def springSecurityService
 
     def index() {
-        if (!params.sort) params.sort = 'bug_id'
+        if (!params.sort) params.sort = 'id'
         if (!params.order) params.order = 'desc'
         if (!params.max) params.max = 20
         if (!params.offset) params.offset = 0
 
         def selectedApp = getApp()
-        def queryParams = [app: selectedApp]
-        def queryCond = ''
-        def filter = ''
+        def queryParams
+        def queryCond
+        def filter
+        def sql
+        (sql, queryParams, queryCond, filter) = bugService.queryBugsParamsAndCondAndFilter(
+                selectedApp, params.from, params.to, params.includeSingleHost,
+                params.includeIgnored, params.sort, params.order, params.max, params.offset)
 
-        if (params.from) {
-            Date fromDate = DateUtil.interpretDate(params.from, DateUtil.TimeAdjustType.BEGINNING_OF_DAY)
-            if (fromDate) {
-                queryCond += " and h.dateReported>=:fromDate"
-                queryParams += [fromDate: fromDate]
-                filter += "from:${params.from} "
-            }
-        }
-
-        if (params.to) {
-            Date toDate = DateUtil.interpretDate(params.to, DateUtil.TimeAdjustType.END_OF_DAY)
-            if (toDate) {
-                queryCond += " and h.dateReported<=:toDate"
-                queryParams += [toDate: toDate]
-                filter += "to:${params.to} "
-            }
-        }
-
-        if (selectedApp.multiHost) {
-            if (params.includeSingleHost) {
-                filter += "showSingleHost "
-            } else {
-                queryCond += " and b.multiReport = true"
-            }
-        }
-
-        if (params.includeIgnored) {
-            filter += "includeIgnored "
-        } else {
-            queryCond += " and b.ignore = false"
-        }
-
-        final sql = """
-                select
-                    b.id as bug_id,
-                    b.title as bug_title,
-                    count(h.id) as hitCount,
-                    min(h.dateReported) as firstHitDate,
-                    max(h.dateReported) as lastHitDate,
-                    b.hot
-                from Bug b, Hit h
-                where b.app=:app
-                and b=h.bug
-                ${queryCond}
-                group by b.id,b.title,b.hot
-                order by ${params.sort} ${params.order}
-                """
         final List list = Bug.executeQuery(sql, queryParams, [
                 max: params.max,
                 offset: params.offset,
@@ -104,8 +62,8 @@ class BugController {
         final total = Bug.executeQuery(countSql, queryParams)
         final bugs = list.collect {
             return [
-                    'bug_id': it[0],
-                    'bug_title': it[1],
+                    'id': it[0],
+                    'title': it[1],
                     'hitCount': it[2],
                     'firstHitDate': it[3],
                     'lastHitDate': it[4],
@@ -118,6 +76,7 @@ class BugController {
                 bugs: bugs,
                 total: total[0],
                 filter: filter,
+                paramNames: PARAM_NAMES
         ]
     }
 
@@ -260,8 +219,8 @@ class BugController {
             def bugInfo = [
                     count: row[0],
                     reportedByCount: "${row[1]} ${row[1] <= 1 ? 'user' : 'users'}",
-                    minDateReported: DateUtil.formatDate((Date) row[2]),
-                    maxDateReported: DateUtil.formatDate((Date) row[3]),
+                    minDateReported: DateUtil.formatDate(row[2]),
+                    maxDateReported: DateUtil.formatDate(row[3]),
             ]
             // Derby does not support two count(distinct) so we must query this separately
             row = sql.firstRow("select count(distinct REMOTE_ADDR) from hit h where h.BUG_ID=${bugId}")
