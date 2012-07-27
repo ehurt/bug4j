@@ -16,12 +16,13 @@
 
 package org.bug4j.client;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Reports exceptions to the bug4j server.
@@ -34,10 +35,6 @@ public class Bug4jAgent {
      */
     private static final int MAX_ENQUEUE = 200;
 
-    /**
-     * Avoid re-entrance caused by calls to log4j during the initialization
-     */
-    private static AtomicBoolean _isEntered = new AtomicBoolean(false);
     private static final BlockingQueue<ReportableEvent> _queue = new LinkedBlockingQueue<ReportableEvent>();
     private static final ReportableEvent STOP = new ReportableEvent("stop", new String[0], "stop");
     private static Thread _clientThread;
@@ -45,6 +42,7 @@ public class Bug4jAgent {
     private final ReportLRU _reportLRU = new ReportLRU();
 
     private HttpConnector _connector;
+    private static boolean _isStarted;
     private boolean _isInitialized;
     private final Settings _settings;
 
@@ -53,51 +51,32 @@ public class Bug4jAgent {
     }
 
     static void start(Settings settings) {
-        if (_isEntered.compareAndSet(false, true)) {
-            try {
-                if (!isStarted()) {
-                    addShutdownHook();
-                    synchronized (Bug4jAgent.class) {
-                        _reported = 0;
 
-                        final Bug4jAgent client = new Bug4jAgent(settings);
-
-                        final Object tellMeWhenYouAreReady = new Object();
-                        final Thread thread = new Thread() {
-                            @Override
-                            public void run() {
-                                synchronized (tellMeWhenYouAreReady) {
-                                    tellMeWhenYouAreReady.notify();
-                                }
-
-                                try {
-                                    client.run();
-                                } catch (InterruptedException ignored) {
-                                }
-                            }
-                        };
-                        thread.setName("bug4j");
-                        thread.setDaemon(true);
-                        thread.start();
-                        //noinspection SynchronizationOnLocalVariableOrMethodParameter
-                        synchronized (tellMeWhenYouAreReady) {
-                            try {
-                                tellMeWhenYouAreReady.wait();
-                                _clientThread = thread;
-                            } catch (InterruptedException e) {
-                                throw new IllegalStateException(e);
-                            }
-                        }
-                    }
-                }
-            } finally {
-                _isEntered.set(false);
+        synchronized (Bug4jAgent.class) {
+            if (_isStarted) {
+                return;
             }
+            _isStarted = true;
         }
-    }
 
-    private static boolean isStarted() {
-        return _clientThread != null;
+        addShutdownHook();
+        _isStarted = true;
+        _reported = 0;
+
+        final Bug4jAgent client = new Bug4jAgent(settings);
+
+        _clientThread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    client.run();
+                } catch (InterruptedException ignored) {
+                }
+            }
+        };
+        _clientThread.setName("bug4j");
+        _clientThread.setDaemon(true);
+        _clientThread.start();
     }
 
     private void init() {
@@ -130,7 +109,7 @@ public class Bug4jAgent {
         // if the client thread has not been started yet then there is nothing to stop
         // but the client may be starting up => sync.
         synchronized (Bug4jAgent.class) {
-            if (_clientThread == null) {
+            if (!_isStarted) {
                 return;
             }
         }
@@ -139,8 +118,9 @@ public class Bug4jAgent {
         try {
             _clientThread.join(2000);
             _clientThread = null;
-        } catch (InterruptedException e) {
-            //
+        } catch (InterruptedException ignored) {
+        } finally {
+            _isStarted = false;
         }
         _queue.clear();
     }
@@ -228,7 +208,7 @@ public class Bug4jAgent {
      * @param message   An error message
      * @param throwable the exception to report
      */
-    public static void report(String message, Throwable throwable) {
+    public static void report(@Nullable String message, Throwable throwable) {
         if (message != null || throwable != null) { // do not allow both to be null. We wouldn't have much to do
             final ReportableEvent reportableEvent = ReportableEvent.createReportableEvent(message, throwable);
             enqueue(reportableEvent);
@@ -246,7 +226,7 @@ public class Bug4jAgent {
 
     static void enqueue(ReportableEvent reportableEvent) {
         if (_queue.size() < MAX_ENQUEUE) {
-            if (!isStarted()) {
+            if (!_isStarted) {
                 new Bug4jStarter().start();
             }
             _queue.add(reportableEvent);
