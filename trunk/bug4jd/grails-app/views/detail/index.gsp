@@ -47,8 +47,8 @@
 
         function collapseSection(sectionId) {
             $("#" + sectionId + "> .section-content").hide('fast');
-            $("#" + sectionId + "> h2 > .collapse-section-img").hide();
-            $("#" + sectionId + "> h2 > .expand-section-img").show();
+            $("#" + sectionId + "> div > .collapse-section-img").hide();
+            $("#" + sectionId + "> div > .expand-section-img").show();
             setExpandedStatePref(sectionId, 'collapsed');
         }
 
@@ -59,8 +59,8 @@
             } else {
                 $("#" + sectionId + "> .section-content").show('fast');
             }
-            $("#" + sectionId + "> h2 > .collapse-section-img").show();
-            $("#" + sectionId + "> h2 > .expand-section-img").hide();
+            $("#" + sectionId + "> div > .collapse-section-img").show();
+            $("#" + sectionId + "> div > .expand-section-img").hide();
             setExpandedStatePref(sectionId, 'expanded');
         }
 
@@ -87,7 +87,7 @@
 
     #bug-title {
         font-size: large;
-    ${                 bug.ignore?'text-decoration: line-through;':''                 }
+    ${ bug.ignore?'text-decoration: line-through;':'' }
     }
 
     .section {
