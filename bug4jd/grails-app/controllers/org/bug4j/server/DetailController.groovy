@@ -86,11 +86,32 @@ class DetailController {
 
         final hits = Hit.findAllByBug(bug, [sort: 'id', order: 'desc', max: 10])
         final totalHits = Hit.countByBug(bug)
+        final strainInfos = Strain.executeQuery("""
+            select r.id as strainId, min(h.dateReported) as minDate, max(h.dateReported) as maxDate
+            from Strain r, Stack a, Hit h
+            where r.bug=:bug
+            and a.strain=r
+            and h.stack=a
+            group by r.id
+            order by r.id desc""", [bug: bug])
+
+        Stack firstStack = null
+        if (strainInfos) {
+            final firstStrainId = strainInfos[0][0] as long
+            StackText.withTransaction {
+                final strain = Strain.get(firstStrainId)
+                firstStack = Stack.findByStrain(strain)
+                final stackText = StackText.get(firstStack.stackTextId)
+                stackText.readStackString()
+            }
+        }
 
         return [
                 bug: bug,
                 bugInfo: bugInfo,
                 timelineData: timelineData,
+                strainInfos: strainInfos,
+                firstStack: firstStack,
                 hits: hits,
                 totalHits: totalHits,
                 collapsed: collapsed,

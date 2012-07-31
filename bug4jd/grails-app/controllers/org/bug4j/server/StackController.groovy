@@ -16,6 +16,8 @@
 package org.bug4j.server
 
 import org.bug4j.Stack
+import org.bug4j.StackText
+import org.bug4j.Strain
 
 class StackController {
 
@@ -30,5 +32,23 @@ class StackController {
                 stack: stack,
                 bug: stack.strain.bug,
         ]
+    }
+
+    def stack = {
+        final stackId = params.id
+        final stack = Stack.get(stackId)
+        render(template: 'stack', model: [stack: stack])
+    }
+
+    def stackOfStrain = {
+        final strainId = params.id
+        StackText.withTransaction {
+            final strain = Strain.get(strainId)
+            final stack = Stack.findByStrain(strain)
+            final stackText = StackText.get(stack.stackTextId)
+            stackText.readStackString()
+
+            render(template: 'stack', model: [stack: stack])
+        }
     }
 }
