@@ -74,9 +74,23 @@
                 error:function (XMLHttpRequest, textStatus, errorThrown) {
                 }
             });
-
         }
 
+        function selectStack(tdId, strainId) {
+            $(".stack-id-sel").removeClass("stack-id-sel");
+            $(tdId).addClass("stack-id-sel")
+
+            jQuery.ajax({
+                type:'POST',
+                data:{'id':strainId},
+                url:'${createLink(controller: 'stack',action: 'stackOfStrain')}',
+                success:function (data, textStatus) {
+                    jQuery('#stack-text').html(data);
+                },
+                error:function (XMLHttpRequest, textStatus, errorThrown) {
+                }
+            });
+        }
 
     </script>
 
@@ -87,7 +101,7 @@
 
     #bug-title {
         font-size: large;
-    ${ bug.ignore?'text-decoration: line-through;':'' }
+    ${      bug.ignore?'text-decoration: line-through;':''      }
     }
 
     .section {
@@ -122,6 +136,29 @@
         -webkit-border-radius: 0.3em;
         border-radius: 0.3em;
         padding: 0 .3em
+    }
+
+    .stack-id {
+        width: 15em;
+        border-right: 4px solid #f0f8ff;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .stack-id-sel {
+        background: #f0f8ff;
+    }
+
+    #stack-id-div {
+        float: left;
+        max-height: 400px;
+        overflow-y: hidden;
+    }
+
+    #stack-text {
+        padding: 3px;
+        overflow-x: hidden;
+        max-height: 400px;
     }
     </style>
 </head>
@@ -234,6 +271,45 @@
             ${bugInfo.maxDateReported}
         </div>
 
+    </g:expansionSection>
+</div>
+
+<div id="stack-section" class="section">
+    <g:expansionToggle section="stack-section" expand="false">
+        Stacks
+    </g:expansionToggle>
+
+    <g:expansionSection section="stack-section" class="section-content" style="border: 1px solid #DFDFDF;padding: 5px;margin-top: 5px;">
+        <g:if test="${strainInfos}">
+            <%
+                DateFormat stackDateFormat = SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT)
+            %>
+
+            <div id="stack-id-div">
+                <table>
+                    <g:each in="${strainInfos}" var="strainInfo" status="lineno">
+                        <tr>
+                            <% def tdId = "stack-id-${lineno}" %>
+                            <td id="${tdId}"
+                                class="stack-id ${lineno == 0 ? 'stack-id-sel' : ''}"
+                                onclick="selectStack('#${tdId}', '${strainInfo[0]}');">
+                                #${strainInfo[0]} <span style="color: #a9a9a9;">${stackDateFormat.format(strainInfo[1])}-${stackDateFormat.format(strainInfo[2])}</span>
+                            </td>
+                        </tr>
+                    </g:each>
+                </table>
+            </div>
+
+            <div id="stack-text">
+                <g:render template="/stack/stack" model="[stack: firstStack]"/>
+            </div>
+
+            <div class="clear"></div>
+
+        </g:if>
+        <g:else>
+            <div>No stack available</div>
+        </g:else>
     </g:expansionSection>
 </div>
 
