@@ -84,7 +84,14 @@ environments {
         dataSource {
             new DerbyUtil().startup()
             dbCreate = "update"
-            url = "jdbc:derby://localhost:1528/\${catalina.home}/bug4jdb;create=true"
+            final userHome = System.getProperty("user.home")
+            final bug4jHome = new File(userHome, ".bug4j")
+            if (!bug4jHome.isDirectory()) {
+                if (!bug4jHome.mkdirs()) {
+                    log.error("Failed to create ${bug4jHome}")
+                }
+            }
+            url = "jdbc:derby://localhost:1528/${bug4jHome}/bug4jdb;create=true"
             username = "bug4j"
             password = "bug4j"
             pooled = true
