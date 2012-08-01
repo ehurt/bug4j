@@ -244,6 +244,20 @@ class DetailController {
                 ])
     }
 
+    /**
+     * User started adding a comment then cancels
+     */
+    def cancelComment = {
+        final bugId = params.bugId as long
+        final bug = Bug.get(bugId)
+        final comments = Comment.findAllByBug(bug, [sort: 'dateAdded', order: 'asc'])
+        render(template: "comments",
+                model: [
+                        bug: bug,
+                        comments: comments
+                ])
+    }
+
     def removeComment = {
         final commentId = params.id as long
         final comment = Comment.get(commentId)

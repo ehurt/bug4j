@@ -41,7 +41,6 @@
         function addComment() {
             expandSection("comments-section");
             $('#newCommentDiv').show('fast');
-            $('#comments-section').show('fast');
             $('#newCommentTextArea').focus();
             return false;
         }
@@ -104,7 +103,7 @@
 
     #bug-title {
         font-size: large;
-    ${                  bug.ignore?'text-decoration: line-through;':''                  }
+    ${                        bug.ignore?'text-decoration: line-through;':''                        }
     }
 
     .section {
@@ -131,6 +130,18 @@
 
     .action-merge {
         background-image: url(${resource(dir: 'images/skin', file: 'arrow_join.png')});
+    }
+
+    #add-comment-button {
+        margin-left: 14px;
+        text-decoration: none;
+        color: #000000;
+    }
+
+    .section-content-boxed {
+        border: 1px solid #DFDFDF;
+        padding: 5px;
+        margin-top: 5px;
     }
 
     .info-span {
@@ -255,19 +266,18 @@
     </g:expansionSection>
 </div>
 
-<% String display = bugInfo.comments ? "" : " display:none;"; %>
-<div id="comments-section" class="section" style="${display}">
+<div id="comments-section" class="section">
     <g:expansionToggle section="comments-section">Comments</g:expansionToggle>
 
-    <div id="bugComments" class="section-content" style="border: 1px solid #DFDFDF;padding: 5px;margin-top: 5px;">
+    <g:expansionSection section="comments-section" class="section-content-boxed section-content">
         <g:render template="comments" model="[bug: bug, comments: bugInfo.comments]"/>
-    </div>
+    </g:expansionSection>
 </div>
 
 <div id="stat-section" class="section">
     <g:expansionToggle section="stat-section" expand="false">Stats</g:expansionToggle>
 
-    <g:expansionSection section="stat-section" class="section-content" style="border: 1px solid #DFDFDF;padding: 5px;margin-top: 5px;">
+    <g:expansionSection section="stat-section" class="section-content-boxed section-content">
         <div>${bugInfo.count} hits</div>
 
         <div>
@@ -292,7 +302,7 @@
         Stacks
     </g:expansionToggle>
 
-    <g:expansionSection section="stack-section" class="section-content" style="border: 1px solid #DFDFDF;padding: 5px;margin-top: 5px;">
+    <g:expansionSection section="stack-section" class="section-content-boxed section-content">
         <g:if test="${strainInfos}">
             <%
                 DateFormat stackDateFormat = SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT)
@@ -342,7 +352,7 @@
         </span>
     </g:expansionToggle>
 
-    <g:expansionSection section="hit-section" class="section-content" style="border: 1px solid #DFDFDF;padding: 5px;margin-top: 5px;">
+    <g:expansionSection section="hit-section" class="section-content-boxed section-content">
         <div>Total: ${totalHits} hits</div>
         <table class="table-hover">
             <thead>
