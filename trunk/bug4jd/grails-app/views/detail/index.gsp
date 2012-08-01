@@ -20,6 +20,7 @@
     <title>${bug.id} - ${bug.title}</title>
 
     <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script type="text/javascript" src="${resource(dir: 'js', file: 'ZeroClipboard.js')}"></script>
     <script type="text/javascript">
 
         google.load('visualization', '1', {packages:['annotatedtimeline']});
@@ -86,6 +87,8 @@
                 url:'${createLink(controller: 'stack',action: 'stackOfStrain')}',
                 success:function (data, textStatus) {
                     jQuery('#stack-text').html(data);
+                    var txt = $("#stack-text-unf").html();
+                    clip.setText(txt);
                 },
                 error:function (XMLHttpRequest, textStatus, errorThrown) {
                 }
@@ -101,7 +104,7 @@
 
     #bug-title {
         font-size: large;
-    ${      bug.ignore?'text-decoration: line-through;':''      }
+    ${                  bug.ignore?'text-decoration: line-through;':''                  }
     }
 
     .section {
@@ -139,10 +142,10 @@
     }
 
     .stack-id {
-        width: 15em;
-        border-right: 4px solid #f0f8ff;
+        width: 11em;
         cursor: pointer;
         white-space: nowrap;
+        padding: 5px 0 5px 5px;
     }
 
     .stack-id-sel {
@@ -159,6 +162,16 @@
         padding: 3px;
         overflow-x: hidden;
         max-height: 400px;
+    }
+
+    #stack-copy-container {
+        text-align: right;
+        margin-right: 25px;
+    }
+
+    #stack-copy-button {
+        color: #000000;
+        border-bottom: dotted 1px #000000;
     }
     </style>
 </head>
@@ -290,18 +303,26 @@
                     <g:each in="${strainInfos}" var="strainInfo" status="lineno">
                         <tr>
                             <% def tdId = "stack-id-${lineno}" %>
-                            <td id="${tdId}"
-                                class="stack-id ${lineno == 0 ? 'stack-id-sel' : ''}"
-                                onclick="selectStack('#${tdId}', '${strainInfo[0]}');">
-                                #${strainInfo[0]} <span style="color: #a9a9a9;">${stackDateFormat.format(strainInfo[1])}-${stackDateFormat.format(strainInfo[2])}</span>
+                            <td>
+                                <div id="${tdId}"
+                                     class="stack-id ${lineno == 0 ? 'stack-id-sel' : ''}"
+                                     onclick="selectStack('#${tdId}', '${strainInfo[0]}');">
+                                    #${strainInfo[0]} <span style="color: #a9a9a9;">${stackDateFormat.format(strainInfo[1])}-${stackDateFormat.format(strainInfo[2])}</span>
+                                </div>
                             </td>
                         </tr>
                     </g:each>
                 </table>
             </div>
 
-            <div id="stack-text">
-                <g:render template="/stack/stack" model="[stack: firstStack]"/>
+            <div>
+                <div id="stack-copy-container" style="position:relative">
+                    <span id="stack-copy-button">Copy</span>
+                </div>
+
+                <div id="stack-text">
+                    <g:render template="/stack/stack" model="[stack: firstStack]"/>
+                </div>
             </div>
 
             <div class="clear"></div>
@@ -342,5 +363,13 @@
     </g:expansionSection>
 </div>
 
+<script type="text/javascript">
+    ZeroClipboard.setMoviePath('${resource(dir: 'js', file: 'ZeroClipboard.swf')}');
+    var clip = new ZeroClipboard.Client();
+    var txt = $("#stack-text-unf").html();
+    clip.setText(txt);
+    clip.setHandCursor(true);
+    clip.glue('stack-copy-button', 'stack-copy-container');
+</script>
 </body>
 </html>
