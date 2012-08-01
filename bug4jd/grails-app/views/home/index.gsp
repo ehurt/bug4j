@@ -111,7 +111,7 @@
     }
 
     .app-sel-selected {
-        background: #E1F2B6;
+        background: #f0f8ff;
         font-weight: bold;
     }
 
@@ -132,22 +132,23 @@
 </head>
 
 <body>
-<!--
+<g:if test="${apps.size() > 1}">
+    <!--
     Username: <sec:username/>
     Authorities: ${SpringSecurityUtils.getPrincipalAuthorities()}
     -->
-<div id="app-sel-div">
-    <ul>
-        <g:each in="${apps}" var="app">
-            <li class="app-sel ${appStats?.app?.id == app.id ? 'app-sel-selected' : ''}">
-                <g:link params="[a: app.code, daysBack: daysBack]" class="app-sel-link">
-                    ${app.label}
-                </g:link>
-            </li>
-        </g:each>
-    </ul>
-</div>
-
+    <div id="app-sel-div">
+        <ul>
+            <g:each in="${apps}" var="app">
+                <li class="app-sel ${appStats?.app?.id == app.id ? 'app-sel-selected' : ''}">
+                    <g:link params="[a: app.code, daysBack: daysBack]" class="app-sel-link">
+                        ${app.label}
+                    </g:link>
+                </li>
+            </g:each>
+        </ul>
+    </div>
+</g:if>
 
 <div id="stats">
     <g:if test="${appStats}">
