@@ -30,6 +30,7 @@ class BugController {
         if (!params.offset) params.offset = 0
 
         def selectedApp = getApp()
+        params.a = selectedApp.code
         def queryParams
         def queryCond
         def filter

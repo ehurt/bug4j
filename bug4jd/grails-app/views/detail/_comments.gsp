@@ -48,15 +48,19 @@
     <tr id="newCommentDiv" style="display: none">
         <td style="padding: 5px;">
             <g:form action="addComment">
-                <div style="background-color: #E1F2B6"><sec:username/> - ${dateFormat.format(new Date())}</div>
+                <div style="background-color: #cadfff"><sec:username/> - ${dateFormat.format(new Date())}</div>
                 <g:hiddenField name="bugId" value="${bug.id}"/>
                 <textarea id="newCommentTextArea" name="newComment" rows="4" cols="80" style="width: 100%;height: 4em;"></textarea>
 
                 <div>
-                    <g:submitToRemote url="[action: 'addComment']" value="Add" update="bugComments"/>
+                    <g:submitToRemote url="[action: 'addComment']" value="Save" update="bugComments"/>
+                    <g:submitToRemote url="[action: 'cancelComment']" value="Cancel" update="bugComments"/>
                 </div>
             </g:form>
         </td>
     </tr>
 </table>
 
+<a href="#" id="add-comment-button" onclick="return addComment();">
+    <g:img dir="images/skin" file="comment_add.png"/> Add
+</a>
