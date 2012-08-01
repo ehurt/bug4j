@@ -103,7 +103,7 @@
 
     #bug-title {
         font-size: large;
-    ${                          bug.ignore?'text-decoration: line-through;':''                          }
+    ${                           bug.ignore?'text-decoration: line-through;':''                           }
     }
 
     .section {
@@ -367,6 +367,7 @@
                 <th class="sortable">Build Number</th>
                 <th class="sortable">Dev.Build</th>
                 <th class="sortable">Stack</th>
+                <th class="sortable">Message</th>
             </tr>
             </thead>
             <g:render template="/hit/hitsRows" model="[hits: hits]"/>

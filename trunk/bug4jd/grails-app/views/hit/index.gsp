@@ -22,7 +22,7 @@
     #bug-title {
         padding: 10px;
         font-size: large;
-    ${                 bug.ignore?'text-decoration: line-through;':''                 }
+    ${                   bug.ignore?'text-decoration: line-through;':''                   }
     }
     </style>
 </head>
@@ -43,7 +43,12 @@
     <g:if test="${flash.message}">
         <div class="message" role="status">${flash.message}</div>
     </g:if>
-    <div id="bug-title">Hits on bug ${bug.id} - ${bug.title}</div>
+    <div id="bug-title">
+        Hits on bug
+        <g:link controller="detail" params="[id: bug.id]">
+            ${bug.id} - ${bug.title}
+        </g:link>
+    </div>
 
     <div class="pagination">
         <g:paginate total="${total}" params="[id: bug.id]"/>
@@ -60,6 +65,7 @@
             <g:sortableColumn property="clientSession.buildNumber" title="Build Number" params="${params}"/>
             <g:sortableColumn property="clientSession.devBuild" title="Dev.Build" params="${params}"/>
             <g:sortableColumn property="stack.strain.id" title="Stack" params="${params}"/>
+            <g:sortableColumn property="message" title="Message" params="${params}"/>
         </tr>
         </thead>
         <g:render template="hitsRows" model="[hits: hits]"/>
