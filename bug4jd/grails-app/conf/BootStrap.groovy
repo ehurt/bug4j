@@ -14,11 +14,17 @@
  *    limitations under the License.
  */
 
+import groovy.sql.Sql
 import org.apache.commons.io.IOUtils
+
+import java.sql.SQLException
+import javax.sql.DataSource
+
 import org.bug4j.*
 
 class BootStrap {
     def extensionService
+    DataSource dataSource
 
     def init = { servletContext ->
 
@@ -60,6 +66,25 @@ class BootStrap {
             final defaultUser = new User(username: 'bug4j', password: 'bug4j', enabled: true).save()
             UserRole.create(defaultUser, userRole)
             UserRole.create(defaultUser, adminRole)
+        }
+
+        final sql = new Sql(dataSource)
+        try {
+            sql.eachRow("select BUG_ID, ADDED_BY, DATE_ADDED, TEXT from COMMENT ORDER BY BUG_ID, ID") {
+                final bugId = it[0]
+                final addedBy = it[1]
+                final dateAdded = it[2]
+                final text = it[3]
+                final bug = Bug.get(bugId)
+                final comment = new Comment(text: text, dateAdded: dateAdded, addedBy: addedBy)
+                comment.bug = bug
+                bug.addToComments(comment)
+                comment.save()
+            }
+            sql.execute("drop table comment")
+        } catch (SQLException ignore) {
+        } finally {
+            sql.close()
         }
     }
 

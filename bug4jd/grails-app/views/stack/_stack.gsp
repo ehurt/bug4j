@@ -37,3 +37,5 @@
     String stackHtml = BugService.stackToHtml(stackText, app.appPackages*.packageName)
 %>
 <pre>${stackHtml}</pre>
+
+<div id="stack-text-unf" style="display: none;">${stackText.encodeAsHTML()}</div>

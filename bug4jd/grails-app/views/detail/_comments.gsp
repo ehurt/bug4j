@@ -40,7 +40,7 @@
                 <div>
                 </div>
 
-                <div>${comment.text}</div>
+                <div>${comment.text.encodeAsHTML().replace('\n', '<br>')}</div>
             </td>
         </tr>
     </g:each>
