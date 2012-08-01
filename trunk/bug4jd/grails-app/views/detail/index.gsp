@@ -103,7 +103,7 @@
 
     #bug-title {
         font-size: large;
-    ${                        bug.ignore?'text-decoration: line-through;':''                        }
+    ${                          bug.ignore?'text-decoration: line-through;':''                          }
     }
 
     .section {
@@ -136,6 +136,7 @@
         margin-left: 14px;
         text-decoration: none;
         color: #000000;
+        border-bottom: dotted 1px #000000;
     }
 
     .section-content-boxed {
@@ -181,7 +182,6 @@
     }
 
     #stack-copy-button {
-        color: #000000;
         border-bottom: dotted 1px #000000;
     }
     </style>
@@ -269,7 +269,7 @@
 <div id="comments-section" class="section">
     <g:expansionToggle section="comments-section">Comments</g:expansionToggle>
 
-    <g:expansionSection section="comments-section" class="section-content-boxed section-content">
+    <g:expansionSection id="bugComments" section="comments-section" class="section-content-boxed section-content">
         <g:render template="comments" model="[bug: bug, comments: bugInfo.comments]"/>
     </g:expansionSection>
 </div>
@@ -279,6 +279,8 @@
 
     <g:expansionSection section="stat-section" class="section-content-boxed section-content">
         <div>${bugInfo.count} hits</div>
+
+        <div>Heat: ${(int) (bug.hot * 100)}%</div>
 
         <div>
             Reported by
@@ -327,7 +329,7 @@
 
             <div>
                 <div id="stack-copy-container" style="position:relative">
-                    <span id="stack-copy-button">Copy</span>
+                    <span id="stack-copy-button"><g:img dir="images/skin" file="clipboard.png"/> Copy</span>
                 </div>
 
                 <div id="stack-text">
@@ -373,13 +375,15 @@
     </g:expansionSection>
 </div>
 
-<script type="text/javascript">
-    ZeroClipboard.setMoviePath('${resource(dir: 'js', file: 'ZeroClipboard.swf')}');
-    var clip = new ZeroClipboard.Client();
-    var txt = $("#stack-text-unf").html();
-    clip.setText(txt);
-    clip.setHandCursor(true);
-    clip.glue('stack-copy-button', 'stack-copy-container');
-</script>
+<g:if test="${strainInfos}">
+    <script type="text/javascript">
+        ZeroClipboard.setMoviePath('${resource(dir: 'js', file: 'ZeroClipboard.swf')}');
+        var clip = new ZeroClipboard.Client();
+        var txt = $("#stack-text-unf").html();
+        clip.setText(txt);
+        clip.setHandCursor(true);
+        clip.glue('stack-copy-button', 'stack-copy-container');
+    </script>
+</g:if>
 </body>
 </html>

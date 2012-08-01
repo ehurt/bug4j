@@ -220,21 +220,23 @@ class DetailController {
 
     def addComment = {
         final bugId = params.bugId as long
-        final newComment = params.newComment
         final bug = Bug.get(bugId)
-        final username = springSecurityService.principal.username
-        final comment = new Comment(
-                text: newComment,
-                dateAdded: new Date(),
-                addedBy: username
-        )
-        comment.bug = bug
+        final newComment = params.newComment
+        if (newComment) {
+            final username = springSecurityService.principal.username
+            final comment = new Comment(
+                    text: newComment,
+                    dateAdded: new Date(),
+                    addedBy: username
+            )
+            comment.bug = bug
 
-        if (!comment.validate()) {
-            final errors = comment.errors
-            println errors
+            if (!comment.validate()) {
+                final errors = comment.errors
+                println errors
+            }
+            comment.save(flush: true)
         }
-        comment.save(flush: true)
 
         final comments = Comment.findAllByBug(bug, [sort: 'dateAdded', order: 'asc'])
         render(template: "comments",
