@@ -35,6 +35,7 @@ import javax.xml.parsers.SAXParserFactory
 import org.bug4j.*
 
 class BugService {
+    public static final char[] PATTERN_CHARS = '\\[].^$?*+'.toCharArray()
     def extensionService
 
     ClientSession createSession(String appCode,
@@ -633,6 +634,13 @@ class BugService {
         final mergePattern = new MergePattern(patternString: titlePattern)
         mergePattern.bug = bug
         mergePattern.save()
+
+        PATTERN_CHARS.each {
+            titlePattern = titlePattern.replace('\\' + it, it.toString())
+        }
+
+        bug.title = titlePattern
+        bug.save()
         return ret
     }
 

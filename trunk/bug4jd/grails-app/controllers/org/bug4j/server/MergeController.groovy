@@ -15,6 +15,7 @@
  */
 package org.bug4j.server
 
+import org.apache.commons.lang.StringUtils
 import org.bug4j.Bug
 
 import java.util.regex.Pattern
@@ -44,8 +45,13 @@ class MergeController {
             }
         } else {
             if (!pat) {
-                final String charsToEscape = '\\[].^$?*+'.collect {'\\' + it}.sum()
-                pat = bug.title.replaceAll("([${charsToEscape}])", '\\\\$1')
+                String[] searchList = new String[BugService.PATTERN_CHARS.length]
+                String[] replacementList = new String[BugService.PATTERN_CHARS.length]
+                BugService.PATTERN_CHARS.eachWithIndex {char c, int i ->
+                    searchList[i] = Character.toString(c)
+                    replacementList[i] = '\\' + c
+                }
+                pat = StringUtils.replaceEach(bug.title, searchList, replacementList)
             }
 
             if (params.test) {
