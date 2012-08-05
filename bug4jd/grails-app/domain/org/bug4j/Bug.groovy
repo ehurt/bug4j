@@ -16,7 +16,7 @@
 package org.bug4j
 
 class Bug {
-    public static final int TITLE_SIZE = 255
+    public static final int TITLE_SIZE = 512
     String title
     Date extinct
     Date unextinct

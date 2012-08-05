@@ -19,6 +19,7 @@ import groovy.sql.Sql
 import org.bug4j.AppSettings
 import org.bug4j.Bug
 import org.bug4j.Comment
+import org.bug4j.MergePattern
 import org.bug4j.server.util.StringUtil
 
 import java.sql.SQLException
@@ -26,6 +27,7 @@ import javax.sql.DataSource
 
 class AppService {
     public static final String DBVERSION = 'DBVERSION'
+    private static final int CURRENT_VERSION = 2
 
     DataSource dataSource
 
@@ -44,7 +46,7 @@ class AppService {
         if (!appSettings) {
             appSettings = new AppSettings(key: DBVERSION)
         }
-        appSettings.value = 1
+        appSettings.value = CURRENT_VERSION
         appSettings.save()
     }
 
@@ -53,8 +55,10 @@ class AppService {
         switch (getDbVersion()) {
             case 0:
                 upgradeFrom0();
+            case 1:
+                upgradeFrom1();
                 setDbVersion();
-            default:
+            case CURRENT_VERSION:
                 break;
         }
     }
@@ -87,6 +91,40 @@ class AppService {
                 it.title = newTitle
                 it.save();
             }
+        }
+    }
+
+    private def upgradeFrom1() {
+        final sql = new Sql(dataSource)
+
+        try {
+            // Bug title size increased
+
+            try { // Derby syntax
+                sql.execute((String) "ALTER TABLE BUG ALTER COLUMN TITLE SET DATA TYPE VARCHAR(${Bug.TITLE_SIZE})")
+            } catch (SQLException ignore) {
+                ignore.printStackTrace()
+            }
+
+            try { // Oracle syntax
+                sql.execute((String) "ALTER TABLE BUG MODIFY ( TITLE VARCHAR2(${Bug.TITLE_SIZE})")
+            } catch (SQLException ignore) {
+            }
+
+            // Pattern size increased to match bug size
+            try { // Derby syntax
+                sql.execute((String) "ALTER TABLE MERGE_PATTERN ALTER COLUMN PATTERN_STRING SET DATA TYPE VARCHAR(${MergePattern.PATTERN_SIZE})")
+            } catch (SQLException ignore) {
+                ignore.printStackTrace()
+            }
+
+            try { // Oracle syntax
+                sql.execute((String) "ALTER TABLE MERGE_PATTERN MODIFY ( PATTERN_STRING VARCHAR2(${MergePattern.PATTERN_SIZE})")
+            } catch (SQLException ignore) {
+            }
+
+        } finally {
+            sql.close()
         }
     }
 }

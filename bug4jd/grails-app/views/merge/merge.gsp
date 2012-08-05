@@ -13,7 +13,7 @@
   -    See the License for the specific language governing permissions and
   -    limitations under the License.
   --}%
-<%@ page import="org.bug4j.server.util.StringUtil" contentType="text/html;charset=UTF-8" %>
+<%@ page import="org.bug4j.MergePattern; org.bug4j.server.util.StringUtil" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta name='layout' content='main'/>
@@ -62,7 +62,7 @@
                         Pattern:
                     </td>
                     <td class="form-field">
-                        <g:textField name="pat" value="${pat}" style="width: 100%;font-family: monospace;"/>
+                        <g:textField name="pat" value="${pat}" style="width: 100%;font-family: monospace;" maxlength="${MergePattern.PATTERN_SIZE}"/>
                     </td>
                 </tr>
                 <tr>

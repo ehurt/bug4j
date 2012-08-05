@@ -16,10 +16,12 @@
 package org.bug4j
 
 class MergePattern {
+    public static final int PATTERN_SIZE = Bug.TITLE_SIZE + 30
 
     String patternString
 
     static constraints = {
+        patternString(blank: false, maxSize: PATTERN_SIZE)
     }
 
     static belongsTo = [
