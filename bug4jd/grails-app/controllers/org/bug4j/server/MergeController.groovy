@@ -21,6 +21,7 @@ import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
 
 class MergeController {
+    def bugService
 
     def merge = {
         final bugId = params.id
@@ -36,7 +37,7 @@ class MergeController {
             try {
                 final int mergedCount = bugService.merge(bug, pat)
                 flash.message = "${mergedCount} bugs merged"
-                redirect(action: 'bug', params: [id: bugId])
+                redirect(controller: 'detail', params: [id: bugId])
                 return;
             } catch (PatternSyntaxException e) {
                 flash.error = e.getMessage()

@@ -18,6 +18,20 @@
 <head>
     <meta name='layout' content='main'/>
     <title>Merge</title>
+    <style type="text/css">
+    .form-label {
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    .form-field {
+        width: 100%;
+    }
+
+    .hilight-bug {
+        background-color: #f0f8ff;
+    }
+    </style>
 </head>
 
 <body>
@@ -32,71 +46,68 @@
 
         <g:form action="merge" autocomplete="off">
             <g:hiddenField name="id" value="${bug.id}"/>
-            <table style="width: inherit;margin-top: 15px;">
+            <table style="width: 100%;margin-top: 15px;">
                 <tr>
-                    <td style="vertical-align: middle;">
+                    <td class="form-label">
                         Merge into:
                     </td>
-                    <td>
-                        <g:link action="bug" params="[id: bug.id]">
+                    <td class="form-field">
+                        <g:link controller="detail" params="[id: bug.id]">
                             ${bug.id} - ${bug.title}
                         </g:link>
                     </td>
                 </tr>
                 <tr>
-                    <td style="vertical-align: middle;">
+                    <td class="form-label">
                         Pattern:
                     </td>
-                    <td>
-                        <g:textField name="pat" value="${pat}" style="width: 30em;font-family: monospace;"/>
+                    <td class="form-field">
+                        <g:textField name="pat" value="${pat}" style="width: 100%;font-family: monospace;"/>
                     </td>
                 </tr>
                 <tr>
                     <td colspan="2">
                         <g:submitButton name="test" value="Test"/>
-                        <g:submitButton name="create" value="Merge"/>
                     </td>
                 </tr>
             </table>
+            <g:if test="${matchingBugs != null}">
+                <g:if test="${matchingBugs}">
+                    <table style="width: 100%;">
+                        <tr>
+                            <th style="width: 5em;">${message(code: 'bug.id.label', default: 'ID')}</th>
+                            <th>${message(code: 'bug.title.label', default: 'Title')}</th>
+                        </tr>
+                        <g:each in="${matchingBugs}" var="matchingBug" status="lineno">
+                            <%
+                                String bugTitle = StringUtil.chopLenghtyString((String) matchingBug.title, 60)
+                                String cls = bug == matchingBug ? " hilight-bug" : ""
+                            %>
+                            <tr class="bug-row ${cls}" ${lineno == 0 ? 'id="row0"' : ''}>
+                                <td>${matchingBug.id}</td>
+                                <td>
+                                    <g:link controller="detail" params="[id: matchingBug.id]">
+                                        ${bugTitle}
+                                    </g:link>
+                                </td>
+                            </tr>
+                        </g:each>
+                    </table>
+                    <g:if test="${matchingBugs.size() < total}">
+                        <div class="pagination">
+                            And ${total - matchingBugs.size()} more
+                        </div>
+                    </g:if>
+
+                    <g:submitButton name="create" value="Merge"/>
+                </g:if>
+                <g:else>
+                    <h1 style="margin: 15px;">No matches!</h1>
+                </g:else>
+            </g:if>
         </g:form>
     </div>
 
-    <g:if test="${matchingBugs != null}">
-        <g:if test="${matchingBugs}">
-            <table>
-                <tr>
-                    <th style="width: 5em;">${message(code: 'bug.id.label', default: 'ID')}</th>
-                    <th>${message(code: 'bug.title.label', default: 'Title')}</th>
-                </tr>
-                <g:each in="${matchingBugs}" var="bug" status="lineno">
-                    <tr class="bug-row" ${lineno == 0 ? 'id="row0"' : ''}>
-                        <td>${bug.id}</td>
-                        <td>
-                            <%
-                                String bugTitle = StringUtil.chopLenghtyString((String) bug.title, 60)
-                            %>
-                            <g:if test="${true}">
-                                <g:link action="bug" params="[id: bug.id, sort: 'id', order: 'desc']">
-                                    ${bugTitle}
-                                </g:link>
-                            </g:if>
-                            <g:else>
-                                ${bugTitle}
-                            </g:else>
-                        </td>
-                    </tr>
-                </g:each>
-            </table>
-            <g:if test="${matchingBugs.size() < total}">
-                <div class="pagination">
-                    And ${total - matchingBugs.size()} more
-                </div>
-            </g:if>
-        </g:if>
-        <g:else>
-            <h1 style="margin: 15px;">No matches!</h1>
-        </g:else>
-    </g:if>
 </div>
 </body>
 </html>

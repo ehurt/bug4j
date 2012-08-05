@@ -112,4 +112,16 @@ class BugController {
 
         return app
     }
+
+    def filterForm = {
+        App app = App.findByCode(params.appCode)
+        render(template: 'filter',
+                model: [
+                        from: params.from,
+                        to: params.to,
+                        includeIgnored: params.includeIgnored,
+                        includeSingleHost: params.includeSingleHost,
+                        app: app,
+                ])
+    }
 }

@@ -30,4 +30,25 @@ public class StringUtilTest {
         Assert.assertEquals("abcdefghij klmnopqrst", StringUtil.chopLenghtyString("abcdefghijklmnopqrst", 10));
         Assert.assertEquals("abcdefghij klmnopqrst abcdefghij klmnopqrst", StringUtil.chopLenghtyString("abcdefghijklmnopqrstabcdefghijklmnopqrst", 10));
     }
+
+    @Test
+    public void testFixTitle() throws Exception {
+        Assert.assertEquals("Hello World", StringUtil.fixTitle("Hello World"));
+        Assert.assertEquals("Hello World", StringUtil.fixTitle("\nHello World"));
+        Assert.assertEquals("Hello World", StringUtil.fixTitle("     Hello World"));
+        Assert.assertEquals("Hello World", StringUtil.fixTitle("\n\rHello World"));
+        Assert.assertEquals("Hello World", StringUtil.fixTitle("Hello\nWorld"));
+        Assert.assertEquals("Hello World", StringUtil.fixTitle("Hello \nWorld"));
+        Assert.assertEquals("Hello World", StringUtil.fixTitle("Hello World\n"));
+        Assert.assertEquals("Hello World", StringUtil.fixTitle("Hello World\r\n"));
+        Assert.assertEquals("Hello World", StringUtil.fixTitle("\r\nHello\tWorld\r\n"));
+        final long t0 = System.currentTimeMillis();
+        final int nbrCalls = 10000;
+        for (int i = 0; i < nbrCalls; i++) {
+            StringUtil.fixTitle("\r\nHello\tWorld\r\n");
+        }
+        final long t1 = System.currentTimeMillis();
+        System.out.printf("Time: %dms for %d calls\n", t1 - t0, nbrCalls);
+        System.out.printf("%d calls per seconds\n", (int) (((double) nbrCalls / (t1 - t0)) * 1000));
+    }
 }
