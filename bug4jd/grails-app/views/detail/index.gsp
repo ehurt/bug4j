@@ -103,7 +103,7 @@
 
     #bug-title {
         font-size: large;
-    ${                           bug.ignore?'text-decoration: line-through;':''                           }
+    ${ bug.ignore?'text-decoration: line-through;':'' }
     }
 
     .section {
@@ -198,11 +198,20 @@
                 <g:message code="detail.action.back.label" default="Back"/>
             </g:link>
         </li>
-        <li>
-            <g:link class="action-comment" onclick="return addComment();">
-                <g:message code="detail.action.comment.label" default="Comment"/>
-            </g:link>
-        </li>
+        <sec:ifAllGranted roles="ROLE_USER">
+            <li>
+                <g:link class="action-comment" onclick="return addComment();">
+                    <g:message code="detail.action.comment.label" default="Comment"/>
+                </g:link>
+            </li>
+        </sec:ifAllGranted>
+        <sec:ifNotGranted roles="ROLE_USER">
+            <li>
+                <g:link class="action-comment" action="authIndex" params="${params}">
+                    <g:message code="detail.action.comment.label" default="Comment"/>
+                </g:link>
+            </li>
+        </sec:ifNotGranted>
         <li>
             <g:if test="${bug.ignore}">
                 <g:link class="action-unignore" action="unignore" params="[id: bug.id]">

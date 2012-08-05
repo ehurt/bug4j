@@ -15,6 +15,7 @@
  */
 package org.bug4j.server
 
+import grails.plugins.springsecurity.Secured
 import groovy.sql.Sql
 import org.bug4j.server.util.DateUtil
 
@@ -121,6 +122,12 @@ class DetailController {
         ]
     }
 
+    @Secured(['ROLE_USER'])
+    def authIndex = {
+        redirect(action: 'index', params: params)
+    }
+
+    @Secured(['ROLE_USER'])
     def ignore = {
         final bugId = params.id
         final bug = Bug.get(bugId)
@@ -129,6 +136,7 @@ class DetailController {
         redirect(action: 'index', params: [id: bugId])
     }
 
+    @Secured(['ROLE_USER'])
     def unignore = {
         final bugId = params.id
         final bug = Bug.get(bugId)
@@ -218,6 +226,7 @@ class DetailController {
         render(text: '100')
     }
 
+    @Secured(['ROLE_USER'])
     def addComment = {
         final bugId = params.bugId as long
         final bug = Bug.get(bugId)
@@ -260,6 +269,7 @@ class DetailController {
                 ])
     }
 
+    @Secured(['ROLE_USER'])
     def removeComment = {
         final commentId = params.id as long
         final comment = Comment.get(commentId)

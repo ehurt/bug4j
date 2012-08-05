@@ -60,7 +60,8 @@
         </td>
     </tr>
 </table>
-
-<a href="#" id="add-comment-button" onclick="return addComment();">
-    <g:img dir="images/skin" file="comment_add.png"/> Add
-</a>
+<sec:ifAllGranted roles="ROLE_USER">
+    <a href="#" id="add-comment-button" onclick="return addComment();">
+        <g:img dir="images/skin" file="comment_add.png"/> Add
+    </a>
+</sec:ifAllGranted>
