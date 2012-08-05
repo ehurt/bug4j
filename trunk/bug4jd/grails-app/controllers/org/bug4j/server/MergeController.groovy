@@ -15,12 +15,14 @@
  */
 package org.bug4j.server
 
+import grails.plugins.springsecurity.Secured
 import org.apache.commons.lang.StringUtils
 import org.bug4j.Bug
 
 import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
 
+@Secured(['ROLE_USER'])
 class MergeController {
     def bugService
 
