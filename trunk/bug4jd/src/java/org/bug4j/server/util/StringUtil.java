@@ -74,4 +74,41 @@ public class StringUtil {
     private static boolean isBreakable(char c) {
         return Character.isWhitespace(c);
     }
+
+    public static String fixTitle(String title) {
+        final int length = title.length();
+        final StringBuilder sb = new StringBuilder(length);
+
+        int i = 0;
+        // Skip leading spaces & other bad chars
+        while (i < length) {
+            final char c = title.charAt(i);
+            if (32 < c && c < 127) {
+                break;
+            }
+            i++;
+        }
+
+        while (i < length) {
+            // Keep good chars
+            while (i < length) {
+                final char c = title.charAt(i++);
+                if (32 >= c || c >= 127) {
+                    break;
+                }
+                sb.append(c);
+            }
+            // Skip bad chars, record a space for the last one
+            while (i < length) {
+                final char c = title.charAt(i);
+                if (32 <= c && c < 127) {
+                    sb.append(' ');
+                    break;
+                }
+                i++;
+            }
+        }
+
+        return sb.toString();
+    }
 }

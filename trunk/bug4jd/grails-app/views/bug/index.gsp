@@ -25,6 +25,21 @@
         var calFilter = new CalendarPopup("filterCal");
 
         function showFilterForm() {
+        ${remoteFunction(
+                action: 'filterForm',
+                update: 'filter-form',
+                onSuccess: 'onSuccessShowFilterForm()',
+                params:[
+                        from:params.from?params.from:'',
+                        to:params.to?params.to:'',
+                        includeIgnored:params.includeIgnored?params.includeIgnored:'',
+                        includeSingleHost:params.includeSingleHost?params.includeSingleHost:'',
+                        appCode:app.code,
+                ]
+         )}
+        }
+
+        function onSuccessShowFilterForm() {
             $("#filter-form").toggle('fast');
         }
 
@@ -58,52 +73,8 @@
     </div>
 
     <div id="filter-form">
-        <g:form id="filter-form-form" action="filter" params="${params}" method="post">
-            <table style="width: auto;">
-                <tr>
-                    <td><label for="filterFrom">From</label></td>
-                    <td>
-                        <g:textField id="filterFrom" name="filterFrom" value="${params.from}"/>
-                        <a href="#" onclick="calFilter.select(document.getElementById('filterFrom'), 'filterFromCalLink', 'MM/dd/yyyy');
-                        return false;" id="filterFromCalLink">
-                            <g:img dir="images" file="calendar.png"/>
-
-                        </a>
-                    </td>
-                    <td><label for="filterTo">to</label></td>
-                    <td>
-                        <g:textField id="filterTo" name="filterTo" value="${params.to}"/>
-                        <a href="#" onclick="calFilter.select(document.getElementById('filterTo'), 'filterToCalLink', 'MM/dd/yyyy');
-                        return false;" id="filterToCalLink">
-                            <g:img dir="images" file="calendar.png"/>
-
-                        </a>
-                    </td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td colspan="3">
-                        <g:checkBox name="filterIncludeIgnored" value="${params.includeIgnored}"/>
-                        <label for="filterIncludeIgnored">Include bugs marked as ignored</label>
-                    </td>
-                </tr>
-                <g:if test="${app.isMultiHost()}">
-                    <tr>
-                        <td></td>
-                        <td colspan="3">
-                            <g:checkBox name="filterIncludeSingleHost" value="${params.includeSingleHost}"/>
-                            <label for="filterIncludeSingleHost">Include hits reported from a single host</label>
-                        </td>
-                    </tr>
-                </g:if>
-            </table>
-
-            <div style="margin: 5px 0 0 5px;">
-                <g:submitButton name="Clear" onclick="clearWhenFilter();"/>
-                <g:submitButton name="Apply"/>
-            </div>
-        </g:form>
     </div>
+
     <g:if test="${bugs}">
         <div class="pagination">
             <g:paginate total="${total}" params="${params}"/>
@@ -127,7 +98,7 @@
                         <%
                             String bugTitle = StringUtil.chopLenghtyString((String) bug.title, 60)
                         %>
-                        <g:link controller="detail" params="${params.subMap(paramNames) + [offset: lineno]}">
+                        <g:link controller="detail" action="index" params="${params.subMap(paramNames) + [offset: lineno + (params.offset as int)]}">
                             ${bugTitle}
                         </g:link>
                     </td>
