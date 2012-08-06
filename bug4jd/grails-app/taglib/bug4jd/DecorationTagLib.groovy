@@ -83,11 +83,15 @@ class DecorationTagLib {
 
     private def isExpanded = {section ->
         boolean expanded = true
-        final expandPreferences = pageScope.expandPreferences
-        if (expandPreferences) {
-            final expandedValue = expandPreferences['expand.' + section]
-            expanded = !"collapsed".equals(expandedValue)
+
+        final expandState = session.expandState
+        if (expandState) {
+            final state = expandState[section]
+            if ('collapsed' == state) {
+                expanded = false
+            }
         }
+
         return expanded
     }
 }
