@@ -16,18 +16,16 @@
 package org.bug4j.server
 
 import groovy.sql.Sql
-import org.bug4j.AppSettings
-import org.bug4j.Bug
-import org.bug4j.Comment
-import org.bug4j.MergePattern
 import org.bug4j.server.util.StringUtil
 
 import java.sql.SQLException
 import javax.sql.DataSource
 
+import org.bug4j.*
+
 class AppService {
     public static final String DBVERSION = 'DBVERSION'
-    private static final int CURRENT_VERSION = 2
+    private static final int CURRENT_VERSION = 3
 
     DataSource dataSource
 
@@ -51,12 +49,20 @@ class AppService {
     }
 
     def upgradeDb() {
+        final dbVersion = getDbVersion()
         //noinspection GroovyFallthrough
-        switch (getDbVersion()) {
+        switch (dbVersion) {
             case 0:
+                log.info("Upgrading from version 0")
                 upgradeFrom0();
             case 1:
-                upgradeFrom1();
+                log.info("Upgrading from version 1")
+                upgradeIncreaseTitleAndPatternSizes();
+            case 2:
+                log.info("Upgrading from version 2")
+                upgradeIncreaseMessageSize();
+                upgradeReplaceAddrWithHostName();
+                log.info("Upgrade complete")
                 setDbVersion();
             case CURRENT_VERSION:
                 break;
@@ -94,7 +100,7 @@ class AppService {
         }
     }
 
-    private def upgradeFrom1() {
+    private def upgradeIncreaseTitleAndPatternSizes() {
         final sql = new Sql(dataSource)
 
         try {
@@ -123,6 +129,50 @@ class AppService {
 
         } finally {
             sql.close()
+        }
+    }
+
+    private def upgradeIncreaseMessageSize() {
+        final sql = new Sql(dataSource)
+
+        try {
+            // Hit message size increased
+            try { // Derby syntax
+                sql.execute((String) "ALTER TABLE HIT ALTER COLUMN MESSAGE SET DATA TYPE VARCHAR(${Hit.MESSAGE_SIZE})")
+            } catch (SQLException ignore) {
+            }
+
+            try { // Oracle syntax
+                sql.execute((String) "ALTER TABLE HIT MODIFY ( MESSAGE VARCHAR2(${Hit.MESSAGE_SIZE})")
+            } catch (SQLException ignore) {
+            }
+
+        } finally {
+            sql.close()
+        }
+    }
+
+    private def upgradeReplaceAddrWithHostName() {
+        log.info("  Upgrading IP addresses to host names")
+        def map = [:]
+
+        log.info("    Reading IP addresses")
+        final List<String> remoteAddresses = Hit.executeQuery("select distinct remoteAddr from Hit")
+
+        remoteAddresses.each {String remoteAddr ->
+            if (remoteAddr) {
+                String hostName = map[remoteAddr]
+                if (!hostName) {
+                    log.info("    Resolving ${remoteAddr}")
+                    final InetAddress inetAddress = InetAddress.getByName(remoteAddr)
+                    hostName = inetAddress.getCanonicalHostName();
+                    map[remoteAddr] = hostName
+                }
+            }
+        }
+        log.info("    Writing host names")
+        map.each {addr, host ->
+            Hit.executeUpdate("update Hit set remoteAddr=:host where remoteAddr=:addr", [host: host, addr: addr])
         }
     }
 }

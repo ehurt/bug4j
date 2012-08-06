@@ -39,6 +39,8 @@ class BugService {
     public static final char[] PATTERN_CHARS = '\\[].^$?*+'.toCharArray()
     def extensionService
 
+    private Map<String, String> _hostNameCache = [:]
+
     ClientSession createSession(String appCode,
                                 String appVersion,
                                 Long buildDateMillis,
@@ -166,6 +168,19 @@ class BugService {
             message = StringUtils.abbreviate(message, Hit.MESSAGE_SIZE)
         }
 
+        String hostName = null
+        if (remoteAddr) {
+            synchronized (_hostNameCache) {
+                hostName = _hostNameCache.get(remoteAddr)
+                if (!hostName) {
+                    final InetAddress inetAddress = InetAddress.getByName(remoteAddr)
+                    hostName = inetAddress.getCanonicalHostName();
+                    _hostNameCache.put(remoteAddr, hostName)
+                }
+            }
+        }
+
+
         Bug bug = null
         Stack stack = null
         String fullHash = null
@@ -251,7 +266,7 @@ class BugService {
                 dateReported: new Date(dateReported),
                 reportedBy: user,
                 message: message,
-                remoteAddr: remoteAddr,
+                remoteAddr: hostName,
         )
         bug.addToHits(newHit)
         if (clientSession) {
@@ -261,7 +276,7 @@ class BugService {
             stack.addToHits(newHit)
         }
         if (!isNewBug) {
-            testForMultiReports(bug, remoteAddr)
+            testForMultiReports(bug, hostName)
         }
         newHit.save(failOnError: true)
 
