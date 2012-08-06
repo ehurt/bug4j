@@ -103,7 +103,7 @@
 
     #bug-title {
         font-size: large;
-    ${ bug.ignore?'text-decoration: line-through;':'' }
+    ${  bug.ignore?'text-decoration: line-through;':''  }
     }
 
     .section {
@@ -245,7 +245,7 @@
                     &nbsp;
                 </g:else>
             </td>
-            <td id="bug-title" rowspan="2" style="padding-top: 4px;">
+            <td id="bug-title" rowspan="2" style="padding-top: 4px;" title="${bug.title}">
                 ${bug.id} - ${bug.title}
                 <g:link params="[id: bug.id]">
                     <g:img dir="images/skin" file="link.png"/>

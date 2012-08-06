@@ -21,6 +21,7 @@ import org.bug4j.server.processor.StackAnalyzer
 import org.bug4j.server.processor.StackPathHashCalculator
 import org.bug4j.server.processor.TextToLines
 import org.bug4j.server.util.DateUtil
+import org.bug4j.server.util.StringUtil
 import org.xml.sax.Attributes
 import org.xml.sax.InputSource
 import org.xml.sax.helpers.DefaultHandler
@@ -162,7 +163,7 @@ class BugService {
 
         final List<String> stackLines = stackString ? TextToLines.toLineList(stackString.trim()) : null;
         if (message) {
-            message = StringUtils.abbreviate(message, Bug.TITLE_SIZE)
+            message = StringUtils.abbreviate(message, Hit.MESSAGE_SIZE)
         }
 
         Bug bug = null
@@ -206,6 +207,7 @@ class BugService {
                     if (title == null) {
                         throw new IllegalStateException("Failed to analyze a stack [\n" + stackString + "\n]");
                     }
+                    title = StringUtil.fixTitle(title)
 
                     // Try to find a bug with the exact same title
                     bug = identifyBugByTitle(app, stackLines, title);
@@ -232,9 +234,10 @@ class BugService {
                 stack.setStackText(stackText)
                 stack.save(failOnError: true)
             } else {
-                bug = identifyBugByTitle(app, stackLines, message);
+                String title = StringUtil.fixTitle(message)
+                bug = identifyBugByTitle(app, stackLines, title);
                 if (!bug) {
-                    bug = new Bug(app: app, title: message)
+                    bug = new Bug(app: app, title: title)
                     app.addToBugs(bug)
                     bug.save(failOnError: true)
                     extensionService.whenBug(bug)

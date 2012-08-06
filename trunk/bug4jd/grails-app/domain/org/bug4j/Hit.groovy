@@ -18,6 +18,8 @@ package org.bug4j
 import org.apache.commons.lang.StringUtils
 
 class Hit {
+    public static final int MESSAGE_SIZE = 1024
+
     Date dateReported
     String reportedBy
     String message
@@ -25,7 +27,7 @@ class Hit {
 
     static constraints = {
         reportedBy(nullable: true)
-        message(nullable: true, maxSize: 1024)
+        message(nullable: true, maxSize: MESSAGE_SIZE)
         remoteAddr(nullable: true, maxSize: 256)
         stack(nullable: true)
         clientSession(nullable: true)
