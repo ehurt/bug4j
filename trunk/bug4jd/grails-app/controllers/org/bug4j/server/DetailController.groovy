@@ -79,7 +79,6 @@ class DetailController {
 
         final bugInfo = getBugInfo(bug)
         final timelineData = getTimelineData(bug)
-        final collapsed = getCollapsed()
 
         final expandPreferences = UserPreference.
                 findAllByKeyLike('expand.%').
@@ -115,7 +114,6 @@ class DetailController {
                 firstStack: firstStack,
                 hits: hits,
                 totalHits: totalHits,
-                collapsed: collapsed,
                 expandPreferences: expandPreferences,
                 offset: offset,
                 hasNext: hasNext,
@@ -210,19 +208,15 @@ class DetailController {
         }
     }
 
-    private String getCollapsed() {
-        String collapsed = session.detailCollapsed
-        if (!collapsed) {
-            collapsed = userPreferenceService.getStringPreference('detailCollapsed')
-            session.detailCollapsed = collapsed
-        }
-        return collapsed
-    }
-
     def setExpandedState = {
         final section = params.section
         final state = params.state
-        userPreferenceService.setPreference("expand." + section, state)
+        final expandState = session.expandState
+        if (!expandState) {
+            expandState = [:]
+            session.expandState = expandState
+        }
+        expandState[section] = state
         render(text: '100')
     }
 
