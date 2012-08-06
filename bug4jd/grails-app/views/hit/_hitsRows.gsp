@@ -50,7 +50,7 @@
                 </g:link>
             </g:if>
         </td>
-        <td>${hit.message}</td>
+        <td title="${hit.message}">${hit.message}</td>
     </tr>
 </g:each>
 </tbody>

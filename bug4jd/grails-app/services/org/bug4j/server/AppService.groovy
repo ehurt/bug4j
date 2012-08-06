@@ -103,7 +103,6 @@ class AppService {
             try { // Derby syntax
                 sql.execute((String) "ALTER TABLE BUG ALTER COLUMN TITLE SET DATA TYPE VARCHAR(${Bug.TITLE_SIZE})")
             } catch (SQLException ignore) {
-                ignore.printStackTrace()
             }
 
             try { // Oracle syntax
@@ -115,7 +114,6 @@ class AppService {
             try { // Derby syntax
                 sql.execute((String) "ALTER TABLE MERGE_PATTERN ALTER COLUMN PATTERN_STRING SET DATA TYPE VARCHAR(${MergePattern.PATTERN_SIZE})")
             } catch (SQLException ignore) {
-                ignore.printStackTrace()
             }
 
             try { // Oracle syntax
