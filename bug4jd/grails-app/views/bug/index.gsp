@@ -86,6 +86,7 @@
                 <g:sortableColumn property="hitCount" title="${message(code: 'bug.hitCount.label', default: 'Hits')}" defaultOrder="desc" params="${params.subMap(paramNames)}"/>
                 <g:sortableColumn property="firstHitDate" title="${message(code: 'bug.firstHitDate.label', default: 'First Hit')}" defaultOrder="desc" params="${params.subMap(paramNames)}"/>
                 <g:sortableColumn property="lastHitDate" title="${message(code: 'bug.lastHitDate.label', default: 'Last Hit')}" defaultOrder="desc" params="${params.subMap(paramNames)}"/>
+                <g:sortableColumn property="stackCount" title="${message(code: 'bug.stackCount.label', default: 'Stack')}" defaultOrder="desc" params="${params.subMap(paramNames)}"/>
                 <g:sortableColumn property="hot" title="${message(code: 'bug.heat.label', default: 'Heat')}" defaultOrder="desc" params="${params.subMap(paramNames)}"/>
             </tr>
             <%
@@ -105,6 +106,7 @@
                     <td>${bug.hitCount}</td>
                     <td>${dateFormat.format(bug.firstHitDate)}</td>
                     <td>${dateFormat.format(bug.lastHitDate)}</td>
+                    <td>${bug.stackCount ? 'Y' : ''}</td>
                     <td>${(int) (bug.hot * 100)}%</td>
                 </tr>
             </g:each>

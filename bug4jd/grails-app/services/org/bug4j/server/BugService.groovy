@@ -706,7 +706,8 @@ class BugService {
                     count(h.id) as hitCount,
                     min(h.dateReported) as firstHitDate,
                     max(h.dateReported) as lastHitDate,
-                    b.hot
+                    b.hot,
+                    count(h.stack.id) as stackCount
                 from Bug b, Hit h
                 where b.app=:app
                 and b=h.bug
