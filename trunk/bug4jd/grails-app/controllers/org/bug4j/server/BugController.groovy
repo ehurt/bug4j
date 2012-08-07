@@ -59,7 +59,8 @@ class BugController {
                     'hitCount': it[2],
                     'firstHitDate': it[3],
                     'lastHitDate': it[4],
-                    hot: it[5]
+                    hot: it[5],
+                    stackCount: it[6],
             ]
         }
 
