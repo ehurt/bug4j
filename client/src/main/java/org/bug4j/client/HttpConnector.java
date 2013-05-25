@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Cedric Dandoy
+ * Copyright 2013 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -61,13 +61,17 @@ class HttpConnector {
     }
 
     public static HttpConnector createHttpConnector(String serverUrl, String proxyHost, int proxyPort, String applicationName, String applicationVersion, long buildDate, boolean devBuild, Integer buildNumber) {
+        HttpConnector ret = null;
+
         final HttpConnector httpConnector = new HttpConnector(
                 serverUrl, proxyHost, proxyPort,
                 applicationName, applicationVersion,
                 buildDate, devBuild, buildNumber);
-        httpConnector.createSession();
+        if (httpConnector.createSession()) {
+            ret = httpConnector;
+        }
 
-        return httpConnector;
+        return ret;
     }
 
     private String send(String endpoint, String... nameValuePairs) {
@@ -98,8 +102,6 @@ class HttpConnector {
             final String response = EntityUtils.toString(entity);
             if (statusCode == 200) {
                 ret = response;
-            } else {
-                System.err.println(response);
             }
         } catch (IOException e) {
             throw new IllegalStateException("Error while contacting the server");
@@ -142,7 +144,8 @@ class HttpConnector {
         return ret;
     }
 
-    private void createSession() {
+    private boolean createSession() {
+        boolean ret = false;
         final String response = send("br/ses"
                 , ParamConstants.PARAM_APPLICATION_NAME, _applicationName
                 , ParamConstants.PARAM_APPLICATION_VERSION, _applicationVersion
@@ -153,9 +156,13 @@ class HttpConnector {
         if (response != null) {
             try {
                 _sessionId = Long.parseLong(response.trim());
+                ret = true;
             } catch (NumberFormatException e) {
                 throw new IllegalStateException(e.getMessage(), e);
             }
+        } else {
+            _sessionId = -1;
         }
+        return ret;
     }
 }

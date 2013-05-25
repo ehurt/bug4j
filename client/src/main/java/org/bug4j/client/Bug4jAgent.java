@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Cedric Dandoy
+ * Copyright 2013 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -208,7 +208,7 @@ public class Bug4jAgent {
      * @param message   An error message
      * @param throwable the exception to report
      */
-    public static void report(@Nullable String message, Throwable throwable) {
+    public static void report(@Nullable String message, @Nullable Throwable throwable) {
         if (message != null || throwable != null) { // do not allow both to be null. We wouldn't have much to do
             final ReportableEvent reportableEvent = ReportableEvent.createReportableEvent(message, throwable);
             enqueue(reportableEvent);
