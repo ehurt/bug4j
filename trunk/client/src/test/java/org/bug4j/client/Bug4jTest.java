@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Cedric Dandoy
+ * Copyright 2013 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -54,6 +54,18 @@ public class Bug4jTest {
         } catch (Exception e) {
             LOGGER.warn("just a warning", e);
         }
+
+        LogManager.shutdown();
+        Bug4jAgent.shutdown();
+        Assert.assertEquals(2, Bug4jAgent.getReported());
+    }
+
+    @Test
+    public void testNoStacks() throws Exception {
+
+        LOGGER.error("testNoStacks:error");
+        LOGGER.warn("testNoStacks:warn");
+        LOGGER.info("testNoStacks:info");
 
         LogManager.shutdown();
         Bug4jAgent.shutdown();
@@ -174,7 +186,13 @@ public class Bug4jTest {
     }
 
     @Test
-    public void testNoStack() throws Exception {
+    public void testNoStackError() throws Exception {
+        Bug4jAgent.report("Just a message", null);
+        Bug4jAgent.shutdown();
+    }
+
+    @Test
+    public void testWarning() throws Exception {
         Bug4jAgent.report("Just a message", null);
         Bug4jAgent.shutdown();
     }

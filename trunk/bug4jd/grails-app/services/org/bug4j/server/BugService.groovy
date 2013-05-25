@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Cedric Dandoy
+ * Copyright 2013 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ class BugService {
     public static final char[] PATTERN_CHARS = '\\[].^$?*+'.toCharArray()
     def extensionService
 
-    private Map<String, String> _hostNameCache = [:]
+    private final Map<String, String> _hostNameCache = [:]
 
     ClientSession createSession(String appCode,
                                 String appVersion,
@@ -52,8 +52,7 @@ class BugService {
 
         final app = App.findByCode(appCode)
         if (!app) {
-            log.warn("Request to create a session for an invalid application. Application:${appCode} - from:${remoteAddr}")
-            throw new IllegalArgumentException("Unknown application: ${appCode}")
+            throw new MessageException("Request to create a session for an invalid application. Application:${appCode} - from:${remoteAddr}", 403)
         }
 
         final clientSession = new ClientSession(
@@ -100,9 +99,7 @@ class BugService {
 
         final App app = App.findByCode(appCode)
         if (!app) {
-            final errorMessage = "Unknown application: ${appCode}"
-            log.error(errorMessage)
-            throw new IllegalArgumentException(errorMessage)
+            throw new IllegalArgumentException("Unknown application: ${appCode}")
         }
 
         def results = Stack.find("from Stack s, Hit h, Bug b where s.hash=:hash and s=h.stack and h.bug=b and b.app=:app",
@@ -153,9 +150,7 @@ class BugService {
 
         final App app = App.findByCode(appCode)
         if (!app) {
-            final errorMessage = "Cannot find application ${appCode}"
-            log.error(errorMessage)
-            throw new IllegalArgumentException(errorMessage)
+            throw new IllegalArgumentException("Cannot find application ${appCode}")
         }
 
         reportBug(clientSession, app, message, dateReported, user, remoteAddr, stackString)

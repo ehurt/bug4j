@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Cedric Dandoy
+ * Copyright 2013 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -34,6 +34,9 @@ class IncomingController {
                 ClientSession clientSession = bugService.createSession(appCode, appVersion, buildDateMillis, devBuild, buildNumber, remoteAddr)
                 render(text: clientSession.id, contentType: 'text/plain')
                 log.info "Created session ${clientSession.id} for ${remoteAddr}"
+            } catch (MessageException e) {
+                log.info(e.getMessage())
+                response.sendError(e.getErrorCode(), e.getMessage())
             } catch (IllegalArgumentException e) {
                 log.error("Failed to create a session for ${remoteAddr}", e)
                 response.sendError(400, e.getMessage())
