@@ -11,12 +11,12 @@ Every time you run one of the demo programs you create a new hit on the same bug
 The statistics are update every hour. Admins (bug4j/bug4j) can force a refresh.
 
 3) Instrumenting your application
-I still need to add some example programs but for now please refer to the online documentation:
+It is easy to instrument your application with bug4j and extremely easy if you already use log4j.
+Please refer to the online documentation:
     http://www.bug4j.org/documentation/application-instrumentation
 
 4) Configuring the bug4j server
-bug4j runs on Apache Tomcat so please refer to the Tomcat documentation.
+bug4j runs on Apache Tomcat. Please refer to the Tomcat documentation if you want to run the server as a service, change the port, ...
 
-Thanks
 Icons by http://p.yusukekamiyamane.com/ and http://www.famfamfam.com/
 
