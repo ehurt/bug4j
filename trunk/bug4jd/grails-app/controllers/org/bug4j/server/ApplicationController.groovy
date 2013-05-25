@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Cedric Dandoy
+ * Copyright 2013 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -23,14 +23,18 @@ import org.bug4j.AppPackages
 @Secured(['ROLE_ADMIN'])
 class ApplicationController {
 
+    def appService
+
     def index() {
         if (!params.sort) params.sort = 'label'
         if (!params.order) params.order = 'asc'
         final apps = App.list(params)
         final total = App.count
+        final appAutoCreate = appService.appAutoCreate
         return [
                 apps: apps,
-                total: total
+                total: total,
+                appAutoCreate: appAutoCreate
         ]
     }
 
@@ -81,6 +85,22 @@ class ApplicationController {
         final appInstance = App.get(id)
         appInstance.delete()
         flash.message = message(code: 'default.deleted.message', args: [message(code: 'app.label', default: 'Application'), appInstance.label])
+        redirect(action: 'index')
+    }
+
+    def autocreate() {
+        final appAutoCreate = appService.appAutoCreate
+        return [
+                appAutoCreate: appAutoCreate
+        ]
+    }
+
+    def updateAutoCreate() {
+        boolean autoCreate = 'on' == params.autoCreate
+        if (appService.appAutoCreate != autoCreate) {
+            appService.appAutoCreate = autoCreate
+            flash.message = "Change applied, auto-creation is ${autoCreate ? 'on' : 'off'}"
+        }
         redirect(action: 'index')
     }
 }
