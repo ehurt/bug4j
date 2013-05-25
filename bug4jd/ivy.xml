@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2012 Cedric Dandoy
+  ~ Copyright 2013 Cedric Dandoy
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
     <conf name="build"/>
   </configurations>
   <dependencies>
-    <dependency org="org.grails" name="grails-bootstrap" rev="2.0.2" conf="build"/>
-    <dependency org="org.codehaus.groovy" name="groovy-all" rev="1.8.6"/>
+    <dependency org="org.grails" name="grails-bootstrap" rev="2.1.1" conf="build"/>
+    <dependency org="org.codehaus.groovy" name="groovy-all" rev="1.8.8"/>
   </dependencies>
 </ivy-module>
