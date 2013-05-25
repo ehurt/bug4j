@@ -1,5 +1,5 @@
 %{--
-  - Copyright 2012 Cedric Dandoy
+  - Copyright 2013 Cedric Dandoy
   -
   -    Licensed under the Apache License, Version 2.0 (the "License");
   -    you may not use this file except in compliance with the License.
@@ -27,6 +27,11 @@
         background: url('${resource(dir:'/images/skin', file:'application_add.png')}') no-repeat 0.7em center;
         text-indent: 25px;
     }
+
+    .autocreate-application {
+        background: url('${resource(dir:'/images/skin', file:'application_lightning.png')}') no-repeat 0.7em center;
+        text-indent: 25px;
+    }
     </style>
 </head>
 
@@ -42,6 +47,11 @@
         <li>
             <g:link class="create-application" action="create">
                 <g:message code="default.new.label" args="[entityName]"/>
+            </g:link>
+        </li>
+        <li>
+            <g:link class="autocreate-application" action="autocreate">
+                <g:message code="application.autocreate-label" args="[appAutoCreate ? 'on' : 'off']"/>
             </g:link>
         </li>
     </ul>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Cedric Dandoy
+ * Copyright 2013 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.bug4j.*
 
 class AppService {
     public static final String DBVERSION = 'DBVERSION'
+    public static final String APP_AUTO_CREATE = 'APP_AUTO_CREATE'
     private static final int CURRENT_VERSION = 3
 
     DataSource dataSource
@@ -174,5 +175,29 @@ class AppService {
         map.each {addr, host ->
             Hit.executeUpdate("update Hit set remoteAddr=:host where remoteAddr=:addr", [host: host, addr: addr])
         }
+    }
+
+    public boolean getAppAutoCreate() {
+        boolean ret = true
+        def appSettings = AppSettings.findByKey(APP_AUTO_CREATE)
+        if (appSettings) {
+            ret = Boolean.parseBoolean(appSettings.value)
+        }
+        return ret
+    }
+
+    public void setAppAutoCreate(boolean autoCreate) {
+        def appSettings = AppSettings.findByKey(APP_AUTO_CREATE)
+        if (!appSettings) {
+            appSettings = new AppSettings(key: APP_AUTO_CREATE)
+        }
+        appSettings.value = autoCreate
+        appSettings.save()
+    }
+
+    App autoCreateApp(String appCode) {
+        final app = new App(code: appCode, label: appCode)
+        app.save()
+        return app
     }
 }

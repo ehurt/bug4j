@@ -38,6 +38,7 @@ import org.bug4j.*
 class BugService {
     public static final char[] PATTERN_CHARS = '\\[].^$?*+'.toCharArray()
     def extensionService
+    def appService
 
     private final Map<String, String> _hostNameCache = [:]
 
@@ -50,9 +51,13 @@ class BugService {
 
         log.debug("createSession ${appCode}")
 
-        final app = App.findByCode(appCode)
+        def app = App.findByCode(appCode)
         if (!app) {
-            throw new MessageException("Request to create a session for an invalid application. Application:${appCode} - from:${remoteAddr}", 403)
+            if (appService.appAutoCreate) {
+                app = appService.autoCreateApp(appCode)
+            } else {
+                throw new MessageException("Request to create a session for an invalid application. Application:${appCode} - from:${remoteAddr}", 403)
+            }
         }
 
         final clientSession = new ClientSession(
