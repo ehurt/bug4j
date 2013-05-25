@@ -60,10 +60,10 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" scope="PROVIDED" name="Global-grails-2.0.2" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="apache-derby" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="ojdbc6" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="apache-commons-lang" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Global grails-2.1.1" level="application" />
     <orderEntry type="module-library" exported="">
       <library name="Grails User Library (bug4jd-grailsPlugins)">
         <CLASSES>
