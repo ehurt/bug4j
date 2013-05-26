@@ -4,8 +4,6 @@
   <property name="home" location="."/>
   <import file="build_include.xml"/>
 
-  <property name="dist" value="${out}/dist"/>
-
   <target name="all" depends="clean,compile,test,package-dist"/>
 
   <target name="package-dist" depends="package-dist-client,package-dist-demo-log4j,package-dist-demo-manual,package-dist-server">
@@ -16,15 +14,7 @@
   </target>
 
   <target name="package-dist-client">
-    <mkdir dir="${dist}/client/lib"/>
-    <copy todir="${dist}/client" file="${artifacts.output}/bug4j.jar"/>
-    <zip destfile="${dist}/client/bug4j-src.zip">
-      <fileset dir="client/src/main/java/"/>
-    </zip>
-    <copy todir="${dist}/client/lib">
-      <path refid="httpcomponents-client.lib"/>
-      <path refid="log4j.lib"/>
-    </copy>
+    <ant dir="client" target="package-dist"/>
   </target>
 
   <target name="package-dist-server">
@@ -47,25 +37,10 @@
     <replace file="${dist}/server/conf/server.xml" token="8080" value="8063"/>
     <replace file="${dist}/server/conf/server.xml" token="8005" value="8064"/>
     <copy tofile="${dist}/server/webapps/ROOT.war" file="bug4jd/target/bug4jd-0.1.war"/>
-    <!--
-            <copy todir="${dist}/server/webapps/ROOT/static">
-                <fileset dir="${dep-home}/zeroclipboard-1.0.7/zeroclipboard">
-                    <include name="ZeroClipboard.js"/>
-                    <include name="ZeroClipboard.swf"/>
-                </fileset>
-            </copy>
-    -->
   </target>
 
   <target name="package-dist-demo-log4j">
-    <copy todir="${dist}/demo/log4j" file="${artifacts.output}/demo-log4j.jar" overwrite="true"/>
-    <copy todir="${dist}/demo/log4j" file="demo/log4j/resources/build.xml" overwrite="true"/>
-    <copy todir="${dist}/demo/log4j/src" overwrite="true">
-      <fileset dir="demo/log4j/src"/>
-      <fileset dir="demo/log4j/resources/">
-        <filename name="log4j.xml"/>
-      </fileset>
-    </copy>
+    <ant dir="demo/log4j" target="package-dist"/>
   </target>
 
   <target name="package-dist-demo-manual">

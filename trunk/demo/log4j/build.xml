@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!--
-  ~ Copyright 2012 Cedric Dandoy
+  ~ Copyright 2013 Cedric Dandoy
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -24,16 +24,23 @@
   <property name="module.test.output" value="${test.output}/${module}"/>
   <property name="module.artifact.output" value="${artifacts.output}/${module}.jar"/>
 
+  <property environment="env"/>
+  <property name="ivy.install.version" value="2.3.0"/>
+  <condition property="ivy.home" value="${env.IVY_HOME}">
+    <isset property="env.IVY_HOME"/>
+  </condition>
+  <property name="ivy.home" value="${user.home}/.grails/ivy"/>
+  <property name="ivy.jar.dir" value="${ivy.home}/lib"/>
+  <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy-${ivy.install.version}.jar"/>
+  <property name="ivy.lib.dir" value="lib"/>
+
   <tstamp>
     <format property="BUILD_TIMESTAMP" pattern="yyyy/MM/dd HH:mm:ss:SSS"/>
   </tstamp>
 
-  <target name="all" depends="clean,compile,run"/>
+  <target name="all" depends="clean,compile,jar"/>
 
-  <path id="project.class.path">
-    <path refid="log4j.lib"/>
-    <pathelement location="${artifacts.output}/bug4j.jar"/>
-  </path>
+  <cachepath pathid="project.class.path" conf="dist"/>
 
   <target name="clean">
     <delete dir="${module.production.output}" failonerror="false"/>
@@ -78,8 +85,15 @@
     </jar>
   </target>
 
-  <target name="run">
-    <java jar="demo-log4j.jar" fork="true"/>
+  <target name="package-dist">
+    <copy todir="${dist}/demo/log4j" file="${artifacts.output}/demo-log4j.jar" overwrite="true"/>
+    <copy todir="${dist}/demo/log4j" file="resources/build.xml" overwrite="true"/>
+    <copy todir="${dist}/demo/log4j/src" overwrite="true">
+      <fileset dir="src"/>
+      <fileset dir="resources/">
+        <filename name="log4j.xml"/>
+      </fileset>
+    </copy>
   </target>
 
 </project>
