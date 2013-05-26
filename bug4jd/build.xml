@@ -18,6 +18,12 @@
   <import file="../build_include.xml"/>
 
   <property name="lib.dir" value="${basedir}/lib"/>
+  <property name="temp.dir" value="${home}/temp"/>
+
+  <property name="tomcat.ver" value="7.0.20"/>
+  <property name="tomcat.zip" value="apache-tomcat-${tomcat.ver}.zip"/>
+  <property name="tomcat.url" value="http://archive.apache.org/dist/tomcat/tomcat-7/v${tomcat.ver}/bin/${tomcat.zip}"/>
+  <property name="tomcat.home" location="${temp.dir}/apache-tomcat-${tomcat.ver}"/>
 
   <macrodef name="grails">
     <attribute name="script"/>
@@ -95,10 +101,10 @@
     <grails script="RunApp"/>
   </target>
 
-  <target name="package-dist">
+  <target name="package-dist" depends="download-tomcat">
     <mkdir dir="${dist}/server"/>
     <copy todir="${dist}/server">
-      <fileset dir="${tomcat-home}">
+      <fileset dir="${tomcat.home}">
         <exclude name="/logs/**"/>
         <exclude name="/temp/"/>
         <exclude name="/webapps/ROOT/"/>
@@ -112,6 +118,16 @@
     <replace file="${dist}/server/conf/server.xml" token="8080" value="8063"/>
     <replace file="${dist}/server/conf/server.xml" token="8005" value="8064"/>
     <copy tofile="${dist}/server/webapps/ROOT.war" file="target/bug4jd-0.1.war"/>
+  </target>
+
+  <target name="check-tomcat">
+    <available file="${tomcat.home}" property="tomcat.present"/>
+  </target>
+
+  <target name="download-tomcat" depends="check-tomcat" unless="tomcat.present">
+    <mkdir dir="${temp.dir}"/>
+    <get src="${tomcat.url}" dest="${temp.dir}"/>
+    <unzip src="${temp.dir}/${tomcat.zip}" dest="${temp.dir}"/>
   </target>
 
 </project>

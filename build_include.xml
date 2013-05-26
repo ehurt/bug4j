@@ -3,7 +3,6 @@
   <property name="home" location="."/>
 
   <property environment="env"/>
-  <property file="${home}/build.properties"/>
 
   <property name="out" value="${home}/out"/>
   <property name="production.output" value="${out}/production"/>
