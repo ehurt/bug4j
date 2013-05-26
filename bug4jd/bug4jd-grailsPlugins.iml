@@ -7,7 +7,6 @@
           <root url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/remote-pagination-0.3/web-app" relative="/" />
           <root url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/jquery-1.7.1/web-app" relative="/" />
         </webroots>
-        <sourceRoots />
       </configuration>
     </facet>
     <facet type="hibernate" name="Hibernate">
@@ -21,48 +20,8 @@
   </component>
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
-    <content url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/hibernate-2.0.2">
-      <sourceFolder url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/hibernate-2.0.2/grails-app/i18n" isTestSource="false" />
-    </content>
-    <content url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/jquery-1.7.1">
-      <sourceFolder url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/jquery-1.7.1/src/groovy" isTestSource="false" />
-      <sourceFolder url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/jquery-1.7.1/grails-app/i18n" isTestSource="false" />
-      <sourceFolder url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/jquery-1.7.1/grails-app/services" isTestSource="false" />
-      <sourceFolder url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/jquery-1.7.1/grails-app/taglib" isTestSource="false" />
-    </content>
-    <content url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/quartz-1.0-RC2">
-      <sourceFolder url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/quartz-1.0-RC2/src/java" isTestSource="false" />
-      <sourceFolder url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/quartz-1.0-RC2/src/groovy" isTestSource="false" />
-      <sourceFolder url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/quartz-1.0-RC2/grails-app/services" isTestSource="false" />
-    </content>
-    <content url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/remote-pagination-0.3">
-      <sourceFolder url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/remote-pagination-0.3/grails-app/taglib" isTestSource="false" />
-    </content>
-    <content url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/resources-1.1.6">
-      <sourceFolder url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/resources-1.1.6/src/java" isTestSource="false" />
-      <sourceFolder url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/resources-1.1.6/src/groovy" isTestSource="false" />
-      <sourceFolder url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/resources-1.1.6/grails-app/i18n" isTestSource="false" />
-      <sourceFolder url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/resources-1.1.6/grails-app/taglib" isTestSource="false" />
-    </content>
-    <content url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/spring-security-core-1.2.7.3">
-      <sourceFolder url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/spring-security-core-1.2.7.3/src/java" isTestSource="false" />
-      <sourceFolder url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/spring-security-core-1.2.7.3/src/groovy" isTestSource="false" />
-      <sourceFolder url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/spring-security-core-1.2.7.3/grails-app/i18n" isTestSource="false" />
-      <sourceFolder url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/spring-security-core-1.2.7.3/grails-app/services" isTestSource="false" />
-      <sourceFolder url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/spring-security-core-1.2.7.3/grails-app/taglib" isTestSource="false" />
-    </content>
-    <content url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/spring-security-ldap-1.0.6">
-      <sourceFolder url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/spring-security-ldap-1.0.6/src/java" isTestSource="false" />
-    </content>
-    <content url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/tomcat-2.0.2" />
-    <content url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/webxml-1.4.1">
-      <sourceFolder url="file://$USER_HOME$/.grails/2.0.2/projects/bug4jd/plugins/webxml-1.4.1/src/groovy" isTestSource="false" />
-    </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" scope="PROVIDED" name="apache-derby" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="ojdbc6" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="apache-commons-lang" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Global grails-2.1.1" level="application" />
     <orderEntry type="module-library" exported="">
       <library name="Grails User Library (bug4jd-grailsPlugins)">

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!--
-  ~ Copyright 2012 Cedric Dandoy
+  ~ Copyright 2013 Cedric Dandoy
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
   ~    limitations under the License.
   -->
 
-<project name="client" default="compile" basedir=".">
+<project name="client" default="all" basedir=".">
   <property name="home" location=".."/>
   <import file="../build_include.xml"/>
 
@@ -24,18 +24,13 @@
   <property name="module.test.output" value="${test.output}/${module}"/>
   <property name="module.jar" value="${artifacts.output}/bug4j.jar"/>
 
-  <path id="project.class.path">
-    <path refid="jetbrains.annotations.lib"/>
-    <path refid="log4j.lib"/>
-    <path refid="httpcomponents-client.lib"/>
-    <path refid="commons-lang.lib"/>
-  </path>
+  <cachepath pathid="dist.class.path" conf="dist"/>
+  <cachepath pathid="project.class.path" conf="build"/>
+  <cachepath pathid="test.class.path" conf="test"/>
 
-  <path id="test.class.path">
-    <path refid="junit.lib"/>
-  </path>
+  <target name="all" depends="clean,compile,test,package-dist"/>
 
-  <target name="compile" depends="javac,jar"/>
+  <target name="compile" depends="javac,jar" description="Compile and builds the jar file"/>
 
   <target name="test" depends="javac.tests,unit-test"/>
 
@@ -45,7 +40,7 @@
     </jar>
   </target>
 
-  <target name="javac">
+  <target name="javac" depends="-resolve">
     <mkdir dir="${module.production.output}"/>
     <javac includes="**" encoding="utf-8"
            destdir="${module.production.output}"
@@ -98,5 +93,18 @@
   <target name="clean">
     <delete dir="${module.production.output}" failonerror="false"/>
     <delete dir="${module.test.output}" failonerror="false"/>
+    <delete dir="${dist}/client/" failonerror="false"/>
+    <delete dir="${ivy.lib.dir}" failonerror="false"/>
+  </target>
+
+  <target name="package-dist">
+    <mkdir dir="${dist}/client/lib"/>
+    <copy todir="${dist}/client" file="${artifacts.output}/bug4j.jar"/>
+    <zip destfile="${dist}/client/bug4j-src.zip">
+      <fileset dir="src/main/java/"/>
+    </zip>
+    <copy todir="${dist}/client/lib" flatten="true">
+      <path refid="dist.class.path"/>
+    </copy>
   </target>
 </project>

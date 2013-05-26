@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="jetbrains">
-    <CLASSES>
-      <root url="jar://$dep-home$/jetbrains/jetbrains-10.5/annotations.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

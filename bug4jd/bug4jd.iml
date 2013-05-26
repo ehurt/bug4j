@@ -87,18 +87,52 @@
           <root url="jar://$USER_HOME$/.grails/ivy-cache/org.apache.derby/derby/jars/derby-10.8.2.2.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES>
-          <root url="jar://$dep-home$/spring-security-ldap-3.0.7.RELEASE-sources.jar!/" />
-          <root url="jar://$dep-home$/spring-security-core-3.0.7.RELEASE-sources.jar!/" />
-        </SOURCES>
+        <SOURCES />
         <jarDirectory url="file://$MODULE_DIR$/lib" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="apache-derby" level="project" />
-    <orderEntry type="library" name="ojdbc6" level="project" />
-    <orderEntry type="library" name="apache-commons-lang" level="project" />
     <orderEntry type="module" module-name="bug4jd-grailsPlugins" />
     <orderEntry type="library" name="Global grails-2.1.1" level="application" />
+    <orderEntry type="module-library">
+      <library name="IvyIDEA">
+        <CLASSES>
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.grails/grails-bootstrap/jars/grails-bootstrap-2.1.1.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.fusesource.jansi/jansi/jars/jansi-1.2.1.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/com.google.protobuf/protobuf-java/jars/protobuf-java-2.4.1.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.bouncycastle/bcpg-jdk15/jars/bcpg-jdk15-1.45.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.bouncycastle/bcprov-jdk15/jars/bcprov-jdk15-1.45.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.apache.ant/ant-launcher/jars/ant-launcher-1.8.2.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/javax.servlet/javax.servlet-api/jars/javax.servlet-api-3.0.1.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.slf4j/slf4j-api/jars/slf4j-api-1.6.2.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/junit/junit/jars/junit-4.10.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.hamcrest/hamcrest-core/jars/hamcrest-core-1.1.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.springframework/spring-beans/jars/spring-beans-3.1.2.RELEASE.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.springframework/spring-core/jars/spring-core-3.1.2.RELEASE.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.springframework/spring-asm/jars/spring-asm-3.1.2.RELEASE.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.springframework/spring-context/jars/spring-context-3.1.2.RELEASE.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.springframework/spring-aop/jars/spring-aop-3.1.2.RELEASE.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/aopalliance/aopalliance/jars/aopalliance-1.0.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.springframework/spring-expression/jars/spring-expression-3.1.2.RELEASE.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.springframework/spring-test/jars/spring-test-3.1.2.RELEASE.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.springframework/spring-context-support/jars/spring-context-support-3.1.2.RELEASE.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/com.googlecode.json-simple/json-simple/jars/json-simple-1.1.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/jline/jline/jars/jline-1.0.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.apache.ant/ant/jars/ant-1.8.2.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.slf4j/jcl-over-slf4j/jars/jcl-over-slf4j-1.6.2.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.apache.ivy/ivy/jars/ivy-2.2.0.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.hibernate.javax.persistence/hibernate-jpa-2.0-api/jars/hibernate-jpa-2.0-api-1.0.1.Final.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.apache.ant/ant-trax/jars/ant-trax-1.7.1.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/net.java.dev.jna/jna/jars/jna-3.2.3.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.apache.ant/ant-junit/jars/ant-junit-1.8.2.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/commons-lang/commons-lang/jars/commons-lang-2.6.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.codehaus.gant/gant_groovy1.8/jars/gant_groovy1.8-1.9.6.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/commons-cli/commons-cli/jars/commons-cli-1.2.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.codehaus.groovy/groovy-all/jars/groovy-all-1.8.8.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>
 
