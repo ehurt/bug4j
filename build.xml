@@ -6,49 +6,19 @@
 
   <target name="all" depends="clean,compile,test,package-dist"/>
 
-  <target name="package-dist" depends="package-dist-client,package-dist-demo-log4j,package-dist-demo-manual,package-dist-server">
+  <target name="package-dist">
+    <ant dir="client" target="package-dist"/>
+    <ant dir="demo/log4j" target="package-dist"/>
+    <ant dir="demo/manual" target="package-dist"/>
+    <ant dir="bug4jd" target="package-dist"/>
+
+    <copy todir="${dist}" overwrite="true">
+      <fileset dir="resources/"/>
+    </copy>
     <zip destfile="${out}/${bug4j-release-name}.zip">
       <zipfileset dir="${dist}" prefix="${bug4j-release-name}" excludes="server/bin/*.sh" filemode="644"/>
       <zipfileset dir="${dist}" prefix="${bug4j-release-name}" includes="server/bin/*.sh" filemode="755"/>
     </zip>
-  </target>
-
-  <target name="package-dist-client">
-    <ant dir="client" target="package-dist"/>
-  </target>
-
-  <target name="package-dist-server">
-    <mkdir dir="${dist}/server"/>
-    <copy todir="${dist}/server">
-      <fileset dir="${tomcat-home}">
-        <exclude name="/logs/**"/>
-        <exclude name="/temp/"/>
-        <exclude name="/webapps/ROOT/"/>
-        <exclude name="/webapps/bug4j/"/>
-        <exclude name="/webapps/bug4j.war"/>
-        <exclude name="/work/**"/>
-      </fileset>
-    </copy>
-    <mkdir dir="${dist}/server/logs"/>
-    <mkdir dir="${dist}/server/temp"/>
-    <copy todir="${dist}" overwrite="true">
-      <fileset dir="resources/"/>
-    </copy>
-    <replace file="${dist}/server/conf/server.xml" token="8080" value="8063"/>
-    <replace file="${dist}/server/conf/server.xml" token="8005" value="8064"/>
-    <copy tofile="${dist}/server/webapps/ROOT.war" file="bug4jd/target/bug4jd-0.1.war"/>
-  </target>
-
-  <target name="package-dist-demo-log4j">
-    <ant dir="demo/log4j" target="package-dist"/>
-  </target>
-
-  <target name="package-dist-demo-manual">
-    <copy todir="${dist}/demo/manual" file="${artifacts.output}/demo-manual.jar" overwrite="true"/>
-    <copy todir="${dist}/demo/manual" file="demo/manual/resources/build.xml" overwrite="true"/>
-    <copy todir="${dist}/demo/manual/src" overwrite="true">
-      <fileset dir="demo/manual/src"/>
-    </copy>
   </target>
 
   <target name="compile">
@@ -57,7 +27,7 @@
     <!-- This fails because of jlines.
       <ant dir="bug4jd" target="war"/>
     -->
-    <java dir="bug4jd" jar="C:/java/apache-ant-1.8.2/lib/ant-launcher.jar" fork="true">
+    <java dir="bug4jd" jar="${ant.home}/lib/ant-launcher.jar" fork="true">
       <sysproperty key="grails.env" value="production"/>
       <arg value="war"/>
     </java>

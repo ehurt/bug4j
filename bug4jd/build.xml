@@ -13,46 +13,9 @@
   ~    See the License for the specific language governing permissions and
   ~    limitations under the License.
   -->
-<project xmlns:ivy="antlib:org.apache.ivy.ant" name="bug4jd" default="test">
-  <property environment="env"/>
-  <property name="ivy.install.version" value="2.3.0"/>
-  <condition property="ivy.home" value="${env.IVY_HOME}">
-    <isset property="env.IVY_HOME"/>
-  </condition>
-  <property name="ivy.home" value="${user.home}/.grails/ivy"/>
-  <property name="ivy.jar.dir" value="${ivy.home}/lib"/>
-  <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy-${ivy.install.version}.jar"/>
-
-  <target name="download-ivy" unless="offline">
-    <available file="${ivy.jar.file}" property="ivy.available"/>
-    <antcall target="-download-ivy"/>
-  </target>
-
-  <target name="-download-ivy" unless="ivy.available">
-    <mkdir dir="${ivy.jar.dir}"/>
-    <!-- download Ivy from web site so that it can be used even without any special installation -->
-    <get src="http://archive.apache.org/dist/ant/ivy/${ivy.install.version}/apache-ivy-${ivy.install.version}-bin.zip"
-         dest="${ivy.home}/ivy.zip" usetimestamp="true" verbose="true"/>
-    <unzip src="${ivy.home}/ivy.zip" dest="${ivy.jar.dir}">
-      <patternset>
-        <include name="**/*.jar"/>
-      </patternset>
-      <mapper type="flatten"/>
-    </unzip>
-  </target>
-
-  <target name="init-ivy" depends="download-ivy" unless="ivy.lib.path">
-    <!-- try to load ivy here from ivy home, in case the user has not already dropped
-it into ant's lib dir (note that the latter copy will always take precedence).
-We will not fail as long as local lib dir exists (it may be empty) and
-ivy is in at least one of ant's lib dir or the local lib dir. -->
-    <path id="ivy.lib.path">
-      <fileset dir="${ivy.jar.dir}" includes="*.jar"/>
-    </path>
-    <taskdef resource="org/apache/ivy/ant/antlib.xml"
-             uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
-  </target>
-
+<project name="bug4jd" default="test">
+  <property name="home" location=".."/>
+  <import file="../build_include.xml"/>
 
   <property name="lib.dir" value="${basedir}/lib"/>
 
@@ -68,13 +31,6 @@ ivy is in at least one of ant's lib dir or the local lib dir. -->
     </sequential>
   </macrodef>
 
-  <!-- =================================
-  target: resolve
- ================================= -->
-  <target name="-resolve" description="--> Retrieve dependencies with ivy" depends="init-ivy">
-    <ivy:retrieve pattern="${lib.dir}/[conf]/[artifact]-[revision].[ext]"/>
-  </target>
-
   <target name="-init-grails" depends="-resolve">
     <path id="grails.classpath">
       <fileset dir="${lib.dir}/build"/>
@@ -84,10 +40,6 @@ ivy is in at least one of ant's lib dir or the local lib dir. -->
     <taskdef name="grailsTask"
              classname="grails.ant.GrailsTask"
              classpathref="grails.classpath"/>
-  </target>
-
-  <target name="deps-report" depends="-resolve" description="--> Generate report of module dependencies.">
-    <ivy:report conf="*"/>
   </target>
 
   <!-- =================================
@@ -143,10 +95,23 @@ ivy is in at least one of ant's lib dir or the local lib dir. -->
     <grails script="RunApp"/>
   </target>
 
-  <!-- =================================
-  target: deploy
- ================================= -->
-  <target name="deploy" depends="war" description="--> The deploy target (initially empty)">
-    <!-- TODO -->
+  <target name="package-dist">
+    <mkdir dir="${dist}/server"/>
+    <copy todir="${dist}/server">
+      <fileset dir="${tomcat-home}">
+        <exclude name="/logs/**"/>
+        <exclude name="/temp/"/>
+        <exclude name="/webapps/ROOT/"/>
+        <exclude name="/webapps/bug4j/"/>
+        <exclude name="/webapps/bug4j.war"/>
+        <exclude name="/work/**"/>
+      </fileset>
+    </copy>
+    <mkdir dir="${dist}/server/logs"/>
+    <mkdir dir="${dist}/server/temp"/>
+    <replace file="${dist}/server/conf/server.xml" token="8080" value="8063"/>
+    <replace file="${dist}/server/conf/server.xml" token="8005" value="8064"/>
+    <copy tofile="${dist}/server/webapps/ROOT.war" file="target/bug4jd-0.1.war"/>
   </target>
+
 </project>
