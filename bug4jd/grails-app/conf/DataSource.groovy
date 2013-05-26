@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Cedric Dandoy
+ * Copyright 2013 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ environments {
                     password = "bug4j"
                     break;
                 case 'derby':
+                    driverClassName = "org.apache.derby.jdbc.ClientDriver"
                     new DerbyUtil().startup()
                     dbCreate = "update"
                     final userHome = System.getProperty("user.home")
@@ -82,6 +83,7 @@ environments {
     }
     production {
         dataSource {
+            driverClassName = "org.apache.derby.jdbc.ClientDriver"
             new DerbyUtil().startup()
             dbCreate = "update"
             final userHome = System.getProperty("user.home")

@@ -20,7 +20,7 @@
   <property name="lib.dir" value="${basedir}/lib"/>
   <property name="temp.dir" value="${home}/temp"/>
 
-  <property name="tomcat.ver" value="7.0.20"/>
+  <property name="tomcat.ver" value="7.0.40"/>
   <property name="tomcat.zip" value="apache-tomcat-${tomcat.ver}.zip"/>
   <property name="tomcat.url" value="http://archive.apache.org/dist/tomcat/tomcat-7/v${tomcat.ver}/bin/${tomcat.zip}"/>
   <property name="tomcat.home" location="${temp.dir}/apache-tomcat-${tomcat.ver}"/>
