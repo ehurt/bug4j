@@ -210,7 +210,21 @@ public class Bug4jAgent {
      */
     public static void report(@Nullable String message, @Nullable Throwable throwable) {
         if (message != null || throwable != null) { // do not allow both to be null. We wouldn't have much to do
-            final ReportableEvent reportableEvent = ReportableEvent.createReportableEvent(message, throwable);
+            final String[] throwableStrRep = TextUtils.createStringRepresentation(throwable);
+            final ReportableEvent reportableEvent = ReportableEvent.createReportableEvent(message, throwableStrRep);
+            enqueue(reportableEvent);
+        }
+    }
+
+    /**
+     * Reports an exception to the server
+     *
+     * @param message         An error message
+     * @param throwableStrRep the exception to report
+     */
+    static void report(@Nullable String message, @Nullable String[] throwableStrRep) {
+        if (message != null || throwableStrRep != null) { // do not allow both to be null. We wouldn't have much to do
+            final ReportableEvent reportableEvent = ReportableEvent.createReportableEvent(message, throwableStrRep);
             enqueue(reportableEvent);
         }
     }

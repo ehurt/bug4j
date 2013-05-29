@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Cedric Dandoy
+ * Copyright 2013 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,9 +15,6 @@
  */
 
 package org.bug4j.client;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 
 class ReportableEvent {
     private final String _message;
@@ -42,25 +39,8 @@ class ReportableEvent {
         return _user;
     }
 
-    public static ReportableEvent createReportableEvent(String message, Throwable throwable) {
-        final String[] throwableStrRep = createStringRepresentation(throwable);
+    static ReportableEvent createReportableEvent(String message, String[] throwableStrRep) {
         final String user = System.getProperty("user.name", null);
         return new ReportableEvent(message, throwableStrRep, user);
-    }
-
-    private static String[] createStringRepresentation(Throwable throwable) {
-        String[] ret = null;
-        if (throwable != null) {
-            final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            final PrintStream printStream = new PrintStream(byteArrayOutputStream);
-            try {
-                throwable.printStackTrace(printStream);
-            } finally {
-                printStream.close();
-            }
-            final String stackText = byteArrayOutputStream.toString();
-            ret = TextToLines.toLineArray(stackText);
-        }
-        return ret;
     }
 }

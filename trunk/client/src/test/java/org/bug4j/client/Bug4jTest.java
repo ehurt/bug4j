@@ -69,7 +69,7 @@ public class Bug4jTest {
 
         LogManager.shutdown();
         Bug4jAgent.shutdown();
-        Assert.assertEquals(2, Bug4jAgent.getReported());
+        Assert.assertEquals(1, Bug4jAgent.getReported());
     }
 
     @Test
@@ -187,19 +187,19 @@ public class Bug4jTest {
 
     @Test
     public void testNoStackError() throws Exception {
-        Bug4jAgent.report("Just a message", null);
+        Bug4jAgent.report("Just a message", (Throwable) null);
         Bug4jAgent.shutdown();
     }
 
     @Test
     public void testWarning() throws Exception {
-        Bug4jAgent.report("Just a message", null);
+        Bug4jAgent.report("Just a message", (Throwable) null);
         Bug4jAgent.shutdown();
     }
 
     @Test
     public void testLongTitle() throws Exception {
-        Bug4jAgent.report(StringUtils.repeat("This_is_a_long_title", 100), null);
+        Bug4jAgent.report(StringUtils.repeat("This_is_a_long_title", 100), (Throwable) null);
         Bug4jAgent.shutdown();
     }
 
