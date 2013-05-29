@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Cedric Dandoy
+ * Copyright 2013 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,14 +16,16 @@
 
 package org.bug4j.client;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Utility class that transforms a text string into an array of Strings.
  */
-public final class TextToLines {
-    private TextToLines() {
+public final class TextUtils {
+    private TextUtils() {
     }
 
     /**
@@ -60,36 +62,18 @@ public final class TextToLines {
         return ret.toArray(new String[ret.size()]);
     }
 
-    /**
-     * Transforms a text string into an List of Strings.
-     *
-     * @param text input text
-     * @return an array of lines
-     */
-    public static List<String> toLineList(String text) {
-        final List<String> ret = new ArrayList<String>();
-        final int length = text.length();
-        int from = 0;
-        int to = from;
-        while (to < length) {
-            final char c = text.charAt(to);
-            if (c == '\r') {
-                if (to + 1 < length && text.charAt(to + 1) == '\n') {
-                    final String line = text.substring(from, to);
-                    ret.add(line);
-                    to++;
-                    from = to + 1;
-                }
-            } else if (c == '\n') {
-                final String line = text.substring(from, to);
-                ret.add(line);
-                from = to + 1;
+    public static String[] createStringRepresentation(Throwable throwable) {
+        String[] ret = null;
+        if (throwable != null) {
+            final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            final PrintStream printStream = new PrintStream(byteArrayOutputStream);
+            try {
+                throwable.printStackTrace(printStream);
+            } finally {
+                printStream.close();
             }
-            to++;
-        }
-        if (from < to) {
-            final String line = text.substring(from, to);
-            ret.add(line);
+            final String stackText = byteArrayOutputStream.toString();
+            ret = toLineArray(stackText);
         }
         return ret;
     }

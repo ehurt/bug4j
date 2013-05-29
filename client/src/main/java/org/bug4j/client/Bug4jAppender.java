@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Cedric Dandoy
+ * Copyright 2013 Cedric Dandoy
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.bug4j.client;
 
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Level;
+import org.apache.log4j.spi.LocationInfo;
 import org.apache.log4j.spi.LoggingEvent;
 import org.apache.log4j.spi.ThrowableInformation;
 
@@ -46,8 +47,18 @@ public class Bug4jAppender extends AppenderSkeleton {
         if (level.isGreaterOrEqual(_minLevel)) {
             final String message = event.getRenderedMessage();
             final ThrowableInformation throwableInformation = event.getThrowableInformation();
-            Throwable throwable = throwableInformation == null ? null : throwableInformation.getThrowable();
-            Bug4jAgent.report(message, throwable);
+            final Throwable throwable = throwableInformation == null ? null : throwableInformation.getThrowable();
+            final String[] throwableStrRep;
+            if (throwable == null) {
+                final LocationInfo locationInformation = event.getLocationInformation();
+                throwableStrRep = new String[]{
+                        message,
+                        "\tat " + locationInformation.fullInfo
+                };
+            } else {
+                throwableStrRep = TextUtils.createStringRepresentation(throwable);
+            }
+            Bug4jAgent.report(message, throwableStrRep);
         }
     }
 

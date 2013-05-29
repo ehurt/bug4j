@@ -85,6 +85,7 @@
           <root url="jar://$USER_HOME$/.grails/ivy-cache/org.apache.derby/derbyclient/jars/derbyclient-10.8.2.2.jar!/" />
           <root url="jar://$USER_HOME$/.grails/ivy-cache/org.apache.derby/derbynet/jars/derbynet-10.8.2.2.jar!/" />
           <root url="jar://$USER_HOME$/.grails/ivy-cache/org.apache.derby/derby/jars/derby-10.8.2.2.jar!/" />
+          <root url="jar://$USER_HOME$/.grails/ivy-cache/org.apache.commons/commons-lang3/jars/commons-lang3-3.0.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
