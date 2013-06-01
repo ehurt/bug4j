@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/bug4jd.iml" filepath="$PROJECT_DIR$/bug4jd.iml"/>
+      <module fileurl="file://$PROJECT_DIR$/bug4jd-grailsPlugins.iml" filepath="$PROJECT_DIR$/bug4jd-grailsPlugins.iml"/>
+    </modules>
+  </component>
+</project>
+

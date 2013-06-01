@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="web" name="GrailsWeb">
+      <configuration>
+        <webroots>
+          <root url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/jquery-1.7.1/web-app" relative="/" />
+          <root url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/remote-pagination-0.3/web-app" relative="/" />
+        </webroots>
+        <sourceRoots />
+      </configuration>
+    </facet>
+    <facet type="hibernate" name="Hibernate">
+      <configuration>
+        <datasource-map>
+          <unit-entry name="Gorm" />
+          <unit-entry name="sessionFactory" />
+        </datasource-map>
+      </configuration>
+    </facet>
+  </component>
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/hibernate-2.1.1">
+      <sourceFolder url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/hibernate-2.1.1/grails-app/i18n" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/jquery-1.7.1">
+      <sourceFolder url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/jquery-1.7.1/src/groovy" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/jquery-1.7.1/grails-app/i18n" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/jquery-1.7.1/grails-app/services" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/jquery-1.7.1/grails-app/taglib" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/quartz-1.0-RC2">
+      <sourceFolder url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/quartz-1.0-RC2/src/java" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/quartz-1.0-RC2/src/groovy" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/quartz-1.0-RC2/grails-app/services" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/remote-pagination-0.3">
+      <sourceFolder url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/remote-pagination-0.3/grails-app/taglib" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/resources-1.1.6">
+      <sourceFolder url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/resources-1.1.6/src/java" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/resources-1.1.6/src/groovy" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/resources-1.1.6/grails-app/i18n" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/resources-1.1.6/grails-app/taglib" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/spring-security-core-1.2.7.3">
+      <sourceFolder url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/spring-security-core-1.2.7.3/src/java" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/spring-security-core-1.2.7.3/src/groovy" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/spring-security-core-1.2.7.3/grails-app/i18n" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/spring-security-core-1.2.7.3/grails-app/services" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/spring-security-core-1.2.7.3/grails-app/taglib" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/spring-security-ldap-1.0.6">
+      <sourceFolder url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/spring-security-ldap-1.0.6/src/java" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/tomcat-2.1.1" />
+    <content url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/webxml-1.4.1">
+      <sourceFolder url="file://$USER_HOME$/.grails/2.1.1/projects/bug4jd/plugins/webxml-1.4.1/src/groovy" isTestSource="false" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" scope="PROVIDED" name="Global grails-2.1.1" level="application" />
+    <orderEntry type="module-library" exported="">
+      <library name="Grails User Library (bug4jd-grailsPlugins)">
+        <CLASSES>
+          <root url="jar://$USER_HOME$/.grails/ivy-cache/org.springframework.security/spring-security-core/jars/spring-security-core-3.0.7.RELEASE.jar!/" />
+          <root url="jar://$USER_HOME$/.grails/ivy-cache/org.springframework.security/spring-security-web/jars/spring-security-web-3.0.7.RELEASE.jar!/" />
+          <root url="jar://$USER_HOME$/.grails/ivy-cache/org.quartz-scheduler/quartz/jars/quartz-1.8.4.jar!/" />
+          <root url="jar://$USER_HOME$/.grails/ivy-cache/org.springframework.ldap/spring-ldap-core/jars/spring-ldap-core-1.3.1.RELEASE.jar!/" />
+          <root url="jar://$USER_HOME$/.grails/ivy-cache/org.springframework.security/spring-security-ldap/jars/spring-security-ldap-3.0.7.RELEASE.jar!/" />
+          <root url="jar://$USER_HOME$/.grails/ivy-cache/com.oracle/ojdbc6.jar/jars/ojdbc6.jar-11.2.0.jar!/" />
+          <root url="jar://$USER_HOME$/.grails/ivy-cache/org.apache.derby/derbyclient/jars/derbyclient-10.8.2.2.jar!/" />
+          <root url="jar://$USER_HOME$/.grails/ivy-cache/org.apache.derby/derbynet/jars/derbynet-10.8.2.2.jar!/" />
+          <root url="jar://$USER_HOME$/.grails/ivy-cache/org.apache.derby/derby/jars/derby-10.8.2.2.jar!/" />
+          <root url="jar://$USER_HOME$/.grails/ivy-cache/org.apache.commons/commons-lang3/jars/commons-lang3-3.0.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+  </component>
+</module>
+

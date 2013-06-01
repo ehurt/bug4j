@@ -1,0 +1,22 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Grails:bug4jd" type="GrailsRunConfigurationType" factoryName="Grails">
+    <module name="bug4jd" />
+    <setting name="vmparams" value="" />
+    <setting name="cmdLine" value="run-app -Dserver.port=8063" />
+    <setting name="depsClasspath" value="true" />
+    <setting name="passParentEnv" value="true" />
+    <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+    <setting name="launchBrowser" value="true" />
+    <RunnerSettings RunnerId="Debug">
+      <option name="DEBUG_PORT" value="" />
+      <option name="TRANSPORT" value="0" />
+      <option name="LOCAL" value="true" />
+    </RunnerSettings>
+    <RunnerSettings RunnerId="Run" />
+    <ConfigurationWrapper RunnerId="Debug" />
+    <ConfigurationWrapper RunnerId="Run" />
+    <method>
+      <option name="Make" enabled="false" />
+    </method>
+  </configuration>
+</component>

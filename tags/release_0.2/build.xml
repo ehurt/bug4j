@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="bug4j" default="all" basedir=".">
+
+  <property name="home" location="."/>
+  <import file="build_include.xml"/>
+
+  <target name="all" depends="clean,compile,test,package-dist"/>
+
+  <target name="package-dist">
+    <ant dir="client" target="package-dist"/>
+    <ant dir="demo/log4j" target="package-dist"/>
+    <ant dir="demo/manual" target="package-dist"/>
+    <ant dir="bug4jd" target="package-dist"/>
+
+    <copy todir="${dist}" overwrite="true">
+      <fileset dir="resources/"/>
+    </copy>
+    <zip destfile="${out}/${bug4j-release-name}.zip">
+      <zipfileset dir="${dist}" prefix="${bug4j-release-name}" excludes="server/bin/*.sh" filemode="644"/>
+      <zipfileset dir="${dist}" prefix="${bug4j-release-name}" includes="server/bin/*.sh" filemode="755"/>
+    </zip>
+  </target>
+
+  <target name="compile">
+    <mkdir dir="${production.output}"/>
+    <ant dir="client" target="compile"/>
+    <!-- This fails because of jlines.
+      <ant dir="bug4jd" target="war"/>
+    -->
+    <java dir="bug4jd" jar="${ant.home}/lib/ant-launcher.jar" fork="true">
+      <sysproperty key="grails.env" value="production"/>
+      <arg value="war"/>
+    </java>
+    <ant dir="demo/log4j" target="compile"/>
+    <ant dir="demo/manual" target="compile"/>
+  </target>
+
+  <target name="test">
+    <mkdir dir="${production.output}"/>
+    <ant dir="client" target="test"/>
+    <ant dir="bug4jd" target="test"/>
+  </target>
+
+  <target name="clean">
+    <ant dir="client" target="clean"/>
+    <ant dir="bug4jd" target="clean"/>
+    <ant dir="demo/log4j" target="clean"/>
+    <ant dir="demo/manual" target="clean"/>
+    <delete dir="${out}"/>
+  </target>
+</project>

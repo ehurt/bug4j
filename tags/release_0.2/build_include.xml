@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="build_include" xmlns:ivy="antlib:org.apache.ivy.ant">
+  <property name="home" location="."/>
+
+  <property environment="env"/>
+
+  <property name="out" value="${home}/out"/>
+  <property name="production.output" value="${out}/production"/>
+  <property name="test.output" value="${out}/test"/>
+  <property name="artifacts.output" value="${out}/artifacts"/>
+  <property name="junit.output" value="${out}/junit"/>
+  <property name="dist" value="${out}/dist"/>
+
+  <property name="ivy.install.version" value="2.3.0"/>
+  <condition property="ivy.home" value="${env.IVY_HOME}">
+    <isset property="env.IVY_HOME"/>
+  </condition>
+  <property name="ivy.home" value="${user.home}/.grails/ivy"/>
+  <property name="ivy.jar.dir" value="${ivy.home}/lib"/>
+  <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy-${ivy.install.version}.jar"/>
+  <property name="ivy.lib.dir" value="lib"/>
+
+  <taskdef resource="org/apache/ivy/ant/antlib.xml">
+    <classpath>
+      <fileset dir="${ivy.home}">
+        <include name="*.jar"/>
+      </fileset>
+    </classpath>
+  </taskdef>
+
+  <tstamp>
+    <format property="snapshot-timestamp" pattern="yyyyMMdd"/>
+  </tstamp>
+  <!--<property name="bug4j-release-name" value="bug4j-0.2.0-SNAPSHOT-${snapshot-timestamp}"/>-->
+  <property name="bug4j-release-name" value="bug4j-0.2.0"/>
+
+
+  <!-- *********  IVY ********************************************************************************
+  -->
+  <target name="download-ivy" unless="offline">
+    <available file="${ivy.jar.file}" property="ivy.available"/>
+    <antcall target="-download-ivy"/>
+  </target>
+
+  <target name="-download-ivy" unless="ivy.available">
+    <mkdir dir="${ivy.jar.dir}"/>
+    <!-- download Ivy from web site so that it can be used even without any special installation -->
+    <get src="http://archive.apache.org/dist/ant/ivy/${ivy.install.version}/apache-ivy-${ivy.install.version}-bin.zip"
+         dest="${ivy.home}/ivy.zip" usetimestamp="true" verbose="true"/>
+    <unzip src="${ivy.home}/ivy.zip" dest="${ivy.jar.dir}">
+      <patternset>
+        <include name="**/*.jar"/>
+      </patternset>
+      <mapper type="flatten"/>
+    </unzip>
+  </target>
+
+  <target name="init-ivy" depends="download-ivy" unless="ivy.lib.path">
+    <path id="ivy.lib.path">
+      <fileset dir="${ivy.jar.dir}" includes="*.jar"/>
+    </path>
+    <taskdef resource="org/apache/ivy/ant/antlib.xml"
+             uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
+  </target>
+
+  <target name="-resolve" description="--> Retrieve dependencies with ivy" depends="init-ivy">
+    <ivy:retrieve pattern="${ivy.lib.dir}/[conf]/[artifact]-[revision].[ext]"/>
+  </target>
+
+  <target name="deps-report" depends="-resolve" description="--> Generate report of module dependencies.">
+    <ivy:report conf="dist"/>
+  </target>
+
+</project>

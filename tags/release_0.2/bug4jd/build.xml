@@ -1,0 +1,133 @@
+<!--
+  ~ Copyright 2013 Cedric Dandoy
+  ~
+  ~    Licensed under the Apache License, Version 2.0 (the "License");
+  ~    you may not use this file except in compliance with the License.
+  ~    You may obtain a copy of the License at
+  ~
+  ~        http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~    Unless required by applicable law or agreed to in writing, software
+  ~    distributed under the License is distributed on an "AS IS" BASIS,
+  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~    See the License for the specific language governing permissions and
+  ~    limitations under the License.
+  -->
+<project name="bug4jd" default="test">
+  <property name="home" location=".."/>
+  <import file="../build_include.xml"/>
+
+  <property name="lib.dir" value="${basedir}/lib"/>
+  <property name="temp.dir" value="${home}/temp"/>
+
+  <property name="tomcat.ver" value="7.0.40"/>
+  <property name="tomcat.zip" value="apache-tomcat-${tomcat.ver}.zip"/>
+  <property name="tomcat.url" value="http://archive.apache.org/dist/tomcat/tomcat-7/v${tomcat.ver}/bin/${tomcat.zip}"/>
+  <property name="tomcat.home" location="${temp.dir}/apache-tomcat-${tomcat.ver}"/>
+
+  <macrodef name="grails">
+    <attribute name="script"/>
+    <attribute name="args" default=""/>
+    <sequential>
+      <grailsTask script="@{script}" args="@{args}" classpathref="grails.classpath">
+        <compileClasspath refid="compile.classpath"/>
+        <testClasspath refid="test.classpath"/>
+        <runtimeClasspath refid="app.classpath"/>
+      </grailsTask>
+    </sequential>
+  </macrodef>
+
+  <target name="-init-grails" depends="-resolve">
+    <path id="grails.classpath">
+      <fileset dir="${lib.dir}/build"/>
+      <fileset dir="${lib.dir}"/>
+    </path>
+
+    <taskdef name="grailsTask"
+             classname="grails.ant.GrailsTask"
+             classpathref="grails.classpath"/>
+  </target>
+
+  <!-- =================================
+  target: clean
+ ================================= -->
+  <target name="clean" description="--> Cleans a Grails application">
+    <mkdir dir="${lib.dir}/build"/>
+    <mkdir dir="${lib.dir}/compile"/>
+    <mkdir dir="${lib.dir}/runtime"/>
+    <mkdir dir="${lib.dir}/test"/>
+    <delete failonerror="true">
+      <fileset dir="${lib.dir}/build" includes="*/"/>
+      <fileset dir="${lib.dir}/compile" includes="*/"/>
+      <fileset dir="${lib.dir}/runtime" includes="*/"/>
+      <fileset dir="${lib.dir}/test" includes="*/"/>
+    </delete>
+    <antcall target="--grails-clean"/>
+    <delete dir="target" failonerror="false"/>
+  </target>
+
+  <!-- extra target to avoid errors on Windows because libs on classpath can not be deleted -->
+  <target name="--grails-clean" depends="-init-grails">
+    <grails script="Clean"/>
+  </target>
+
+  <!-- =================================
+  target: compile
+ ================================= -->
+  <target name="compile" depends="-init-grails" description="--> Compiles a Grails application">
+    <grails script="Compile"/>
+  </target>
+
+  <!-- =================================
+  target: war
+ ================================= -->
+  <target name="war" depends="-init-grails" description="--> Creates a WAR of a Grails application">
+    <grails script="War"/>
+  </target>
+
+  <!-- =================================
+  target: test
+ ================================= -->
+  <target name="test" depends="-init-grails" description="--> Run a Grails applications unit tests">
+    <!--
+        <grails script="TestApp"/>
+    -->
+  </target>
+
+  <!-- =================================
+  target: run
+ ================================= -->
+  <target name="run" depends="-init-grails" description="--> Runs a Grails application using embedded Jetty">
+    <grails script="RunApp"/>
+  </target>
+
+  <target name="package-dist" depends="download-tomcat">
+    <mkdir dir="${dist}/server"/>
+    <copy todir="${dist}/server">
+      <fileset dir="${tomcat.home}">
+        <exclude name="/logs/**"/>
+        <exclude name="/temp/"/>
+        <exclude name="/webapps/ROOT/"/>
+        <exclude name="/webapps/bug4j/"/>
+        <exclude name="/webapps/bug4j.war"/>
+        <exclude name="/work/**"/>
+      </fileset>
+    </copy>
+    <mkdir dir="${dist}/server/logs"/>
+    <mkdir dir="${dist}/server/temp"/>
+    <replace file="${dist}/server/conf/server.xml" token="8080" value="8063"/>
+    <replace file="${dist}/server/conf/server.xml" token="8005" value="8064"/>
+    <copy tofile="${dist}/server/webapps/ROOT.war" file="target/bug4jd-0.1.war"/>
+  </target>
+
+  <target name="check-tomcat">
+    <available file="${tomcat.home}" property="tomcat.present"/>
+  </target>
+
+  <target name="download-tomcat" depends="check-tomcat" unless="tomcat.present">
+    <mkdir dir="${temp.dir}"/>
+    <get src="${tomcat.url}" dest="${temp.dir}"/>
+    <unzip src="${temp.dir}/${tomcat.zip}" dest="${temp.dir}"/>
+  </target>
+
+</project>
