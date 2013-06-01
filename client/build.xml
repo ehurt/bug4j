@@ -44,7 +44,8 @@
     <mkdir dir="${module.production.output}"/>
     <javac includes="**" encoding="utf-8"
            destdir="${module.production.output}"
-           target="1.5" nowarn="true"
+           target="1.5" source="1.5"
+           nowarn="true"
            debug="true" debuglevel="lines,vars,source"
            includeantruntime="false">
       <src path="src/main/java"/>
