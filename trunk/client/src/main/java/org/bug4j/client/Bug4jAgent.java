@@ -70,6 +70,7 @@ public class Bug4jAgent {
             public void run() {
                 try {
                     client.run();
+                    _clientThread = null;
                 } catch (InterruptedException ignored) {
                 }
             }
